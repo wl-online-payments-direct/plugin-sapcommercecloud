@@ -1,0 +1,17 @@
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+# you can put key/value pairs here.
+# Use Config.getParameter(..) to retrieve the values during runtime.
+
+ingenicoogonedirectb2ccheckoutaddon.key=value
+
+# Specifies the location of the spring context file added automatically to the global platform application context.
+ingenicoogonedirectb2ccheckoutaddon.application-context=ingenicoogonedirectb2ccheckoutaddon-spring.xml
+
+yacceleratorstorefront.additionalWebSpringConfigs.ingenicoogonedirectb2ccheckoutaddon=classpath:/ingenicoogonedirectb2ccheckoutaddon/web/spring/ingenicoogonedirectb2ccheckoutaddon-web-spring.xml
+
+
+
+ingenicoogonedirectb2ccheckoutaddon.javascript.paths.responsive=/responsive/common/js/ingenicoogonedirectb2ccheckoutaddon.js
+ingenicoogonedirectb2ccheckoutaddon.css.paths.responsive=/responsive/common/css/ingenicoogonedirectb2ccheckoutaddon.css

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+--><extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+        	
+    
+    <extension abstractclassprefix="Generated" classprefix="Ingenicoogonedirectoccaddon" description="ingenicoogonedirectoccaddon extension" managername="IngenicoogonedirectoccaddonManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="ingenicoogonedirectoccaddon">
+
+        <!-- you should add all required extensions to this list, except platform extensions which are automatically required -->
+        <requires-extension name="addonsupport"/>
+        <requires-extension name="commercewebservicescommons"/>
+        <requires-extension name="ingenicoogonedirectcore"/>
+        
+        <coremodule generated="true" manager="com.ingenico.ogone.direct.jalo.IngenicoogonedirectoccaddonManager" packageroot="com.ingenico.ogone.direct"/>
+    </extension>
+        
+
+</extensioninfo>
