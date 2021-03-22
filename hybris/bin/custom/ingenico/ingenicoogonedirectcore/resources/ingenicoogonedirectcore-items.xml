@@ -9,8 +9,8 @@
     <enumtypes>
         <enumtype generate="true" code="IngenicoCheckoutTypesEnum" autocreate="true">
             <description>Checkout types for card payments</description>
-            <value code="HOSTED_PAYMENT_PAGE" />
-            <value code="HOSTED_TOKENIZATION_PAYMENT_PAGE" />
+            <value code="HOSTED_CHECKOUT" />
+            <value code="HOSTED_TOKENIZATION" />
         </enumtype>
     </enumtypes>
 
@@ -24,7 +24,7 @@
                 <attribute qualifier="ingenicoCheckoutType" type="IngenicoCheckoutTypesEnum">
                     <modifiers read="true" write="true" />
                     <persistence type="property" />
-                    <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_PAYMENT_PAGE")</defaultvalue>
+                    <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
                 </attribute>
             </attributes>
         </itemtype>
