@@ -28,5 +28,38 @@
                 </attribute>
             </attributes>
         </itemtype>
+        <itemtype code="IngenicoConfiguration"
+                  extends="GenericItem"
+                  autocreate="true"
+                  generate="true">
+            <deployment table="IngenicoConfiguration" typecode="15001"/>
+            <description>Item type which will keep all required data for exchanging information with payment provider</description>
+            <attributes>
+                <attribute qualifier="merchantID" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" />
+                    <persistence type="property" />
+                </attribute>
+                <attribute qualifier="endpointURL" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" />
+                    <persistence type="property" />
+                </attribute>
+                <attribute qualifier="ApiKey" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" />
+                    <persistence type="property" />
+                </attribute>
+                <attribute qualifier="ApiSecret" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" />
+                    <persistence type="property" />
+                </attribute>
+            </attributes>
+        </itemtype>
+        <itemtype code="BaseStore" autocreate="false" generate="false">
+            <attributes>
+                <attribute qualifier="ingenicoConfiguration" type="IngenicoConfiguration">
+                    <modifiers read="true" write="true" />
+                    <persistence type="property" />
+                </attribute>
+            </attributes>
+        </itemtype>
     </itemtypes>
 </items>
