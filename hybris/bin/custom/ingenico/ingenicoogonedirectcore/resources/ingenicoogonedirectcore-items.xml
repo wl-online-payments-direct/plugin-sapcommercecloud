@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved
+-->
+
+<items 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="items.xsd">
+
+    <enumtypes>
+        <enumtype generate="true" code="IngenicoCheckoutTypesEnum" autocreate="true">
+            <description>Checkout types for card payments</description>
+            <value code="HOSTED_CHECKOUT" />
+            <value code="HOSTED_TOKENIZATION" />
+        </enumtype>
+    </enumtypes>
+
+    <itemtypes>
+        <itemtype code="PaymentMode"
+                  extends="GenericItem"
+                  jaloclass="de.hybris.platform.jalo.order.payment.PaymentMode"
+                  autocreate="false"
+                  generate="false">
+            <attributes>
+                <attribute qualifier="ingenicoCheckoutType" type="IngenicoCheckoutTypesEnum">
+                    <modifiers read="true" write="true" />
+                    <persistence type="property" />
+                    <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
+                </attribute>
+            </attributes>
+        </itemtype>
+    </itemtypes>
+</items>

@@ -2,12 +2,35 @@
 <!--
  Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved
 -->
-<config xmlns="http://www.hybris.com/cockpit/config">
+<config xmlns="http://www.hybris.com/cockpit/config"
+		xmlns:yc="http://www.hybris.com/cockpitng/config/common"
+		xmlns:y="http://www.hybris.com/cockpit/config/hybris"
+		xmlns:wz="http://www.hybris.com/cockpitng/config/wizard-config"
+		xmlns:cb="http://www.hybris.com/cockpitng/config/collectionbrowser"
+		xmlns:cv="http://www.hybris.com/cockpitng/component/compareview"
+		xmlns:lv="http://www.hybris.com/cockpitng/component/listView"
+		xmlns:ea="http://www.hybris.com/cockpitng/component/editorArea"
+		xmlns:et="http://www.hybris.com/cockpitng/config/explorertree"
+		xmlns:ss="http://www.hybris.com/cockpitng/config/simplesearch"
+		xmlns:as="http://www.hybris.com/cockpitng/config/advancedsearch"
+		xmlns:df="http://www.hybris.com/cockpitng/component/dynamicForms"
+		xmlns:dsb="http://www.hybris.com/cockpitng/config/dashboard"
+		xmlns:na="http://www.hybris.com/cockpitng/config/notifications"
+		xmlns:gv="http://www.hybris.com/cockpitng/component/gridView">
 
-	<!-- ingenicoogonedirectbackoffice UI configuration should be provided here -->
-
-	<!--<context component="component-code" module="ingenicoogonedirectbackoffice">-->
-		<!--Please check documentation for code snippets for specific components-->
-	<!--</context>-->
-
+	<context merge-by="type" parent="GenericItem" type="PaymentMode" component="editor-area">
+		<ea:editorArea name="">
+			<ea:essentials>
+				<ea:essentialSection name="hmc.essential">
+					<ea:attribute qualifier="code"/>
+					<ea:attribute qualifier="name"/>
+				</ea:essentialSection>
+			</ea:essentials>
+			<ea:tab name="hmc.properties">
+				<ea:section name="hmc.ingenico">
+					<ea:attribute qualifier="ingenicoCheckoutType"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
 </config>
