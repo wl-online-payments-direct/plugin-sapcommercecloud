@@ -78,6 +78,15 @@
 		</ea:editorArea>
 	</context>
 
+	<!-- IngenicoConfiguration display name when viewing all attributes -->
+	<context type="IngenicoConfiguration" component="base" merge-by="type" parent="GenericItem">
+		<y:base>
+			<y:labels>
+				<y:label>merchantID</y:label>
+			</y:labels>
+		</y:base>
+	</context>
+
 	<!-- IngenicoConfiguration BO appearance END -->
 
 	<!-- BaseStore update BO appearance START -->
