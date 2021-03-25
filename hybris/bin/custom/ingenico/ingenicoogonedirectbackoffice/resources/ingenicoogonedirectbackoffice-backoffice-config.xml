@@ -29,6 +29,8 @@
 			<ea:tab name="hmc.properties">
 				<ea:section name="hmc.ingenico">
 					<ea:attribute qualifier="ingenicoCheckoutType"/>
+					<ea:attribute qualifier="defaultOperationCode"/>
+					<ea:attribute qualifier="captureTimeFrame"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
