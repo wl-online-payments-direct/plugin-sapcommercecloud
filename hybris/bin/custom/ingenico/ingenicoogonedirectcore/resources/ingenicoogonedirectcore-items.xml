@@ -12,6 +12,11 @@
             <value code="HOSTED_CHECKOUT" />
             <value code="HOSTED_TOKENIZATION" />
         </enumtype>
+        <enumtype generate="true" code="OperationCodesEnum" autocreate="true">
+            <description>Checkout types for card payments</description>
+            <value code="SALE" />
+            <value code="PRE_AUTHORIZATION" />
+        </enumtype>
     </enumtypes>
 
     <itemtypes>
@@ -25,6 +30,16 @@
                     <modifiers read="true" write="true" />
                     <persistence type="property" />
                     <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
+                </attribute>
+                <attribute qualifier="defaultOperationCode" type="OperationCodesEnum">
+                    <modifiers read="true" write="true" />
+                    <persistence type="property" />
+                    <defaultvalue>em().getEnumerationValue("OperationCodesEnum","SALE")</defaultvalue>
+                </attribute>
+                <attribute qualifier="captureTimeFrame" type="java.lang.Integer">
+                    <modifiers read="true" write="true" />
+                    <persistence type="property" />
+                    <defaultvalue>Integer.valueOf(0)</defaultvalue>
                 </attribute>
             </attributes>
         </itemtype>
