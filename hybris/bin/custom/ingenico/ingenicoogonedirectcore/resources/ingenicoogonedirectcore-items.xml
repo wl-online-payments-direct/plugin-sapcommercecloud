@@ -3,19 +3,19 @@
  Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved
 -->
 
-<items 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="items.xsd">
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
 
     <enumtypes>
         <enumtype generate="true" code="IngenicoCheckoutTypesEnum" autocreate="true">
             <description>Checkout types for card payments</description>
-            <value code="HOSTED_CHECKOUT" />
-            <value code="HOSTED_TOKENIZATION" />
+            <value code="HOSTED_CHECKOUT"/>
+            <value code="HOSTED_TOKENIZATION"/>
         </enumtype>
         <enumtype generate="true" code="OperationCodesEnum" autocreate="true">
             <description>Checkout types for card payments</description>
-            <value code="SALE" />
-            <value code="PRE_AUTHORIZATION" />
+            <value code="SALE"/>
+            <value code="PRE_AUTHORIZATION"/>
         </enumtype>
     </enumtypes>
 
@@ -27,18 +27,18 @@
                   generate="false">
             <attributes>
                 <attribute qualifier="ingenicoCheckoutType" type="IngenicoCheckoutTypesEnum">
-                    <modifiers read="true" write="true" />
-                    <persistence type="property" />
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
                     <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
                 </attribute>
                 <attribute qualifier="defaultOperationCode" type="OperationCodesEnum">
-                    <modifiers read="true" write="true" />
-                    <persistence type="property" />
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
                     <defaultvalue>em().getEnumerationValue("OperationCodesEnum","SALE")</defaultvalue>
                 </attribute>
                 <attribute qualifier="captureTimeFrame" type="java.lang.Integer">
-                    <modifiers read="true" write="true" />
-                    <persistence type="property" />
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
                     <defaultvalue>Integer.valueOf(0)</defaultvalue>
                 </attribute>
             </attributes>
@@ -47,33 +47,60 @@
                   extends="GenericItem"
                   autocreate="true"
                   generate="true">
-            <description>Item type which will keep all required data for exchanging information with payment provider</description>
+            <description>Item type which will keep all required data for exchanging information with payment provider
+            </description>
             <deployment table="ingenicoConfiguration" typecode="15001"/>
             <attributes>
                 <attribute qualifier="merchantID" type="java.lang.String">
-                    <modifiers read="true" write="true" optional="false" />
-                    <persistence type="property" />
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="endpointURL" type="java.lang.String">
-                    <modifiers read="true" write="true" optional="false" />
-                    <persistence type="property" />
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="apiKey" type="java.lang.String">
-                    <modifiers read="true" write="true" optional="false" />
-                    <persistence type="property" />
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="apiSecret" type="java.lang.String">
-                    <modifiers read="true" write="true" optional="false" />
-                    <persistence type="property" />
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
                 </attribute>
             </attributes>
         </itemtype>
 
         <itemtype code="BaseStore" autocreate="false" generate="false" extends="GenericItem">
+            <description>Extending BaseStore type with additional ingenico attributes.</description>
             <attributes>
                 <attribute qualifier="ingenicoConfiguration" type="IngenicoConfiguration">
-                    <modifiers read="true" write="true" />
-                    <persistence type="property" />
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="ingenicoCheckoutType" type="IngenicoCheckoutTypesEnum">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="IngenicoPaymentInfo" extends="PaymentInfo"
+                  jaloclass="de.hybris.platform.jalo.order.payment.PaymentInfo"
+                  generate="false">
+            <attributes>
+                <attribute qualifier="id" type="java.lang.Integer">
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentMethod" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="ingenicoCheckoutType" type="IngenicoCheckoutTypesEnum">
+                    <modifiers read="true" write="true" search="true" optional="false"/>
+                    <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
+                    <persistence type="property"/>
                 </attribute>
             </attributes>
         </itemtype>

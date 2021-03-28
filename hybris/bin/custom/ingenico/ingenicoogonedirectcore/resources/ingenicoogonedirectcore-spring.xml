@@ -3,8 +3,45 @@
  Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd">	
-		   
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="ingenicoogonedirectcore-spring-cache.xml"/>
+
+    <bean id="ingenicoClientFactory" class="com.ingenico.ogone.direct.factory.impl.IngenicoClientFactoryImpl">
+        <property name="configurationService" ref="configurationService"/>
+    </bean>
+
+    <bean id="ingenicoAmountUtils" class="com.ingenico.ogone.direct.util.IngenicoAmountUtils">
+        <property name="commonI18NService" ref="commonI18NService"/>
+    </bean>
+
+
+    <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
+        <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>
+        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
+    </bean>
+
+    <bean id="ingenicoCheckoutFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoCheckoutFacadeImpl">
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="checkoutFacade" ref="checkoutFacade"/>
+        <property name="ingenicoPaymentService" ref="ingenicoPaymentService"/>
+        <property name="addressReverseConverter" ref="addressReverseConverter"/>
+        <property name="cartService" ref="cartService"/>
+        <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+    </bean>
+
+    <bean name="ingenicoCartPopulator" class="com.ingenico.ogone.direct.populator.IngenicoCartPopulator">
+        <property name="addressConverter" ref="addressConverter"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="cartConverter"/>
+        <property name="add" ref="ingenicoCartPopulator"/>
+    </bean>
+
+
 </beans>
