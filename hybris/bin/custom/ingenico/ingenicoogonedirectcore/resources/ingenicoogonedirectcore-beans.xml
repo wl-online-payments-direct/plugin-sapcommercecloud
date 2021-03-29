@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
+
+    <bean class="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData">
+        <property name="id" type="int"/>
+        <property name="paymentMethod" type="String"/>
+        <property name="ingenicoCheckoutType" type="com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum"/>
+        <property name="billingAddress" type="de.hybris.platform.commercefacades.user.data.AddressData"/>
+    </bean>
+
+    <bean class="de.hybris.platform.commercefacades.order.data.CartData">
+        <property name="ingenicoPaymentInfo" type="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
+    </bean>
+
+</beans>
