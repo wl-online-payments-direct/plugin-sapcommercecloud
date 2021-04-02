@@ -6,7 +6,6 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-
 <c:choose>
     <c:when test="${paymentProduct.id==-1}">
         <spring:theme code="checkout.paymentProduct.groupedCards.display.label" var="groupedCardsLabel"/>
