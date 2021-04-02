@@ -1,13 +1,18 @@
 package com.ingenico.ogone.direct.controllers.pages.steps;
 
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.ingenico.direct.domain.DirectoryEntry;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -27,6 +32,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -81,9 +87,28 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         setupSelectPaymentPage(model);
 
         model.addAttribute("ingenicoPaymentDetailsForm", new IngenicoPaymentDetailsForm());
-        final List<PaymentProduct> availablePaymentMethods = ingenicoCheckoutFacade.getAvailablePaymentMethods();
+        if (getSessionService().getAttribute("checkoutPaymentInfo") != null) {
+            IngenicoPaymentDetailsForm ingenicoPaymentDetailsForm = getSessionService().getAttribute("checkoutPaymentInfo");
+            model.addAttribute("ingenicoPaymentDetailsForm", ingenicoPaymentDetailsForm);
+            model.addAttribute("previouslySelectedPaymentProductId", ingenicoPaymentDetailsForm.getPaymentProductId());
+        }
+        List<PaymentProduct> availablePaymentMethods = ingenicoCheckoutFacade.getAvailablePaymentMethods();
+        if (CollectionUtils.isEmpty(availablePaymentMethods))
+        {
+            GlobalMessages.addErrorMessage(model, "payment.methods.not.found");
+            return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.SelectPaymentMethod;
+        }
+
+        Collection<DirectoryEntry> iDealIssuers = ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods);
+        if (CollectionUtils.isEmpty(iDealIssuers)) {
+            availablePaymentMethods = availablePaymentMethods.stream()
+                  .filter(paymentProduct -> !PAYMENT_METHOD_IDEAL.equals(paymentProduct.getId()))
+                  .collect(Collectors.toList());
+        } else {
+            model.addAttribute("idealIssuers", iDealIssuers);
+        }
+
         model.addAttribute("paymentProducts", availablePaymentMethods);
-//        model.addAttribute("idealIssuers",  ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods));
 
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
@@ -105,7 +130,6 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
 
         final IngenicoPaymentInfoData ingenicoPaymentInfoData = new IngenicoPaymentInfoData();
         ingenicoCheckoutFacade.fillIngenicoPaymentInfoData(ingenicoPaymentInfoData, ingenicoPaymentDetailsForm.getPaymentProductId());
-
 
         final AddressData addressData;
         if (Boolean.TRUE.equals(ingenicoPaymentDetailsForm.isUseDeliveryAddress())) {
@@ -132,6 +156,7 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
 
         setCheckoutStepLinksForModel(model, getCheckoutStep());
 
+        getSessionService().setAttribute("checkoutPaymentInfo", ingenicoPaymentDetailsForm);
         return getCheckoutStep().nextStep();
     }
 
@@ -193,5 +218,11 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
      */
     protected CheckoutStep getCheckoutStep() {
         return getCheckoutStep(PAYMENT_METHOD_STEP_NAME);
+    }
+
+    protected boolean isValidPaymentId(String paymentId) {
+
+
+        return false;
     }
 }

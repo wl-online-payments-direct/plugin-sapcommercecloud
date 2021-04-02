@@ -98,11 +98,11 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                     getShopperLocale());
         }
 
-        //TODO validate if the paymentID accepts the BaseStore CheckoutType
-
-        ingenicoPaymentInfoData.setId(paymentProduct.getId());
-        ingenicoPaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
-        ingenicoPaymentInfoData.setIngenicoCheckoutType(getIngenicoCheckoutType());
+        if (isValidPaymentMethod(paymentProduct)) {
+            ingenicoPaymentInfoData.setId(paymentProduct.getId());
+            ingenicoPaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
+            ingenicoPaymentInfoData.setIngenicoCheckoutType(getIngenicoCheckoutType());
+        }
     }
 
     @Override
@@ -215,6 +215,11 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
         paymentProduct.getDisplayHints().setLabel("Grouped Cards");
         return paymentProduct;
+    }
+
+    private Boolean isValidPaymentMethod(PaymentProduct paymentProduct) {
+        final IngenicoCheckoutTypesEnum ingenicoCheckoutType = getIngenicoCheckoutType();
+        return paymentProduct.getPaymentMethod().equals(ingenicoCheckoutType);
     }
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
