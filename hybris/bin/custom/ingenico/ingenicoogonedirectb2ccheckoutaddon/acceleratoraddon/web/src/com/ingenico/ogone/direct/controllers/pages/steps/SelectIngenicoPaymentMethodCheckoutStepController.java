@@ -87,28 +87,16 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         setupSelectPaymentPage(model);
 
         model.addAttribute("ingenicoPaymentDetailsForm", new IngenicoPaymentDetailsForm());
-        if (getSessionService().getAttribute("checkoutPaymentInfo") != null) {
-            IngenicoPaymentDetailsForm ingenicoPaymentDetailsForm = getSessionService().getAttribute("checkoutPaymentInfo");
-            model.addAttribute("ingenicoPaymentDetailsForm", ingenicoPaymentDetailsForm);
-            model.addAttribute("previouslySelectedPaymentProductId", ingenicoPaymentDetailsForm.getPaymentProductId());
-        }
-        List<PaymentProduct> availablePaymentMethods = ingenicoCheckoutFacade.getAvailablePaymentMethods();
+
+        final List<PaymentProduct> availablePaymentMethods = ingenicoCheckoutFacade.getAvailablePaymentMethods();
         if (CollectionUtils.isEmpty(availablePaymentMethods))
         {
             GlobalMessages.addErrorMessage(model, "payment.methods.not.found");
             return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.SelectPaymentMethod;
         }
 
-        Collection<DirectoryEntry> iDealIssuers = ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods);
-        if (CollectionUtils.isEmpty(iDealIssuers)) {
-            availablePaymentMethods = availablePaymentMethods.stream()
-                  .filter(paymentProduct -> !PAYMENT_METHOD_IDEAL.equals(paymentProduct.getId()))
-                  .collect(Collectors.toList());
-        } else {
-            model.addAttribute("idealIssuers", iDealIssuers);
-        }
-
         model.addAttribute("paymentProducts", availablePaymentMethods);
+//        model.addAttribute("idealIssuers", ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods));
 
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
@@ -156,7 +144,6 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
 
         setCheckoutStepLinksForModel(model, getCheckoutStep());
 
-        getSessionService().setAttribute("checkoutPaymentInfo", ingenicoPaymentDetailsForm);
         return getCheckoutStep().nextStep();
     }
 
