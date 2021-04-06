@@ -89,8 +89,7 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         model.addAttribute("ingenicoPaymentDetailsForm", new IngenicoPaymentDetailsForm());
 
         final List<PaymentProduct> availablePaymentMethods = ingenicoCheckoutFacade.getAvailablePaymentMethods();
-        if (CollectionUtils.isEmpty(availablePaymentMethods))
-        {
+        if (CollectionUtils.isEmpty(availablePaymentMethods)) {
             GlobalMessages.addErrorMessage(model, "payment.methods.not.found");
             return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
         }
