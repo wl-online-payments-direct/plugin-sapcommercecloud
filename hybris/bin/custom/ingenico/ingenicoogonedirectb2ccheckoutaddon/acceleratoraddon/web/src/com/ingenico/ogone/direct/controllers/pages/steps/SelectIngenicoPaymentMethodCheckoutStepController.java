@@ -88,7 +88,7 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
 
-        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.SelectPaymentMethod;
+        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
     }
 
     @RequestMapping(value = "/select-payment-method", method = RequestMethod.POST)
