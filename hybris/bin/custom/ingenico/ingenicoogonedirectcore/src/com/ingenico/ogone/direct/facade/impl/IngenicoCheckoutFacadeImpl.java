@@ -30,6 +30,7 @@ import de.hybris.platform.store.services.BaseStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentProductDisplayHints;
@@ -38,6 +39,7 @@ import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
+import com.ingenico.ogone.direct.util.IngenicoUrlUtils;
 
 public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoCheckoutFacadeImpl.class);
@@ -72,6 +74,28 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     }
 
     @Override
+    public PaymentProduct getPaymentMethodById(int paymentId) {
+        if (paymentId == GROUPED_CARDS_ID) {
+            return createGroupedCardPaymentProduct();
+        }
+        final CartData cartData = checkoutFacade.getCheckoutCart();
+        final PriceData totalPrice = cartData.getTotalPrice();
+
+        return ingenicoPaymentService.getPaymentProduct(paymentId,
+                totalPrice.getValue(),
+                totalPrice.getCurrencyIso(),
+                getCountryCode(cartData),
+                getShopperLocale());
+    }
+
+    @Override
+    public CreateHostedTokenizationResponse createHostedTokenization() {
+        final CreateHostedTokenizationResponse hostedTokenization = ingenicoPaymentService.createHostedTokenization(getShopperLocale());
+        hostedTokenization.setPartialRedirectUrl(IngenicoUrlUtils.buildFullURL(hostedTokenization.getPartialRedirectUrl()));
+        return hostedTokenization;
+    }
+
+    @Override
     public List<DirectoryEntry> getIdealIssuers(List<PaymentProduct> paymentProducts) {
         final boolean isIdealPresent = paymentProducts.stream()
                 .anyMatch(paymentProduct -> PAYMENT_METHOD_IDEAL.equals(paymentProduct.getId()));
@@ -89,13 +113,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         if (paymentId == GROUPED_CARDS_ID) {
             paymentProduct = createGroupedCardPaymentProduct();
         } else {
-            final CartData cartData = checkoutFacade.getCheckoutCart();
-            final PriceData totalPrice = cartData.getTotalPrice();
-            paymentProduct = ingenicoPaymentService.getPaymentProduct(paymentId,
-                    totalPrice.getValue(),
-                    totalPrice.getCurrencyIso(),
-                    getCountryCode(cartData),
-                    getShopperLocale());
+            paymentProduct = getPaymentMethodById(paymentId);
         }
 
         //TODO validate if the paymentID accepts the BaseStore CheckoutType
