@@ -2,6 +2,7 @@ package com.ingenico.ogone.direct.facade.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +39,7 @@ import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
+import org.springframework.util.CollectionUtils;
 
 public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoCheckoutFacadeImpl.class);
@@ -67,6 +69,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 getShopperLocale());
 
         paymentProducts = filterByCheckoutType(paymentProducts);
+        paymentProducts = removeIDealWhenNoIssuers(paymentProducts);
 
         return paymentProducts;
     }
@@ -219,7 +222,31 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     private Boolean isValidPaymentMethod(PaymentProduct paymentProduct) {
         final IngenicoCheckoutTypesEnum ingenicoCheckoutType = getIngenicoCheckoutType();
-        return paymentProduct.getPaymentMethod().equals(ingenicoCheckoutType);
+        switch (ingenicoCheckoutType) {
+            case HOSTED_CHECKOUT:
+                if (PAYMENT_METHOD_TYPE.MOBILE.getValue().equals(paymentProduct.getPaymentMethod())) {
+                    return false;
+                }
+                break;
+            case HOSTED_TOKENIZATION:
+                if (PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentProduct.getPaymentMethod()) || PAYMENT_METHOD_TYPE.REDIRECT.getValue().equals(paymentProduct.getPaymentMethod())) {
+                    return false;
+                }
+                break;
+            default:
+                // Happy Sonar
+                break;
+        }
+        return true;
+    }
+
+    private List<PaymentProduct> removeIDealWhenNoIssuers(List<PaymentProduct> paymentProducts) {
+//        Collection<DirectoryEntry> iDealIssuers = getIdealIssuers(paymentProducts);
+//        if (CollectionUtils.isEmpty(iDealIssuers)) {
+            paymentProducts =
+                  paymentProducts.stream().filter(paymentProduct -> !PAYMENT_METHOD_IDEAL.equals(paymentProduct.getId())).collect(Collectors.toList());
+//        }
+        return paymentProducts;
     }
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
