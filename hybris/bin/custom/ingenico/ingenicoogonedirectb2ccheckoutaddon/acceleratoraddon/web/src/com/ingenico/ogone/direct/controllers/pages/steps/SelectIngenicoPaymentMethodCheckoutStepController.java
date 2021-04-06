@@ -206,10 +206,4 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
     protected CheckoutStep getCheckoutStep() {
         return getCheckoutStep(PAYMENT_METHOD_STEP_NAME);
     }
-
-    protected boolean isValidPaymentId(String paymentId) {
-
-
-        return false;
-    }
 }
