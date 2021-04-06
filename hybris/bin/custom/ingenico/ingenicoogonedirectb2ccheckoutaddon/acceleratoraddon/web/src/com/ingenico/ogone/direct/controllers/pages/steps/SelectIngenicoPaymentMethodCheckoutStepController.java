@@ -92,7 +92,7 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         if (CollectionUtils.isEmpty(availablePaymentMethods))
         {
             GlobalMessages.addErrorMessage(model, "payment.methods.not.found");
-            return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.SelectPaymentMethod;
+            return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
         }
 
         model.addAttribute("paymentProducts", availablePaymentMethods);
@@ -100,8 +100,11 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
 
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
+        if (cartData.getIngenicoPaymentInfo() != null) {
+            model.addAttribute("selectedPaymentMethodId", cartData.getIngenicoPaymentInfo().getId());
+        }
 
-        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.SelectPaymentMethod;
+        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
     }
 
     @RequestMapping(value = "/select-payment-method", method = RequestMethod.POST)
