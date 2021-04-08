@@ -24,8 +24,9 @@ public final class Ingenicoogonedirectb2ccheckoutaddonConstants extends Generate
         interface Pages {
 
             interface MultiStepCheckout {
-                String CheckoutSummaryPage = ADDON_PREFIX + "pages/checkout/multi/checkoutSummaryPage";
-                String SelectPaymentMethod = ADDON_PREFIX + "pages/checkout/multi/selectPaymentMethodPage";
+                String ingenicoPaymentMethod = ADDON_PREFIX + "pages/checkout/multi/ingenicoPaymentMethodPage";
+                String ingenicoCheckoutSummaryPage = ADDON_PREFIX + "pages/checkout/multi/ingenicoCheckoutSummaryPage";
+                String ingenicoDoPaymentPage = ADDON_PREFIX + "pages/checkout/multi/ingenicoDoPaymentPage";
             }
         }
 
