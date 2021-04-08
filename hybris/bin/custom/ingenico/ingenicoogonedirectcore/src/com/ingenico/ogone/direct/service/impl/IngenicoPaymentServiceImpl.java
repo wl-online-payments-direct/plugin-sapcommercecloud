@@ -4,11 +4,19 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.ingenico.direct.ReferenceException;
+import com.ingenico.direct.domain.CardPaymentMethodSpecificInput;
+import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
+import com.ingenico.direct.domain.HostedCheckoutSpecificInput;
+import com.ingenico.direct.domain.PaymentProduct5100SpecificInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 
 import com.ingenico.direct.Client;
+import com.ingenico.direct.domain.CreateHostedTokenizationRequest;
+import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
@@ -107,6 +115,53 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     @Override
     public List<DirectoryEntry> getProductDirectoryEntries(Integer id, String currency, String countryCode) {
         return getProductDirectory(id, currency, countryCode).getEntries();
+    }
+
+    @Override
+    public CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale) {
+        try (Client client = ingenicoClientFactory.getClient()) {
+
+            CreateHostedTokenizationRequest params = new CreateHostedTokenizationRequest();
+            params.setLocale(shopperLocale);
+            params.setAskConsumerConsent(true);
+            final CreateHostedTokenizationResponse hostedTokenization = client.merchant(getMerchantId()).hostedTokenization().createHostedTokenization(params);
+
+            IngenicoLogUtils.logAction(LOGGER, "createHostedTokenization", params, hostedTokenization);
+
+            return hostedTokenization;
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting createHostedTokenization ", e);
+            //TODO Throw Logical Exception
+            return null;
+        }
+    }
+
+    @Override
+    public CreateHostedCheckoutResponse createHostedCheckout() {
+        try (Client client = ingenicoClientFactory.getClient()) {
+            CreateHostedCheckoutRequest request = new CreateHostedCheckoutRequest();
+            CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
+//            cardPaymentMethodSpecificInput.setAuthorizationMode();
+//            cardPaymentMethodSpecificInput.setPaymentProductId();
+//            PaymentProduct5100SpecificInput cPayspecificData = new PaymentProduct5100SpecificInput();
+//            cPayspecificData.setBrand();
+//
+//            cardPaymentMethodSpecificInput.setPaymentProduct5100SpecificInput(cPayspecificData);
+//
+//            HostedCheckoutSpecificInput hostedCheckoutSpecificInput = new HostedCheckoutSpecificInput();
+//            hostedCheckoutSpecificInput.setLocale();
+//            hostedCheckoutSpecificInput.setReturnUrl();
+//
+//            request.setCardPaymentMethodSpecificInput();
+            final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(request);
+
+            return hostedCheckout;
+
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting createHostedCheckout ", e);
+            //TODO Throw Logical Exception
+            return null;
+        }
     }
 
     public void setIngenicoAmountUtils(IngenicoAmountUtils ingenicoAmountUtils) {
