@@ -8,6 +8,7 @@
         <!-- you should add all required extensions to this list, except platform extensions which are automatically required -->
         <requires-extension name="addonsupport"/>
         <requires-extension name="ingenicoogonedirectcore"/>
+        <requires-extension name="acceleratorstorefrontcommons"/>
 
 
         <coremodule generated="true" manager="com.ingenico.ogone.direct.jalo.Ingenicoogonedirectb2ccheckoutaddonManager" packageroot="com.ingenico.ogone.direct"/>

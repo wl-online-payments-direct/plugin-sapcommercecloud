@@ -2,6 +2,7 @@ package com.ingenico.ogone.direct.facade.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -40,8 +41,8 @@ import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
-import com.ingenico.ogone.direct.util.IngenicoUrlUtils;
 import org.springframework.util.CollectionUtils;
+import com.ingenico.ogone.direct.util.IngenicoUrlUtils;
 
 public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoCheckoutFacadeImpl.class);

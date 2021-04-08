@@ -28,7 +28,6 @@
 			</ea:essentials>
 			<ea:tab name="hmc.properties">
 				<ea:section name="hmc.ingenico">
-					<ea:attribute qualifier="ingenicoCheckoutType"/>
 					<ea:attribute qualifier="defaultOperationCode"/>
 					<ea:attribute qualifier="captureTimeFrame"/>
 				</ea:section>
@@ -97,6 +96,7 @@
 			<ea:tab name="hmc.ingenico">
 				<ea:section name="hmc.ingenico.ingenicoConfiguration">
 					<ea:attribute qualifier="ingenicoConfiguration"/>
+					<ea:attribute qualifier="ingenicoCheckoutType"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
