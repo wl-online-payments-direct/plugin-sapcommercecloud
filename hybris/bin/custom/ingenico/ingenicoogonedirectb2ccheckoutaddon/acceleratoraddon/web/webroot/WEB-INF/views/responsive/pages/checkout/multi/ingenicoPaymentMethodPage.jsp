@@ -13,9 +13,13 @@
 
 
 <c:url value="/checkout/multi/ingenico/select-payment-method" var="selectPaymentMethod"/>
+
 <template:page pageTitle="${pageTitle}" hideHeaderLinks="true">
+
+
+
     <jsp:attribute name="pageScripts">
-<%--  List JS --%>
+<%--  JS --%>
     </jsp:attribute>
 
     <jsp:body>
@@ -78,9 +82,6 @@
                                             <spring:theme code="checkout.multi.paymentMethod.continue"/></button>
 
                                     </form:form>
-                                        <%--                                        </ycommerce:testId>--%>
-                                        <%--                                    </c:if>--%>
-
                                 </div>
                             </div>
                         </ycommerce:testId>
