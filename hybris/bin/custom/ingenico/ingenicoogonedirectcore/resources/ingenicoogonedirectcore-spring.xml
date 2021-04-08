@@ -43,5 +43,10 @@
         <property name="add" ref="ingenicoCartPopulator"/>
     </bean>
 
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="extendedCartConverter"/>
+        <property name="add" ref="ingenicoCartPopulator"/>
+    </bean>
+
 
 </beans>
