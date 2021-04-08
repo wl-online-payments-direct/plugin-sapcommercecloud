@@ -3,6 +3,8 @@ package com.ingenico.ogone.direct.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
+import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
@@ -19,4 +21,8 @@ public interface IngenicoPaymentService {
     ProductDirectory getProductDirectory(Integer id, String currency, String countryCode);
 
     List<DirectoryEntry> getProductDirectoryEntries(Integer id, String currency, String countryCode);
+
+    CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale);
+
+    CreateHostedCheckoutResponse createHostedCheckout();
 }
