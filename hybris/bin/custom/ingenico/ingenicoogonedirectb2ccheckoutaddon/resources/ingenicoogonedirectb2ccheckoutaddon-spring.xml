@@ -36,4 +36,8 @@
 		<property name="extensionName" value="ingenicoogonedirectb2ccheckoutaddon" />
 	</bean>
 
+	<!-- Custom checkoutFlowFacade-->
+	<alias name="ingenicoCheckoutFlowFacade" alias="checkoutFlowFacade"/>
+	<bean id="ingenicoCheckoutFlowFacade" class="com.ingenico.ogone.direct.acceleratorfacades.flow.impl.IngenicoCheckoutFlowFacadeImpl" parent="defaultCheckoutFlowFacade" />
+
 </beans>
