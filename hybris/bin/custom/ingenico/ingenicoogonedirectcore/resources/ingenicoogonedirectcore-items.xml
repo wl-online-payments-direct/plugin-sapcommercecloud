@@ -26,11 +26,6 @@
                   autocreate="false"
                   generate="false">
             <attributes>
-                <attribute qualifier="ingenicoCheckoutType" type="IngenicoCheckoutTypesEnum">
-                    <modifiers read="true" write="true"/>
-                    <persistence type="property"/>
-                    <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
-                </attribute>
                 <attribute qualifier="defaultOperationCode" type="OperationCodesEnum">
                     <modifiers read="true" write="true"/>
                     <persistence type="property"/>
