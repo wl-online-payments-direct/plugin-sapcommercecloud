@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -81,14 +82,23 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         setupSelectPaymentPage(model);
 
         model.addAttribute("ingenicoPaymentDetailsForm", new IngenicoPaymentDetailsForm());
+
         final List<PaymentProduct> availablePaymentMethods = ingenicoCheckoutFacade.getAvailablePaymentMethods();
+        if (CollectionUtils.isEmpty(availablePaymentMethods)) {
+            GlobalMessages.addErrorMessage(model, "payment.methods.not.found");
+            return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
+        }
+
         model.addAttribute("paymentProducts", availablePaymentMethods);
-//        model.addAttribute("idealIssuers",  ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods));
+//        model.addAttribute("idealIssuers", ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods));
 
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
+        if (cartData.getIngenicoPaymentInfo() != null) {
+            model.addAttribute("selectedPaymentMethodId", cartData.getIngenicoPaymentInfo().getId());
+        }
 
-        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.SelectPaymentMethod;
+        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
     }
 
     @RequestMapping(value = "/select-payment-method", method = RequestMethod.POST)
@@ -105,7 +115,6 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
 
         final IngenicoPaymentInfoData ingenicoPaymentInfoData = new IngenicoPaymentInfoData();
         ingenicoCheckoutFacade.fillIngenicoPaymentInfoData(ingenicoPaymentInfoData, ingenicoPaymentDetailsForm.getPaymentProductId());
-
 
         final AddressData addressData;
         if (Boolean.TRUE.equals(ingenicoPaymentDetailsForm.isUseDeliveryAddress())) {
