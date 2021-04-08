@@ -30,7 +30,10 @@ public class IngenicoPaymentDetailsValidator implements Validator {
             ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.countryIso", "address.country.invalid");
         }
 
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "paymentProductId", "checkout.error.paymentProduct.id.missing");
+//        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "paymentProductId", "checkout.error.paymentProduct.id.missing");
+        if (form.getPaymentProductId() == 0) { //no paymentMethod was selected
+            errors.rejectValue("paymentProductId", "checkout.error.paymentProduct.id.missing", null, null);
+        }
         if (IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL.equals(form.getPaymentProductId())) {
             ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "checkout.error.issuer.id.missing");
         }

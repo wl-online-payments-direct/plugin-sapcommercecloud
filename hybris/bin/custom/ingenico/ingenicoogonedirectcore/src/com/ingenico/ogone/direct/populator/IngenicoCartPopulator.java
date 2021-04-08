@@ -20,14 +20,14 @@ public class IngenicoCartPopulator implements Populator<CartModel, CartData> {
     public void populate(final CartModel source, final CartData target) throws ConversionException {
 
         final PaymentInfoModel paymentInfo = source.getPaymentInfo();
-        final IngenicoPaymentInfoData ingenicoPaymentInfoData = new IngenicoPaymentInfoData();
         if (paymentInfo instanceof IngenicoPaymentInfoModel) {
+            IngenicoPaymentInfoData ingenicoPaymentInfoData = new IngenicoPaymentInfoData();
             ingenicoPaymentInfoData.setId(((IngenicoPaymentInfoModel) paymentInfo).getId());
             ingenicoPaymentInfoData.setPaymentMethod(((IngenicoPaymentInfoModel) paymentInfo).getPaymentMethod());
             ingenicoPaymentInfoData.setIngenicoCheckoutType(((IngenicoPaymentInfoModel) paymentInfo).getIngenicoCheckoutType());
             ingenicoPaymentInfoData.setBillingAddress(addressConverter.convert(paymentInfo.getBillingAddress()));
+            target.setIngenicoPaymentInfo(ingenicoPaymentInfoData);
         }
-        target.setIngenicoPaymentInfo(ingenicoPaymentInfoData);
     }
 
     public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {
