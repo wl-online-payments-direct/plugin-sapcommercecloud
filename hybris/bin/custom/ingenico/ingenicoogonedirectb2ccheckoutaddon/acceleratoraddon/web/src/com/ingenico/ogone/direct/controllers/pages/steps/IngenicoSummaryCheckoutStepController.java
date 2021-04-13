@@ -4,6 +4,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
+import com.ingenico.ogone.direct.util.IngenicoUrlUtils;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -125,8 +127,10 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         switch (cartData.getIngenicoPaymentInfo().getIngenicoCheckoutType()) {
             case HOSTED_CHECKOUT:
-                //redirect to Hosted Page
-                break;
+                //TODO if hostedCheckoutResponse is null or there is an error (implementation in facade)
+                CreateHostedCheckoutResponse hostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout();
+                String partialRedirectUrl = hostedCheckoutResponse.getPartialRedirectUrl();
+                return REDIRECT_PREFIX + IngenicoUrlUtils.buildFullURL(partialRedirectUrl);
             case HOSTED_TOKENIZATION:
                 return REDIRECT_PREFIX + INGENICO_PAYMENT_VIEW;
             default:

@@ -2,7 +2,6 @@ package com.ingenico.ogone.direct.facade.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -10,6 +9,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
+import com.ingenico.direct.domain.GetHostedCheckoutResponse;
+import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
+import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.product.data.PriceData;
@@ -19,13 +21,16 @@ import de.hybris.platform.commerceservices.order.CommerceCheckoutService;
 import de.hybris.platform.commerceservices.service.data.CommerceCheckoutParameter;
 import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.order.CartService;
+import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 
@@ -41,7 +46,6 @@ import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
-import org.springframework.util.CollectionUtils;
 import com.ingenico.ogone.direct.util.IngenicoUrlUtils;
 
 public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
@@ -59,6 +63,9 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private BaseStoreService baseStoreService;
 
     private IngenicoPaymentService ingenicoPaymentService;
+
+    private BaseSiteService baseSiteService;
+    private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
 
 
     @Override
@@ -129,8 +136,25 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     @Override
     public CreateHostedCheckoutResponse createHostedCheckout() {
-        final CreateHostedCheckoutResponse hostedCheckout = ingenicoPaymentService.createHostedCheckout();
-        return null;
+        final CartData cartData = checkoutFacade.getCheckoutCart();
+        final PriceData totalPrice = cartData.getTotalPrice();
+
+        String fullReturnUrl = getFullResponseUrl("/checkout/multi/ingenico/hosted-checkout/response", true, cartData.getCode());
+        return ingenicoPaymentService.createHostedCheckout(fullReturnUrl, cartData.getIngenicoPaymentInfo().getPaymentMethod(),
+              cartData.getIngenicoPaymentInfo().getId(),
+              totalPrice.getValue(),
+              totalPrice.getCurrencyIso(),
+              getShopperLocale());
+    }
+
+    @Override
+    public boolean validatePaymentForHostedCheckoutResponse(String hostedCheckoutId) {
+        GetHostedCheckoutResponse hostedCheckoutData = ingenicoPaymentService.getHostedCheckout(hostedCheckoutId);
+
+        //TODO check if payment is processed and return true. If there is a problem with the payment fill the corresponding data
+
+        return false;
+
     }
 
     @Override
@@ -265,6 +289,16 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         return true;
     }
 
+    protected String getFullResponseUrl(final String responseUrl, final boolean isSecure, String cartId) {
+        final BaseSiteModel currentBaseSite = baseSiteService.getCurrentBaseSite();
+        final String queryParams = "cartId=" + cartId;
+
+        final String fullResponseUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(currentBaseSite, isSecure,
+              responseUrl, queryParams);
+
+        return fullResponseUrl == null ? "" : fullResponseUrl;
+    }
+
     private List<PaymentProduct> removeIDealWhenNoIssuers(List<PaymentProduct> paymentProducts) {
 //        Collection<DirectoryEntry> iDealIssuers = getIdealIssuers(paymentProducts);
 //        if (CollectionUtils.isEmpty(iDealIssuers)) {
@@ -304,5 +338,13 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     public void setBaseStoreService(BaseStoreService baseStoreService) {
         this.baseStoreService = baseStoreService;
+    }
+
+    public void setBaseSiteService(BaseSiteService baseSiteService) {
+        this.baseSiteService = baseSiteService;
+    }
+
+    public void setSiteBaseUrlResolutionService(SiteBaseUrlResolutionService siteBaseUrlResolutionService) {
+        this.siteBaseUrlResolutionService = siteBaseUrlResolutionService;
     }
 }
