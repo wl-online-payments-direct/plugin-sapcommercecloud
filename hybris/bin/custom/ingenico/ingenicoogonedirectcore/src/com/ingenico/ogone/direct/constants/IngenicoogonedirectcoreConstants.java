@@ -3,10 +3,6 @@
  */
 package com.ingenico.ogone.direct.constants;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Global class for all Ingenicoogonedirectcore constants. You can add global constants for your extension into this class.
  */
@@ -56,6 +52,7 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
     // Payment methods
 
     public static final Integer PAYMENT_METHOD_IDEAL = 809;
+    public static final Integer PAYMENT_METHOD_PAYPAL = 840;
     public static final Integer PAYMENT_METHOD_BCC = 3012;
 
 

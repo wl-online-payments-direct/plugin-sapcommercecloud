@@ -23,4 +23,6 @@ public interface IngenicoCheckoutFacade {
     void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId);
 
     CreateHostedCheckoutResponse createHostedCheckout();
+
+    boolean validatePaymentForHostedCheckoutResponse(String hostedCheckoutId);
 }
