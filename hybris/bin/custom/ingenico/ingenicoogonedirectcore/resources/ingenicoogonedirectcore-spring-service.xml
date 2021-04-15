@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
+        <property name="cartService" ref="cartService"/>
+        <property name="baseSiteService" ref="baseSiteService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
+        <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>
+        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
+        <property name="ingenicoPaymentRequestConverter" ref="ingenicoPaymentRequestConverter"/>
+    </bean>
+
+
+    <bean id="ingenicoCustomerAccountService" class="com.ingenico.ogone.direct.service.impl.IngenicoCustomerAccountServiceImpl">
+        <property name="ingenicoCustomerAccountDao" ref="ingenicoCustomerAccountDao" />
+    </bean>
+
+
+</beans>

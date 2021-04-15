@@ -34,16 +34,22 @@ import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
+import com.ingenico.direct.domain.CreatePaymentResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
+import com.ingenico.direct.domain.GetHostedTokenizationResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentProductDisplayHints;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_TYPE;
 import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
+import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
+import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
+import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.util.IngenicoUrlUtils;
@@ -62,6 +68,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private CommerceCheckoutService commerceCheckoutService;
     private BaseStoreService baseStoreService;
 
+    private IngenicoUserFacade ingenicoUserFacade;
     private IngenicoPaymentService ingenicoPaymentService;
 
     private BaseSiteService baseSiteService;
@@ -79,7 +86,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 getShopperLocale());
 
         paymentProducts = filterByCheckoutType(paymentProducts);
-        paymentProducts = removeIDealWhenNoIssuers(paymentProducts);
 
         return paymentProducts;
     }
@@ -101,8 +107,13 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     @Override
     public CreateHostedTokenizationResponse createHostedTokenization() {
-        final CreateHostedTokenizationResponse hostedTokenization = ingenicoPaymentService.createHostedTokenization(getShopperLocale());
+        final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = ingenicoUserFacade.getIngenicoPaymentInfos(true);
+        final List<String> savedTokens = ingenicoPaymentInfos.stream().map(IngenicoPaymentInfoData::getToken).collect(Collectors.toList());
+        final CreateHostedTokenizationResponse hostedTokenization = ingenicoPaymentService.createHostedTokenization(getShopperLocale(), savedTokens);
         hostedTokenization.setPartialRedirectUrl(IngenicoUrlUtils.buildFullURL(hostedTokenization.getPartialRedirectUrl()));
+        if (CollectionUtils.isNotEmpty(hostedTokenization.getInvalidTokens())) {
+            LOGGER.warn("[ INGENICO ] invalid tokens : {}", hostedTokenization.getInvalidTokens());
+        }
         return hostedTokenization;
     }
 
@@ -119,19 +130,29 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     }
 
     @Override
-    public void fillIngenicoPaymentInfoData(final IngenicoPaymentInfoData ingenicoPaymentInfoData, int paymentId) {
-        PaymentProduct paymentProduct;
-        if (paymentId == GROUPED_CARDS_ID) {
-            paymentProduct = createGroupedCardPaymentProduct();
-        } else {
-            paymentProduct = getPaymentMethodById(paymentId);
-        }
-
+    public void fillIngenicoPaymentInfoData(final IngenicoPaymentInfoData ingenicoPaymentInfoData, int paymentId) throws IngenicoNonValidPaymentProductException {
+        final PaymentProduct paymentProduct = getPaymentMethodById(paymentId);
         if (isValidPaymentMethod(paymentProduct)) {
             ingenicoPaymentInfoData.setId(paymentProduct.getId());
             ingenicoPaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
-            ingenicoPaymentInfoData.setIngenicoCheckoutType(getIngenicoCheckoutType());
+            if (paymentId == GROUPED_CARDS_ID) {
+                ingenicoPaymentInfoData.setIngenicoCheckoutType(IngenicoCheckoutTypesEnum.HOSTED_TOKENIZATION);
+            } else {
+                ingenicoPaymentInfoData.setIngenicoCheckoutType(IngenicoCheckoutTypesEnum.HOSTED_CHECKOUT);
+            }
+        } else {
+            throw new IngenicoNonValidPaymentProductException(paymentId);
         }
+
+    }
+
+    @Override
+    public CreatePaymentResponse authorisePayment(IngenicoHostedTokenizationData ingenicoHostedTokenizationData) {
+
+        final GetHostedTokenizationResponse hostedTokenization = ingenicoPaymentService.getHostedTokenization(ingenicoHostedTokenizationData.getHostedTokenizationId());
+
+        return ingenicoPaymentService.createPaymentForHostedTokenization(ingenicoHostedTokenizationData, hostedTokenization);
+
     }
 
     @Override
@@ -164,7 +185,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
-        parameter.setPaymentInfo(createPaymentInfo(cartModel, ingenicoPaymentInfoData));
+        parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, ingenicoPaymentInfoData));
 
         commerceCheckoutService.setPaymentInfo(parameter);
     }
@@ -208,12 +229,17 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         return null;
     }
 
-    protected PaymentInfoModel createPaymentInfo(final CartModel cartModel, IngenicoPaymentInfoData ingenicoPaymentInfoData) {
-        final IngenicoPaymentInfoModel paymentInfo = modelService.create(IngenicoPaymentInfoModel.class);
-        paymentInfo.setCode(generatePaymentInfoCode(cartModel));
+    protected PaymentInfoModel updateOrCreatePaymentInfo(final CartModel cartModel, IngenicoPaymentInfoData ingenicoPaymentInfoData) {
+        IngenicoPaymentInfoModel paymentInfo;
+        if (cartModel.getPaymentInfo() instanceof IngenicoPaymentInfoModel) {
+            paymentInfo = (IngenicoPaymentInfoModel) cartModel.getPaymentInfo();
+        } else {
+            paymentInfo = modelService.create(IngenicoPaymentInfoModel.class);
+            paymentInfo.setCode(generatePaymentInfoCode(cartModel));
+            paymentInfo.setUser(cartModel.getUser());
+            paymentInfo.setSaved(false);
+        }
 
-        paymentInfo.setUser(cartModel.getUser());
-        paymentInfo.setSaved(false);
         paymentInfo.setId(ingenicoPaymentInfoData.getId());
         paymentInfo.setPaymentMethod(ingenicoPaymentInfoData.getPaymentMethod());
         paymentInfo.setIngenicoCheckoutType(ingenicoPaymentInfoData.getIngenicoCheckoutType());
@@ -263,7 +289,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private PaymentProduct createGroupedCardPaymentProduct() {
         PaymentProduct paymentProduct = new PaymentProduct();
         paymentProduct.setId(GROUPED_CARDS_ID);
-        paymentProduct.setPaymentMethod("card");
+        paymentProduct.setPaymentMethod(PAYMENT_METHOD_TYPE.CARD.getValue());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
         paymentProduct.getDisplayHints().setLabel("Grouped Cards");
         return paymentProduct;
@@ -278,7 +304,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 }
                 break;
             case HOSTED_TOKENIZATION:
-                if (PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentProduct.getPaymentMethod()) || PAYMENT_METHOD_TYPE.REDIRECT.getValue().equals(paymentProduct.getPaymentMethod())) {
+                if (PAYMENT_METHOD_TYPE.MOBILE.getValue().equals(paymentProduct.getPaymentMethod())) {
                     return false;
                 }
                 break;
@@ -297,15 +323,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
               responseUrl, queryParams);
 
         return fullResponseUrl == null ? "" : fullResponseUrl;
-    }
-
-    private List<PaymentProduct> removeIDealWhenNoIssuers(List<PaymentProduct> paymentProducts) {
-//        Collection<DirectoryEntry> iDealIssuers = getIdealIssuers(paymentProducts);
-//        if (CollectionUtils.isEmpty(iDealIssuers)) {
-            paymentProducts =
-                  paymentProducts.stream().filter(paymentProduct -> !PAYMENT_METHOD_IDEAL.equals(paymentProduct.getId())).collect(Collectors.toList());
-//        }
-        return paymentProducts;
     }
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
@@ -338,6 +355,10 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     public void setBaseStoreService(BaseStoreService baseStoreService) {
         this.baseStoreService = baseStoreService;
+    }
+
+    public void setIngenicoUserFacade(IngenicoUserFacade ingenicoUserFacade) {
+        this.ingenicoUserFacade = ingenicoUserFacade;
     }
 
     public void setBaseSiteService(BaseSiteService baseSiteService) {

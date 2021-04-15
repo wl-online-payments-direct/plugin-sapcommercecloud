@@ -6,21 +6,37 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<spring:htmlEscape defaultHtmlEscape="true" />
+<spring:htmlEscape defaultHtmlEscape="true"/>
 
 <c:if test="${not empty paymentInfo && not empty paymentProduct && showPaymentInfo}">
     <ul class="checkout-order-summary-list">
         <li class="checkout-order-summary-list-heading">
-            <div class="title"><spring:theme code="checkout.multi.payment" text="Payment:" /></div>
+            <div class="title"><spring:theme code="checkout.multi.payment" text="Payment:"/></div>
             <div class="address">
                 <c:if test="${not empty paymentInfo.billingAddress}"> ${fn:escapeXml(paymentInfo.billingAddress.title)}</c:if>
                 <br>
-                <img src="${paymentProduct.displayHints.logo}" alt="${paymentProduct.displayHints.label}"/>
-                <span>${paymentProduct.displayHints.label}</span>
-                <br>
-                <c:if test="${not empty paymentInfo.billingAddress}">${fn:escapeXml(paymentInfo.billingAddress.line1)}, <c:if test="${not empty paymentInfo.billingAddress.line2}">${fn:escapeXml(paymentInfo.billingAddress.line2)},</c:if>
-                ${fn:escapeXml(paymentInfo.billingAddress.town)}, ${fn:escapeXml(paymentInfo.billingAddress.region.name)}&nbsp;${fn:escapeXml(paymentInfo.billingAddress.postalCode)}, ${fn:escapeXml(paymentInfo.billingAddress.country.name)}</c:if>
-                <br/><c:if test="${not empty paymentInfo.billingAddress.phone }">${fn:escapeXml(paymentInfo.billingAddress.phone)}</c:if>
+                <c:choose>
+                    <c:when test="${paymentProduct.id==-1}">
+                        <spring:theme code="checkout.paymentProduct.groupedCards.display.label"
+                                      var="groupedCardsLabel"/>
+                        <div class="ingenico_payment_product" title="${groupedCardsLabel}">
+                            <img src="" alt="${groupedCardsLabel}"/>
+                            <span>${groupedCardsLabel}</span>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="ingenico_payment_product" title="${paymentProduct.displayHints.label}">
+                            <img src="${paymentProduct.displayHints.logo}" alt="${paymentProduct.displayHints.label}"/>
+                            <span>${paymentProduct.displayHints.label}</span>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+                <c:if test="${not empty paymentInfo.billingAddress}">${fn:escapeXml(paymentInfo.billingAddress.line1)},
+                    <c:if test="${not empty paymentInfo.billingAddress.line2}">${fn:escapeXml(paymentInfo.billingAddress.line2)},</c:if>
+                    ${fn:escapeXml(paymentInfo.billingAddress.town)}, ${fn:escapeXml(paymentInfo.billingAddress.region.name)}&nbsp;${fn:escapeXml(paymentInfo.billingAddress.postalCode)}, ${fn:escapeXml(paymentInfo.billingAddress.country.name)}
+                </c:if>
+                <br/><c:if
+                    test="${not empty paymentInfo.billingAddress.phone }">${fn:escapeXml(paymentInfo.billingAddress.phone)}</c:if>
             </div>
         </li>
     </ul>
