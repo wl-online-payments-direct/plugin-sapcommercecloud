@@ -6,6 +6,7 @@
     
     <extension abstractclassprefix="Generated" classprefix="Ingenicoogonedirectcore" jaloLogicFree="true" managername="IngenicoogonedirectcoreManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="ingenicoogonedirectcore" usemaven="true">
         <requires-extension name="commercefacades"/>
+        <requires-extension name="acceleratorservices"/>
         <requires-extension name="payment"/>
         <requires-extension name="acceleratorservices"/>
         <coremodule generated="true" manager="com.ingenico.ogone.direct.jalo.IngenicoogonedirectcoreManager" packageroot="com.ingenico.ogone.direct"/>

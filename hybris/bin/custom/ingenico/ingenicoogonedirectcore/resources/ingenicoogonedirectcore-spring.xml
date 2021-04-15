@@ -8,6 +8,11 @@
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="ingenicoogonedirectcore-spring-cache.xml"/>
+    <import resource="ingenicoogonedirectcore-spring-dao.xml"/>
+    <import resource="ingenicoogonedirectcore-spring-service.xml"/>
+    <import resource="ingenicoogonedirectcore-spring-converter.xml"/>
+
+    <!-- utils -->
 
     <bean id="ingenicoClientFactory" class="com.ingenico.ogone.direct.factory.impl.IngenicoClientFactoryImpl">
         <property name="configurationService" ref="configurationService"/>
@@ -17,16 +22,17 @@
         <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
-
-    <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
-        <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>
-        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
-        <property name="baseStoreService" ref="baseStoreService"/>
+    <!-- facades -->
+    <bean id="ingenicoUserFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoUserFacadeImpl">
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy" />
+        <property name="ingenicoCustomerAccountService" ref="ingenicoCustomerAccountService" />
+        <property name="ingenicoPaymentInfoConverter" ref="ingenicoPaymentInfoConverter"/>
     </bean>
 
     <bean id="ingenicoCheckoutFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoCheckoutFacadeImpl">
         <property name="commonI18NService" ref="commonI18NService"/>
         <property name="checkoutFacade" ref="checkoutFacade"/>
+        <property name="ingenicoUserFacade" ref="ingenicoUserFacade"/>
         <property name="ingenicoPaymentService" ref="ingenicoPaymentService"/>
         <property name="addressReverseConverter" ref="addressReverseConverter"/>
         <property name="cartService" ref="cartService"/>
@@ -36,20 +42,5 @@
         <property name="baseSiteService" ref="baseSiteService"/>
         <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
     </bean>
-
-    <bean name="ingenicoCartPopulator" class="com.ingenico.ogone.direct.populator.IngenicoCartPopulator">
-        <property name="addressConverter" ref="addressConverter"/>
-    </bean>
-
-    <bean parent="modifyPopulatorList">
-        <property name="list" ref="cartConverter"/>
-        <property name="add" ref="ingenicoCartPopulator"/>
-    </bean>
-
-    <bean parent="modifyPopulatorList">
-        <property name="list" ref="extendedCartConverter"/>
-        <property name="add" ref="ingenicoCartPopulator"/>
-    </bean>
-
 
 </beans>
