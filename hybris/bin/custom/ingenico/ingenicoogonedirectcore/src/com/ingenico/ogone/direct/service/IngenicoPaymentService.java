@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
+import com.ingenico.direct.domain.GetHostedCheckoutResponse;
 import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.ProductDirectory;
@@ -22,4 +24,8 @@ public interface IngenicoPaymentService {
     List<DirectoryEntry> getProductDirectoryEntries(Integer id, String currency, String countryCode);
 
     CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale);
+
+    CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, String paymentMethod, Integer paymentProductId, BigDecimal amount, String currency, String shopperLocale);
+
+    GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 }
