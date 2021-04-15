@@ -21,6 +21,7 @@
     <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
         <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>
         <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
     </bean>
 
     <bean id="ingenicoCheckoutFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoCheckoutFacadeImpl">
@@ -32,6 +33,8 @@
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
         <property name="modelService" ref="modelService"/>
         <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="baseSiteService" ref="baseSiteService"/>
+        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
     </bean>
 
     <bean name="ingenicoCartPopulator" class="com.ingenico.ogone.direct.populator.IngenicoCartPopulator">

@@ -2,6 +2,7 @@ package com.ingenico.ogone.direct.facade;
 
 import java.util.List;
 
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.PaymentProduct;
@@ -20,4 +21,8 @@ public interface IngenicoCheckoutFacade {
     void handlePaymentInfo(IngenicoPaymentInfoData paymentInfoData);
 
     void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId);
+
+    CreateHostedCheckoutResponse createHostedCheckout();
+
+    boolean validatePaymentForHostedCheckoutResponse(String hostedCheckoutId);
 }
