@@ -85,6 +85,7 @@
                   generate="false">
             <attributes>
                 <attribute qualifier="id" type="java.lang.Integer">
+                    <description>ingenico paymentProduct ID</description>
                     <modifiers read="true" write="true" search="true"/>
                     <persistence type="property"/>
                 </attribute>
@@ -95,6 +96,26 @@
                 <attribute qualifier="ingenicoCheckoutType" type="IngenicoCheckoutTypesEnum">
                     <modifiers read="true" write="true" search="true" optional="false"/>
                     <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="token" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="alias" type="java.lang.String">
+                <modifiers read="true" write="true" search="false" optional="true"/>
+                <persistence type="property"/>
+            </attribute>
+                <attribute qualifier="type" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="cardholderName" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="expiryDate" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
                     <persistence type="property"/>
                 </attribute>
             </attributes>
