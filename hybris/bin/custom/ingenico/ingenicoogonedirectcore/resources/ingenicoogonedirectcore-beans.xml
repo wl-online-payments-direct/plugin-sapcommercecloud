@@ -6,11 +6,29 @@
         <property name="id" type="Integer"/>
         <property name="paymentMethod" type="String"/>
         <property name="ingenicoCheckoutType" type="com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum"/>
+        <property name="token" type="String"/>
+        <property name="alias" type="String"/>
+        <property name="type" type="String"/>
+        <property name="cardholderName" type="String"/>
+        <property name="expiryDate" type="String"/>
         <property name="billingAddress" type="de.hybris.platform.commercefacades.user.data.AddressData"/>
     </bean>
 
     <bean class="de.hybris.platform.commercefacades.order.data.CartData">
         <property name="ingenicoPaymentInfo" type="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData">
+        <property name="hostedTokenizationId" type="String"/>
+        <property name="screenHeight" type="String"/>
+        <property name="screenWidth" type="String"/>
+        <property name="navigatorJavaEnabled" type="Boolean"/>
+        <property name="timezoneOffsetUtcMinutes" type="String"/>
+        <property name="colorDepth" type="Integer"/>
+        <property name="acceptHeader" type="String"/>
+        <property name="userAgent" type="String"/>
+        <property name="locale" type="String"/>
+        <property name="ipAddress" type="String"/>
     </bean>
 
 </beans>

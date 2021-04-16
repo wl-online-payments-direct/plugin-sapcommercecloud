@@ -2,61 +2,85 @@ package com.ingenico.ogone.direct.service.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_PAYPAL;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.ingenico.direct.ReferenceException;
-import com.ingenico.direct.domain.AmountBreakdown;
-import com.ingenico.direct.domain.AmountOfMoney;
-import com.ingenico.direct.domain.CardPaymentMethodSpecificInput;
-import com.ingenico.direct.domain.CardPaymentMethodSpecificInputBase;
-import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
-import com.ingenico.direct.domain.Customer;
-import com.ingenico.direct.domain.GetHostedCheckoutResponse;
-import com.ingenico.direct.domain.HostedCheckoutSpecificInput;
-import com.ingenico.direct.domain.Order;
-import com.ingenico.direct.domain.PaymentProduct5100SpecificInput;
-import com.ingenico.direct.domain.RedirectPaymentMethodSpecificInput;
-import com.ingenico.direct.domain.RedirectPaymentProduct809SpecificInput;
-import com.ingenico.direct.domain.RedirectPaymentProduct840SpecificInput;
-import com.ingenico.direct.domain.RedirectionData;
-import com.ingenico.direct.domain.ShoppingCart;
-import com.ingenico.ogone.direct.enums.OperationCodesEnum;
+import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
+import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.order.CartService;
+import de.hybris.platform.servicelayer.dto.converter.Converter;
+import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 
 import com.ingenico.direct.Client;
+import com.ingenico.direct.DeclinedPaymentException;
+import com.ingenico.direct.domain.AmountOfMoney;
+import com.ingenico.direct.domain.BrowserData;
+import com.ingenico.direct.domain.Card;
+import com.ingenico.direct.domain.CardPaymentMethodSpecificInput;
+import com.ingenico.direct.domain.CardPaymentMethodSpecificInputBase;
+import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationRequest;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
+import com.ingenico.direct.domain.CreatePaymentRequest;
+import com.ingenico.direct.domain.CreatePaymentResponse;
+import com.ingenico.direct.domain.Customer;
+import com.ingenico.direct.domain.CustomerDevice;
 import com.ingenico.direct.domain.DirectoryEntry;
+import com.ingenico.direct.domain.GetHostedCheckoutResponse;
+import com.ingenico.direct.domain.GetHostedTokenizationResponse;
 import com.ingenico.direct.domain.GetPaymentProductsResponse;
+import com.ingenico.direct.domain.HostedCheckoutSpecificInput;
+import com.ingenico.direct.domain.Order;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.ProductDirectory;
+import com.ingenico.direct.domain.RedirectPaymentMethodSpecificInput;
+import com.ingenico.direct.domain.RedirectPaymentProduct840SpecificInput;
+import com.ingenico.direct.domain.RedirectionData;
+import com.ingenico.direct.domain.ThreeDSecure;
 import com.ingenico.direct.merchant.products.GetPaymentProductParams;
 import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
 import com.ingenico.direct.merchant.products.GetProductDirectoryParams;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_TYPE;
+import com.ingenico.ogone.direct.enums.OperationCodesEnum;
 import com.ingenico.ogone.direct.factory.IngenicoClientFactory;
+import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
 import com.ingenico.ogone.direct.util.IngenicoLogUtils;
-import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_TYPE;
 
 public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(IngenicoPaymentServiceImpl.class);
+    private static final String ECOMMERCE = "ECOMMERCE";
+    private static final String CHECKOUT_MULTI_INGENICO_PAYMENT_HANDLE_3_DS = "/checkout/multi/ingenico/payment/handle3ds";
 
+    private CartService cartService;
+    private BaseSiteService baseSiteService;
+    private BaseStoreService baseStoreService;
+    private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
     private IngenicoAmountUtils ingenicoAmountUtils;
     private IngenicoClientFactory ingenicoClientFactory;
-    private BaseStoreService baseStoreService;
+    private Converter<CartModel, CreatePaymentRequest> ingenicoPaymentRequestConverter;
+
 
     @Override
     public GetPaymentProductsResponse getPaymentProductsResponse(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
+        validateParameterNotNull(amount, "amount cannot be null");
+        validateParameterNotNull(currency, "currency cannot be null");
+        validateParameterNotNull(countryCode, "countryCode cannot be null");
+        validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
+
         try (Client client = ingenicoClientFactory.getClient()) {
             final GetPaymentProductsParams params = new GetPaymentProductsParams();
             params.setCurrencyCode(currency);
@@ -91,6 +115,12 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     @Override
     public PaymentProduct getPaymentProduct(Integer id, BigDecimal amount, String currency, String countryCode, String shopperLocale) {
+        validateParameterNotNull(id, "id cannot be null");
+        validateParameterNotNull(amount, "amount cannot be null");
+        validateParameterNotNull(currency, "currency cannot be null");
+        validateParameterNotNull(countryCode, "countryCode cannot be null");
+        validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
+
         try (Client client = ingenicoClientFactory.getClient()) {
 
             final GetPaymentProductParams params = new GetPaymentProductParams();
@@ -114,6 +144,10 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     @Override
     @Cacheable(value = "productDirectory", key = "#id+'_cur_'+#currency+'_country_'+#countryCode")
     public ProductDirectory getProductDirectory(Integer id, String currency, String countryCode) {
+        validateParameterNotNull(id, "id cannot be null");
+        validateParameterNotNull(currency, "currency cannot be null");
+        validateParameterNotNull(countryCode, "countryCode cannot be null");
+
         try (Client client = ingenicoClientFactory.getClient()) {
 
             final GetProductDirectoryParams params = new GetProductDirectoryParams();
@@ -138,12 +172,16 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     }
 
     @Override
-    public CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale) {
+    public CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale, List<String> savedTokens) {
+        validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
         try (Client client = ingenicoClientFactory.getClient()) {
 
             CreateHostedTokenizationRequest params = new CreateHostedTokenizationRequest();
             params.setLocale(shopperLocale);
             params.setAskConsumerConsent(true);
+            if (CollectionUtils.isNotEmpty(savedTokens)) {
+                params.setTokens(String.join(",", savedTokens));
+            }
             final CreateHostedTokenizationResponse hostedTokenization = client.merchant(getMerchantId()).hostedTokenization().createHostedTokenization(params);
 
             IngenicoLogUtils.logAction(LOGGER, "createHostedTokenization", params, hostedTokenization);
@@ -155,6 +193,108 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             return null;
         }
     }
+
+    @Override
+    public GetHostedTokenizationResponse getHostedTokenization(String hostedTokenizationId) {
+        validateParameterNotNull(hostedTokenizationId, "hostedTokenizationId cannot be null");
+        try (Client client = ingenicoClientFactory.getClient()) {
+
+            final GetHostedTokenizationResponse hostedTokenization = client.merchant(getMerchantId()).hostedTokenization().getHostedTokenization(hostedTokenizationId);
+
+            IngenicoLogUtils.logAction(LOGGER, "getHostedTokenization", hostedTokenizationId, hostedTokenization);
+
+            return hostedTokenization;
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting getHostedTokenization ", e);
+            //TODO Throw Logical Exception
+            return null;
+        }
+    }
+
+
+    @Override
+    @SuppressWarnings("all")
+    public CreatePaymentResponse createPaymentForHostedTokenization(IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) {
+        validateParameterNotNull(tokenizationResponse, "tokenizationResponse cannot be null");
+        final CartModel sessionCart = getSessionCart();
+        validateParameterNotNull(sessionCart, "sessionCart cannot be null");
+        try (Client client = ingenicoClientFactory.getClient()) {
+
+            final CreatePaymentRequest params = ingenicoPaymentRequestConverter.convert(sessionCart);
+
+            params.setCardPaymentMethodSpecificInput(buildCardPaymentMethodSpecificInput(tokenizationResponse));
+            params.getOrder().getCustomer().setDevice(getBrowserInfo(ingenicoHostedTokenizationData));
+            final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
+
+            IngenicoLogUtils.logAction(LOGGER, "getHostedTokenization", params, payment);
+
+            return payment;
+        } catch (DeclinedPaymentException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting createPayment ", e);
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting createPayment ", e);
+            //TODO Throw Logical Exception
+        }
+        return null;
+    }
+
+    private CardPaymentMethodSpecificInput buildCardPaymentMethodSpecificInput(GetHostedTokenizationResponse tokenizationResponse) {
+        CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
+        cardPaymentMethodSpecificInput.setPaymentProductId(tokenizationResponse.getToken().getPaymentProductId());
+//        cardPaymentMethodSpecificInput.setToken(tokenizationResponse.getToken().getId());
+        // TODO to remove later
+//        cardPaymentMethodSpecificInput.setIsRecurring(true);
+//        cardPaymentMethodSpecificInput.setRecurring(new CardRecurrenceDetails());
+//        cardPaymentMethodSpecificInput.getRecurring().setRecurringPaymentSequenceIndicator("recurring");
+
+        cardPaymentMethodSpecificInput.setSkipAuthentication(false);
+        cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
+        cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
+        cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
+        cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
+
+        //TODO to replace by Token
+        final Card card = new Card();
+        card.setCardNumber("4000000000000002");
+        card.setCardholderName("Marouane");
+        card.setCvv("123");
+        card.setExpiryDate("1230");
+        cardPaymentMethodSpecificInput.setCard(card);
+
+
+        return cardPaymentMethodSpecificInput;
+    }
+
+    private CustomerDevice getBrowserInfo(IngenicoHostedTokenizationData ingenicoHostedTokenizationData) {
+        BrowserData browserData = new BrowserData();
+        browserData.setColorDepth(ingenicoHostedTokenizationData.getColorDepth());
+        browserData.setJavaEnabled(ingenicoHostedTokenizationData.getNavigatorJavaEnabled());
+        browserData.setScreenHeight(ingenicoHostedTokenizationData.getScreenHeight());
+        browserData.setScreenWidth(ingenicoHostedTokenizationData.getScreenWidth());
+
+        CustomerDevice browserInfo = new CustomerDevice();
+        browserInfo.setAcceptHeader(ingenicoHostedTokenizationData.getAcceptHeader());
+        browserInfo.setUserAgent(ingenicoHostedTokenizationData.getUserAgent());
+        browserInfo.setLocale(ingenicoHostedTokenizationData.getLocale());
+        browserInfo.setIpAddress(ingenicoHostedTokenizationData.getIpAddress());
+        browserInfo.setTimezoneOffsetUtcMinutes(ingenicoHostedTokenizationData.getTimezoneOffsetUtcMinutes());
+        browserInfo.setBrowserData(browserData);
+
+        return browserInfo;
+    }
+
+    private String getHostedTokenizationReturnUrl() {
+        return siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(), true,
+                CHECKOUT_MULTI_INGENICO_PAYMENT_HANDLE_3_DS);
+    }
+
+    private CartModel getSessionCart() {
+        if (cartService.hasSessionCart()) {
+            return cartService.getSessionCart();
+        }
+        return null;
+    }
+
 
     @Override
     public CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, String paymentMethod, Integer paymentProductId, BigDecimal amount, String currency, String shopperLocale) {
@@ -263,6 +403,22 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     public void setIngenicoClientFactory(IngenicoClientFactory ingenicoClientFactory) {
         this.ingenicoClientFactory = ingenicoClientFactory;
+    }
+
+    public void setCartService(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    public void setIngenicoPaymentRequestConverter(Converter<CartModel, CreatePaymentRequest> ingenicoPaymentRequestConverter) {
+        this.ingenicoPaymentRequestConverter = ingenicoPaymentRequestConverter;
+    }
+
+    public void setBaseSiteService(BaseSiteService baseSiteService) {
+        this.baseSiteService = baseSiteService;
+    }
+
+    public void setSiteBaseUrlResolutionService(SiteBaseUrlResolutionService siteBaseUrlResolutionService) {
+        this.siteBaseUrlResolutionService = siteBaseUrlResolutionService;
     }
 
     public void setBaseStoreService(BaseStoreService baseStoreService) {

@@ -4,8 +4,11 @@ import java.util.List;
 
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
+import com.ingenico.direct.domain.CreatePaymentResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.PaymentProduct;
+import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
+import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 
 public interface IngenicoCheckoutFacade {
@@ -20,7 +23,9 @@ public interface IngenicoCheckoutFacade {
 
     void handlePaymentInfo(IngenicoPaymentInfoData paymentInfoData);
 
-    void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId);
+    void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId) throws IngenicoNonValidPaymentProductException;
+
+    CreatePaymentResponse authorisePayment(IngenicoHostedTokenizationData hostedTokenizationId);
 
     CreateHostedCheckoutResponse createHostedCheckout();
 
