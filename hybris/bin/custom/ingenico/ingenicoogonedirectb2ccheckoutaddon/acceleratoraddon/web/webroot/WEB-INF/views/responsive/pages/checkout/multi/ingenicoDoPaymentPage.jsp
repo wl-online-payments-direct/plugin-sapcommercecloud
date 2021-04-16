@@ -20,7 +20,11 @@
         <script src="https://payment.preprod.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js"></script>
 
         <script>
-            var tokenizer = new Tokenizer("${hostedTokenization.partialRedirectUrl}", 'hostedTokenization', {validationCallback: validateHostedTokenizationSubmit});
+            var params = {
+                validationCallback: validateHostedTokenizationSubmit,
+                hideCardholderName: false
+            };
+            var tokenizer = new Tokenizer("${hostedTokenization.partialRedirectUrl}", 'hostedTokenization', params);
 
             tokenizer.initialize()
                 .then(() => {
@@ -29,7 +33,6 @@
                 .catch(reason => {
                     console.log("tokenizer", "error on init");
                 });
-
 
             function validateHostedTokenizationSubmit(result) {
                 console.log("tokenizer", result);
@@ -64,10 +67,29 @@
                         <ycommerce:testId code="checkoutStepFive">
                             <div class="checkout-payment">
                                 <div class="checkout-indent">
+                                    <c:if test="${not empty savedPaymentInfos}">
+                                        <div id="checkout-payment-tokens">
+                                            <form:select id="select_payment-tokens" path="savedPaymentInfos"
+                                                         cssClass="form-control">
+                                                <option value="" ></option>
+                                                <c:forEach var="savedPaymentInfo" items="${savedPaymentInfos}">
+                                                    <form:option value="${savedPaymentInfo.token}">
+                                                        ${savedPaymentInfo.cardholderName} - ${savedPaymentInfo.alias}
+                                                    </form:option>
+                                                </c:forEach>
+                                            </form:select>
+                                        </div>
+                                    </c:if>
                                     <div id="hostedTokenization"></div>
                                     <form:form id="ingenicoDoPaymentForm" name="ingenicoDoPaymentForm"
                                                modelAttribute="ingenicoDoPaymentForm" method="POST"
-                                               action="${selectPaymentMethod}">
+                                               action="${doPayment}">
+                                        <form:input type="hidden" path="hostedTokenizationId"/>
+                                        <form:input type="hidden" path="screenHeight"/>
+                                        <form:input type="hidden" path="screenWidth"/>
+                                        <form:input type="hidden" path="navigatorJavaEnabled"/>
+                                        <form:input type="hidden" path="timezoneOffset"/>
+                                        <form:input type="hidden" path="colorDepth"/>
                                         <button type="button"
                                                 class="btn btn-primary btn-block submit_ingenicoDoPaymentForm checkout-next">
                                             <spring:theme code="checkout.multi.tokenization.do.payment"/>

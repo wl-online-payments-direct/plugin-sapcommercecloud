@@ -14,23 +14,19 @@ import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 
 public class IngenicoCartPopulator implements Populator<CartModel, CartData> {
 
-    private Converter<AddressModel, AddressData> addressConverter;
+    private Converter<IngenicoPaymentInfoModel, IngenicoPaymentInfoData> ingenicoPaymentInfoConverter;
 
     @Override
     public void populate(final CartModel source, final CartData target) throws ConversionException {
-
         final PaymentInfoModel paymentInfo = source.getPaymentInfo();
         if (paymentInfo instanceof IngenicoPaymentInfoModel) {
             IngenicoPaymentInfoData ingenicoPaymentInfoData = new IngenicoPaymentInfoData();
-            ingenicoPaymentInfoData.setId(((IngenicoPaymentInfoModel) paymentInfo).getId());
-            ingenicoPaymentInfoData.setPaymentMethod(((IngenicoPaymentInfoModel) paymentInfo).getPaymentMethod());
-            ingenicoPaymentInfoData.setIngenicoCheckoutType(((IngenicoPaymentInfoModel) paymentInfo).getIngenicoCheckoutType());
-            ingenicoPaymentInfoData.setBillingAddress(addressConverter.convert(paymentInfo.getBillingAddress()));
+            ingenicoPaymentInfoConverter.convert((IngenicoPaymentInfoModel) paymentInfo, ingenicoPaymentInfoData);
             target.setIngenicoPaymentInfo(ingenicoPaymentInfoData);
         }
     }
 
-    public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {
-        this.addressConverter = addressConverter;
+    public void setIngenicoPaymentInfoConverter(Converter<IngenicoPaymentInfoModel, IngenicoPaymentInfoData> ingenicoPaymentInfoConverter) {
+        this.ingenicoPaymentInfoConverter = ingenicoPaymentInfoConverter;
     }
 }
