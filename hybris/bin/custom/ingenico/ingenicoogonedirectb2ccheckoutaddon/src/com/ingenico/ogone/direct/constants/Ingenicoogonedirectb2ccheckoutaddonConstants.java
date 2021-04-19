@@ -27,6 +27,7 @@ public final class Ingenicoogonedirectb2ccheckoutaddonConstants extends Generate
                 String ingenicoPaymentMethod = ADDON_PREFIX + "pages/checkout/multi/ingenicoPaymentMethodPage";
                 String ingenicoCheckoutSummaryPage = ADDON_PREFIX + "pages/checkout/multi/ingenicoCheckoutSummaryPage";
                 String ingenicoDoPaymentPage = ADDON_PREFIX + "pages/checkout/multi/ingenicoDoPaymentPage";
+                String ingenicoOrderConfirmationPage = ADDON_PREFIX + "pages/checkout/multi/ingenicoOrderConfirmationPage";
             }
         }
 
