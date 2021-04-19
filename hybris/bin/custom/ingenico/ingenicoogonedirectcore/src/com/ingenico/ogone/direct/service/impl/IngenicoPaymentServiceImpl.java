@@ -6,12 +6,22 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.order.CartService;
+import de.hybris.platform.payment.PaymentService;
+import de.hybris.platform.payment.dto.TransactionStatus;
+import de.hybris.platform.payment.dto.TransactionStatusDetails;
+import de.hybris.platform.payment.enums.PaymentTransactionType;
+import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
+import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
@@ -47,6 +57,22 @@ import com.ingenico.direct.domain.ProductDirectory;
 import com.ingenico.direct.domain.RedirectPaymentMethodSpecificInput;
 import com.ingenico.direct.domain.RedirectPaymentProduct840SpecificInput;
 import com.ingenico.direct.domain.RedirectionData;
+import com.ingenico.direct.domain.ShoppingCart;
+import com.ingenico.ogone.direct.enums.OperationCodesEnum;
+import de.hybris.platform.commercefacades.order.data.CartData;
+import de.hybris.platform.store.BaseStoreModel;
+import de.hybris.platform.store.services.BaseStoreService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
+
+import com.ingenico.direct.Client;
+import com.ingenico.direct.domain.CreateHostedTokenizationRequest;
+import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
+import com.ingenico.direct.domain.DirectoryEntry;
+import com.ingenico.direct.domain.GetPaymentProductsResponse;
+import com.ingenico.direct.domain.PaymentProduct;
+import com.ingenico.direct.domain.ProductDirectory;
 import com.ingenico.direct.domain.ThreeDSecure;
 import com.ingenico.direct.merchant.products.GetPaymentProductParams;
 import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
@@ -72,6 +98,8 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     private IngenicoAmountUtils ingenicoAmountUtils;
     private IngenicoClientFactory ingenicoClientFactory;
     private Converter<CartModel, CreatePaymentRequest> ingenicoPaymentRequestConverter;
+    private ModelService modelService;
+    private PaymentService paymentService;
 
 
     @Override
@@ -100,7 +128,6 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         }
     }
 
-    // TODO Getting MerchantID using the configuration on BaseStore
     private String getMerchantId() {
         final BaseStoreModel currentBaseStore = baseStoreService.getCurrentBaseStore();
 //        return currentBaseStore.getIngenicoConfiguration().getMerchantID();
@@ -303,8 +330,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
             switch (PAYMENT_METHOD_TYPE.valueOf(paymentMethod.toUpperCase())) {
                 case CARD:
-                    // TODO take authorizationCode from paymentMode
-                    request.setCardPaymentMethodSpecificInput(prepareCardPaymentInputData(OperationCodesEnum.SALE.getCode(), paymentProductId));
+                    request.setCardPaymentMethodSpecificInput(prepareCardPaymentInputData(paymentProductId));
                     break;
                 case REDIRECT:
                     request.setRedirectPaymentMethodSpecificInput(prepareRedirectPaymentInputData(fullResponseUrl, paymentProductId));
@@ -340,9 +366,35 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     }
 
-    private CardPaymentMethodSpecificInputBase prepareCardPaymentInputData(String authorizationMode, Integer paymentProductId) {
+    @Override public PaymentTransactionEntryModel authorisePayment(CartModel cartModel, CustomerModel customerModel, String requestId) {
+
+        final PaymentTransactionModel transaction = modelService.create(PaymentTransactionModel.class);
+        final PaymentTransactionType paymentTransactionType = PaymentTransactionType.AUTHORIZATION;
+        transaction.setCode(customerModel.getUid() + "_" + UUID.randomUUID());
+        transaction.setRequestId(requestId);
+//        transaction.setRequestToken(orderInfoData.getOrderPageRequestToken());
+//        transaction.setPaymentProvider(getCommerceCheckoutService().getPaymentProvider());
+        modelService.save(transaction);
+
+        final PaymentTransactionEntryModel entry = modelService.create(PaymentTransactionEntryModel.class);
+        entry.setType(paymentTransactionType);
+        entry.setRequestId(requestId);
+//        entry.setRequestToken(orderInfoData.getOrderPageRequestToken());
+        entry.setTime(new Date());
+        entry.setPaymentTransaction(transaction);
+        entry.setTransactionStatus(TransactionStatus.ACCEPTED.name());
+        entry.setTransactionStatusDetails(TransactionStatusDetails.SUCCESFULL.name());
+        entry.setCode(paymentService.getNewPaymentTransactionEntryCode(transaction, paymentTransactionType));
+        modelService.save(entry);
+
+        transaction.setOrder(cartModel);
+        transaction.setInfo(cartModel.getPaymentInfo());
+        modelService.saveAll(cartModel, transaction);
+        return entry;
+    }
+
+    private CardPaymentMethodSpecificInputBase prepareCardPaymentInputData(Integer paymentProductId) {
         CardPaymentMethodSpecificInputBase cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInputBase();
-        cardPaymentMethodSpecificInput.setAuthorizationMode(authorizationMode);
         cardPaymentMethodSpecificInput.setPaymentProductId(paymentProductId);
 //                    PaymentProduct5100SpecificInput cPayspecificData = new PaymentProduct5100SpecificInput();
 //                    cPayspecificData.setBrand();
@@ -423,5 +475,13 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     public void setBaseStoreService(BaseStoreService baseStoreService) {
         this.baseStoreService = baseStoreService;
+    }
+
+    public void setModelService(ModelService modelService) {
+        this.modelService = modelService;
+    }
+
+    public void setPaymentService(PaymentService paymentService) {
+        this.paymentService = paymentService;
     }
 }

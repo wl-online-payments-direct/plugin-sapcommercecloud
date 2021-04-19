@@ -2,6 +2,7 @@ package com.ingenico.ogone.direct.facade.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 
+import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -10,23 +11,30 @@ import java.util.stream.Collectors;
 
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.GetHostedCheckoutResponse;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
+import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.product.data.PriceData;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commercefacades.user.data.CountryData;
 import de.hybris.platform.commerceservices.order.CommerceCheckoutService;
 import de.hybris.platform.commerceservices.service.data.CommerceCheckoutParameter;
+import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
+import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
+import de.hybris.platform.payment.dto.TransactionStatus;
+import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
@@ -45,6 +53,8 @@ import com.ingenico.direct.domain.GetHostedTokenizationResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentProductDisplayHints;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_TYPE;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.HOSTED_CHECKOUT_STATUS_ENUM;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM;
 import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
@@ -67,13 +77,13 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private CheckoutFacade checkoutFacade;
     private CommerceCheckoutService commerceCheckoutService;
     private BaseStoreService baseStoreService;
+    private CheckoutCustomerStrategy checkoutCustomerStrategy;
 
     private IngenicoUserFacade ingenicoUserFacade;
     private IngenicoPaymentService ingenicoPaymentService;
 
     private BaseSiteService baseSiteService;
     private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
-
 
     @Override
     public List<PaymentProduct> getAvailablePaymentMethods() {
@@ -172,10 +182,36 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     public boolean validatePaymentForHostedCheckoutResponse(String hostedCheckoutId) {
         GetHostedCheckoutResponse hostedCheckoutData = ingenicoPaymentService.getHostedCheckout(hostedCheckoutId);
 
-        //TODO check if payment is processed and return true. If there is a problem with the payment fill the corresponding data
-
+        if (hostedCheckoutData.getStatus().equals(HOSTED_CHECKOUT_STATUS_ENUM.PAYMENT_CREATED.getValue())) { // hosted checkout was created and processed
+            if (hostedCheckoutData.getCreatedPaymentOutput().getPaymentStatusCategory().equals(PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue())) { //payment was created and captured
+                return true;
+            }
+        }
         return false;
+    }
 
+    @Override public boolean authorisePaymentHostedCheckout(String requestId) {
+        CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+        CartModel cartModel = getCart();
+        PaymentTransactionEntryModel paymentTransactionModel = ingenicoPaymentService.authorisePayment(cartModel, currentCustomer, requestId);
+
+        return paymentTransactionModel != null
+              && (TransactionStatus.ACCEPTED.name().equals(paymentTransactionModel.getTransactionStatus())
+              || TransactionStatus.REVIEW.name().equals(paymentTransactionModel.getTransactionStatus()));
+    }
+
+    @Override public String startOrderCreationProcess() {
+        final OrderData orderData;
+        String orderCode = "";
+        try
+        {
+            orderData = checkoutFacade.placeOrder();
+            orderCode = orderData.getCode();
+        } catch (final Exception e)
+        {
+            LOGGER.error("Failed to place Order", e);
+        }
+        return orderCode;
     }
 
     @Override
@@ -317,6 +353,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     protected String getFullResponseUrl(final String responseUrl, final boolean isSecure, String cartId) {
         final BaseSiteModel currentBaseSite = baseSiteService.getCurrentBaseSite();
+        //TODO remove clue cartId
         final String queryParams = "cartId=" + cartId;
 
         final String fullResponseUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(currentBaseSite, isSecure,
@@ -367,5 +404,9 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     public void setSiteBaseUrlResolutionService(SiteBaseUrlResolutionService siteBaseUrlResolutionService) {
         this.siteBaseUrlResolutionService = siteBaseUrlResolutionService;
+    }
+
+    public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
+        this.checkoutCustomerStrategy = checkoutCustomerStrategy;
     }
 }

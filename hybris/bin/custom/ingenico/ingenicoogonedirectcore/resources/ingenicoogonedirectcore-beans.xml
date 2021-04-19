@@ -18,6 +18,10 @@
         <property name="ingenicoPaymentInfo" type="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
     </bean>
 
+    <bean class="de.hybris.platform.commercefacades.order.data.AbstractOrderData">
+        <property name="ingenicoPaymentInfo" type="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
+    </bean>
+
     <bean class="com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData">
         <property name="hostedTokenizationId" type="String"/>
         <property name="screenHeight" type="String"/>
