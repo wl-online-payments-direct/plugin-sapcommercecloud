@@ -34,6 +34,4 @@ public class IngenicoPaymentInfoPopulator implements Populator<IngenicoPaymentIn
     public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {
         this.addressConverter = addressConverter;
     }
-
-
 }

@@ -24,21 +24,21 @@ public class IngenicoHostedCheckoutResponseController {
    @RequestMapping(value = "/response", method = {RequestMethod.POST, RequestMethod.GET})
    public String handleHostedCheckoutPaymentResponse(final HttpServletRequest request) {
 
-      //TODO this controller will be covered as part of ING-633
-      //it is for handling the response after the hosted checkout is complete
       Map<String, String> requestParams = getRequestParameterMap(request);
       // get hostedCheckoutStatus and payment id
       String hostedCheckoutId = requestParams.get("hostedCheckoutId");
 
       //if payment is success and an order is created redirect to order confirmation page
       if (ingenicoCheckoutFacade.validatePaymentForHostedCheckoutResponse(hostedCheckoutId)) {
-         // todo fill model with order data
+         if (!ingenicoCheckoutFacade.authorisePaymentHostedCheckout(hostedCheckoutId)) {
+            // Payment transaction wasn't created for the order == unhappy path => don't place order
+            return "redirect:/cart";
+         }
+         String orderId = ingenicoCheckoutFacade.startOrderCreationProcess();
+         return String.format("redirect:/checkout/ingenico/orderConfirmation/%s", orderId);
       } else {
          return "redirect:/cart";
       }
-
-//      return "redirect:/checkout/ingenico/orderConfirmation/%s";
-      return "redirect:/";
    }
 
    protected Map<String, String> getRequestParameterMap(HttpServletRequest request) {
