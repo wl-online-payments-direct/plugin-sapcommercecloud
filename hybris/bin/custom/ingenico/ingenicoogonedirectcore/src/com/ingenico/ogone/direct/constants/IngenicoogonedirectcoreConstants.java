@@ -72,6 +72,64 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
         }
     }
 
+    public enum HOSTED_CHECKOUT_STATUS_ENUM {
+        PAYMENT_CREATED("PAYMENT_CREATED"),
+        IN_PROGRESS("IN_PROGRESS");
+
+        private final String value;
+
+        HOSTED_CHECKOUT_STATUS_ENUM(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public enum PAYMENT_STATUS_ENUM {
+        CREATED("PAYMENT_CREATED"),
+        CANCELLED("CANCELLED"),
+        REJECTED("REJECTED"),
+        REJECTED_CAPTURE("REJECTED_CAPTURE"),
+        REDIRECTED("REDIRECTED"),
+        PENDING_PAYMENT("PENDING_PAYMENT"),
+        PENDING_COMPLETION("PENDING_COMPLETION"),
+        PENDING_CAPTURE("PENDING_CAPTURE"),
+        AUTHORIZATION_REQUESTED("AUTHORIZATION_REQUESTED"),
+        CAPTURE_REQUESTED("CAPTURE_REQUESTED"),
+        CAPTURED("CAPTURED"),
+        REVERSED("REVERSED"),
+        REFUND_REQUESTED("REFUND_REQUESTED"),
+        REFUNDED("REFUNDED");
+
+        private final String value;
+
+        PAYMENT_STATUS_ENUM(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public enum PAYMENT_STATUS_CATEGORY_ENUM {
+        SUCCESSFUL("SUCCESSFUL"),
+        REJECTED("REJECTED"),
+        STATUS_UNKNOWN("STATUS_UNKNOWN");
+
+        private final String value;
+
+        PAYMENT_STATUS_CATEGORY_ENUM(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
     private IngenicoogonedirectcoreConstants() {
         //empty to avoid instantiating this constant class
     }

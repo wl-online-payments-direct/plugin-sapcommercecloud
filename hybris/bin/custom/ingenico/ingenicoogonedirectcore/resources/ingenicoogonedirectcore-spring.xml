@@ -41,6 +41,8 @@
         <property name="baseStoreService" ref="baseStoreService"/>
         <property name="baseSiteService" ref="baseSiteService"/>
         <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy" />
     </bean>
+
 
 </beans>
