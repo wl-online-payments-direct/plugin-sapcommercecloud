@@ -8,23 +8,15 @@ import de.hybris.platform.acceleratorstorefrontcommons.forms.AddressForm;
  *
  */
 public class IngenicoPaymentDetailsForm {
-    private int paymentProductId;
+    private Integer paymentProductId;
 
-    private int issuerId;
+    private Integer issuerId;
 
     private boolean useDeliveryAddress;
 
     private boolean newBillingAddress;
 
     private AddressForm billingAddress;
-
-    public int getPaymentProductId() {
-        return paymentProductId;
-    }
-
-    public void setPaymentProductId(int paymentProductId) {
-        this.paymentProductId = paymentProductId;
-    }
 
     public boolean isUseDeliveryAddress() {
         return useDeliveryAddress;
@@ -50,11 +42,19 @@ public class IngenicoPaymentDetailsForm {
         this.billingAddress = billingAddress;
     }
 
-    public int getIssuerId() {
+    public Integer getPaymentProductId() {
+        return paymentProductId;
+    }
+
+    public void setPaymentProductId(Integer paymentProductId) {
+        this.paymentProductId = paymentProductId;
+    }
+
+    public Integer getIssuerId() {
         return issuerId;
     }
 
-    public void setIssuerId(int issuerId) {
+    public void setIssuerId(Integer issuerId) {
         this.issuerId = issuerId;
     }
 }
