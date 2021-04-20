@@ -3,6 +3,33 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <bean name="ingenicoPaymentInfoPopulator" class="com.ingenico.ogone.direct.populator.IngenicoPaymentInfoPopulator">
+        <property name="addressConverter" ref="addressConverter"/>
+    </bean>
+
+    <bean id="ingenicoPaymentInfoConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
+        <property name="populators">
+            <list>
+                <ref bean="ingenicoPaymentInfoPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="ingenicoOrderPaymentRequestPopulator"
+          class="com.ingenico.ogone.direct.populator.IngenicoOrderPaymentRequestPopulator">
+        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
+    </bean>
+
+    <bean id="ingenicoPaymentRequestConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.ingenico.direct.domain.CreatePaymentRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="ingenicoOrderPaymentRequestPopulator"/>
+            </list>
+        </property>
+    </bean>
+
     <bean name="ingenicoCartPopulator" class="com.ingenico.ogone.direct.populator.IngenicoCartPopulator">
         <property name="ingenicoPaymentInfoConverter" ref="ingenicoPaymentInfoConverter"/>
     </bean>
@@ -17,32 +44,12 @@
         <property name="add" ref="ingenicoCartPopulator"/>
     </bean>
 
-    <bean name="ingenicoPaymentInfoPopulator" class="com.ingenico.ogone.direct.populator.IngenicoPaymentInfoPopulator">
-        <property name="addressConverter" ref="addressConverter"/>
+    <bean name="ingenicoOrderPopulator" class="com.ingenico.ogone.direct.populator.IngenicoOrderPopulator">
+        <property name="ingenicoPaymentInfoConverter" ref="ingenicoPaymentInfoConverter"/>
     </bean>
 
-    <bean id="ingenicoPaymentInfoConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
-        <property name="populators">
-            <list>
-                <ref bean="ingenicoPaymentInfoPopulator"/>
-            </list>
-        </property>
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="orderConverter"/>
+        <property name="add" ref="ingenicoOrderPopulator"/>
     </bean>
-
-    <bean id="ingenicoPaymentRequestConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CreatePaymentRequest"/>
-        <property name="populators">
-            <list>
-                <ref bean="ingenicoOrderPaymentRequestPopulator"/>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="ingenicoOrderPaymentRequestPopulator"
-          class="com.ingenico.ogone.direct.populator.IngenicoOrderPaymentRequestPopulator">
-        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
-    </bean>
-
-
 </beans>

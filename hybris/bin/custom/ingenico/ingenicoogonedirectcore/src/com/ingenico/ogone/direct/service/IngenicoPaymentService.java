@@ -13,6 +13,10 @@ import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.ProductDirectory;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
+import de.hybris.platform.commercefacades.order.data.CartData;
+import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.user.CustomerModel;
+import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 
 public interface IngenicoPaymentService {
 
@@ -35,4 +39,6 @@ public interface IngenicoPaymentService {
     CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, String paymentMethod, Integer paymentProductId, BigDecimal amount, String currency, String shopperLocale);
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
+
+    PaymentTransactionEntryModel authorisePayment(CartModel cartModel, CustomerModel customerModel, String requestId);
 }

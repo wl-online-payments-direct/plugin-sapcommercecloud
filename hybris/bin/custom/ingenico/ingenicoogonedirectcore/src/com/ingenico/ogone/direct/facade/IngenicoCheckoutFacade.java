@@ -30,4 +30,8 @@ public interface IngenicoCheckoutFacade {
     CreateHostedCheckoutResponse createHostedCheckout();
 
     boolean validatePaymentForHostedCheckoutResponse(String hostedCheckoutId);
+
+    boolean authorisePaymentHostedCheckout(String requestId); //requestId = hostedCheckoutID or transactionID ???
+
+    String startOrderCreationProcess();
 }
