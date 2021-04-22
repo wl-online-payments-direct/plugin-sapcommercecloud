@@ -2,16 +2,12 @@ package com.ingenico.ogone.direct.facade.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
-import com.ingenico.direct.domain.GetHostedCheckoutResponse;
-import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -25,16 +21,13 @@ import de.hybris.platform.commerceservices.service.data.CommerceCheckoutParamete
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
-import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.order.CartService;
-import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.payment.dto.TransactionStatus;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
-import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
@@ -46,14 +39,17 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ingenico.direct.ApiException;
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.CreatePaymentResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
+import com.ingenico.direct.domain.GetHostedCheckoutResponse;
 import com.ingenico.direct.domain.GetHostedTokenizationResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentProductDisplayHints;
-import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_TYPE;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.HOSTED_CHECKOUT_STATUS_ENUM;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_TYPE;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM;
 import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
@@ -134,7 +130,11 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
         if (isIdealPresent) {
             final CartData cartData = checkoutFacade.getCheckoutCart();
-            return ingenicoPaymentService.getProductDirectoryEntries(PAYMENT_METHOD_IDEAL, cartData.getTotalPrice().getCurrencyIso(), getCountryCode(cartData));
+            try {
+                return ingenicoPaymentService.getProductDirectoryEntries(PAYMENT_METHOD_IDEAL, cartData.getTotalPrice().getCurrencyIso(), getCountryCode(cartData));
+            } catch (ApiException e) {
+                LOGGER.info("[ INGENICO ] No ProductDirectory found! reason : {}", e.getResponseBody());
+            }
         }
         return Collections.emptyList();
     }
@@ -172,10 +172,10 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
         String fullReturnUrl = getFullResponseUrl("/checkout/multi/ingenico/hosted-checkout/response", true, cartData.getCode());
         return ingenicoPaymentService.createHostedCheckout(fullReturnUrl, cartData.getIngenicoPaymentInfo().getPaymentMethod(),
-              cartData.getIngenicoPaymentInfo().getId(),
-              totalPrice.getValue(),
-              totalPrice.getCurrencyIso(),
-              getShopperLocale());
+                cartData.getIngenicoPaymentInfo().getId(),
+                totalPrice.getValue(),
+                totalPrice.getCurrencyIso(),
+                getShopperLocale());
     }
 
     @Override
@@ -190,25 +190,25 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         return false;
     }
 
-    @Override public boolean authorisePaymentHostedCheckout(String requestId) {
+    @Override
+    public boolean authorisePaymentHostedCheckout(String requestId) {
         CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
         CartModel cartModel = getCart();
         PaymentTransactionEntryModel paymentTransactionModel = ingenicoPaymentService.authorisePayment(cartModel, currentCustomer, requestId);
 
         return paymentTransactionModel != null
-              && (TransactionStatus.ACCEPTED.name().equals(paymentTransactionModel.getTransactionStatus())
-              || TransactionStatus.REVIEW.name().equals(paymentTransactionModel.getTransactionStatus()));
+                && (TransactionStatus.ACCEPTED.name().equals(paymentTransactionModel.getTransactionStatus())
+                || TransactionStatus.REVIEW.name().equals(paymentTransactionModel.getTransactionStatus()));
     }
 
-    @Override public String startOrderCreationProcess() {
+    @Override
+    public String startOrderCreationProcess() {
         final OrderData orderData;
         String orderCode = "";
-        try
-        {
+        try {
             orderData = checkoutFacade.placeOrder();
             orderCode = orderData.getCode();
-        } catch (final Exception e)
-        {
+        } catch (final Exception e) {
             LOGGER.error("Failed to place Order", e);
         }
         return orderCode;
@@ -357,7 +357,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         final String queryParams = "cartId=" + cartId;
 
         final String fullResponseUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(currentBaseSite, isSecure,
-              responseUrl, queryParams);
+                responseUrl, queryParams);
 
         return fullResponseUrl == null ? "" : fullResponseUrl;
     }

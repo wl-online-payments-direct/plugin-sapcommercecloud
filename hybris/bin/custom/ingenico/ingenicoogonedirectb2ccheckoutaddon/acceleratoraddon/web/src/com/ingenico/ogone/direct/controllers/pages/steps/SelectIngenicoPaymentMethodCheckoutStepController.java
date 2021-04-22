@@ -1,11 +1,11 @@
 package com.ingenico.ogone.direct.controllers.pages.steps;
 
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import java.util.List;
 
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
@@ -84,7 +84,8 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         model.addAttribute("ingenicoPaymentDetailsForm", new IngenicoPaymentDetailsForm());
         final List<PaymentProduct> availablePaymentMethods = ingenicoCheckoutFacade.getAvailablePaymentMethods();
         model.addAttribute("paymentProducts", availablePaymentMethods);
-//        model.addAttribute("idealIssuers",  ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods));
+        model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
+        model.addAttribute("idealIssuers", ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods));
 
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
