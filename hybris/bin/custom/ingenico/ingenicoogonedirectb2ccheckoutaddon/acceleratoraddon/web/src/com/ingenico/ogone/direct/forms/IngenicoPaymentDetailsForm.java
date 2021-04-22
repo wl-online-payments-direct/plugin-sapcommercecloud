@@ -10,7 +10,7 @@ import de.hybris.platform.acceleratorstorefrontcommons.forms.AddressForm;
 public class IngenicoPaymentDetailsForm {
     private Integer paymentProductId;
 
-    private Integer issuerId;
+    private String issuerId;
 
     private boolean useDeliveryAddress;
 
@@ -50,11 +50,11 @@ public class IngenicoPaymentDetailsForm {
         this.paymentProductId = paymentProductId;
     }
 
-    public Integer getIssuerId() {
+    public String getIssuerId() {
         return issuerId;
     }
 
-    public void setIssuerId(Integer issuerId) {
+    public void setIssuerId(String issuerId) {
         this.issuerId = issuerId;
     }
 }
