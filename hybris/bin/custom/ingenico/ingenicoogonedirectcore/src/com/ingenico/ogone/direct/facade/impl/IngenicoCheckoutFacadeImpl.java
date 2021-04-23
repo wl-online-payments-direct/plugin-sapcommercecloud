@@ -15,6 +15,7 @@ import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
+import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.product.data.PriceData;
@@ -36,6 +37,7 @@ import de.hybris.platform.payment.dto.TransactionStatus;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
+import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.site.BaseSiteService;
@@ -168,14 +170,9 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     @Override
     public CreateHostedCheckoutResponse createHostedCheckout() {
         final CartData cartData = checkoutFacade.getCheckoutCart();
-        final PriceData totalPrice = cartData.getTotalPrice();
 
         String fullReturnUrl = getFullResponseUrl("/checkout/multi/ingenico/hosted-checkout/response", true, cartData.getCode());
-        return ingenicoPaymentService.createHostedCheckout(fullReturnUrl, cartData.getIngenicoPaymentInfo().getPaymentMethod(),
-              cartData.getIngenicoPaymentInfo().getId(),
-              totalPrice.getValue(),
-              totalPrice.getCurrencyIso(),
-              getShopperLocale());
+        return ingenicoPaymentService.createHostedCheckout(fullReturnUrl, cartData, getShopperLocale());
     }
 
     @Override
@@ -212,6 +209,11 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
             LOGGER.error("Failed to place Order", e);
         }
         return orderCode;
+    }
+
+    @Override
+    public boolean loadOrderConfirmationPageDirectly() {
+        return getCart() != null ? true : false;
     }
 
     @Override
