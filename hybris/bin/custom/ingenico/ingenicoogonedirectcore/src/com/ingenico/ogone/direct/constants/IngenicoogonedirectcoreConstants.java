@@ -87,6 +87,23 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
         }
     }
 
+    public enum ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM {
+        DISCOUNT("DISCOUNT"),
+        SHIPPING("SHIPPING"),
+        VAT("VAT"),
+        BASE_AMOUNT("BASE_AMOUNT");
+
+        private final String value;
+
+        ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
     public enum PAYMENT_STATUS_ENUM {
         CREATED("PAYMENT_CREATED"),
         CANCELLED("CANCELLED"),

@@ -34,4 +34,6 @@ public interface IngenicoCheckoutFacade {
     boolean authorisePaymentHostedCheckout(String requestId); //requestId = hostedCheckoutID or transactionID ???
 
     String startOrderCreationProcess();
+
+    boolean loadOrderConfirmationPageDirectly(); // there is no cart
 }
