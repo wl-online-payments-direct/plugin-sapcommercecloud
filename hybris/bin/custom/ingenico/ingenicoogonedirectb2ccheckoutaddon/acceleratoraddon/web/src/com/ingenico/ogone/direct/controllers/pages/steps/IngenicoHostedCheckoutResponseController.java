@@ -28,6 +28,11 @@ public class IngenicoHostedCheckoutResponseController {
       // get hostedCheckoutStatus and payment id
       String hostedCheckoutId = requestParams.get("hostedCheckoutId");
 
+      if (!ingenicoCheckoutFacade.loadOrderConfirmationPageDirectly()) { // if cart doesn't exist an order exists return order confirmation page
+         String cartId = requestParams.get("cartId");
+         return String.format("redirect:/checkout/ingenico/orderConfirmation/%s", cartId);
+      }
+
       //if payment is success and an order is created redirect to order confirmation page
       if (ingenicoCheckoutFacade.validatePaymentForHostedCheckoutResponse(hostedCheckoutId)) {
          if (!ingenicoCheckoutFacade.authorisePaymentHostedCheckout(hostedCheckoutId)) {
