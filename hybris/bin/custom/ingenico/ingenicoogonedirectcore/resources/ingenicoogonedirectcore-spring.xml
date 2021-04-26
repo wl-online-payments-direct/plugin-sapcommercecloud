@@ -16,7 +16,6 @@
 
 
     <bean id="ingenicoClientFactory" class="com.ingenico.ogone.direct.factory.impl.IngenicoClientFactoryImpl">
-        <property name="baseStoreService" ref="baseStoreService"/>
         <property name="ingenicoConfigurationService" ref="ingenicoConfigurationService"/>
         <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
     </bean>
