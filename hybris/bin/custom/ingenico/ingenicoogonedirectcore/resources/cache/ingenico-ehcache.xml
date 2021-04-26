@@ -14,7 +14,7 @@
            timeToLiveSeconds="1800"
            memoryStoreEvictionPolicy="LRU"/>
 
-    <cache name="communicatorConfiguration"
+    <cache name="ingenicoConfiguration"
            maxElementsInMemory="100"
            eternal="false"
            overflowToDisk="false"
