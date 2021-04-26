@@ -4,19 +4,35 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd">
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/util
+            http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <import resource="ingenicoogonedirectcore-spring-cache.xml"/>
     <import resource="ingenicoogonedirectcore-spring-dao.xml"/>
     <import resource="ingenicoogonedirectcore-spring-service.xml"/>
     <import resource="ingenicoogonedirectcore-spring-converter.xml"/>
 
-    <!-- utils -->
 
     <bean id="ingenicoClientFactory" class="com.ingenico.ogone.direct.factory.impl.IngenicoClientFactoryImpl">
-        <property name="configurationService" ref="configurationService"/>
+        <property name="ingenicoConfigurationService" ref="ingenicoConfigurationService"/>
+        <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
     </bean>
+
+    <bean id="communicatorConfiguration" class="com.ingenico.direct.CommunicatorConfiguration">
+        <property name="authorizationType"
+                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.authorizationType')}"/>
+        <property name="connectTimeout"
+                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.connectTimeout')}"/>
+        <property name="socketTimeout"
+                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.socketTimeout')}"/>
+        <property name="maxConnections"
+                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.maxConnections')}"/>
+        <property name="integrator"
+                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.integrator')}"/>
+    </bean>
+    <!-- utils -->
 
     <bean id="ingenicoAmountUtils" class="com.ingenico.ogone.direct.util.IngenicoAmountUtils">
         <property name="commonI18NService" ref="commonI18NService"/>
@@ -24,8 +40,8 @@
 
     <!-- facades -->
     <bean id="ingenicoUserFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoUserFacadeImpl">
-        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy" />
-        <property name="ingenicoCustomerAccountService" ref="ingenicoCustomerAccountService" />
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
+        <property name="ingenicoCustomerAccountService" ref="ingenicoCustomerAccountService"/>
         <property name="ingenicoPaymentInfoConverter" ref="ingenicoPaymentInfoConverter"/>
     </bean>
 
@@ -41,7 +57,7 @@
         <property name="baseStoreService" ref="baseStoreService"/>
         <property name="baseSiteService" ref="baseSiteService"/>
         <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
-        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy" />
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
     </bean>
 
 

@@ -19,16 +19,22 @@ ACC.ingenicoPaymentPost = {
     bindSubmitingenicoDoPaymentForm: function () {
         $('.submit_ingenicoDoPaymentForm').click(function () {
             if (tokenizer !== undefined) {
-                ACC.common.blockFormAndShowProcessingMessage($(this));
-
+                var submitBtn =$(this);
+                var form = submitBtn.parents('form:first');
+                form.block({message: ACC.ingenicoPaymentPost.spinner});
                 tokenizer.submitTokenization().then((result) => {
                     if (result.success) {
-                        console.log("success Tokenization :", result.hostedTokenizationId);
+                        console.log("Tokenization succeed :", result.hostedTokenizationId);
                         $('#ingenicoDoPaymentForm  input[name=hostedTokenizationId]').val(result.hostedTokenizationId);
                         $('#ingenicoDoPaymentForm').submit();
+                        submitBtn.unbind("click");
                     } else {
-                        console.log("error Tokenization :", result.error);
+                        console.log("Tokenization failed :", result.error);
                     }
+                }).catch(function (error) {
+                    console.error("Unknown Error :", error);
+                }).finally(function () {
+                    form.unblock();
                 });
 
 
@@ -39,9 +45,9 @@ ACC.ingenicoPaymentPost = {
         $("#select_payment-tokens").change(function () {
             if (tokenizer !== undefined) {
                 var useSavedCard = $(this).val();
-                if(useSavedCard===""){
+                if (useSavedCard === "") {
                     tokenizer.useToken();
-                }else {
+                } else {
                     tokenizer.useToken(useSavedCard);
                 }
             }
