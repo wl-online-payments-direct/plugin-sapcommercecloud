@@ -20,7 +20,6 @@
                         <spring:theme code="checkout.paymentProduct.groupedCards.display.label"
                                       var="groupedCardsLabel"/>
                         <div class="ingenico_payment_product" title="${groupedCardsLabel}">
-                            <img src="" alt="${groupedCardsLabel}"/>
                             <span>${groupedCardsLabel}</span>
                         </div>
                     </c:when>
