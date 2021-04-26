@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<!--
+	ATTENTION: This is just an example file. You have to edit it according to your needs.
+-->
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.PaymentProductDisplayHintsWsDTO">
+        <description>PaymentProduct display hints</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">DisplayHints</hint>
+        </hints>
+        <property name="displayOrder" type="String"/>
+        <property name="label" type="String"/>
+        <property name="logo" type="String"/>
+    </bean>
+
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.PaymentProductWsDTO">
+        <description>PaymentProduct</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">PaymentProduct</hint>
+        </hints>
+        <property name="id" type="String"/>
+        <property name="paymentMethod" type="String"/>
+        <property name="displayHints" type="com.ingenico.ogone.direct.payment.dto.PaymentProductDisplayHintsWsDTO"/>
+        <property name="directoryEntries" type="com.ingenico.ogone.direct.payment.dto.DirectoryEntryListWsDTO"/>
+    </bean>
+
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO">
+        <description>list of PaymentProduct</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">PaymentProductList</hint>
+        </hints>
+        <property name="paymentProducts" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.PaymentProductWsDTO>">
+            <description>list of PaymentProduct</description>
+        </property>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO">
+        <description>Hosted Tokenization Response</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">HostedTokenizationResponse</hint>
+        </hints>
+        <property name="hostedTokenizationId" type="String"/>
+        <property name="redirectUrl" type="String"/>
+        <property name="tokens" type="java.util.List&lt;String>"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO">
+        <description>Directory Entry</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">DirectoryEntry</hint>
+        </hints>
+        <property name="issuerId" type="String"/>
+        <property name="issuerList" type="String"/>
+        <property name="issuerName" type="String"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.DirectoryEntryListWsDTO">
+        <description>Directory Entries</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">DirectoryEntryList</hint>
+        </hints>
+        <property name="paymentProducts" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO>">
+            <description>Directory Entries</description>
+        </property>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.RedirectDataWsDTO">
+        <description>Redirect Data</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">RedirectData</hint>
+        </hints>
+        <property name="redirectURL" type="String"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.MerchantActionWsDTO">
+        <description>Merchant Action</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">MerchantAction</hint>
+        </hints>
+        <property name="actionType" type="String"/>
+        <property name="redirectData" type="com.ingenico.ogone.direct.payment.dto.RedirectDataWsDTO"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.CreatePaymentResponseWsDTO">
+        <description>Create Payment Response</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">CreatePaymentResponse</hint>
+        </hints>
+        <property name="MerchantAction" type="com.ingenico.ogone.direct.payment.dto.MerchantActionWsDTO"/>
+        <property name="PaymentResponse" type="com.ingenico.ogone.direct.payment.dto.PaymentResponseWsDTO"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.PaymentResponseWsDTO">
+        <description>Payment Response</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">PaymentResponse</hint>
+        </hints>
+        <property name="id" type="String"/>
+        <property name="status" type="String"/>
+    </bean>
+
+
+
+</beans>
