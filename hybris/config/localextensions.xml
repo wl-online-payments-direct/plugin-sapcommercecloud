@@ -256,12 +256,11 @@
     <extension name='xyformsservices' />
     <extension name='xyformsstorefrontcommons' />
     <extension name='xyformsweb' />
-    
         <!-- INGENICO -->
     <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectcore"/>
     <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectb2ccheckoutaddon"/>
     <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectbackoffice"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectoccaddon"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectocc"/>
 
     <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectfulfilmentprocess"/>
 

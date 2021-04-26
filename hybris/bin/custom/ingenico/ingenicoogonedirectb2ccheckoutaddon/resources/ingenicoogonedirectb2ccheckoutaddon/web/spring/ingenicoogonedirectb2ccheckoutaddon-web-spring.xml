@@ -15,7 +15,7 @@
            
     <context:annotation-config/>
 
-	<context:component-scan base-package="com.ingenico.ogone.direct"/>
+	<context:component-scan base-package="com.ingenico.ogone.direct.checkoutaddon"/>
 
     <alias name="defaultIngenicoB2CResponsiveMultiStepCheckout" alias="ingenicoB2CResponsiveMultiStepCheckout" />
     <bean id="defaultIngenicoB2CResponsiveMultiStepCheckout" parent="checkoutStep">
@@ -141,7 +141,7 @@
         <property name="value" ref="ingenicoB2CResponsiveCheckoutGroup"/>
     </bean>
 
-    <bean id="ingenicoPaymentWithTokenCheckoutStepValidator" class="com.ingenico.ogone.direct.checkout.steps.validation.impl.IngenicoPaymentWithTokenCheckoutStepValidator" parent="abstractCheckoutStepValidator" >
+    <bean id="ingenicoPaymentWithTokenCheckoutStepValidator" class="com.ingenico.ogone.direct.checkoutaddon.checkout.steps.validation.impl.IngenicoPaymentWithTokenCheckoutStepValidator" parent="abstractCheckoutStepValidator" >
         <property name="ingenicoCheckoutFlowFacade" ref="ingenicoCheckoutFlowFacade"/>
     </bean>
 
