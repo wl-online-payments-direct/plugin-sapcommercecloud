@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- Fieldset mapping -->
+
+    <bean parent="fieldSetLevelMapping" id="paymentProductListWsDTOFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="paymentProducts"/>
+                <entry key="DEFAULT" value="paymentProducts(DEFAULT)"/>
+                <entry key="FULL" value="paymentProducts(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+
+    <bean parent="fieldSetLevelMapping" id="paymentProductFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.PaymentProductWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="id,paymentMethod,displayHints"/>
+                <entry key="DEFAULT" value="id,paymentMethod,displayHints(DEFAULT)"/>
+                <entry key="FULL" value="id,paymentMethod,displayHints(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="paymentProductDisplayHintFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.PaymentProductDisplayHintsWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="label"/>
+                <entry key="DEFAULT" value="BASIC,logo"/>
+                <entry key="FULL" value="DEFAULT,displayOrder"/>
+            </map>
+        </property>
+    </bean>
+
+
+</beans>
