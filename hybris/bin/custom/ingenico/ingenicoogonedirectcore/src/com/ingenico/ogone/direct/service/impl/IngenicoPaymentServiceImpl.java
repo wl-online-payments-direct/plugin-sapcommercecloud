@@ -148,7 +148,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     }
 
     @Override
-    @Cacheable(value = "productDirectory", key = "#id+'_cur_'+#currency+'_country_'+#countryCode")
+    @Cacheable(value = "productDirectory", key = "T(com.ingenico.ogone.direct.cache.IngenicoCacheKeyGenerator).generateKey(true,'directory',#id,#currency,#countryCode)")
     public ProductDirectory getProductDirectory(Integer id, String currency, String countryCode) {
         validateParameterNotNull(id, "id cannot be null");
         validateParameterNotNull(currency, "currency cannot be null");
@@ -173,6 +173,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     }
 
     @Override
+    @Cacheable(value = "productDirectory", key = "T(com.ingenico.ogone.direct.cache.IngenicoCacheKeyGenerator).generateKey(true,'entry',#id,#currency,#countryCode)")
     public List<DirectoryEntry> getProductDirectoryEntries(Integer id, String currency, String countryCode) {
         return getProductDirectory(id, currency, countryCode).getEntries();
     }
