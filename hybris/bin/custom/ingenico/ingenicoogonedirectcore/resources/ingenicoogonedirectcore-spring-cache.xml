@@ -13,7 +13,10 @@
      	http://www.springframework.org/schema/util
      	http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <cache:annotation-driven cache-manager="ingenicoCacheManager"/>
+
+    <cache:annotation-driven cache-manager="ingenicoCacheManager" key-generator="ingenicoCacheKeyGenerator"/>
+
+    <bean id="ingenicoCacheKeyGenerator" class="com.ingenico.ogone.direct.cache.IngenicoCacheKeyGenerator" lazy-init="true"/>
 
     <bean id="ingenicoCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
         <property name="cacheManager" ref="ingenicoEhCache"/>
@@ -21,6 +24,5 @@
 
     <bean id="ingenicoEhCache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
         <property name="configLocation" value="cache/ingenico-ehcache.xml"/>
-        <property name="shared" value="true"/>
     </bean>
 </beans>
