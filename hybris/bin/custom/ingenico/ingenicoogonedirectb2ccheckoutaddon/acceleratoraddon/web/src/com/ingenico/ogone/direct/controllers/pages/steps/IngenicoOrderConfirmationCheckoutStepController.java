@@ -6,12 +6,15 @@ import javax.servlet.http.HttpServletRequest;
 import com.ingenico.ogone.direct.constants.Ingenicoogonedirectb2ccheckoutaddonConstants;
 import de.hybris.platform.acceleratorservices.controllers.page.PageType;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
+import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractCheckoutController;
+import de.hybris.platform.acceleratorstorefrontcommons.forms.RegisterForm;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
 import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +49,11 @@ public class IngenicoOrderConfirmationCheckoutStepController extends AbstractChe
       {
          LOG.warn("Attempted to load an order confirmation that does not exist or is not visible. Redirect to home page.");
          return REDIRECT_PREFIX + ROOT;
+      }
+
+      if (super.getUserFacade().isAnonymousUser()) {
+         model.addAttribute("isAnonymousUser", true);
+         model.addAttribute(new RegisterForm());
       }
 
       model.addAttribute("orderCode", orderCode);

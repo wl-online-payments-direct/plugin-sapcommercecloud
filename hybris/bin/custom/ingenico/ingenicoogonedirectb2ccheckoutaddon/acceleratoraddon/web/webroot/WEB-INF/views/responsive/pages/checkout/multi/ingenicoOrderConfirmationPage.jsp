@@ -1,17 +1,14 @@
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="template" tagdir="/WEB-INF/tags/responsive/template" %>
-<%@ taglib prefix="cms" uri="http://hybris.com/tld/cmstags" %>
-<%@ taglib prefix="multiCheckout" tagdir="/WEB-INF/tags/responsive/checkout/multi" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="format" tagdir="/WEB-INF/tags/shared/format" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<%@ taglib prefix="formElement" tagdir="/WEB-INF/tags/responsive/formElement" %>
-<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="ycommerce" uri="http://hybris.com/tld/ycommercetags" %>
 <%@ taglib prefix="ingenico" tagdir="/WEB-INF/tags/addons/ingenicoogonedirectb2ccheckoutaddon/responsive" %>
 <%@ taglib prefix="order" tagdir="/WEB-INF/tags/responsive/order" %>
-
+<%@ taglib prefix="user" tagdir="/WEB-INF/tags/responsive/user"%>
 
 <template:page pageTitle="${pageTitle}" hideHeaderLinks="true">
     <jsp:body>
@@ -94,7 +91,7 @@
                                 <div class="col-sm-6 col-md-4 order-billing-address">
                                     <ingenico:ingenicoBillingAddressDetailsItem order="${orderData}"/>
                                 </div>
-                                <c:if test="${not empty orderData.paymentInfo}">
+                                <c:if test="${not empty orderData.ingenicoPaymentInfo}">
                                     <div class="col-sm-6 col-md-4 order-payment-data">
                                         <ingenico:ingenicoPaymentDetails order="${orderData}"/>
                                     </div>
@@ -119,6 +116,14 @@
                 </div>
             </div>
         </div>--%>
+        <c:if test="${isAnonymousUser eq true}"> <%-- Registration form --%>
+            <div class="register__section">
+            	<c:url value="/login/register" var="registerActionUrl" />
+            	<user:register actionNameKey="register.submit"
+            		action="${registerActionUrl}" />
+            </div>
+
+        </c:if>
 
     </jsp:body>
 </template:page>

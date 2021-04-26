@@ -203,7 +203,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         try
         {
             orderData = checkoutFacade.placeOrder();
-            orderCode = orderData.getCode();
+            orderCode = checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
         } catch (final Exception e)
         {
             LOGGER.error("Failed to place Order", e);
