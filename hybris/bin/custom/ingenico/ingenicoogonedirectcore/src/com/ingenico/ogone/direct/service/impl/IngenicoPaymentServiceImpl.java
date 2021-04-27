@@ -15,6 +15,7 @@ import java.util.UUID;
 import com.ingenico.direct.domain.AmountBreakdown;
 import com.ingenico.direct.domain.LineItem;
 import com.ingenico.direct.domain.OrderLineDetails;
+import com.ingenico.direct.domain.Shipping;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.commercefacades.order.data.OrderEntryData;
 import de.hybris.platform.commercefacades.product.data.PriceData;
@@ -442,35 +443,10 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         Customer customer = new Customer();
         customer.setLocale(shopperLocale);
 
-        ShoppingCart cart = new ShoppingCart();
+        Shipping shipping = new Shipping();
+        shipping.setShippingCost(ingenicoAmountUtils.createAmount(cartData.getDeliveryCost().getValue(), currencyISO));
 
-        List<AmountBreakdown> amountBreakdowns = new ArrayList<>();
-        for (ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM type : ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM.values()) {
-            AmountBreakdown amountBreakdown = new AmountBreakdown();
-            // using the 0 index which points to the main order
-            switch (type) {
-                case DISCOUNT:
-                    amountBreakdown.setType(ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM.DISCOUNT.getValue());
-                    amountBreakdown.setAmount(ingenicoAmountUtils.createAmount(cartData.getOrderPrices().get(0).getTotalDiscounts().getValue(), currencyISO));
-                    break;
-                case SHIPPING:
-                    amountBreakdown.setType(ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM.SHIPPING.getValue());
-                    amountBreakdown.setAmount(ingenicoAmountUtils.createAmount(cartData.getOrderPrices().get(0).getDeliveryCost().getValue(), currencyISO));
-                    break;
-                case VAT:
-                    amountBreakdown.setType(ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM.VAT.getValue());
-                    amountBreakdown.setAmount(ingenicoAmountUtils.createAmount(cartData.getOrderPrices().get(0).getTotalTax().getValue(), currencyISO));
-                    break;
-                case BASE_AMOUNT:
-                    amountBreakdown.setType(ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM.BASE_AMOUNT.getValue());
-                    amountBreakdown.setAmount(ingenicoAmountUtils.createAmount(cartData.getOrderPrices().get(0).getSubTotal().getValue(), currencyISO));
-                    break;
-                default:
-                    break;
-            }
-            amountBreakdowns.add(amountBreakdown);
-        }
-        cart.setAmountBreakdown(amountBreakdowns);
+        ShoppingCart cart = new ShoppingCart();
 
         List<LineItem> lineItems = new ArrayList<>();
         for (OrderEntryData orderEntry : cartData.getEntries()) {
@@ -488,6 +464,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         }
         cart.setItems(lineItems);
 
+//        order.setShipping(shipping);
 //        order.setShoppingCart(cart);
         order.setCustomer(customer);
 

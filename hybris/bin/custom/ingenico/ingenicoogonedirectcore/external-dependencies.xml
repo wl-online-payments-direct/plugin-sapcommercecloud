@@ -6,7 +6,7 @@
 	<version>2011.4</version>
 
 	<properties>
-		<ingenico.ogone.direct.version>2.3.0</ingenico.ogone.direct.version>
+		<ingenico.ogone.direct.version>2.5.0</ingenico.ogone.direct.version>
 	</properties>
 
 	<packaging>jar</packaging>

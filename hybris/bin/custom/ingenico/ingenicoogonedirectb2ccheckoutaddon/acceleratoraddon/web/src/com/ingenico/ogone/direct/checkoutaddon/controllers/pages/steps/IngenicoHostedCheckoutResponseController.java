@@ -9,6 +9,8 @@ import java.util.Map;
 
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
+import de.hybris.platform.commercefacades.order.OrderFacade;
+import de.hybris.platform.commercefacades.order.data.OrderData;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,6 +22,9 @@ public class IngenicoHostedCheckoutResponseController {
    @Resource(name = "ingenicoCheckoutFacade")
    private IngenicoCheckoutFacade ingenicoCheckoutFacade;
 
+   @Resource(name = "orderFacade")
+   private OrderFacade orderFacade;
+
    @RequireHardLogIn
    @RequestMapping(value = "/response", method = {RequestMethod.POST, RequestMethod.GET})
    public String handleHostedCheckoutPaymentResponse(final HttpServletRequest request) {
@@ -30,7 +35,9 @@ public class IngenicoHostedCheckoutResponseController {
 
       if (!ingenicoCheckoutFacade.loadOrderConfirmationPageDirectly()) { // if cart doesn't exist an order exists return order confirmation page
          String cartId = requestParams.get("cartId");
-         return String.format("redirect:/checkout/ingenico/orderConfirmation/%s", cartId);
+         OrderData orderData = orderFacade.getOrderDetailsForCode(cartId);
+         String orderId = orderData.isGuestCustomer() ? orderData.getGuid() : orderData.getCode();
+         return String.format("redirect:/checkout/ingenico/orderConfirmation/%s", orderId);
       }
 
       //if payment is success and an order is created redirect to order confirmation page
