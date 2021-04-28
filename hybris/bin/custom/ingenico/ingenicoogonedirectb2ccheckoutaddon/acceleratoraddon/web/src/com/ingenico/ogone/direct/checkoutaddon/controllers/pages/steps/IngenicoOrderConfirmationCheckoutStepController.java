@@ -208,7 +208,7 @@ public class IngenicoOrderConfirmationCheckoutStepController extends AbstractChe
 
       processEmailAddress(model, orderDetails);
 
-      final String continueUrl = (String) getSessionService().getAttribute(WebConstants.CONTINUE_URL);
+      final String continueUrl = getSessionService().getAttribute(WebConstants.CONTINUE_URL).toString();
       model.addAttribute(CONTINUE_URL_KEY, (continueUrl != null && !continueUrl.isEmpty()) ? continueUrl : ROOT);
 
       final ContentPageModel orderConfirmationPage = getContentPageForLabelOrId(CHECKOUT_ORDER_CONFIRMATION_CMS_PAGE_LABEL);
