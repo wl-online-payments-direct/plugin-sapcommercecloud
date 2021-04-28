@@ -35,7 +35,7 @@ public class IngenicoHostedCheckoutResponseController {
 
       if (!ingenicoCheckoutFacade.loadOrderConfirmationPageDirectly()) { // if cart doesn't exist an order exists return order confirmation page
          String cartId = requestParams.get("cartId");
-         OrderData orderData = orderFacade.getOrderDetailsForCode(cartId);
+         OrderData orderData = orderFacade.getOrderDetailsForCodeWithoutUser(cartId);
          String orderId = orderData.isGuestCustomer() ? orderData.getGuid() : orderData.getCode();
          return String.format("redirect:/checkout/ingenico/orderConfirmation/%s", orderId);
       }
