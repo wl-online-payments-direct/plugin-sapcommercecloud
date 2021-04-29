@@ -33,7 +33,6 @@ import com.ingenico.direct.Client;
 import com.ingenico.direct.DeclinedPaymentException;
 import com.ingenico.direct.domain.AmountOfMoney;
 import com.ingenico.direct.domain.BrowserData;
-import com.ingenico.direct.domain.Card;
 import com.ingenico.direct.domain.CardPaymentMethodSpecificInput;
 import com.ingenico.direct.domain.CardPaymentMethodSpecificInputBase;
 import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
@@ -247,27 +246,14 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     private CardPaymentMethodSpecificInput buildCardPaymentMethodSpecificInput(GetHostedTokenizationResponse tokenizationResponse) {
         CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
-        cardPaymentMethodSpecificInput.setPaymentProductId(tokenizationResponse.getToken().getPaymentProductId());
-//        cardPaymentMethodSpecificInput.setToken(tokenizationResponse.getToken().getId());
-        // TODO to remove later
-//        cardPaymentMethodSpecificInput.setIsRecurring(true);
-//        cardPaymentMethodSpecificInput.setRecurring(new CardRecurrenceDetails());
-//        cardPaymentMethodSpecificInput.getRecurring().setRecurringPaymentSequenceIndicator("recurring");
 
+        cardPaymentMethodSpecificInput.setPaymentProductId(tokenizationResponse.getToken().getPaymentProductId());
+        cardPaymentMethodSpecificInput.setToken(tokenizationResponse.getToken().getId());
         cardPaymentMethodSpecificInput.setSkipAuthentication(false);
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
         cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
         cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
         cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
-
-        //TODO to replace by Token
-        final Card card = new Card();
-        card.setCardNumber("4000000000000002");
-        card.setCardholderName("Marouane");
-        card.setCvv("123");
-        card.setExpiryDate("1230");
-        cardPaymentMethodSpecificInput.setCard(card);
-
 
         return cardPaymentMethodSpecificInput;
     }
