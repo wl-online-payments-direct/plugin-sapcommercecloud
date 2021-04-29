@@ -1,6 +1,7 @@
 package com.ingenico.ogone.direct.facade.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL_COUNTRY;
 
 import java.util.Collections;
 import java.util.List;
@@ -131,7 +132,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         if (isIdealPresent) {
             final CartData cartData = checkoutFacade.getCheckoutCart();
             try {
-                return ingenicoPaymentService.getProductDirectoryEntries(PAYMENT_METHOD_IDEAL, cartData.getTotalPrice().getCurrencyIso(), getCountryCode(cartData));
+                return ingenicoPaymentService.getProductDirectoryEntries(PAYMENT_METHOD_IDEAL, cartData.getTotalPrice().getCurrencyIso(), PAYMENT_METHOD_IDEAL_COUNTRY);
             } catch (ApiException e) {
                 LOGGER.info("[ INGENICO ] No ProductDirectory found! reason : {}", e.getResponseBody());
             }
