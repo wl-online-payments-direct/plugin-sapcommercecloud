@@ -16,6 +16,9 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
     public static final Integer PAYMENT_METHOD_BCC = 3012;
 
 
+    public static final String PAYMENT_METHOD_IDEAL_COUNTRY = "NL";
+
+
     public enum PAYMENT_METHOD_TYPE {
         CARD("card"),
         REDIRECT("redirect"),
