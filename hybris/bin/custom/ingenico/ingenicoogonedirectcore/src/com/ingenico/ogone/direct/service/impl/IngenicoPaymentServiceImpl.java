@@ -2,15 +2,23 @@ package com.ingenico.ogone.direct.service.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_PAYPAL;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.ORDER_AMOUNT_BREAKDOWN_TYPES_ENUM;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.ingenico.direct.domain.AmountBreakdown;
+import com.ingenico.direct.domain.LineItem;
+import com.ingenico.direct.domain.OrderLineDetails;
+import com.ingenico.direct.domain.Shipping;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
+import de.hybris.platform.commercefacades.order.data.OrderEntryData;
+import de.hybris.platform.commercefacades.product.data.PriceData;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.order.CartService;
@@ -54,6 +62,8 @@ import com.ingenico.direct.domain.ProductDirectory;
 import com.ingenico.direct.domain.RedirectPaymentMethodSpecificInput;
 import com.ingenico.direct.domain.RedirectPaymentProduct840SpecificInput;
 import com.ingenico.direct.domain.RedirectionData;
+import com.ingenico.direct.domain.ShoppingCart;
+import de.hybris.platform.commercefacades.order.data.CartData;
 import com.ingenico.direct.domain.ThreeDSecure;
 import com.ingenico.direct.merchant.products.GetPaymentProductParams;
 import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
@@ -290,25 +300,28 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
 
     @Override
-    public CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, String paymentMethod, Integer paymentProductId, BigDecimal amount, String currency, String shopperLocale) {
+    public CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, CartData cartData, String shopperLocale) {
+
         try (Client client = ingenicoClientFactory.getClient()) {
             CreateHostedCheckoutRequest request = new CreateHostedCheckoutRequest();
 
-            switch (PAYMENT_METHOD_TYPE.valueOf(paymentMethod.toUpperCase())) {
+            switch (PAYMENT_METHOD_TYPE.valueOf(cartData.getIngenicoPaymentInfo().getPaymentMethod().toUpperCase())) {
                 case CARD:
-                    request.setCardPaymentMethodSpecificInput(prepareCardPaymentInputData(paymentProductId));
+                    request.setCardPaymentMethodSpecificInput(prepareCardPaymentInputData(cartData.getIngenicoPaymentInfo().getId()));
                     break;
                 case REDIRECT:
-                    request.setRedirectPaymentMethodSpecificInput(prepareRedirectPaymentInputData(fullResponseUrl, paymentProductId));
+                    request.setRedirectPaymentMethodSpecificInput(prepareRedirectPaymentInputData(fullResponseUrl, cartData.getIngenicoPaymentInfo().getId()));
                     break;
                 default:
                     break;
             }
 
             request.setHostedCheckoutSpecificInput(prepareHostedCheckoutInputData(shopperLocale, fullResponseUrl));
-            request.setOrder(prepareOrderDetailsInputData(currency, amount, shopperLocale));
+            request.setOrder(prepareOrderDetailsInputData(cartData, shopperLocale));
 
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(request);
+
+            IngenicoLogUtils.logAction(LOGGER, "createHostedCheckout", request, hostedCheckout);
 
             return hostedCheckout;
 
@@ -323,6 +336,9 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     public GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId) {
         try (Client client = ingenicoClientFactory.getClient()) {
             final GetHostedCheckoutResponse hostedCheckoutResponse = client.merchant(getMerchantId()).hostedCheckout().getHostedCheckout(hostedCheckoutId);
+
+            IngenicoLogUtils.logAction(LOGGER, "getHostedCheckout", hostedCheckoutId, hostedCheckoutResponse);
+
             return hostedCheckoutResponse;
         } catch (IOException e) {
             LOGGER.error("[ INGENICO ] Errors during getting createHostedCheckout ", e);
@@ -400,19 +416,44 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     }
 
-    private Order prepareOrderDetailsInputData(String currencyCode, BigDecimal amount, String shopperLocale) {
+    private Order prepareOrderDetailsInputData(CartData cartData, String shopperLocale) {
+        final PriceData totalPrice = cartData.getTotalPrice();
+        final String currencyISO = totalPrice.getCurrencyIso();
         Order order = new Order();
 
-        AmountOfMoney amountOfMoney = new AmountOfMoney();
-        amountOfMoney.setAmount(ingenicoAmountUtils.createAmount(amount, currencyCode));
-        amountOfMoney.setCurrencyCode(currencyCode);
+        AmountOfMoney amountOfMoney = new AmountOfMoney(); //total amountOfMoney for the order
+        amountOfMoney.setAmount(ingenicoAmountUtils.createAmount(totalPrice.getValue(), currencyISO));
+        amountOfMoney.setCurrencyCode(currencyISO);
         order.setAmountOfMoney(amountOfMoney);
 
         Customer customer = new Customer();
         customer.setLocale(shopperLocale);
 
-//        ShoppingCart cart = new ShoppingCart();
-//        cart.setAmountBreakdown();
+        Shipping shipping = new Shipping();
+        shipping.setShippingCost(ingenicoAmountUtils.createAmount(cartData.getDeliveryCost().getValue(), currencyISO));
+
+        ShoppingCart cart = new ShoppingCart();
+
+        List<LineItem> lineItems = new ArrayList<>();
+        for (OrderEntryData orderEntry : cartData.getEntries()) {
+            LineItem item = new LineItem();
+            AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
+            itemAmountOfMoney.setCurrencyCode(currencyISO);
+            itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(orderEntry.getTotalPrice().getValue(), currencyISO));
+            item.setAmountOfMoney(itemAmountOfMoney);
+
+            OrderLineDetails orderLineDetails = new OrderLineDetails();
+            orderLineDetails.setProductName(orderEntry.getProduct().getName());
+            orderLineDetails.setQuantity(orderEntry.getQuantity());
+            item.setOrderLineDetails(orderLineDetails);
+            lineItems.add(item);
+        }
+        cart.setItems(lineItems);
+
+//        order.setShipping(shipping);
+//        order.setShoppingCart(cart);
+        order.setCustomer(customer);
+
         return order;
     }
 

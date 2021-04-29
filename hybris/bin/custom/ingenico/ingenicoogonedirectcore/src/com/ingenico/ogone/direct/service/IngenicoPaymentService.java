@@ -36,7 +36,7 @@ public interface IngenicoPaymentService {
 
     CreatePaymentResponse createPaymentForHostedTokenization(IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse);
 
-    CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, String paymentMethod, Integer paymentProductId, BigDecimal amount, String currency, String shopperLocale);
+    CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, CartData cartData, String shopperLocale);
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 
