@@ -5,6 +5,7 @@
     <bean class="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData">
         <property name="id" type="Integer"/>
         <property name="paymentMethod" type="String"/>
+        <property name="paymentProductDirectoryId" type="String"/>
         <property name="ingenicoCheckoutType" type="com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum"/>
         <property name="token" type="String"/>
         <property name="alias" type="String"/>

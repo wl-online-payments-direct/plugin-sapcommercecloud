@@ -20,24 +20,6 @@
     </enumtypes>
 
     <itemtypes>
-        <itemtype code="PaymentMode"
-                  extends="GenericItem"
-                  jaloclass="de.hybris.platform.jalo.order.payment.PaymentMode"
-                  autocreate="false"
-                  generate="false">
-            <attributes>
-                <attribute qualifier="defaultOperationCode" type="OperationCodesEnum">
-                    <modifiers read="true" write="true"/>
-                    <persistence type="property"/>
-                    <defaultvalue>em().getEnumerationValue("OperationCodesEnum","SALE")</defaultvalue>
-                </attribute>
-                <attribute qualifier="captureTimeFrame" type="java.lang.Integer">
-                    <modifiers read="true" write="true"/>
-                    <persistence type="property"/>
-                    <defaultvalue>Integer.valueOf(0)</defaultvalue>
-                </attribute>
-            </attributes>
-        </itemtype>
         <itemtype code="IngenicoConfiguration"
                   extends="GenericItem"
                   autocreate="true"
@@ -61,6 +43,16 @@
                 <attribute qualifier="apiSecret" type="java.lang.String">
                     <modifiers read="true" write="true" optional="false"/>
                     <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="defaultOperationCode" type="OperationCodesEnum">
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("OperationCodesEnum","SALE")</defaultvalue>
+                </attribute>
+                <attribute qualifier="captureTimeFrame" type="java.lang.Integer">
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>Integer.valueOf(0)</defaultvalue>
                 </attribute>
             </attributes>
         </itemtype>
@@ -90,6 +82,10 @@
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="paymentMethod" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentProductDirectoryId" type="java.lang.String">
                     <modifiers read="true" write="true" search="true"/>
                     <persistence type="property"/>
                 </attribute>
