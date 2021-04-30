@@ -23,7 +23,7 @@ public interface IngenicoCheckoutFacade {
 
     void handlePaymentInfo(IngenicoPaymentInfoData paymentInfoData);
 
-    void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId) throws IngenicoNonValidPaymentProductException;
+    void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId, String paymentDirId) throws IngenicoNonValidPaymentProductException;
 
     CreatePaymentResponse authorisePayment(IngenicoHostedTokenizationData hostedTokenizationId);
 

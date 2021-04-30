@@ -107,7 +107,7 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
 
         final IngenicoPaymentInfoData ingenicoPaymentInfoData = new IngenicoPaymentInfoData();
         try {
-            ingenicoCheckoutFacade.fillIngenicoPaymentInfoData(ingenicoPaymentInfoData, ingenicoPaymentDetailsForm.getPaymentProductId());
+            ingenicoCheckoutFacade.fillIngenicoPaymentInfoData(ingenicoPaymentInfoData, ingenicoPaymentDetailsForm.getPaymentProductId(), ingenicoPaymentDetailsForm.getIssuerId());
         } catch (IngenicoNonValidPaymentProductException e) {
             GlobalMessages.addErrorMessage(model, "checkout.error.paymentproduct.invalid");
             return enterStep(model, redirectAttributes);

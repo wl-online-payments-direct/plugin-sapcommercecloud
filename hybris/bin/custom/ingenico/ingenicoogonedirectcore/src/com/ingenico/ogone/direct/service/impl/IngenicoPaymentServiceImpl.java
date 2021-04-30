@@ -15,6 +15,7 @@ import java.util.UUID;
 import com.ingenico.direct.domain.AmountBreakdown;
 import com.ingenico.direct.domain.LineItem;
 import com.ingenico.direct.domain.OrderLineDetails;
+import com.ingenico.direct.domain.RedirectPaymentProduct809SpecificInput;
 import com.ingenico.direct.domain.Shipping;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.commercefacades.order.data.OrderEntryData;
@@ -88,7 +89,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     private IngenicoConfigurationService ingenicoConfigurationService;
     private IngenicoAmountUtils ingenicoAmountUtils;
     private IngenicoClientFactory ingenicoClientFactory;
-    private Converter<CartModel, CreatePaymentRequest> ingenicoPaymentRequestConverter;
+    private Converter<CartModel, Order> ingenicoOrderParamConverter;
     private ModelService modelService;
     private PaymentService paymentService;
 
@@ -236,8 +237,10 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         validateParameterNotNull(sessionCart, "sessionCart cannot be null");
         try (Client client = ingenicoClientFactory.getClient()) {
 
-            final CreatePaymentRequest params = ingenicoPaymentRequestConverter.convert(sessionCart);
+            final CreatePaymentRequest params = new CreatePaymentRequest();
+            final Order order = ingenicoOrderParamConverter.convert(sessionCart);
 
+            params.setOrder(order);
             params.setCardPaymentMethodSpecificInput(buildCardPaymentMethodSpecificInput(tokenizationResponse));
             params.getOrder().getCustomer().setDevice(getBrowserInfo(ingenicoHostedTokenizationData));
             final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
@@ -302,6 +305,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     @Override
     public CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, CartData cartData, String shopperLocale) {
 
+        final CartModel sessionCart = getSessionCart();
         try (Client client = ingenicoClientFactory.getClient()) {
             CreateHostedCheckoutRequest request = new CreateHostedCheckoutRequest();
 
@@ -310,14 +314,14 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
                     request.setCardPaymentMethodSpecificInput(prepareCardPaymentInputData(cartData.getIngenicoPaymentInfo().getId()));
                     break;
                 case REDIRECT:
-                    request.setRedirectPaymentMethodSpecificInput(prepareRedirectPaymentInputData(fullResponseUrl, cartData.getIngenicoPaymentInfo().getId()));
+                    request.setRedirectPaymentMethodSpecificInput(prepareRedirectPaymentInputData(fullResponseUrl, cartData.getIngenicoPaymentInfo().getId(), cartData.getIngenicoPaymentInfo().getPaymentProductDirectoryId()));
                     break;
                 default:
                     break;
             }
 
             request.setHostedCheckoutSpecificInput(prepareHostedCheckoutInputData(shopperLocale, fullResponseUrl));
-            request.setOrder(prepareOrderDetailsInputData(cartData, shopperLocale));
+            request.setOrder(ingenicoOrderParamConverter.convert(sessionCart));
 
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(request);
 
@@ -394,15 +398,14 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         return hostedCheckoutSpecificInput;
     }
 
-    private RedirectPaymentMethodSpecificInput prepareRedirectPaymentInputData(String fullReturnUrl, Integer paymentProductId) {
+    private RedirectPaymentMethodSpecificInput prepareRedirectPaymentInputData(String fullReturnUrl, Integer paymentProductId, String paymentDirId) {
         RedirectPaymentMethodSpecificInput redirectPaymentMethodSpecificInput = new RedirectPaymentMethodSpecificInput();
         redirectPaymentMethodSpecificInput.setPaymentProductId(paymentProductId);
-        if (paymentProductId == PAYMENT_METHOD_IDEAL) {
-            // TODO fill data for iDeal
-            //        RedirectPaymentProduct809SpecificInput iDealSpecificInfo = new RedirectPaymentProduct809SpecificInput();
-            //        iDealSpecificInfo.setIssuerId();
-            //        redirectPaymentMethodSpecificInput.setPaymentProduct809SpecificInput(iDealSpecificInfo);
-        } else if (paymentProductId == PAYMENT_METHOD_PAYPAL) {
+        if (PAYMENT_METHOD_IDEAL.equals(paymentProductId)) {
+            RedirectPaymentProduct809SpecificInput iDealSpecificInfo = new RedirectPaymentProduct809SpecificInput();
+            iDealSpecificInfo.setIssuerId(paymentDirId);
+            redirectPaymentMethodSpecificInput.setPaymentProduct809SpecificInput(iDealSpecificInfo);
+        } else if (PAYMENT_METHOD_PAYPAL.equals(paymentProductId)) {
             // TODO needs configuration field; default is false
             RedirectPaymentProduct840SpecificInput redirectPaymentProduct840SpecificInput = new RedirectPaymentProduct840SpecificInput();
             redirectPaymentProduct840SpecificInput.setAddressSelectionAtPayPal(Boolean.FALSE);
@@ -469,8 +472,8 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         this.cartService = cartService;
     }
 
-    public void setIngenicoPaymentRequestConverter(Converter<CartModel, CreatePaymentRequest> ingenicoPaymentRequestConverter) {
-        this.ingenicoPaymentRequestConverter = ingenicoPaymentRequestConverter;
+    public void setIngenicoOrderParamConverter(Converter<CartModel, Order> ingenicoOrderParamConverter) {
+        this.ingenicoOrderParamConverter = ingenicoOrderParamConverter;
     }
 
     public void setBaseSiteService(BaseSiteService baseSiteService) {
