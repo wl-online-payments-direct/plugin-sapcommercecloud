@@ -16,16 +16,28 @@
         </property>
     </bean>
 
-    <bean id="ingenicoOrderPaymentRequestPopulator"
-          class="com.ingenico.ogone.direct.populator.IngenicoOrderPaymentRequestPopulator">
+    <bean id="ingenicoOrderRequestParamPopulator"
+          class="com.ingenico.ogone.direct.populator.IngenicoOrderRequestParamPopulator">
         <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
     </bean>
 
-    <bean id="ingenicoPaymentRequestConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CreatePaymentRequest"/>
+    <bean id="ingenicoShoppingCartRequestParamPopulator"
+          class="com.ingenico.ogone.direct.populator.IngenicoShoppingCartRequestParamPopulator">
+        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
+    </bean>
+
+    <bean id="ingenicoCustomerRequestParamPopulator"
+          class="com.ingenico.ogone.direct.populator.IngenicoCustomerRequestParamPopulator">
+        <property name="commonI18NService" ref="commonI18NService"/>
+    </bean>
+
+    <bean id="ingenicoOrderParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.ingenico.direct.domain.Order"/>
         <property name="populators">
             <list>
-                <ref bean="ingenicoOrderPaymentRequestPopulator"/>
+                <ref bean="ingenicoOrderRequestParamPopulator"/>
+                <ref bean="ingenicoShoppingCartRequestParamPopulator"/>
+                <ref bean="ingenicoCustomerRequestParamPopulator"/>
             </list>
         </property>
     </bean>
