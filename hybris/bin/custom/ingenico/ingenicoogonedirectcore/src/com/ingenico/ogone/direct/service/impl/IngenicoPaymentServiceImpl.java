@@ -15,6 +15,7 @@ import java.util.UUID;
 import com.ingenico.direct.domain.AmountBreakdown;
 import com.ingenico.direct.domain.LineItem;
 import com.ingenico.direct.domain.OrderLineDetails;
+import com.ingenico.direct.domain.RedirectPaymentProduct809SpecificInput;
 import com.ingenico.direct.domain.Shipping;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.commercefacades.order.data.OrderEntryData;
@@ -313,7 +314,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
                     request.setCardPaymentMethodSpecificInput(prepareCardPaymentInputData(cartData.getIngenicoPaymentInfo().getId()));
                     break;
                 case REDIRECT:
-                    request.setRedirectPaymentMethodSpecificInput(prepareRedirectPaymentInputData(fullResponseUrl, cartData.getIngenicoPaymentInfo().getId()));
+                    request.setRedirectPaymentMethodSpecificInput(prepareRedirectPaymentInputData(fullResponseUrl, cartData.getIngenicoPaymentInfo().getId(), cartData.getIngenicoPaymentInfo().getPaymentProductDirectoryId()));
                     break;
                 default:
                     break;
@@ -397,15 +398,14 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         return hostedCheckoutSpecificInput;
     }
 
-    private RedirectPaymentMethodSpecificInput prepareRedirectPaymentInputData(String fullReturnUrl, Integer paymentProductId) {
+    private RedirectPaymentMethodSpecificInput prepareRedirectPaymentInputData(String fullReturnUrl, Integer paymentProductId, String paymentDirId) {
         RedirectPaymentMethodSpecificInput redirectPaymentMethodSpecificInput = new RedirectPaymentMethodSpecificInput();
         redirectPaymentMethodSpecificInput.setPaymentProductId(paymentProductId);
-        if (paymentProductId == PAYMENT_METHOD_IDEAL) {
-            // TODO fill data for iDeal
-            //        RedirectPaymentProduct809SpecificInput iDealSpecificInfo = new RedirectPaymentProduct809SpecificInput();
-            //        iDealSpecificInfo.setIssuerId();
-            //        redirectPaymentMethodSpecificInput.setPaymentProduct809SpecificInput(iDealSpecificInfo);
-        } else if (paymentProductId == PAYMENT_METHOD_PAYPAL) {
+        if (PAYMENT_METHOD_IDEAL.equals(paymentProductId)) {
+            RedirectPaymentProduct809SpecificInput iDealSpecificInfo = new RedirectPaymentProduct809SpecificInput();
+            iDealSpecificInfo.setIssuerId(paymentDirId);
+            redirectPaymentMethodSpecificInput.setPaymentProduct809SpecificInput(iDealSpecificInfo);
+        } else if (PAYMENT_METHOD_PAYPAL.equals(paymentProductId)) {
             // TODO needs configuration field; default is false
             RedirectPaymentProduct840SpecificInput redirectPaymentProduct840SpecificInput = new RedirectPaymentProduct840SpecificInput();
             redirectPaymentProduct840SpecificInput.setAddressSelectionAtPayPal(Boolean.FALSE);
