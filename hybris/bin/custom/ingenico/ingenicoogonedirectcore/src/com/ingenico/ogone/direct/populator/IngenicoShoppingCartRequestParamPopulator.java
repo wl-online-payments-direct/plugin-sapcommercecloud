@@ -34,9 +34,10 @@ public class IngenicoShoppingCartRequestParamPopulator implements Populator<Cart
          LineItem item = new LineItem();
          AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
          itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(new BigDecimal(orderEntry.getTotalPrice()), currencyISOCode));
+         itemAmountOfMoney.setCurrencyCode(currencyISOCode);
          item.setAmountOfMoney(itemAmountOfMoney);
 
-         item.setOrderLineDetails(createOrderLineDetails(orderEntry));
+         item.setOrderLineDetails(createOrderLineDetails(orderEntry, currencyISOCode));
          lineItems.add(item);
       }
 
@@ -52,23 +53,26 @@ public class IngenicoShoppingCartRequestParamPopulator implements Populator<Cart
       LineItem shipping = new LineItem();
       AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
       itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(shippingCost, currencyISOCode));
+      itemAmountOfMoney.setCurrencyCode(currencyISOCode);
       shipping.setAmountOfMoney(itemAmountOfMoney);
 
       OrderLineDetails orderLineDetails = new OrderLineDetails();
       orderLineDetails.setProductName("Delivery cost");
       orderLineDetails.setQuantity(1L);
+      orderLineDetails.setProductPrice(ingenicoAmountUtils.createAmount(shippingCost, currencyISOCode));
 
       shipping.setOrderLineDetails(orderLineDetails);
       return shipping;
    }
 
-   private OrderLineDetails createOrderLineDetails(AbstractOrderEntryModel orderEntry) {
+   private OrderLineDetails createOrderLineDetails(AbstractOrderEntryModel orderEntry, String currencyISOcode) {
       OrderLineDetails orderLineDetails = new OrderLineDetails();
       orderLineDetails.setProductName(orderEntry.getProduct().getName());
       orderLineDetails.setQuantity(orderEntry.getQuantity());
-
+      orderLineDetails.setProductPrice(ingenicoAmountUtils.createAmount(new BigDecimal(orderEntry.getBasePrice()), currencyISOcode));
       return orderLineDetails;
    }
+
    public void setIngenicoAmountUtils(IngenicoAmountUtils ingenicoAmountUtils) {
       this.ingenicoAmountUtils = ingenicoAmountUtils;
    }
