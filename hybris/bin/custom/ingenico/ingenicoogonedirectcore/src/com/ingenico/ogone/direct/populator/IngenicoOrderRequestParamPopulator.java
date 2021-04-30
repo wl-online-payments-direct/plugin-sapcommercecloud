@@ -11,28 +11,25 @@ import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 
 import com.ingenico.direct.domain.Address;
 import com.ingenico.direct.domain.AmountOfMoney;
-import com.ingenico.direct.domain.CreatePaymentRequest;
 import com.ingenico.direct.domain.Customer;
 import com.ingenico.direct.domain.Order;
 import com.ingenico.direct.domain.OrderReferences;
 import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
 
-public class IngenicoOrderPaymentRequestPopulator implements Populator<CartModel, CreatePaymentRequest> {
+public class IngenicoOrderRequestParamPopulator implements Populator<CartModel, Order> {
 
     private IngenicoAmountUtils ingenicoAmountUtils;
 
     @Override
-    public void populate(CartModel cartModel, CreatePaymentRequest createPaymentRequest) throws ConversionException {
+    public void populate(CartModel cartModel, Order order) throws ConversionException {
         validateParameterNotNull(cartModel, "cart cannot be null!");
         validateParameterNotNull(cartModel.getPaymentInfo(), "paymentInfo cannot be null!");
         validateParameterNotNull(cartModel.getPaymentInfo().getBillingAddress(), "billingAddress cannot be null!");
 
-        final Order order = new Order();
         order.setAmountOfMoney(getAmoutOfMoney(cartModel));
         order.setCustomer(getCustomer(cartModel));
         order.setReferences(getReferences(cartModel));
 
-        createPaymentRequest.setOrder(order);
     }
 
     private OrderReferences getReferences(CartModel cartModel) {
