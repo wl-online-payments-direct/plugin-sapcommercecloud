@@ -143,10 +143,11 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     }
 
     @Override
-    public void fillIngenicoPaymentInfoData(final IngenicoPaymentInfoData ingenicoPaymentInfoData, int paymentId) throws IngenicoNonValidPaymentProductException {
+    public void fillIngenicoPaymentInfoData(final IngenicoPaymentInfoData ingenicoPaymentInfoData, int paymentId, String paymentDirId) throws IngenicoNonValidPaymentProductException {
         final PaymentProduct paymentProduct = getPaymentMethodById(paymentId);
         if (isValidPaymentMethod(paymentProduct)) {
             ingenicoPaymentInfoData.setId(paymentProduct.getId());
+            ingenicoPaymentInfoData.setPaymentProductDirectoryId(paymentDirId);
             ingenicoPaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
             if (paymentId == GROUPED_CARDS_ID) {
                 ingenicoPaymentInfoData.setIngenicoCheckoutType(IngenicoCheckoutTypesEnum.HOSTED_TOKENIZATION);

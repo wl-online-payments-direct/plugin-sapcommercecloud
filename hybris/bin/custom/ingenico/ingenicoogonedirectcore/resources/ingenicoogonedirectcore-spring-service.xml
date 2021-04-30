@@ -15,7 +15,7 @@
         <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>
         <property name="ingenicoConfigurationService" ref="ingenicoConfigurationService"/>
         <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
-        <property name="ingenicoPaymentRequestConverter" ref="ingenicoPaymentRequestConverter"/>
+        <property name="ingenicoOrderParamConverter" ref="ingenicoOrderParamConverter"/>
         <property name="modelService" ref="modelService"/>
         <property name="paymentService" ref="paymentService"/>
     </bean>

@@ -88,7 +88,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     private IngenicoConfigurationService ingenicoConfigurationService;
     private IngenicoAmountUtils ingenicoAmountUtils;
     private IngenicoClientFactory ingenicoClientFactory;
-    private Converter<CartModel, CreatePaymentRequest> ingenicoPaymentRequestConverter;
+    private Converter<CartModel, Order> ingenicoOrderParamConverter;
     private ModelService modelService;
     private PaymentService paymentService;
 
@@ -236,8 +236,10 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         validateParameterNotNull(sessionCart, "sessionCart cannot be null");
         try (Client client = ingenicoClientFactory.getClient()) {
 
-            final CreatePaymentRequest params = ingenicoPaymentRequestConverter.convert(sessionCart);
+            final CreatePaymentRequest params = new CreatePaymentRequest();
+            final Order order = ingenicoOrderParamConverter.convert(sessionCart);
 
+            params.setOrder(order);
             params.setCardPaymentMethodSpecificInput(buildCardPaymentMethodSpecificInput(tokenizationResponse));
             params.getOrder().getCustomer().setDevice(getBrowserInfo(ingenicoHostedTokenizationData));
             final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
@@ -302,6 +304,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     @Override
     public CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, CartData cartData, String shopperLocale) {
 
+        final CartModel sessionCart = getSessionCart();
         try (Client client = ingenicoClientFactory.getClient()) {
             CreateHostedCheckoutRequest request = new CreateHostedCheckoutRequest();
 
@@ -317,7 +320,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             }
 
             request.setHostedCheckoutSpecificInput(prepareHostedCheckoutInputData(shopperLocale, fullResponseUrl));
-            request.setOrder(prepareOrderDetailsInputData(cartData, shopperLocale));
+            request.setOrder(ingenicoOrderParamConverter.convert(sessionCart));
 
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(request);
 
@@ -469,8 +472,8 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         this.cartService = cartService;
     }
 
-    public void setIngenicoPaymentRequestConverter(Converter<CartModel, CreatePaymentRequest> ingenicoPaymentRequestConverter) {
-        this.ingenicoPaymentRequestConverter = ingenicoPaymentRequestConverter;
+    public void setIngenicoOrderParamConverter(Converter<CartModel, Order> ingenicoOrderParamConverter) {
+        this.ingenicoOrderParamConverter = ingenicoOrderParamConverter;
     }
 
     public void setBaseSiteService(BaseSiteService baseSiteService) {
