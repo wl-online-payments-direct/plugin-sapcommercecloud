@@ -18,29 +18,12 @@
 		xmlns:na="http://www.hybris.com/cockpitng/config/notifications"
 		xmlns:gv="http://www.hybris.com/cockpitng/component/gridView">
 
-	<context merge-by="type" parent="GenericItem" type="PaymentMode" component="editor-area">
-		<ea:editorArea name="">
-			<ea:essentials>
-				<ea:essentialSection name="hmc.essential">
-					<ea:attribute qualifier="code"/>
-					<ea:attribute qualifier="name"/>
-				</ea:essentialSection>
-			</ea:essentials>
-			<ea:tab name="hmc.properties">
-				<ea:section name="hmc.ingenico">
-					<ea:attribute qualifier="defaultOperationCode"/>
-					<ea:attribute qualifier="captureTimeFrame"/>
-				</ea:section>
-			</ea:tab>
-		</ea:editorArea>
-	</context>
-
 	<!-- IngenicoConfiguration BO appearance START -->
 
 	<context merge-by="module" parent="auto" component="explorer-tree">
 		<et:explorer-tree>
 			<et:navigation-node id="hmc.ingenico">
-				<et:type-node code="IngenicoConfiguration" id="hmc.ingenicoConfiguration"/>
+				<et:type-node code="IngenicoConfiguration" id="hmc.ingenico.ingenicoConfiguration"/>
 			</et:navigation-node>
 		</et:explorer-tree>
 	</context>
@@ -69,11 +52,15 @@
 				</ea:essentialSection>
 			</ea:essentials>
 			<ea:tab name="hmc.ingenico">
-				<ea:section name="hmc.ingenicoConfiguration">
+				<ea:section name="hmc.ingenico.ingenicoConfiguration">
 					<ea:attribute qualifier="merchantID"/>
 					<ea:attribute qualifier="endpointURL"/>
 					<ea:attribute qualifier="ApiKey"/>
 					<ea:attribute qualifier="ApiSecret"/>
+				</ea:section>
+				<ea:section name="hmc.ingenico.ingenicoOperationCodeConfig">
+					<ea:attribute qualifier="defaultOperationCode"/>
+					<ea:attribute qualifier="captureTimeFrame"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
