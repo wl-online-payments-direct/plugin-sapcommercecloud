@@ -70,7 +70,7 @@
                 <entry key="next" value-ref="REDIRECT_TO_SUMMARY_INGENICO"/>
             </map>
         </property>
-        <property name="progressBarId" value="paymentMethod"/>
+        <property name="progressBarId" value="ingenicoPaymentMethod"/>
     </bean>
 
     <alias name="defaultIngenicoB2CResponsiveSummaryCheckoutStep" alias="ingenicoB2CResponsiveSummaryCheckoutStep" />
@@ -84,7 +84,7 @@
                 <entry key="next" value="REDIRECT_TO_ORDER_CONFIRMATION_INGENICO"/>
             </map>
         </property>
-        <property name="progressBarId" value="confirmOrder"/>
+        <property name="progressBarId" value="ingenicoConfirmOrder"/>
     </bean>
 
     <alias name="defaultIngenicoB2CResponsiveDoPaymentCheckoutStep" alias="ingenicoB2CResponsiveDoPaymentCheckoutStep" />
@@ -98,7 +98,7 @@
                 <entry key="next" value="REDIRECT_TO_ORDER_CONFIRMATION_INGENICO"/>
             </map>
         </property>
-        <property name="progressBarId" value="confirmOrder"/>
+        <property name="progressBarId" value="ingenicoPayOrder"/>
     </bean>
 
 
@@ -130,6 +130,7 @@
                 <entry key="2" value-ref="ingenicoB2CResponsiveDeliveryMethodCheckoutStep"/>
                 <entry key="3" value-ref="ingenicoB2CResponsiveChoosePaymentCheckoutStep"/>
                 <entry key="4" value-ref="ingenicoB2CResponsiveSummaryCheckoutStep"/>
+                <entry key="5" value-ref="ingenicoB2CResponsiveDoPaymentCheckoutStep"/>
             </map>
         </property>
     </bean>
@@ -155,7 +156,7 @@
     </bean>
 
     <bean id="REDIRECT_TO_PAYMENT_INGENICO" class="java.lang.String">
-        <constructor-arg value="redirect:/checkout/multi/ingenico/payment/view"/>
+        <constructor-arg value="redirect:/checkout/multi/ingenico/hosted-tokenization/view"/>
     </bean>
 
     <bean id="REDIRECT_TO_ORDER_CONFIRMATION_INGENICO" class="java.lang.String">

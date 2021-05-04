@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ingenico.ogone.direct.constants.Ingenicoogonedirectb2ccheckoutaddonConstants;
+import com.ingenico.ogone.direct.constants.IngenicoCheckoutConstants;
 import de.hybris.platform.acceleratorfacades.flow.impl.SessionOverrideCheckoutFlowFacade;
 import de.hybris.platform.acceleratorservices.controllers.page.PageType;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
@@ -41,7 +41,6 @@ import de.hybris.platform.commercefacades.product.ProductFacade;
 import de.hybris.platform.commercefacades.product.ProductOption;
 import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.commerceservices.customer.DuplicateUidException;
-import de.hybris.platform.commerceservices.util.ResponsiveUtils;
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -208,7 +207,7 @@ public class IngenicoOrderConfirmationCheckoutStepController extends AbstractChe
 
       processEmailAddress(model, orderDetails);
 
-      final String continueUrl = getSessionService().getAttribute(WebConstants.CONTINUE_URL).toString();
+      final String continueUrl = getSessionService().getAttribute(WebConstants.CONTINUE_URL);
       model.addAttribute(CONTINUE_URL_KEY, (continueUrl != null && !continueUrl.isEmpty()) ? continueUrl : ROOT);
 
       final ContentPageModel orderConfirmationPage = getContentPageForLabelOrId(CHECKOUT_ORDER_CONFIRMATION_CMS_PAGE_LABEL);
@@ -216,7 +215,7 @@ public class IngenicoOrderConfirmationCheckoutStepController extends AbstractChe
       setUpMetaDataForContentPage(model, orderConfirmationPage);
       model.addAttribute(ThirdPartyConstants.SeoRobots.META_ROBOTS, ThirdPartyConstants.SeoRobots.NOINDEX_NOFOLLOW);
 
-      return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoOrderConfirmationPage;
+      return IngenicoCheckoutConstants.Views.Pages.MultiStepCheckout.ingenicoOrderConfirmationPage;
    }
 
    protected void processEmailAddress(final Model model, final OrderData orderDetails) {

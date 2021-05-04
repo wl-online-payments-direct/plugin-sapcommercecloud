@@ -33,7 +33,7 @@ public class IngenicoShoppingCartRequestParamPopulator implements Populator<Cart
 
          LineItem item = new LineItem();
          AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
-         itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(new BigDecimal(orderEntry.getTotalPrice()), currencyISOCode));
+         itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(orderEntry.getTotalPrice(), currencyISOCode));
          itemAmountOfMoney.setCurrencyCode(currencyISOCode);
          item.setAmountOfMoney(itemAmountOfMoney);
 
@@ -42,14 +42,14 @@ public class IngenicoShoppingCartRequestParamPopulator implements Populator<Cart
       }
 
       //workaround for shipping taxes
-      lineItems.add(setShippingAsProduct(new BigDecimal(cartModel.getDeliveryCost()), currencyISOCode));
+      lineItems.add(setShippingAsProduct(cartModel.getDeliveryCost(), currencyISOCode));
 
       cart.setItems(lineItems);
 
       return cart;
    }
 
-   private LineItem setShippingAsProduct(BigDecimal shippingCost, String currencyISOCode) {
+   private LineItem setShippingAsProduct(Double shippingCost, String currencyISOCode) {
       LineItem shipping = new LineItem();
       AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
       itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(shippingCost, currencyISOCode));
@@ -69,7 +69,7 @@ public class IngenicoShoppingCartRequestParamPopulator implements Populator<Cart
       OrderLineDetails orderLineDetails = new OrderLineDetails();
       orderLineDetails.setProductName(orderEntry.getProduct().getName());
       orderLineDetails.setQuantity(orderEntry.getQuantity());
-      orderLineDetails.setProductPrice(ingenicoAmountUtils.createAmount(new BigDecimal(orderEntry.getBasePrice()), currencyISOcode));
+      orderLineDetails.setProductPrice(ingenicoAmountUtils.createAmount(orderEntry.getBasePrice(), currencyISOcode));
       return orderLineDetails;
    }
 

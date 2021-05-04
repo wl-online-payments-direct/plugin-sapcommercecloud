@@ -16,8 +16,6 @@
 
 <template:page pageTitle="${pageTitle}" hideHeaderLinks="true">
 
-
-
     <jsp:attribute name="pageScripts">
 <%--  JS --%>
     </jsp:attribute>
@@ -36,7 +34,7 @@
                             <div class="checkout-paymentmethod">
                                 <div class="checkout-indent">
 
-                                    <div class="headline"><spring:theme code="checkout.multi.paymentMethod"/></div>
+                                    <div class="headline"><spring:theme code="checkout.multi.ingenicoPaymentMethod.paymentMethod.subtitle"/></div>
 
                                     <form:form id="ingenicoSelectPaymentForm" name="ingenicoSelectPaymentForm"
                                                modelAttribute="ingenicoPaymentDetailsForm" method="POST"
@@ -46,7 +44,7 @@
 
                                         <div class="headline">
                                             <spring:theme
-                                                    code="checkout.multi.paymentMethod.addPaymentDetails.billingAddress"/>
+                                                    code="checkout.multi.ingenicoPaymentMethod.billingAddress.subtitle"/>
                                         </div>
 
                                         <c:if test="${cartData.deliveryItemsQuantity > 0}">

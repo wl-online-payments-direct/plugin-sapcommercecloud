@@ -3,6 +3,7 @@ package com.ingenico.ogone.direct.checkoutaddon.controllers.pages.steps;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -13,8 +14,10 @@ import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
 import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
+import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commerceservices.order.CommerceCartModificationException;
-import de.hybris.platform.payment.AdapterException;
+import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 
 import org.apache.commons.lang.StringUtils;
@@ -30,19 +33,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
-import com.ingenico.direct.domain.CreatePaymentResponse;
+import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants;
+import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants.URL.Checkout.Payment.HTP;
 import com.ingenico.ogone.direct.checkoutaddon.forms.IngenicoHostedTokenizationForm;
 import com.ingenico.ogone.direct.checkoutaddon.forms.validation.IngenicoHostedTokenizationValidator;
-import com.ingenico.ogone.direct.constants.Ingenicoogonedirectb2ccheckoutaddonConstants;
+import com.ingenico.ogone.direct.constants.IngenicoCheckoutConstants;
+import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
-
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 
 @Controller
-@RequestMapping(value = "/checkout/multi/ingenico/payment")
-public class IngenicoDoPaymentCheckoutStepController extends AbstractCheckoutStepController {
-    private static final Logger LOGGER = Logger.getLogger(IngenicoDoPaymentCheckoutStepController.class);
+@RequestMapping(value = HTP.root)
+public class IngenicoTokenizationCheckoutStepController extends AbstractCheckoutStepController {
+    private static final Logger LOGGER = Logger.getLogger(IngenicoTokenizationCheckoutStepController.class);
 
     private final static String PAYMENT = "do-payment";
     private static final String ACCEPT = "accept";
@@ -64,10 +68,16 @@ public class IngenicoDoPaymentCheckoutStepController extends AbstractCheckoutSte
     @Resource(name = "ingenicoHostedTokenizationValidator")
     private IngenicoHostedTokenizationValidator ingenicoHostedTokenizationValidator;
 
+    @Resource(name = "siteBaseUrlResolutionService")
+    private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
+
+    @Resource(name = "checkoutCustomerStrategy")
+    private CheckoutCustomerStrategy checkoutCustomerStrategy;
+
     @Autowired
     private HttpServletRequest httpServletRequest;
 
-    @RequestMapping(value = "/view", method = RequestMethod.GET)
+    @RequestMapping(value = HTP.view, method = RequestMethod.GET)
     @RequireHardLogIn
     @Override
     @PreValidateCheckoutStep(checkoutStep = PAYMENT)
@@ -90,16 +100,16 @@ public class IngenicoDoPaymentCheckoutStepController extends AbstractCheckoutSte
         model.addAttribute("metaRobots", "noindex,nofollow");
         setCheckoutStepLinksForModel(model, getCheckoutStep());
 
-        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoDoPaymentPage;
+        return IngenicoCheckoutConstants.Views.Pages.MultiStepCheckout.ingenicoDoPaymentPage;
     }
 
-    @RequestMapping({"/do"})
+    @RequestMapping(value = HTP.create, method = RequestMethod.POST)
     @RequireHardLogIn
     public String doPayment(@ModelAttribute("ingenicoHostedTokenizationForm") final IngenicoHostedTokenizationForm ingenicoHostedTokenizationForm,
                             final Model model,
                             final HttpServletRequest request,
                             final BindingResult bindingResult,
-                            final RedirectAttributes redirectAttributes) throws CMSItemNotFoundException, CommerceCartModificationException {
+                            final RedirectAttributes redirectAttributes) throws CMSItemNotFoundException, CommerceCartModificationException, InvalidCartException {
         ingenicoHostedTokenizationValidator.validate(ingenicoHostedTokenizationForm, bindingResult);
         if (bindingResult.hasErrors()) {
             GlobalMessages.addErrorMessage(model, "checkout.error.paymentethod.formentry.invalid");
@@ -108,40 +118,51 @@ public class IngenicoDoPaymentCheckoutStepController extends AbstractCheckoutSte
 
         IngenicoHostedTokenizationData ingenicoHostedTokenizationData = fillIngenicoHostedTokenizationData(request, ingenicoHostedTokenizationForm);
 
-        final CreatePaymentResponse paymentResponse = ingenicoCheckoutFacade.authorisePayment(ingenicoHostedTokenizationData);
-        boolean isPaymentAuthorized = paymentResponse != null;
-        // authorize, if failure occurs don't allow to place the order
-        if (!isPaymentAuthorized) {
-            GlobalMessages.addErrorMessage(model, "checkout.error.authorization.failed");
-            return enterStep(model, redirectAttributes);
-        }
-
-        if (paymentResponse.getMerchantAction() != null) {
-
-            if ("REDIRECT".equals(paymentResponse.getMerchantAction().getActionType())) {
-                final CartData cartData = getCheckoutFacade().getCheckoutCart();
-                getSessionService().setAttribute(cartData.getCode() + "_ingenico_htp_returnmac", paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
-                getSessionService().setAttribute(cartData.getCode() + "_ingenico_htp_id", paymentResponse.getPayment().getId());
-                return REDIRECT_PREFIX + paymentResponse.getMerchantAction().getRedirectData().getRedirectURL();
-            } else {
-                LOGGER.error("[ INGENICO ] Merchant action " + paymentResponse.getMerchantAction().getActionType() + " not implemented!!");
+        try {
+            storeReturnUrlInSession();
+            final OrderData orderData = ingenicoCheckoutFacade.authorisePaymentForHostedTokenization(ingenicoHostedTokenizationData);
+            return redirectToOrderConfirmationPage(orderData);
+        } catch (IngenicoNonAuthorizedPaymentException e) {
+            switch (e.getReason()) {
+                case NEED_3DS:
+                    final CartData cartData = getCheckoutFacade().getCheckoutCart();
+                    getSessionService().setAttribute(cartData.getCode() + "_ingenico_htp_returnmac", e.getMerchantAction().getRedirectData().getRETURNMAC());
+                    getSessionService().setAttribute(cartData.getCode() + "_ingenico_htp_id", e.getPaymentResponse().getId());
+                    return REDIRECT_PREFIX + e.getMerchantAction().getRedirectData().getRedirectURL();
+                case REJECTED:
+                    if (e.getPaymentResponse() != null) {
+                        GlobalMessages.addErrorMessage(model, "checkout.error.payment." + e.getPaymentResponse().getStatus());
+                    }
+                    return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
+                case CANCELLED:
+                    return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
             }
         }
         return enterStep(model, redirectAttributes);
     }
 
-    @RequestMapping(value = "/handle3ds", method = RequestMethod.GET)
+    private void storeReturnUrlInSession() {
+        final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
+                true, HTP.root + HTP.handleResponse);
+        getSessionService().setAttribute("hostedTokenizationReturnUrl", returnUrl);
+    }
+
+    @RequestMapping(value = HTP.handleResponse, method = RequestMethod.GET)
     @RequireHardLogIn
     public String handle3ds(@RequestParam(value = "REF", required = true) final String ref,
                             @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
-                            @RequestParam(value = "paymentId", required = true) final String paymentId) {
+                            @RequestParam(value = "paymentId", required = true) final String paymentId,
+                            final Model model,
+                            final HttpServletRequest request,
+                            final RedirectAttributes redirectAttributes) throws CMSItemNotFoundException, CommerceCartModificationException, InvalidCartException {
         LOGGER.info("[ INGENICO ] handle3ds with ref:" + ref + " returnmac:" + returnMAC + " paymentId:" + paymentId);
-        final CartData cartData = getCheckoutFacade().getCheckoutCart();
-        final String storedReturnMAC = getSessionService().getAttribute(cartData.getCode() + "_ingenico_htp_returnmac");
-        if (returnMAC.equals(storedReturnMAC)) {
-            return REDIRECT_PREFIX + "/ok";
-        } else {
-            return REDIRECT_PREFIX + "/nok";
+
+        try {
+            final OrderData orderData = ingenicoCheckoutFacade.handle3dsResponse(ref, returnMAC, paymentId);
+            return redirectToOrderConfirmationPage(orderData);
+        } catch (IngenicoNonAuthorizedPaymentException e) {
+            GlobalMessages.addErrorMessage(model, "checkout.error.paymentethod.formentry.invalid");
+            return REDIRECT_PREFIX + REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
         }
     }
 
@@ -170,6 +191,15 @@ public class IngenicoDoPaymentCheckoutStepController extends AbstractCheckoutSte
             }
         }
         return remoteAddr;
+    }
+
+    @Override
+    protected String redirectToOrderConfirmationPage(OrderData orderData) {
+        return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
+    }
+
+    protected String getOrderCode(OrderData orderData) {
+        return checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
     }
 
 
