@@ -2,11 +2,15 @@ package com.ingenico.ogone.direct.facade.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
@@ -29,6 +33,12 @@ public class IngenicoUserFacadeImpl implements IngenicoUserFacade {
             ingenicoPaymentInfoDataList.add(paymentInfoData);
         }
         return ingenicoPaymentInfoDataList;
+    }
+
+    @Override
+    public List<String> getSavedTokens() {
+        final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = getIngenicoPaymentInfos(true);
+        return ingenicoPaymentInfos.stream().map(IngenicoPaymentInfoData::getToken).collect(Collectors.toList());
     }
 
     @Override

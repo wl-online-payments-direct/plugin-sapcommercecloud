@@ -31,7 +31,7 @@ public class IngenicoPaymentDetailsValidator implements Validator {
         }
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "paymentProductId", "checkout.error.paymentProduct.id.missing");
-        if (IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL.equals(form.getPaymentProductId())) {
+        if (form.getPaymentProductId() != null && IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL == form.getPaymentProductId()) {
             ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "checkout.error.issuer.id.missing");
         }
 

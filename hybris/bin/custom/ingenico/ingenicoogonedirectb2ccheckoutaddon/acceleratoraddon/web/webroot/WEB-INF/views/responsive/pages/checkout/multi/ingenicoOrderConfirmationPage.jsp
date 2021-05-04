@@ -25,7 +25,6 @@
                     <div class="row">
                         <div class="col-sm-12 col-md-9">
                             <div class="row">
-                            123445
                                 <div class="col-sm-6 col-md-4 order-billing-address">
                                     <ingenico:ingenicoBillingAddressDetailsItem order="${orderData}"/>
                                 </div>
