@@ -12,8 +12,8 @@
 <%@ taglib prefix="ingenico" tagdir="/WEB-INF/tags/addons/ingenicoogonedirectb2ccheckoutaddon/responsive" %>
 
 
-<c:url value="/checkout/multi/ingenico/payment/do" var="doPayment"/>
-<c:url value="/checkout/multi/ingenico/payment/view" var="viewPayment"/>
+<c:url value="/checkout/multi/ingenico/hosted-tokenization/do" var="doPayment"/>
+<c:url value="/checkout/multi/ingenico/hosted-tokenization/view" var="viewPayment"/>
 <template:page pageTitle="${pageTitle}" hideHeaderLinks="true">
 
     <jsp:attribute name="pageScripts">
@@ -55,15 +55,9 @@
                     <span class="glyphicon glyphicon-lock"></span>
                     <spring:theme code="checkout.multi.secure.checkout"/>
                 </div>
-                <div class="checkout-steps">
-                    <a href="${viewPayment}"
-                       class="step-head js-checkout-step active">
-                        <div class="title">
-                            <div class="headline"><spring:theme code="checkout.multi.tokenization.payment"/></div>
-                        </div>
-                    </a>
 
-                    <div class="step-body">
+                <multiCheckout:checkoutSteps checkoutSteps="${checkoutSteps}" progressBarId="${progressBarId}">
+                    <jsp:body>
                         <ycommerce:testId code="checkoutStepFive">
                             <div class="checkout-payment">
                                 <div class="checkout-indent">
@@ -71,7 +65,7 @@
                                         <div id="checkout-payment-tokens">
                                             <form:select id="select_payment-tokens" path="savedPaymentInfos"
                                                          cssClass="form-control">
-                                                <option value="" ></option>
+                                                <option value=""></option>
                                                 <c:forEach var="savedPaymentInfo" items="${savedPaymentInfos}">
                                                     <form:option value="${savedPaymentInfo.token}">
                                                         ${savedPaymentInfo.cardholderName} - ${savedPaymentInfo.alias}
@@ -99,8 +93,8 @@
                                 </div>
                             </div>
                         </ycommerce:testId>
-                    </div>
-                </div>
+                    </jsp:body>
+                </multiCheckout:checkoutSteps>
             </div>
 
             <div class="col-sm-6 hidden-xs">

@@ -2,6 +2,8 @@ package com.ingenico.ogone.direct.facade.impl;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL_COUNTRY;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.UNAUTHORIZED_REASON;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,26 +14,24 @@ import java.util.stream.Collectors;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
-import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.product.data.PriceData;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commercefacades.user.data.CountryData;
+import de.hybris.platform.commerceservices.customer.CustomerAccountService;
 import de.hybris.platform.commerceservices.order.CommerceCheckoutService;
 import de.hybris.platform.commerceservices.service.data.CommerceCheckoutParameter;
-import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
-import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.order.CartService;
-import de.hybris.platform.payment.dto.TransactionStatus;
-import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
+import de.hybris.platform.order.InvalidCartException;
+import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.site.BaseSiteService;
@@ -51,16 +51,18 @@ import com.ingenico.direct.domain.GetHostedCheckoutResponse;
 import com.ingenico.direct.domain.GetHostedTokenizationResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentProductDisplayHints;
+import com.ingenico.direct.domain.PaymentResponse;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.HOSTED_CHECKOUT_STATUS_ENUM;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_TYPE;
-import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM;
 import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
+import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
+import com.ingenico.ogone.direct.service.IngenicoTransactionService;
 import com.ingenico.ogone.direct.util.IngenicoUrlUtils;
 
 public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
@@ -76,13 +78,13 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private CheckoutFacade checkoutFacade;
     private CommerceCheckoutService commerceCheckoutService;
     private BaseStoreService baseStoreService;
-    private CheckoutCustomerStrategy checkoutCustomerStrategy;
+    private CustomerAccountService customerAccountService;
+    private BaseSiteService baseSiteService;
+    private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
 
     private IngenicoUserFacade ingenicoUserFacade;
     private IngenicoPaymentService ingenicoPaymentService;
-
-    private BaseSiteService baseSiteService;
-    private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
+    private IngenicoTransactionService ingenicoTransactionService;
 
     @Override
     public List<PaymentProduct> getAvailablePaymentMethods() {
@@ -129,7 +131,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     @Override
     public List<DirectoryEntry> getIdealIssuers(List<PaymentProduct> paymentProducts) {
         final boolean isIdealPresent = paymentProducts.stream()
-                .anyMatch(paymentProduct -> PAYMENT_METHOD_IDEAL.equals(paymentProduct.getId()));
+                .anyMatch(paymentProduct -> PAYMENT_METHOD_IDEAL == paymentProduct.getId());
 
         if (isIdealPresent) {
             final CartData cartData = checkoutFacade.getCheckoutCart();
@@ -161,62 +163,53 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     }
 
     @Override
-    public CreatePaymentResponse authorisePayment(IngenicoHostedTokenizationData ingenicoHostedTokenizationData) {
+    public OrderData authorisePaymentForHostedTokenization(IngenicoHostedTokenizationData ingenicoHostedTokenizationData) throws IngenicoNonAuthorizedPaymentException, InvalidCartException {
 
         final GetHostedTokenizationResponse hostedTokenization = ingenicoPaymentService.getHostedTokenization(ingenicoHostedTokenizationData.getHostedTokenizationId());
+        final CreatePaymentResponse paymentForHostedTokenization = ingenicoPaymentService.createPaymentForHostedTokenization(ingenicoHostedTokenizationData, hostedTokenization);
 
-        return ingenicoPaymentService.createPaymentForHostedTokenization(ingenicoHostedTokenizationData, hostedTokenization);
+        if (paymentForHostedTokenization.getMerchantAction() != null) {
+            ingenicoTransactionService.createPaymentTransaction(cartService.getSessionCart(), paymentForHostedTokenization.getPayment(), PaymentTransactionType.AUTHORIZATION);
+            throw new IngenicoNonAuthorizedPaymentException(paymentForHostedTokenization.getPayment(),
+                    paymentForHostedTokenization.getMerchantAction(),
+                    UNAUTHORIZED_REASON.NEED_3DS);
+        }
+        return handlePaymentResponse(paymentForHostedTokenization.getPayment());
 
+    }
+
+
+    public OrderData handle3dsResponse(String ref, String returnMAC, String paymentId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException {
+        final PaymentResponse payment = ingenicoPaymentService.getPayment(paymentId);
+        return handlePaymentResponse(payment);
     }
 
     @Override
     public CreateHostedCheckoutResponse createHostedCheckout() {
-        final CartData cartData = checkoutFacade.getCheckoutCart();
-
-        String fullReturnUrl = getFullResponseUrl("/checkout/multi/ingenico/hosted-checkout/response", true, cartData.getCode());
-        return ingenicoPaymentService.createHostedCheckout(fullReturnUrl, cartData, getShopperLocale());
+        final CreateHostedCheckoutResponse hostedCheckout = ingenicoPaymentService.createHostedCheckout();
+        hostedCheckout.setPartialRedirectUrl(IngenicoUrlUtils.buildFullURL(hostedCheckout.getPartialRedirectUrl()));
+        return hostedCheckout;
     }
 
     @Override
-    public boolean validatePaymentForHostedCheckoutResponse(String hostedCheckoutId) {
+    public OrderData authorisePaymentForHostedCheckout(String hostedCheckoutId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException {
         GetHostedCheckoutResponse hostedCheckoutData = ingenicoPaymentService.getHostedCheckout(hostedCheckoutId);
 
-        if (hostedCheckoutData.getStatus().equals(HOSTED_CHECKOUT_STATUS_ENUM.PAYMENT_CREATED.getValue())) { // hosted checkout was created and processed
-            if (hostedCheckoutData.getCreatedPaymentOutput().getPaymentStatusCategory().equals(PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue())) { //payment was created and captured
-                return true;
-            }
+        switch (HOSTED_CHECKOUT_STATUS_ENUM.valueOf(hostedCheckoutData.getStatus())) {
+            case CANCELLED_BY_CONSUMER:
+
+            case CLIENT_NOT_ELIGIBLE_FOR_SELECTED_PAYMENT_PRODUCT:
+                throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.CANCELLED);
+            case IN_PROGRESS:
+                throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.IN_PROGRESS);
+            case PAYMENT_CREATED:
+                return handlePaymentResponse(hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+            default:
+                LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
+                throw new IllegalStateException("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
         }
-        return false;
     }
 
-    @Override
-    public boolean authorisePaymentHostedCheckout(String requestId) {
-        CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
-        CartModel cartModel = getCart();
-        PaymentTransactionEntryModel paymentTransactionModel = ingenicoPaymentService.authorisePayment(cartModel, currentCustomer, requestId);
-
-        return paymentTransactionModel != null
-                && (TransactionStatus.ACCEPTED.name().equals(paymentTransactionModel.getTransactionStatus())
-                || TransactionStatus.REVIEW.name().equals(paymentTransactionModel.getTransactionStatus()));
-    }
-
-    @Override
-    public String startOrderCreationProcess() {
-        final OrderData orderData;
-        String orderCode = "";
-        try {
-            orderData = checkoutFacade.placeOrder();
-            orderCode = checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
-        } catch (final Exception e) {
-            LOGGER.error("Failed to place Order", e);
-        }
-        return orderCode;
-    }
-
-    @Override
-    public boolean loadOrderConfirmationPageDirectly() {
-        return getCart() != null ? true : false;
-    }
 
     @Override
     public void handlePaymentInfo(IngenicoPaymentInfoData ingenicoPaymentInfoData) {
@@ -228,6 +221,46 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, ingenicoPaymentInfoData));
 
         commerceCheckoutService.setPaymentInfo(parameter);
+    }
+
+
+    protected OrderData handlePaymentResponse(PaymentResponse paymentResponse) throws IngenicoNonAuthorizedPaymentException, InvalidCartException {
+        switch (PAYMENT_STATUS_ENUM.valueOf(paymentResponse.getStatus())) {
+            case CREATED:
+            case REJECTED:
+            case REJECTED_CAPTURE:
+                ingenicoTransactionService.createPaymentTransaction(cartService.getSessionCart(),
+                        paymentResponse,
+                        PaymentTransactionType.AUTHORIZATION);
+                throw new IngenicoNonAuthorizedPaymentException(paymentResponse, UNAUTHORIZED_REASON.REJECTED);
+            case CANCELLED:
+                ingenicoTransactionService.createPaymentTransaction(cartService.getSessionCart(),
+                        paymentResponse,
+                        PaymentTransactionType.AUTHORIZATION);
+                throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.CANCELLED);
+            case REDIRECTED:
+            case PENDING_PAYMENT:
+            case PENDING_COMPLETION:
+            case PENDING_CAPTURE:
+            case AUTHORIZATION_REQUESTED:
+            case CAPTURE_REQUESTED:
+                return createOrderFromPaymentResponse(paymentResponse, PaymentTransactionType.AUTHORIZATION);
+            case CAPTURED:
+                return createOrderFromPaymentResponse(paymentResponse, PaymentTransactionType.CAPTURE);
+            default:
+                LOGGER.warn("Unexpected value: " + paymentResponse.getStatus());
+                throw new IllegalStateException("Unexpected value: " + paymentResponse.getStatus());
+        }
+    }
+
+    protected OrderData createOrderFromPaymentResponse(final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) throws InvalidCartException {
+
+        OrderData orderData = checkoutFacade.placeOrder();
+        final BaseStoreModel baseStoreModel = baseStoreService.getBaseStoreForUid(orderData.getStore());
+        final OrderModel orderModel = customerAccountService.getOrderForCode(orderData.getCode(), baseStoreModel);
+
+        ingenicoTransactionService.createPaymentTransaction(orderModel, paymentResponse, paymentTransactionType);
+        return orderData;
     }
 
     protected List<PaymentProduct> filterByCheckoutType(List<PaymentProduct> paymentProducts) {
@@ -282,6 +315,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
         paymentInfo.setId(ingenicoPaymentInfoData.getId());
         paymentInfo.setPaymentMethod(ingenicoPaymentInfoData.getPaymentMethod());
+        paymentInfo.setPaymentProductDirectoryId(ingenicoPaymentInfoData.getPaymentProductDirectoryId());
         paymentInfo.setIngenicoCheckoutType(ingenicoPaymentInfoData.getIngenicoCheckoutType());
 
         AddressModel billingAddress = convertToAddressModel(ingenicoPaymentInfoData.getBillingAddress());
@@ -410,7 +444,11 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         this.siteBaseUrlResolutionService = siteBaseUrlResolutionService;
     }
 
-    public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
-        this.checkoutCustomerStrategy = checkoutCustomerStrategy;
+    public void setCustomerAccountService(CustomerAccountService customerAccountService) {
+        this.customerAccountService = customerAccountService;
+    }
+
+    public void setIngenicoTransactionService(IngenicoTransactionService ingenicoTransactionService) {
+        this.ingenicoTransactionService = ingenicoTransactionService;
     }
 }
