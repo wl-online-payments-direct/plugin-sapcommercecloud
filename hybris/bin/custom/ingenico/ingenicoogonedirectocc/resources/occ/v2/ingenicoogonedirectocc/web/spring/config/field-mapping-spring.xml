@@ -25,9 +25,9 @@
         <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.PaymentProductWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="id,paymentMethod,displayHints"/>
-                <entry key="DEFAULT" value="id,paymentMethod,displayHints(DEFAULT)"/>
-                <entry key="FULL" value="id,paymentMethod,displayHints(FULL)"/>
+                <entry key="BASIC" value="id,paymentMethod,displayHints,productDirectory"/>
+                <entry key="DEFAULT" value="id,paymentMethod,displayHints(DEFAULT),productDirectory(DEFAULT)"/>
+                <entry key="FULL" value="id,paymentMethod,displayHints(FULL),productDirectory(FULL)"/>
             </map>
         </property>
     </bean>
@@ -42,6 +42,65 @@
             </map>
         </property>
     </bean>
+
+    <bean parent="fieldSetLevelMapping" id="hostedTokenizationFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="hostedTokenizationId,redirectUrl,tokens(BASIC)"/>
+                <entry key="DEFAULT" value="BASIC,tokens(DEFAULT)"/>
+                <entry key="FULL" value="BASIC,tokens(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="savedTokenFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="alias,cardholderName,expiryDate,type"/>
+                <entry key="DEFAULT" value="BASIC,token"/>
+                <entry key="FULL" value="DEFAULT,token"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="directoryEntryFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="issuerId,issuerList,entries"/>
+                <entry key="DEFAULT" value="BASIC"/>
+                <entry key="FULL" value="DEFAULT"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="productDirectoryFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.ProductDirectoryWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="entries"/>
+                <entry key="DEFAULT" value="entries(DEFAULT)"/>
+                <entry key="FULL" value="entries(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+    <!-- Field Mappings  -->
+
+    <bean id="hostedTokenizationFieldMapper" parent="fieldMapper">
+        <property name="sourceClass"
+                  value="com.ingenico.direct.domain.CreateHostedTokenizationResponse"/>
+        <property name="destClass"
+                  value="com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
+        <property name="fieldMapping">
+            <map>
+                <entry key="partialRedirectUrl" value="redirectUrl"/>
+            </map>
+        </property>
+    </bean>
+
 
 
 </beans>
