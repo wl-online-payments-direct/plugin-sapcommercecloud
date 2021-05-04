@@ -29,7 +29,7 @@
         <property name="id" type="String"/>
         <property name="paymentMethod" type="String"/>
         <property name="displayHints" type="com.ingenico.ogone.direct.payment.dto.PaymentProductDisplayHintsWsDTO"/>
-        <property name="directoryEntries" type="com.ingenico.ogone.direct.payment.dto.DirectoryEntryListWsDTO"/>
+        <property name="productDirectory" type="com.ingenico.ogone.direct.payment.dto.ProductDirectoryWsDTO"/>
     </bean>
 
 
@@ -52,7 +52,20 @@
         </hints>
         <property name="hostedTokenizationId" type="String"/>
         <property name="redirectUrl" type="String"/>
-        <property name="tokens" type="java.util.List&lt;String>"/>
+        <property name="tokens" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO>"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO">
+        <description>Saved Token</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">SavedToken</hint>
+        </hints>
+        <property name="token" type="String"/>
+        <property name="alias" type="String"/>
+        <property name="type" type="String"/>
+        <property name="cardholderName" type="String"/>
+        <property name="expiryDate" type="String"/>
     </bean>
 
     <bean class="com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO">
@@ -63,18 +76,16 @@
         </hints>
         <property name="issuerId" type="String"/>
         <property name="issuerList" type="String"/>
-        <property name="issuerName" type="String"/>
+        <property name="entries" type="String"/>
     </bean>
 
-    <bean class="com.ingenico.ogone.direct.payment.dto.DirectoryEntryListWsDTO">
-        <description>Directory Entries</description>
+    <bean class="com.ingenico.ogone.direct.payment.dto.ProductDirectoryWsDTO">
+        <description>Product Directory</description>
         <hints>
             <hint name="wsRelated"/>
-            <hint name="alias">DirectoryEntryList</hint>
+            <hint name="alias">ProductDirectory</hint>
         </hints>
-        <property name="paymentProducts" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO>">
-            <description>Directory Entries</description>
-        </property>
+        <property name="entries" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO>"/>
     </bean>
 
     <bean class="com.ingenico.ogone.direct.payment.dto.RedirectDataWsDTO">
