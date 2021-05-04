@@ -1,9 +1,9 @@
 package com.ingenico.ogone.direct.occ.controllers.v2;
 
-import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static com.ingenico.ogone.direct.occ.controllers.IngenicoogonedirectoccControllerConstants.DEFAULT_FIELD_SET;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
@@ -12,7 +12,6 @@ import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
@@ -22,12 +21,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.ingenico.direct.domain.DirectoryEntry;
+import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
+import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
 import com.ingenico.ogone.direct.occ.helpers.IngenicoHelper;
-import com.ingenico.ogone.direct.payment.dto.DirectoryEntryListWsDTO;
+import com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO;
 
 @Controller
@@ -44,6 +44,9 @@ public class IngenicoCartsController {
 
     @Resource(name = "ingenicoCheckoutFacade")
     private IngenicoCheckoutFacade ingenicoCheckoutFacade;
+
+    @Resource(name = "ingenicoUserFacade")
+    private IngenicoUserFacade ingenicoUserFacade;
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @RequestMapping(value = "/{cartId}/paymentproducts", method = RequestMethod.GET)
@@ -63,6 +66,22 @@ public class IngenicoCartsController {
         ingenicoHelper.fillIdealIssuers(paymentProductListWsDTO, availablePaymentMethods, fields);
 
         return paymentProductListWsDTO;
+    }
+
+    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
+    @RequestMapping(value = "/{cartId}/hostedtokenization", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(nickname = "getHostedTokenization", value = "Get ingenico hosted tokenization.", notes =
+            "Returns a hosted tokenization for the current base store and cart. " +
+                    "A delivery address must be set for the cart, otherwise an error will be returned.")
+    @ApiBaseSiteIdUserIdAndCartIdParam
+    public HostedTokenizationResponseWsDTO getHostedTokenization(@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
+        final CreateHostedTokenizationResponse hostedTokenization = ingenicoCheckoutFacade.createHostedTokenization();
+        final HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO = getDataMapper().map(hostedTokenization, HostedTokenizationResponseWsDTO.class, fields);
+
+        ingenicoHelper.fillSavedTokens(hostedTokenizationResponseWsDTO, fields);
+
+        return hostedTokenizationResponseWsDTO;
     }
 
 
