@@ -62,16 +62,42 @@
                             <div class="checkout-payment">
                                 <div class="checkout-indent">
                                     <c:if test="${not empty savedPaymentInfos}">
-                                        <div id="checkout-payment-tokens">
-                                            <form:select id="select_payment-tokens" path="savedPaymentInfos"
-                                                         cssClass="form-control">
-                                                <option value=""></option>
+                                        <div class="form-group">
+                                            <button type="button"
+                                                    class="btn btn-default btn-block js-saved-ingenico-payments">
+                                                <spring:theme code="checkout.multi.tokenization.useSavedCard"/>
+                                            </button>
+                                        </div>
+                                        <div class="form-group display-none">
+                                            <button type="button" class="btn btn-default btn-block js-reset-token-form">
+                                                <spring:theme code="checkout.multi.tokenization.resetForm"/>
+                                            </button>
+                                        </div>
+                                        <div id="savedpayments">
+                                            <div id="savedpaymentstitle">
+                                                <div class="headline">
+                                                    <span class="headline-text"> <spring:theme
+                                                            code="checkout.multi.tokenization.useSavedCard"/></span>
+                                                </div>
+                                            </div>
+                                            <div id="savedpaymentsbody">
                                                 <c:forEach var="savedPaymentInfo" items="${savedPaymentInfos}">
-                                                    <form:option value="${savedPaymentInfo.token}">
-                                                        ${savedPaymentInfo.cardholderName} - ${savedPaymentInfo.alias}
-                                                    </form:option>
+                                                    <div class="saved-payment-entry">
+                                                        <ul>
+                                                            <strong>${savedPaymentInfo.cardholderName}</strong><br>
+                                                                ${savedPaymentInfo.type}<br>
+                                                                ${savedPaymentInfo.alias}<br>
+                                                            <spring:theme code="checkout.multi.tokenization.expire"
+                                                                          arguments="${savedPaymentInfo.expiryDate}"/><br>
+                                                        </ul>
+                                                        <button type="button" data-token="${savedPaymentInfo.token}"
+                                                                class="btn btn-primary btn-block js-use-saved-ingenico-payment">
+                                                            <spring:theme
+                                                                    code="checkout.multi.tokenization.useThesePaymentDetails"/>
+                                                        </button>
+                                                    </div>
                                                 </c:forEach>
-                                            </form:select>
+                                            </div>
                                         </div>
                                     </c:if>
                                     <div id="hostedTokenization"></div>
