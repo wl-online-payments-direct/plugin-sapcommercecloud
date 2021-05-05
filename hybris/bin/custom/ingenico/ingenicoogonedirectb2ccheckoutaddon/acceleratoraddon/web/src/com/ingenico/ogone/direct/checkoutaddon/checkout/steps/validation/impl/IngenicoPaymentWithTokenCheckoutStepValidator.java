@@ -32,13 +32,13 @@ public class IngenicoPaymentWithTokenCheckoutStepValidator extends AbstractCheck
     }
 
     protected ValidationResults checkPaymentMethodAndPickup(RedirectAttributes redirectAttributes) {
-        if (getCheckoutFlowFacade().hasNoPaymentInfo()) {
+        if (getIngenicoCheckoutFlowFacade().hasNoPaymentInfo()) {
             GlobalMessages.addFlashMessage(redirectAttributes, GlobalMessages.INFO_MESSAGES_HOLDER,
                     "checkout.multi.paymentDetails.notprovided");
             return ValidationResults.REDIRECT_TO_PAYMENT_METHOD;
         }
 
-        if (ingenicoCheckoutFlowFacade.isNotCheckoutWithTokenization()) {
+        if (getIngenicoCheckoutFlowFacade().isNotCheckoutWithTokenization()) {
             GlobalMessages.addFlashMessage(redirectAttributes, GlobalMessages.INFO_MESSAGES_HOLDER,
                     "checkout.multi.payment.not.tokenization.flow");
             return ValidationResults.REDIRECT_TO_SUMMARY;
@@ -57,18 +57,18 @@ public class IngenicoPaymentWithTokenCheckoutStepValidator extends AbstractCheck
     }
 
     protected ValidationResults checkCartAndDelivery(RedirectAttributes redirectAttributes) {
-        if (!getCheckoutFlowFacade().hasValidCart()) {
+        if (!getIngenicoCheckoutFlowFacade().hasValidCart()) {
             LOGGER.info("Missing, empty or unsupported cart");
             return ValidationResults.REDIRECT_TO_CART;
         }
 
-        if (getCheckoutFlowFacade().hasNoDeliveryAddress()) {
+        if (getIngenicoCheckoutFlowFacade().hasNoDeliveryAddress()) {
             GlobalMessages.addFlashMessage(redirectAttributes, GlobalMessages.INFO_MESSAGES_HOLDER,
                     "checkout.multi.deliveryAddress.notprovided");
             return ValidationResults.REDIRECT_TO_DELIVERY_ADDRESS;
         }
 
-        if (getCheckoutFlowFacade().hasNoDeliveryMode()) {
+        if (getIngenicoCheckoutFlowFacade().hasNoDeliveryMode()) {
             GlobalMessages.addFlashMessage(redirectAttributes, GlobalMessages.INFO_MESSAGES_HOLDER,
                     "checkout.multi.deliveryMethod.notprovided");
             return ValidationResults.REDIRECT_TO_DELIVERY_METHOD;
@@ -76,7 +76,13 @@ public class IngenicoPaymentWithTokenCheckoutStepValidator extends AbstractCheck
         return null;
     }
 
+    protected IngenicoCheckoutFlowFacade getIngenicoCheckoutFlowFacade() {
+        return ingenicoCheckoutFlowFacade;
+    }
+
     public void setIngenicoCheckoutFlowFacade(IngenicoCheckoutFlowFacade ingenicoCheckoutFlowFacade) {
         this.ingenicoCheckoutFlowFacade = ingenicoCheckoutFlowFacade;
     }
+
+
 }

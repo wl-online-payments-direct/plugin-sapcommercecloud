@@ -1,6 +1,9 @@
 package com.ingenico.ogone.direct.acceleratorfacades.flow;
 
-public interface IngenicoCheckoutFlowFacade {
+import de.hybris.platform.acceleratorfacades.flow.CheckoutFlowFacade;
+import de.hybris.platform.acceleratorfacades.order.AcceleratorCheckoutFacade;
+
+public interface IngenicoCheckoutFlowFacade extends AcceleratorCheckoutFacade, CheckoutFlowFacade {
 
     boolean isNotCheckoutWithTokenization();
 }
