@@ -41,15 +41,38 @@ ACC.ingenicoPaymentPost = {
             }
         });
     },
-    bindSavedIngenicoCardSelect: function () {
-        $("#select_payment-tokens").change(function () {
-            if (tokenizer !== undefined) {
-                var useSavedCard = $(this).val();
-                if (useSavedCard === "") {
-                    tokenizer.useToken();
-                } else {
-                    tokenizer.useToken(useSavedCard);
+    bindIngenicoSavedPayments:function(){
+        $(document).on("click",".js-saved-ingenico-payments",function(e){
+            e.preventDefault();
+
+            var title = $("#savedpaymentstitle").html();
+
+            $.colorbox({
+                href: "#savedpaymentsbody",
+                inline:true,
+                maxWidth:"100%",
+                opacity:0.7,
+                title: title,
+                close:'<span class="glyphicon glyphicon-remove"></span>',
+                onComplete: function(){
                 }
+            });
+        });
+        $(document).on("click",".js-use-saved-ingenico-payment",function(e){
+            e.preventDefault();
+            if (tokenizer !== undefined) {
+                tokenizer.useToken($(this).data('token'));
+                $(".js-saved-ingenico-payments").parent().toggleClass("display-none");
+                $(".js-reset-token-form").parent().toggleClass("display-none");
+                $.colorbox.close();
+            }
+        });
+        $(document).on("click",".js-reset-token-form",function(e){
+            e.preventDefault();
+            if (tokenizer !== undefined) {
+               tokenizer.useToken();
+                $(".js-saved-ingenico-payments").parent().toggleClass("display-none");
+                $(".js-reset-token-form").parent().toggleClass("display-none");
             }
         });
     }
@@ -58,5 +81,5 @@ ACC.ingenicoPaymentPost = {
 $(document).ready(function () {
     ACC.ingenicoPaymentPost.bindSubmitingenicoDoPaymentForm();
     ACC.ingenicoPaymentPost.fillInternalDataIngenicoDoPaymentForm();
-    ACC.ingenicoPaymentPost.bindSavedIngenicoCardSelect();
+    ACC.ingenicoPaymentPost.bindIngenicoSavedPayments();
 });
