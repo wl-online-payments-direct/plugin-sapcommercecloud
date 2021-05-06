@@ -35,7 +35,7 @@ public class IngenicoHelper {
     private IngenicoUserFacade ingenicoUserFacade;
 
     private int getIdealIndex(List<PaymentProduct> availablePaymentMethods) {
-        return Iterables.indexOf(availablePaymentMethods, paymentProduct -> PAYMENT_METHOD_IDEAL.equals(paymentProduct.getId()));
+        return Iterables.indexOf(availablePaymentMethods, paymentProduct -> PAYMENT_METHOD_IDEAL == paymentProduct.getId());
     }
 
     public void fillIdealIssuers(PaymentProductListWsDTO paymentProductListWsDTO, List<PaymentProduct> availablePaymentMethods, String fields) {

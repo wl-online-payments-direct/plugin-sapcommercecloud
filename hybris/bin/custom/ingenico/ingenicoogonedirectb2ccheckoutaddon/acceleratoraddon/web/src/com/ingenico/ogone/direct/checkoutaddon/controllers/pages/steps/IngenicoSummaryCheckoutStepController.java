@@ -4,8 +4,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
-import com.ingenico.ogone.direct.util.IngenicoUrlUtils;
+import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -16,11 +15,14 @@ import de.hybris.platform.acceleratorstorefrontcommons.forms.PlaceOrderForm;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
 import de.hybris.platform.commercefacades.order.OrderFacade;
+import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.commercefacades.order.data.CartData;
+import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.order.data.OrderEntryData;
 import de.hybris.platform.commercefacades.product.ProductOption;
 import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.commerceservices.order.CommerceCartModificationException;
+import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 
 import org.apache.log4j.Logger;
@@ -32,17 +34,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.ogone.direct.constants.Ingenicoogonedirectb2ccheckoutaddonConstants;
+import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants;
+import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants.URL.Checkout.Summary;
+import com.ingenico.ogone.direct.constants.IngenicoCheckoutConstants;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 
 @Controller
-@RequestMapping(value = "/checkout/multi/ingenico/summary")
+@RequestMapping(value = Summary.root)
 public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepController {
     private static final Logger LOGGER = Logger.getLogger(IngenicoSummaryCheckoutStepController.class);
 
     private final static String SUMMARY = "summary";
-    private static final String INGENICO_PAYMENT_VIEW = "/checkout/multi/ingenico/payment/view";
 
     @Resource(name = "orderFacade")
     private OrderFacade orderFacade;
@@ -53,10 +57,16 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
     @Resource(name = "configurationService")
     private ConfigurationService configurationService;
 
+    @Resource(name = "siteBaseUrlResolutionService")
+    private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
+
+    @Resource(name = "checkoutCustomerStrategy")
+    private CheckoutCustomerStrategy checkoutCustomerStrategy;
+
     @Autowired
     private HttpServletRequest httpServletRequest;
 
-    @RequestMapping(value = "/view", method = RequestMethod.GET)
+    @RequestMapping(value = Summary.view, method = RequestMethod.GET)
     @RequireHardLogIn
     @Override
     @PreValidateCheckoutStep(checkoutStep = SUMMARY)
@@ -104,10 +114,10 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         model.addAttribute("metaRobots", "noindex,nofollow");
         setCheckoutStepLinksForModel(model, getCheckoutStep());
 
-        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoCheckoutSummaryPage;
+        return IngenicoCheckoutConstants.Views.Pages.MultiStepCheckout.ingenicoCheckoutSummaryPage;
     }
 
-    @RequestMapping({"/placeOrder"})
+    @RequestMapping(value = Summary.placeOrder)
     @RequireHardLogIn
     public String placeOrder(@ModelAttribute("placeOrderForm") final PlaceOrderForm placeOrderForm,
                              final Model model,
@@ -127,18 +137,26 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         switch (cartData.getIngenicoPaymentInfo().getIngenicoCheckoutType()) {
             case HOSTED_CHECKOUT:
-                //TODO if hostedCheckoutResponse is null or there is an error (implementation in facade)
+                storeReturnUrlInSession(getOrderCode(cartData));
                 CreateHostedCheckoutResponse hostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout();
-                String partialRedirectUrl = hostedCheckoutResponse.getPartialRedirectUrl();
-                return REDIRECT_PREFIX + IngenicoUrlUtils.buildFullURL(partialRedirectUrl);
+                return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
-                return REDIRECT_PREFIX + INGENICO_PAYMENT_VIEW;
+                return REDIRECT_PREFIX +
+                        IngenicoWebConstants.URL.Checkout.Payment.HTP.root +
+                        IngenicoWebConstants.URL.Checkout.Payment.HTP.view;
             default:
                 break;
         }
 
-        LOGGER.error("Unhandled checkoutType");
+        GlobalMessages.addErrorMessage(model, "checkout.error.checkoutType.unknown");
         return enterStep(model, redirectModel);
+    }
+
+    private void storeReturnUrlInSession(String code) {
+        final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
+                true, IngenicoWebConstants.URL.Checkout.Payment.HOP.root +
+                        IngenicoWebConstants.URL.Checkout.Payment.HOP.handleResponse + code);
+        getSessionService().setAttribute("hostedCheckoutReturnUrl", returnUrl);
     }
 
     protected boolean validateOrderForm(final PlaceOrderForm placeOrderForm, final Model model) {
@@ -184,6 +202,11 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
 
         return invalid;
     }
+
+    protected String getOrderCode(AbstractOrderData orderData) {
+        return checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
+    }
+
 
 
     @RequestMapping(value = "/back", method = RequestMethod.GET)

@@ -1,69 +1,88 @@
 package com.ingenico.ogone.direct.checkoutaddon.controllers.pages.steps;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
+import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractCheckoutController;
+import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
 import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.OrderData;
+import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.order.InvalidCartException;
+
+import org.apache.commons.lang.BooleanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants;
+import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants.URL.Checkout.Payment.HOP;
+import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
+import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 
 @Controller
-@RequestMapping(value = "/checkout/multi/ingenico/hosted-checkout")
-public class IngenicoHostedCheckoutResponseController {
+@RequestMapping(value = HOP.root)
+public class IngenicoHostedCheckoutResponseController extends AbstractCheckoutController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoHostedCheckoutResponseController.class);
+    private static final String ORDER_CODE_PATH_VARIABLE_PATTERN = "{orderCode:.*}";
 
-   @Resource(name = "ingenicoCheckoutFacade")
-   private IngenicoCheckoutFacade ingenicoCheckoutFacade;
+    @Resource(name = "ingenicoCheckoutFacade")
+    private IngenicoCheckoutFacade ingenicoCheckoutFacade;
 
-   @Resource(name = "orderFacade")
-   private OrderFacade orderFacade;
+    @Resource(name = "orderFacade")
+    private OrderFacade orderFacade;
 
-   @RequireHardLogIn
-   @RequestMapping(value = "/response", method = {RequestMethod.POST, RequestMethod.GET})
-   public String handleHostedCheckoutPaymentResponse(final HttpServletRequest request) {
+    @Resource(name = "checkoutCustomerStrategy")
+    private CheckoutCustomerStrategy checkoutCustomerStrategy;
 
-      Map<String, String> requestParams = getRequestParameterMap(request);
-      // get hostedCheckoutStatus and payment id
-      String hostedCheckoutId = requestParams.get("hostedCheckoutId");
+    @RequireHardLogIn
+    @RequestMapping(value = HOP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = {RequestMethod.POST, RequestMethod.GET})
+    public String handleHostedCheckoutPaymentResponse(@PathVariable(value = "orderCode") final String orderCode,
+                                                      @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
+                                                      @RequestParam(value = "hostedCheckoutId", required = true) final String hostedCheckoutId,
+                                                      final Model model) throws InvalidCartException {
 
-      if (!ingenicoCheckoutFacade.loadOrderConfirmationPageDirectly()) { // if cart doesn't exist an order exists return order confirmation page
-         String cartId = requestParams.get("cartId");
-         OrderData orderData = orderFacade.getOrderDetailsForCodeWithoutUser(cartId);
-         String orderId = orderData.isGuestCustomer() ? orderData.getGuid() : orderData.getCode();
-         return String.format("redirect:/checkout/ingenico/orderConfirmation/%s", orderId);
-      }
 
-      //if payment is success and an order is created redirect to order confirmation page
-      if (ingenicoCheckoutFacade.validatePaymentForHostedCheckoutResponse(hostedCheckoutId)) {
-         if (!ingenicoCheckoutFacade.authorisePaymentHostedCheckout(hostedCheckoutId)) {
-            // Payment transaction wasn't created for the order == unhappy path => don't place order
-            return "redirect:/cart";
-         }
-         String orderId = ingenicoCheckoutFacade.startOrderCreationProcess();
-         return String.format("redirect:/checkout/ingenico/orderConfirmation/%s", orderId);
-      } else {
-         return "redirect:/cart";
-      }
-   }
+        if (BooleanUtils.isFalse(getCartFacade().hasSessionCart())) { // if cart doesn't exist an order exists return order confirmation page
+            OrderData orderData = orderFacade.getOrderDetailsForCode(orderCode);
+            return redirectToOrderConfirmationPage(orderData);
+        }
 
-   protected Map<String, String> getRequestParameterMap(HttpServletRequest request) {
-      Map<String, String> map = new HashMap();
-      Enumeration myEnum = request.getParameterNames();
+        try {
+            final OrderData orderData = ingenicoCheckoutFacade.authorisePaymentForHostedCheckout(hostedCheckoutId);
+            return redirectToOrderConfirmationPage(orderData);
+        } catch (IngenicoNonAuthorizedPaymentException e) {
+            switch (e.getReason()) {
+                case CANCELLED:
+                    return REDIRECT_PREFIX +
+                            IngenicoWebConstants.URL.Checkout.Payment.root +
+                            IngenicoWebConstants.URL.Checkout.Payment.select;
+                case REJECTED:
+                    GlobalMessages.addErrorMessage(model, "checkout.error.paymentethod.formentry.invalid");
+                    return REDIRECT_PREFIX +
+                            IngenicoWebConstants.URL.Checkout.Payment.root +
+                            IngenicoWebConstants.URL.Checkout.Payment.select;
+                case IN_PROGRESS:
+                    LOGGER.warn("[INGENICO] HostedCheckout is still in progress");
+                    break;
+            }
+        }
 
-      while(myEnum.hasMoreElements()) {
-         String paramName = (String)myEnum.nextElement();
-         String paramValue = request.getParameter(paramName);
-         map.put(paramName, paramValue);
-      }
+        return REDIRECT_PREFIX + "/cart";
 
-      return map;
-   }
+    }
+
+    protected String redirectToOrderConfirmationPage(OrderData orderData) {
+        return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
+    }
+
+    protected String getOrderCode(OrderData orderData) {
+        return checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
+    }
 
 }

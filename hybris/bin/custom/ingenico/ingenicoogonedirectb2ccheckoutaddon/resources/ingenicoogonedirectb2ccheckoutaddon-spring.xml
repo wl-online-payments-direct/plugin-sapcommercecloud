@@ -38,6 +38,8 @@
 
 	<!-- Custom checkoutFlowFacade-->
 	<alias name="ingenicoCheckoutFlowFacade" alias="checkoutFlowFacade"/>
-	<bean id="ingenicoCheckoutFlowFacade" class="com.ingenico.ogone.direct.acceleratorfacades.flow.impl.IngenicoCheckoutFlowFacadeImpl" parent="defaultCheckoutFlowFacade" />
+	<bean id="ingenicoCheckoutFlowFacade" class="com.ingenico.ogone.direct.acceleratorfacades.flow.impl.IngenicoCheckoutFlowFacadeImpl" parent="defaultCheckoutFlowFacade" >
+		<property name="commercePaymentProviderStrategy" ref="commercePaymentProviderStrategy"/>
+	</bean>
 
 </beans>

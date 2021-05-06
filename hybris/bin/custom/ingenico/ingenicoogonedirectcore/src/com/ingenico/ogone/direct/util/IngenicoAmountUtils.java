@@ -18,6 +18,10 @@ public class IngenicoAmountUtils {
 
     }
 
+    public long createAmount(Double amount, String currencyIso) {
+        return createAmount(BigDecimal.valueOf(amount), currencyIso);
+    }
+
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;
     }

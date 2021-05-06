@@ -3,20 +3,17 @@ package com.ingenico.ogone.direct.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.CreatePaymentResponse;
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
-import com.ingenico.direct.domain.GetHostedTokenizationResponse;
 import com.ingenico.direct.domain.GetHostedCheckoutResponse;
+import com.ingenico.direct.domain.GetHostedTokenizationResponse;
 import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
+import com.ingenico.direct.domain.PaymentResponse;
 import com.ingenico.direct.domain.ProductDirectory;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
-import de.hybris.platform.commercefacades.order.data.CartData;
-import de.hybris.platform.core.model.order.CartModel;
-import de.hybris.platform.core.model.user.CustomerModel;
-import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 
 public interface IngenicoPaymentService {
 
@@ -36,9 +33,10 @@ public interface IngenicoPaymentService {
 
     CreatePaymentResponse createPaymentForHostedTokenization(IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse);
 
-    CreateHostedCheckoutResponse createHostedCheckout(String fullResponseUrl, CartData cartData, String shopperLocale);
+    PaymentResponse getPayment(String paymentId);
+
+    CreateHostedCheckoutResponse createHostedCheckout();
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 
-    PaymentTransactionEntryModel authorisePayment(CartModel cartModel, CustomerModel customerModel, String requestId);
 }
