@@ -8,6 +8,8 @@ public interface IngenicoUserFacade {
 
     List<IngenicoPaymentInfoData> getIngenicoPaymentInfos(boolean saved);
 
+    List<String> getSavedTokens();
+
     List<IngenicoPaymentInfoData> getIngenicoPaymentInfoByToken(String token);
 
 }

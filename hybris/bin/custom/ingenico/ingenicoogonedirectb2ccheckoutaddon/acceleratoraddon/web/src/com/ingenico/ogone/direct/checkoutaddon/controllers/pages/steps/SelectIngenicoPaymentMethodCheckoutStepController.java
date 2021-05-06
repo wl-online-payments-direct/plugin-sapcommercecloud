@@ -1,5 +1,6 @@
 package com.ingenico.ogone.direct.checkoutaddon.controllers.pages.steps;
 
+import static com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants.URL.Checkout.Payment;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -36,13 +37,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.ogone.direct.checkoutaddon.forms.IngenicoPaymentDetailsForm;
 import com.ingenico.ogone.direct.checkoutaddon.forms.validation.IngenicoPaymentDetailsValidator;
-import com.ingenico.ogone.direct.constants.Ingenicoogonedirectb2ccheckoutaddonConstants;
+import com.ingenico.ogone.direct.constants.IngenicoCheckoutConstants;
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 
 @Controller
-@RequestMapping(value = "/checkout/multi/ingenico")
+@RequestMapping(value = Payment.root)
 public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractCheckoutStepController {
     private static final Logger LOGGER = Logger.getLogger(SelectIngenicoPaymentMethodCheckoutStepController.class);
 
@@ -74,7 +75,7 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
      * {@inheritDoc}
      */
     @Override
-    @RequestMapping(value = "/select-payment-method", method = GET)
+    @RequestMapping(value = Payment.select, method = GET)
     @RequireHardLogIn
     @PreValidateCheckoutStep(checkoutStep = PAYMENT_METHOD_STEP_NAME)
     public String enterStep(final Model model, final RedirectAttributes redirectAttributes) throws CMSItemNotFoundException {
@@ -90,10 +91,10 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
 
-        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
+        return IngenicoCheckoutConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
     }
 
-    @RequestMapping(value = "/select-payment-method", method = RequestMethod.POST)
+    @RequestMapping(value = Payment.select, method = RequestMethod.POST)
     @RequireHardLogIn
     public String add(final Model model, @Valid final IngenicoPaymentDetailsForm ingenicoPaymentDetailsForm, final RedirectAttributes redirectAttributes, final BindingResult bindingResult)
             throws CMSItemNotFoundException {
@@ -158,7 +159,7 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
             addressDataUtil.convert(deliveryAddress, addressForm);
         }
         ingenicoPaymentDetailsForm.setBillingAddress(addressForm);
-        return Ingenicoogonedirectb2ccheckoutaddonConstants.Views.Fragments.Checkout.BillingAddressForm;
+        return IngenicoCheckoutConstants.Views.Fragments.Checkout.BillingAddressForm;
     }
 
     protected void setupSelectPaymentPage(final Model model) throws CMSItemNotFoundException {

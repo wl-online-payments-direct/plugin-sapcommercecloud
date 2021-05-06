@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
- */
 package com.ingenico.ogone.direct.constants;
 
 /**
@@ -11,9 +8,10 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
 
     // Payment methods
 
-    public static final Integer PAYMENT_METHOD_IDEAL = 809;
-    public static final Integer PAYMENT_METHOD_PAYPAL = 840;
-    public static final Integer PAYMENT_METHOD_BCC = 3012;
+    public static final int PAYMENT_METHOD_IDEAL = 809;
+    public static final int PAYMENT_METHOD_PAYPAL = 840;
+    public static final int PAYMENT_METHOD_ILLICADO = 3112;
+    public static final int PAYMENT_METHOD_BCC = 3012;
 
 
     public static final String PAYMENT_METHOD_IDEAL_COUNTRY = "NL";
@@ -35,10 +33,14 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
         }
     }
 
-    public enum HOSTED_CHECKOUT_STATUS_ENUM {
-        PAYMENT_CREATED("PAYMENT_CREATED"),
-        IN_PROGRESS("IN_PROGRESS");
+    public enum UNAUTHORIZED_REASON {NEED_3DS, IN_PROGRESS, CANCELLED, REJECTED}
 
+
+    public enum HOSTED_CHECKOUT_STATUS_ENUM {
+        CANCELLED_BY_CONSUMER("CANCELLED_BY_CONSUMER"),
+        CLIENT_NOT_ELIGIBLE_FOR_SELECTED_PAYMENT_PRODUCT("CLIENT_NOT_ELIGIBLE_FOR_SELECTED_PAYMENT_PRODUCT"),
+        IN_PROGRESS("IN_PROGRESS"),
+        PAYMENT_CREATED("PAYMENT_CREATED");
         private final String value;
 
         HOSTED_CHECKOUT_STATUS_ENUM(String value) {

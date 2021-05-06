@@ -2,12 +2,15 @@ package com.ingenico.ogone.direct.facade;
 
 import java.util.List;
 
+import de.hybris.platform.commercefacades.order.data.OrderData;
+import de.hybris.platform.order.InvalidCartException;
+
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
-import com.ingenico.direct.domain.CreatePaymentResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
+import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 
@@ -25,15 +28,12 @@ public interface IngenicoCheckoutFacade {
 
     void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId, String paymentDirId) throws IngenicoNonValidPaymentProductException;
 
-    CreatePaymentResponse authorisePayment(IngenicoHostedTokenizationData hostedTokenizationId);
+    OrderData authorisePaymentForHostedTokenization(IngenicoHostedTokenizationData hostedTokenizationId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
+
+    OrderData handle3dsResponse(String ref, String returnMAC, String paymentId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
     CreateHostedCheckoutResponse createHostedCheckout();
 
-    boolean validatePaymentForHostedCheckoutResponse(String hostedCheckoutId);
+    OrderData authorisePaymentForHostedCheckout(String hostedCheckoutId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
-    boolean authorisePaymentHostedCheckout(String requestId); //requestId = hostedCheckoutID or transactionID ???
-
-    String startOrderCreationProcess();
-
-    boolean loadOrderConfirmationPageDirectly(); // there is no cart
 }

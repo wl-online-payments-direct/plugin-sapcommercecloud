@@ -10,20 +10,22 @@
 
     <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
         <property name="cartService" ref="cartService"/>
-        <property name="baseSiteService" ref="baseSiteService"/>
-        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
         <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>
         <property name="ingenicoConfigurationService" ref="ingenicoConfigurationService"/>
         <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
-        <property name="ingenicoOrderParamConverter" ref="ingenicoOrderParamConverter"/>
-        <property name="modelService" ref="modelService"/>
-        <property name="paymentService" ref="paymentService"/>
+        <property name="ingenicoHostedCheckoutParamConverter" ref="ingenicoHostedCheckoutParamConverter"/>
+        <property name="ingenicoHostedTokenizationParamConverter" ref="ingenicoHostedTokenizationParamConverter"/>
     </bean>
 
 
     <bean id="ingenicoCustomerAccountService"
           class="com.ingenico.ogone.direct.service.impl.IngenicoCustomerAccountServiceImpl">
         <property name="ingenicoCustomerAccountDao" ref="ingenicoCustomerAccountDao"/>
+    </bean>
+
+    <bean id="ingenicoTransactionService"
+          class="com.ingenico.ogone.direct.service.impl.IngenicoTransactionServiceImpl">
+        <property name="modelService" ref="modelService"/>
     </bean>
 
 
