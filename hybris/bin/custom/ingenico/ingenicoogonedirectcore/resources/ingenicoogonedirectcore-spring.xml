@@ -50,6 +50,7 @@
         <property name="checkoutFacade" ref="checkoutFacade"/>
         <property name="ingenicoUserFacade" ref="ingenicoUserFacade"/>
         <property name="ingenicoPaymentService" ref="ingenicoPaymentService"/>
+        <property name="ingenicoTransactionService" ref="ingenicoTransactionService"/>
         <property name="addressReverseConverter" ref="addressReverseConverter"/>
         <property name="cartService" ref="cartService"/>
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
@@ -57,7 +58,7 @@
         <property name="baseStoreService" ref="baseStoreService"/>
         <property name="baseSiteService" ref="baseSiteService"/>
         <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
-        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
     </bean>
 
 

@@ -29,6 +29,7 @@
     <bean id="ingenicoCustomerRequestParamPopulator"
           class="com.ingenico.ogone.direct.populator.IngenicoCustomerRequestParamPopulator">
         <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="customerEmailResolutionService" ref="customerEmailResolutionService"/>
     </bean>
 
     <bean id="ingenicoOrderParamConverter" parent="abstractPopulatingConverter">
@@ -38,6 +39,56 @@
                 <ref bean="ingenicoOrderRequestParamPopulator"/>
                 <ref bean="ingenicoShoppingCartRequestParamPopulator"/>
                 <ref bean="ingenicoCustomerRequestParamPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="ingenicoHostedCheckoutBasicPopulator"
+          class="com.ingenico.ogone.direct.populator.hostedcheckout.IngenicoHostedCheckoutBasicPopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="i18NService" ref="i18NService"/>
+        <property name="ingenicoUserFacade" ref="ingenicoUserFacade"/>
+        <property name="ingenicoOrderParamConverter" ref="ingenicoOrderParamConverter"/>
+    </bean>
+
+    <bean id="ingenicoHostedCheckoutCardPopulator"
+          class="com.ingenico.ogone.direct.populator.hostedcheckout.IngenicoHostedCheckoutCardPopulator">
+        <property name="ingenicoConfigurationService" ref="ingenicoConfigurationService"/>
+    </bean>
+
+    <bean id="ingenicoHostedCheckoutRedirectPopulator"
+          class="com.ingenico.ogone.direct.populator.hostedcheckout.IngenicoHostedCheckoutRedirectPopulator">
+        <property name="sessionService" ref="sessionService"/>
+    </bean>
+
+    <bean id="ingenicoHostedCheckoutMobilePopulator"
+          class="com.ingenico.ogone.direct.populator.hostedcheckout.IngenicoHostedCheckoutMobilePopulator">
+    </bean>
+
+    <bean id="ingenicoHostedCheckoutParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.ingenico.direct.domain.CreateHostedCheckoutRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="ingenicoHostedCheckoutBasicPopulator"/>
+                <ref bean="ingenicoHostedCheckoutCardPopulator"/>
+                <ref bean="ingenicoHostedCheckoutRedirectPopulator"/>
+                <ref bean="ingenicoHostedCheckoutMobilePopulator"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="ingenicoHostedTokenizationPaymentPopulator"
+          class="com.ingenico.ogone.direct.populator.hostedtokenization.IngenicoHostedTokenizationPaymentPopulator">
+        <property name="ingenicoOrderParamConverter" ref="ingenicoOrderParamConverter"/>
+        <property name="sessionService" ref="sessionService"/>
+    </bean>
+
+    <bean id="ingenicoHostedTokenizationParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.ingenico.direct.domain.CreatePaymentRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="ingenicoHostedTokenizationPaymentPopulator"/>
             </list>
         </property>
     </bean>
