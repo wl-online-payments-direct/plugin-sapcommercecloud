@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants;
 import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants.URL.Checkout.Payment.HOP;
@@ -45,8 +46,8 @@ public class IngenicoHostedCheckoutResponseController extends AbstractCheckoutCo
     public String handleHostedCheckoutPaymentResponse(@PathVariable(value = "orderCode") final String orderCode,
                                                       @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
                                                       @RequestParam(value = "hostedCheckoutId", required = true) final String hostedCheckoutId,
-                                                      final Model model) throws InvalidCartException {
-
+                                                      final Model model,
+                                                      final RedirectAttributes redirectAttributes) throws InvalidCartException {
 
         if (BooleanUtils.isFalse(getCartFacade().hasSessionCart())) { // if cart doesn't exist an order exists return order confirmation page
             OrderData orderData = orderFacade.getOrderDetailsForCode(orderCode);
@@ -59,11 +60,16 @@ public class IngenicoHostedCheckoutResponseController extends AbstractCheckoutCo
         } catch (IngenicoNonAuthorizedPaymentException e) {
             switch (e.getReason()) {
                 case CANCELLED:
+                    GlobalMessages.addFlashMessage(redirectAttributes,
+                            GlobalMessages.INFO_MESSAGES_HOLDER,
+                            "checkout.error.payment.cancelled");
                     return REDIRECT_PREFIX +
                             IngenicoWebConstants.URL.Checkout.Payment.root +
                             IngenicoWebConstants.URL.Checkout.Payment.select;
                 case REJECTED:
-                    GlobalMessages.addErrorMessage(model, "checkout.error.paymentethod.formentry.invalid");
+                    GlobalMessages.addFlashMessage(redirectAttributes,
+                            GlobalMessages.ERROR_MESSAGES_HOLDER,
+                            "checkout.error.payment.rejected");
                     return REDIRECT_PREFIX +
                             IngenicoWebConstants.URL.Checkout.Payment.root +
                             IngenicoWebConstants.URL.Checkout.Payment.select;
