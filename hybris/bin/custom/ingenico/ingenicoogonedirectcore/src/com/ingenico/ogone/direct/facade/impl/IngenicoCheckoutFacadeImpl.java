@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import bsh.StringUtil;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -39,6 +40,7 @@ import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,6 +205,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
             case IN_PROGRESS:
                 throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
+                keepPaymentToken(hostedCheckoutData.getCreatedPaymentOutput().getPayment()); //token exists if customer checks "Save payment details" btn on HOP
                 return handlePaymentResponse(hostedCheckoutData.getCreatedPaymentOutput().getPayment());
             default:
                 LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
@@ -318,6 +321,11 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         paymentInfo.setPaymentProductDirectoryId(ingenicoPaymentInfoData.getPaymentProductDirectoryId());
         paymentInfo.setIngenicoCheckoutType(ingenicoPaymentInfoData.getIngenicoCheckoutType());
 
+        if (StringUtils.isNotEmpty(ingenicoPaymentInfoData.getToken())) {
+            paymentInfo.setSaved(true);
+            paymentInfo.setToken(ingenicoPaymentInfoData.getToken());
+        }
+
         AddressModel billingAddress = convertToAddressModel(ingenicoPaymentInfoData.getBillingAddress());
         paymentInfo.setBillingAddress(billingAddress);
         billingAddress.setOwner(paymentInfo);
@@ -358,6 +366,22 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     protected CartModel getCart() {
         return cartService.hasSessionCart() ? cartService.getSessionCart() : null;
+    }
+
+    private void keepPaymentToken(PaymentResponse paymentResponse) {
+
+        String token = "";
+        if (paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
+            token = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken();
+        } else if (paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput() != null) {
+            token = paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput().getToken();
+        }
+
+        if (StringUtils.isNotEmpty(token)) {
+            final CartData cartData = checkoutFacade.getCheckoutCart();
+            cartData.getIngenicoPaymentInfo().setToken(token);
+            handlePaymentInfo(cartData.getIngenicoPaymentInfo());
+        }
     }
 
     private PaymentProduct createGroupedCardPaymentProduct() {
