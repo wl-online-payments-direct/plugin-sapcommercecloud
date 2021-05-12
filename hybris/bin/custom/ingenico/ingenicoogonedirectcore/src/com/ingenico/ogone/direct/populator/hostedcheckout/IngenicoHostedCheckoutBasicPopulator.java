@@ -4,8 +4,10 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 
 import java.util.List;
 
+import com.ingenico.ogone.direct.constants.GeneratedIngenicoogonedirectcoreConstants;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.I18NService;
@@ -39,15 +41,17 @@ public class IngenicoHostedCheckoutBasicPopulator implements Populator<CartModel
         hostedCheckoutSpecificInput.setIsRecurring(Boolean.FALSE);
         hostedCheckoutSpecificInput.setShowResultPage(Boolean.FALSE);
         hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
-        hostedCheckoutSpecificInput.setTokens(getSavedTokens());
+
+        final IngenicoPaymentInfoModel paymentInfo = (IngenicoPaymentInfoModel) cartModel.getPaymentInfo();
+        hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
 
         hostedCheckoutSpecificInput.setReturnUrl(getReturnUrlFromSession());
 
         return hostedCheckoutSpecificInput;
     }
 
-    private String getSavedTokens() {
-        final List<String> savedTokens = ingenicoUserFacade.getSavedTokens();
+    private String getSavedTokens(Integer paymentMethodId) {
+        final List<String> savedTokens = ingenicoUserFacade.getSavedTokensForPaymentMethod(paymentMethodId);
         if (CollectionUtils.isNotEmpty(savedTokens)) {
             return String.join(",", savedTokens);
         }

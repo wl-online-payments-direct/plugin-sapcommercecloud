@@ -152,7 +152,6 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             final IngenicoConfigurationModel currentIngenicoConfiguration = ingenicoConfigurationService.getCurrentIngenicoConfiguration();
             CreateHostedTokenizationRequest params = new CreateHostedTokenizationRequest();
             params.setLocale(shopperLocale);
-            params.setAskConsumerConsent(currentIngenicoConfiguration.getAskConsumerConsent());
             if (StringUtils.isNotBlank(currentIngenicoConfiguration.getVariant())) {
                 params.setVariant(currentIngenicoConfiguration.getVariant());
             }
