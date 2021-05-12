@@ -10,6 +10,8 @@ public interface IngenicoUserFacade {
 
     List<String> getSavedTokens();
 
+    List<String> getSavedTokensForPaymentMethod(Integer paymentMethodId);
+
     List<IngenicoPaymentInfoData> getIngenicoPaymentInfoByToken(String token);
 
 }

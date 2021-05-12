@@ -42,6 +42,13 @@ public class IngenicoUserFacadeImpl implements IngenicoUserFacade {
     }
 
     @Override
+    public List<String> getSavedTokensForPaymentMethod(Integer paymentMethodId) { //return list of unique tokens
+        final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = getIngenicoPaymentInfos(true);
+        final List<String> allSavedTokensForPM = ingenicoPaymentInfos.stream().filter(ingenicoPaymentInfoData -> ingenicoPaymentInfoData.getId().equals(paymentMethodId)).map(IngenicoPaymentInfoData::getToken).collect(Collectors.toList());
+        return allSavedTokensForPM.stream().distinct().collect(Collectors.toList());
+    }
+
+    @Override
     public List<IngenicoPaymentInfoData> getIngenicoPaymentInfoByToken(String token) {
         return null;
     }
