@@ -176,6 +176,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                     paymentForHostedTokenization.getMerchantAction(),
                     UNAUTHORIZED_REASON.NEED_3DS);
         }
+        keepPaymentToken(paymentForHostedTokenization.getPayment()); //token exists if customer checks "Save payment details" btn on HOP
         return handlePaymentResponse(paymentForHostedTokenization.getPayment());
 
     }
@@ -324,6 +325,8 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         if (StringUtils.isNotEmpty(ingenicoPaymentInfoData.getToken())) {
             paymentInfo.setSaved(true);
             paymentInfo.setToken(ingenicoPaymentInfoData.getToken());
+            paymentInfo.setAlias(ingenicoPaymentInfoData.getAlias());
+            paymentInfo.setExpiryDate(ingenicoPaymentInfoData.getExpiryDate());
         }
 
         AddressModel billingAddress = convertToAddressModel(ingenicoPaymentInfoData.getBillingAddress());
@@ -371,8 +374,12 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private void keepPaymentToken(PaymentResponse paymentResponse) {
 
         String token = "";
+        String cardNumber = "";
+        String expDate = "";
         if (paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
             token = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken();
+            cardNumber = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getCard().getCardNumber();
+            expDate = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getCard().getExpiryDate();
         } else if (paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput() != null) {
             token = paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput().getToken();
         }
@@ -380,6 +387,8 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         if (StringUtils.isNotEmpty(token)) {
             final CartData cartData = checkoutFacade.getCheckoutCart();
             cartData.getIngenicoPaymentInfo().setToken(token);
+            cartData.getIngenicoPaymentInfo().setExpiryDate(expDate);
+            cartData.getIngenicoPaymentInfo().setAlias(cardNumber); //in tokenization response the alias==cardNumber
             handlePaymentInfo(cartData.getIngenicoPaymentInfo());
         }
     }
