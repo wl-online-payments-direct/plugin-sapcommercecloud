@@ -22,7 +22,6 @@ public class IngenicoCustomerAccountDaoImpl extends AbstractItemDao implements I
     private static final String FIND_SAVED_INGENICO_PAYMENT_INFOS_BY_CUSTOMER_QUERY = FIND_INGENICO_PAYMENT_INFOS_BY_CUSTOMER_QUERY
             + " AND {" + IngenicoPaymentInfoModel.SAVED + "} = ?saved";
 
-
     @Override
     public List<IngenicoPaymentInfoModel> findIgenicoPaymentInfosByCustomer(CustomerModel customerModel, boolean saved) {
         validateParameterNotNull(customerModel, "Customer must not be null");
