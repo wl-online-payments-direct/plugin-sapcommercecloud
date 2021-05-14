@@ -131,11 +131,14 @@ public class IngenicoTokenizationCheckoutStepController extends AbstractCheckout
                     getSessionService().setAttribute(cartData.getCode() + "_ingenico_htp_id", e.getPaymentResponse().getId());
                     return REDIRECT_PREFIX + e.getMerchantAction().getRedirectData().getRedirectURL();
                 case REJECTED:
-                    if (e.getPaymentResponse() != null) {
-                        GlobalMessages.addErrorMessage(model, "checkout.error.payment." + e.getPaymentResponse().getStatus());
-                    }
+                    GlobalMessages.addFlashMessage(redirectAttributes,
+                            GlobalMessages.ERROR_MESSAGES_HOLDER,
+                            "checkout.error.payment.rejected");
                     return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
                 case CANCELLED:
+                    GlobalMessages.addFlashMessage(redirectAttributes,
+                            GlobalMessages.INFO_MESSAGES_HOLDER,
+                            "checkout.error.payment.cancelled");
                     return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
             }
         }
@@ -162,8 +165,23 @@ public class IngenicoTokenizationCheckoutStepController extends AbstractCheckout
             final OrderData orderData = ingenicoCheckoutFacade.handle3dsResponse(ref, returnMAC, paymentId);
             return redirectToOrderConfirmationPage(orderData);
         } catch (IngenicoNonAuthorizedPaymentException e) {
-            GlobalMessages.addErrorMessage(model, "checkout.error.paymentethod.formentry.invalid");
-            return REDIRECT_PREFIX + REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
+            switch (e.getReason()) {
+                case CANCELLED:
+                    GlobalMessages.addFlashMessage(redirectAttributes,
+                            GlobalMessages.INFO_MESSAGES_HOLDER,
+                            "checkout.error.payment.cancelled");
+                    return REDIRECT_PREFIX +
+                            IngenicoWebConstants.URL.Checkout.Payment.root +
+                            IngenicoWebConstants.URL.Checkout.Payment.select;
+                case REJECTED:
+                    GlobalMessages.addFlashMessage(redirectAttributes,
+                            GlobalMessages.ERROR_MESSAGES_HOLDER,
+                            "checkout.error.payment.rejected");
+                    return REDIRECT_PREFIX +
+                            IngenicoWebConstants.URL.Checkout.Payment.root +
+                            IngenicoWebConstants.URL.Checkout.Payment.select;
+            }
+            return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
         }
     }
 
