@@ -29,7 +29,7 @@
                                     <ingenico:ingenicoBillingAddressDetailsItem order="${orderData}"/>
                                 </div>
                                 <c:if test="${not empty orderData.ingenicoPaymentInfo}">
-                                ${orderData.ingenicoPaymentInfo.paymentMethod}
+                                    ${orderData.ingenicoPaymentInfo.paymentMethod}
                                     <div class="col-sm-6 col-md-4 order-payment-data">
                                         <ingenico:ingenicoPaymentDetails order="${orderData}"/>
                                     </div>
@@ -42,6 +42,7 @@
         </div>
 
         <order:accountOrderDetailOrderTotals order="${orderData}"/>
+        <jsp:include page="/WEB-INF/views/responsive/pages/checkout/checkoutConfirmationContinueButton.jsp" />
 
     </jsp:body>
 </template:page>
