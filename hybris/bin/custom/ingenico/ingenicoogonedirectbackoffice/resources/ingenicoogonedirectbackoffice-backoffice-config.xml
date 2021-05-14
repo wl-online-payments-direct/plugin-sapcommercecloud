@@ -42,7 +42,6 @@
 				<as:field name="apiKey" />
 				<as:field name="defaultOperationCode" />
 				<as:field name="captureTimeFrame" />
-				<as:field name="askConsumerConsent" />
 				<as:field name="variant" />
 			</as:field-list>
 		</as:advanced-search>
@@ -66,7 +65,6 @@
 					<ea:attribute qualifier="captureTimeFrame"/>
 				</ea:section>
 				<ea:section name="hmc.ingenico.ingenicoTokenizationConfig">
-					<ea:attribute qualifier="askConsumerConsent"/>
 					<ea:attribute qualifier="variant"/>
 				</ea:section>
 			</ea:tab>
