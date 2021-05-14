@@ -2,6 +2,7 @@ package com.ingenico.ogone.direct.facade.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
@@ -39,6 +40,24 @@ public class IngenicoUserFacadeImpl implements IngenicoUserFacade {
     public List<String> getSavedTokens() {
         final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = getIngenicoPaymentInfos(true);
         return ingenicoPaymentInfos.stream().map(IngenicoPaymentInfoData::getToken).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getSavedTokensForPaymentMethod(Integer paymentMethodId) { //return list of unique tokens
+        final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = getIngenicoPaymentInfos(true);
+        final List<String> allSavedTokensForPM = ingenicoPaymentInfos.stream().filter(ingenicoPaymentInfoData -> ingenicoPaymentInfoData.getId().equals(paymentMethodId)).map(IngenicoPaymentInfoData::getToken).collect(Collectors.toList());
+        return allSavedTokensForPM.stream().distinct().collect(Collectors.toList());
+    }
+
+    public List<IngenicoPaymentInfoData> getIngenicoPaymentInfoDataForUniqueTokens() {
+        final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = getIngenicoPaymentInfos(true);
+        Map<String, List<IngenicoPaymentInfoData>> groupedIngenicoPaymentInfoDataItems = ingenicoPaymentInfos.stream().collect(Collectors.groupingBy(IngenicoPaymentInfoData::getToken));
+
+        List<IngenicoPaymentInfoData> ingenicoPaymentInfoDataUniqueTokens = new ArrayList<>();
+        for (List<IngenicoPaymentInfoData> ingenicoPaymentInfoDataList : groupedIngenicoPaymentInfoDataItems.values()) {
+            ingenicoPaymentInfoDataUniqueTokens.add(ingenicoPaymentInfoDataList.get(0));
+        }
+        return ingenicoPaymentInfoDataUniqueTokens;
     }
 
     @Override
