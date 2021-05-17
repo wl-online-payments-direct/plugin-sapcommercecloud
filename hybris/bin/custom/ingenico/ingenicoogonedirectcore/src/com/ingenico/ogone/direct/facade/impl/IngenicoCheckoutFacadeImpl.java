@@ -1,5 +1,6 @@
 package com.ingenico.ogone.direct.facade.impl;
 
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_BCC;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL_COUNTRY;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM;
@@ -9,11 +10,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import bsh.StringUtil;
-import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
-import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.order.data.OrderData;
@@ -35,7 +34,6 @@ import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
-import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 
@@ -81,8 +79,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private CommerceCheckoutService commerceCheckoutService;
     private BaseStoreService baseStoreService;
     private CustomerAccountService customerAccountService;
-    private BaseSiteService baseSiteService;
-    private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
 
     private IngenicoUserFacade ingenicoUserFacade;
     private IngenicoPaymentService ingenicoPaymentService;
@@ -283,8 +279,10 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 final boolean isCardsPresent = paymentProducts.stream()
                         .anyMatch(paymentProduct -> PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentProduct.getPaymentMethod()));
 
+                final Predicate<PaymentProduct> isCard = paymentProduct -> PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentProduct.getPaymentMethod());
+                final Predicate<PaymentProduct> isBCMC = paymentProduct -> PAYMENT_METHOD_BCC == paymentProduct.getId();
                 paymentProducts = paymentProducts.stream()
-                        .filter(paymentProduct -> PAYMENT_METHOD_TYPE.REDIRECT.getValue().equals(paymentProduct.getPaymentMethod()))
+                        .filter(isCard.negate().or(isBCMC))
                         .collect(Collectors.toList());
 
                 if (isCardsPresent) {
@@ -404,34 +402,12 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     private Boolean isValidPaymentMethod(PaymentProduct paymentProduct) {
         final IngenicoCheckoutTypesEnum ingenicoCheckoutType = getIngenicoCheckoutType();
-        switch (ingenicoCheckoutType) {
-            case HOSTED_CHECKOUT:
-                if (PAYMENT_METHOD_TYPE.MOBILE.getValue().equals(paymentProduct.getPaymentMethod())) {
-                    return false;
-                }
-                break;
-            case HOSTED_TOKENIZATION:
-                if (PAYMENT_METHOD_TYPE.MOBILE.getValue().equals(paymentProduct.getPaymentMethod())) {
-                    return false;
-                }
-                break;
-            default:
-                // Happy Sonar
-                break;
+        if (IngenicoCheckoutTypesEnum.HOSTED_CHECKOUT.equals(ingenicoCheckoutType)) {
+            return paymentProduct.getId() >= 0;
         }
         return true;
     }
 
-    protected String getFullResponseUrl(final String responseUrl, final boolean isSecure, String cartId) {
-        final BaseSiteModel currentBaseSite = baseSiteService.getCurrentBaseSite();
-        //TODO remove clue cartId
-        final String queryParams = "cartId=" + cartId;
-
-        final String fullResponseUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(currentBaseSite, isSecure,
-                responseUrl, queryParams);
-
-        return fullResponseUrl == null ? "" : fullResponseUrl;
-    }
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;
@@ -467,14 +443,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     public void setIngenicoUserFacade(IngenicoUserFacade ingenicoUserFacade) {
         this.ingenicoUserFacade = ingenicoUserFacade;
-    }
-
-    public void setBaseSiteService(BaseSiteService baseSiteService) {
-        this.baseSiteService = baseSiteService;
-    }
-
-    public void setSiteBaseUrlResolutionService(SiteBaseUrlResolutionService siteBaseUrlResolutionService) {
-        this.siteBaseUrlResolutionService = siteBaseUrlResolutionService;
     }
 
     public void setCustomerAccountService(CustomerAccountService customerAccountService) {
