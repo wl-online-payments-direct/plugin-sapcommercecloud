@@ -80,6 +80,15 @@
 		</y:base>
 	</context>
 
+	<!-- IngenicoConfiguration test connection btn -->
+	<context merge-by="module" component="editorareaactions" type="IngenicoConfiguration">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common">
+				<y:action action-id="com.ingenico.ogone.direct.actions.ingenicoTestConnectionAction" property="currentObject"/>
+			</y:group>
+		</y:actions>
+	</context>
+
 	<!-- IngenicoConfiguration BO appearance END -->
 
 	<!-- BaseStore update BO appearance START -->
