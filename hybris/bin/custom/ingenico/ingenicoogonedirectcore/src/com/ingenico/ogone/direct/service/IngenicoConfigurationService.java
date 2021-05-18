@@ -14,5 +14,4 @@ public interface IngenicoConfigurationService {
 
     String getCurrentMerchantId();
 
-    String testConnection();
 }
