@@ -6,6 +6,8 @@ import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 
 public interface IngenicoConfigurationService {
 
+    IngenicoConfigurationModel getIngenicoConfigurationByWebhookKey(String webhookKey);
+
     IngenicoConfigurationModel getIngenicoConfiguration(BaseStoreModel baseStoreModel);
 
     IngenicoConfigurationModel getCurrentIngenicoConfiguration();

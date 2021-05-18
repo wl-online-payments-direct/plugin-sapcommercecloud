@@ -3,6 +3,19 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="ingenicoCustomerAccountDao" class="com.ingenico.ogone.direct.dao.impl.IngenicoCustomerAccountDaoImpl" parent="abstractItemDao" />
+    <bean id="ingenicoCustomerAccountDao" class="com.ingenico.ogone.direct.dao.impl.IngenicoCustomerAccountDaoImpl"
+          parent="abstractItemDao"/>
+
+    <bean id="ingenicoConfigurationDao" class="com.ingenico.ogone.direct.dao.impl.IngenicoConfigurationDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="ingenicoWebhookDao" class="com.ingenico.ogone.direct.dao.impl.IngenicoWebhookDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="ingenicoTransactionDao" class="com.ingenico.ogone.direct.dao.impl.IngenicoTransactionDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
 
 </beans>

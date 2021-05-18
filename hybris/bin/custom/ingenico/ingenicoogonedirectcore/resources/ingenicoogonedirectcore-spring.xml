@@ -59,5 +59,14 @@
         <property name="customerAccountService" ref="customerAccountService"/>
     </bean>
 
+    <bean id="ingenicoWebhookFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoWebhookFacadeImpl">
+        <property name="ingenicoWebhookService" ref="ingenicoWebhookService"/>
+    </bean>
 
+    <!-- Job -->
+    <bean id="ingenicoProcessWebhooksEventJob" class="com.ingenico.ogone.direct.cronjob.IngenicoProcessWebhooksEventJob" parent="abstractJobPerformable">
+        <property name="modelService" ref="modelService" />
+        <property name="ingenicoWebhookService" ref="ingenicoWebhookService" />
+        <property name="ingenicoWebhookDao" ref="ingenicoWebhookDao" />
+    </bean>
 </beans>
