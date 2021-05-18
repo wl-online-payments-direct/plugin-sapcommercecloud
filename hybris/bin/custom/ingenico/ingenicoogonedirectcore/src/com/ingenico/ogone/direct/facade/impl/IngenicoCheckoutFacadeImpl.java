@@ -167,7 +167,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         final CreatePaymentResponse paymentForHostedTokenization = ingenicoPaymentService.createPaymentForHostedTokenization(ingenicoHostedTokenizationData, hostedTokenization);
 
         if (paymentForHostedTokenization.getMerchantAction() != null) {
-            ingenicoTransactionService.createPaymentTransaction(cartService.getSessionCart(), paymentForHostedTokenization.getPayment(), PaymentTransactionType.AUTHORIZATION);
+            ingenicoTransactionService.createOrUpdatePaymentTransaction(cartService.getSessionCart(), paymentForHostedTokenization.getPayment(), PaymentTransactionType.AUTHORIZATION);
             throw new IngenicoNonAuthorizedPaymentException(paymentForHostedTokenization.getPayment(),
                     paymentForHostedTokenization.getMerchantAction(),
                     UNAUTHORIZED_REASON.NEED_3DS);
@@ -229,12 +229,12 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
             case CREATED:
             case REJECTED:
             case REJECTED_CAPTURE:
-                ingenicoTransactionService.createPaymentTransaction(cartService.getSessionCart(),
+                ingenicoTransactionService.createOrUpdatePaymentTransaction(cartService.getSessionCart(),
                         paymentResponse,
                         PaymentTransactionType.AUTHORIZATION);
                 throw new IngenicoNonAuthorizedPaymentException(paymentResponse, UNAUTHORIZED_REASON.REJECTED);
             case CANCELLED:
-                ingenicoTransactionService.createPaymentTransaction(cartService.getSessionCart(),
+                ingenicoTransactionService.createOrUpdatePaymentTransaction(cartService.getSessionCart(),
                         paymentResponse,
                         PaymentTransactionType.AUTHORIZATION);
                 throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.CANCELLED);
@@ -259,7 +259,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         final BaseStoreModel baseStoreModel = baseStoreService.getBaseStoreForUid(orderData.getStore());
         final OrderModel orderModel = customerAccountService.getOrderForCode(orderData.getCode(), baseStoreModel);
 
-        ingenicoTransactionService.createPaymentTransaction(orderModel, paymentResponse, paymentTransactionType);
+        ingenicoTransactionService.createOrUpdatePaymentTransaction(orderModel, paymentResponse, paymentTransactionType);
         return orderData;
     }
 
