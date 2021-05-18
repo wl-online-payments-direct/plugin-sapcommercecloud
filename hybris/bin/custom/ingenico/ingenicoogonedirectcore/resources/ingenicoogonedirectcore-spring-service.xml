@@ -6,7 +6,11 @@
     <bean id="ingenicoConfigurationService"
           class="com.ingenico.ogone.direct.service.impl.IngenicoConfigurationServiceImpl">
         <property name="baseStoreService" ref="baseStoreService"/>
-        <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>
+    </bean>
+
+    <bean id="ingenicoServiceMethodService"
+          class="com.ingenico.ogone.direct.service.impl.IngenicoServiceMethodServiceImpl">
+        <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
     </bean>
 
     <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
