@@ -56,9 +56,18 @@
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
         <property name="modelService" ref="modelService"/>
         <property name="baseStoreService" ref="baseStoreService"/>
-        <property name="baseSiteService" ref="baseSiteService"/>
-        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
         <property name="customerAccountService" ref="customerAccountService"/>
+    </bean>
+
+    <bean id="ingenicoWebhookFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoWebhookFacadeImpl">
+        <property name="ingenicoWebhookService" ref="ingenicoWebhookService"/>
+    </bean>
+
+    <!-- Job -->
+    <bean id="ingenicoProcessWebhooksEventJob" class="com.ingenico.ogone.direct.cronjob.IngenicoProcessWebhooksEventJob" parent="abstractJobPerformable">
+        <property name="modelService" ref="modelService" />
+        <property name="ingenicoWebhookService" ref="ingenicoWebhookService" />
+        <property name="ingenicoWebhookDao" ref="ingenicoWebhookDao" />
     </bean>
 
     <!-- strategies -->
