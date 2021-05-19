@@ -16,6 +16,11 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
 
     public static final String PAYMENT_METHOD_IDEAL_COUNTRY = "NL";
 
+    public static final String PAYMENT_PROVIDER = "INGENICO";
+    public static final String INGENICO_EVENT_AUTHORIZED = "ingenico_authorized";
+    public static final String INGENICO_EVENT_CAPTURED = "ingenico_catpured";
+    public static final String INGENICO_EVENT_REFUNDED = "ingenico_refunded";
+
 
     public enum PAYMENT_METHOD_TYPE {
         CARD("card"),
@@ -111,6 +116,43 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
             return value;
         }
     }
+
+    public enum WEBHOOK_TYPE_ENUM {
+        PAYMENT_CREATED("payment.created"),
+        PAYMENT_REDIRECTED("payment.redirected"),
+        PAYMENT_AUTH_REQUESTED("payment.authorization_requested"),
+        PAYMENT_PENDING_APPROVAL("payment.pending_approval"),
+        PAYMENT_PENDING_COMPLETION("payment.pending_completion"),
+        PAYMENT_PENDING_CAPTURE("payment.pending_capture"),
+        PAYMENT_CAPTURE_REQUEST("payment.capture_requested"),
+        PAYMENT_CAPTURED("payment.captured"),
+        PAYMENT_CHARGEBACKED("payment.chargebacked"),
+        PAYMENT_REJECTED("payment.rejected"),
+        PAYMENT_REJECTED_CAPTURE("payment.rejected_capture"),
+        PAYMENT_CANCELLED("payment.cancelled"),
+        PAYMENT_REFUNDED("payment.refunded"),
+        PAYMENT_REFUND_REQUESTED("refund_requested");
+
+        WEBHOOK_TYPE_ENUM(String value) {
+            this.value = value;
+        }
+
+        private final String value;
+        public String getValue() {
+            return value;
+        }
+
+        public static WEBHOOK_TYPE_ENUM fromString(String text) {
+            for (WEBHOOK_TYPE_ENUM wte : WEBHOOK_TYPE_ENUM.values()) {
+                if (wte.value.equalsIgnoreCase(text)) {
+                    return wte;
+                }
+            }
+            return null;
+        }
+
+    }
+
 
     private IngenicoogonedirectcoreConstants() {
         //empty to avoid instantiating this constant class
