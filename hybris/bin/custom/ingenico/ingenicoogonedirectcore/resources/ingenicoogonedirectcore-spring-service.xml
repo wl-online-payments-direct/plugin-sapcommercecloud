@@ -6,6 +6,7 @@
     <bean id="ingenicoConfigurationService"
           class="com.ingenico.ogone.direct.service.impl.IngenicoConfigurationServiceImpl">
         <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="ingenicoConfigurationDao" ref="ingenicoConfigurationDao"/>
     </bean>
 
     <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
@@ -23,8 +24,22 @@
         <property name="ingenicoCustomerAccountDao" ref="ingenicoCustomerAccountDao"/>
     </bean>
 
+    <bean id="ingenicoBusinessProcessService"
+          class="com.ingenico.ogone.direct.service.impl.IngenicoBusinessProcessServiceImpl">
+        <property name="businessProcessService" ref="businessProcessService"/>
+    </bean>
+
     <bean id="ingenicoTransactionService"
           class="com.ingenico.ogone.direct.service.impl.IngenicoTransactionServiceImpl">
+        <property name="ingenicoBusinessProcessService" ref="ingenicoBusinessProcessService"/>
+        <property name="ingenicoTransactionDao" ref="ingenicoTransactionDao"/>
+        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
+        <property name="modelService" ref="modelService"/>
+    </bean>
+
+    <bean id="ingenicoWebhookService" class="com.ingenico.ogone.direct.service.impl.IngenicoWebhookServiceImpl">
+        <property name="ingenicoConfigurationService" ref="ingenicoConfigurationService"/>
+        <property name="ingenicoTransactionService" ref="ingenicoTransactionService"/>
         <property name="modelService" ref="modelService"/>
     </bean>
 
