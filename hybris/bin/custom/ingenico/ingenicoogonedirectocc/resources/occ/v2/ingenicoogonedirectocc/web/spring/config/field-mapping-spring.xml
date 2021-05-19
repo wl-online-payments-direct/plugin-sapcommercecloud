@@ -9,6 +9,40 @@
 
     <!-- Fieldset mapping -->
 
+    <bean parent="fieldSetLevelMapping" id="ingenicoAbstractOrderWsDTOFieldSetLevelMapping">
+        <property name="dtoClass"
+                  value="de.hybris.platform.commercewebservicescommons.dto.order.AbstractOrderWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="ingenicoPaymentInfo(BASIC)"/>
+                <entry key="DEFAULT" value="ingenicoPaymentInfo(DEFAULT)"/>
+                <entry key="FULL" value="ingenicoPaymentInfo(FULL)"/>
+            </map>
+        </property>
+    </bean>
+    <bean parent="fieldSetLevelMapping" id="ingenicoCartWsDTOFieldSetLevelMapping">
+        <property name="dtoClass"
+                  value="de.hybris.platform.commercewebservicescommons.dto.order.CartWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="ingenicoPaymentInfo(BASIC)"/>
+                <entry key="DEFAULT" value="ingenicoPaymentInfo(DEFAULT)"/>
+                <entry key="FULL" value="ingenicoPaymentInfo(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="ingenicoPaymentInfoWsDTOFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.IngenicoPaymentInfoWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="paymentProductId,paymentMethod,issuerId,ingenicoCheckoutType"/>
+                <entry key="DEFAULT" value="BASIC,billingAddress(DEFAULT),ingenicoCheckoutType"/>
+                <entry key="FULL" value="BASIC,billingAddress(FULL),ingenicoCheckoutType"/>
+            </map>
+        </property>
+    </bean>
+
     <bean parent="fieldSetLevelMapping" id="paymentProductListWsDTOFieldSetLevelMapping">
         <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO"/>
         <property name="levelMapping">
@@ -47,7 +81,7 @@
         <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="hostedTokenizationId,redirectUrl,tokens(BASIC)"/>
+                <entry key="BASIC" value="hostedTokenizationId,redirectURL,tokens(BASIC)"/>
                 <entry key="DEFAULT" value="BASIC,tokens(DEFAULT)"/>
                 <entry key="FULL" value="BASIC,tokens(FULL)"/>
             </map>
@@ -87,6 +121,17 @@
         </property>
     </bean>
 
+    <bean parent="fieldSetLevelMapping" id="hostedCheckoutResponseFieldSetLevelMapping">
+        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.HostedCheckoutResponseWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="hostedCheckoutId,redirectURL"/>
+                <entry key="DEFAULT" value="BASIC"/>
+                <entry key="FULL" value="DEFAULT"/>
+            </map>
+        </property>
+    </bean>
+
     <!-- Field Mappings  -->
 
     <bean id="hostedTokenizationFieldMapper" parent="fieldMapper">
@@ -96,11 +141,37 @@
                   value="com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
         <property name="fieldMapping">
             <map>
-                <entry key="partialRedirectUrl" value="redirectUrl"/>
+                <entry key="partialRedirectUrl" value="redirectURL"/>
             </map>
         </property>
     </bean>
 
+    <bean id="hostedCheckoutFieldMapper" parent="fieldMapper">
+        <property name="sourceClass"
+                  value="com.ingenico.direct.domain.CreateHostedCheckoutResponse"/>
+        <property name="destClass"
+                  value="com.ingenico.ogone.direct.payment.dto.HostedCheckoutResponseWsDTO"/>
+        <property name="fieldMapping">
+            <map>
+                <entry key="partialRedirectUrl" value="redirectURL"/>
+            </map>
+        </property>
+    </bean>
 
+    <bean id="IngenicoPaymentDetailsFieldMapper" parent="fieldMapper">
+        <property name="sourceClass"
+                  value="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
+        <property name="destClass"
+                  value="com.ingenico.ogone.direct.payment.dto.IngenicoPaymentDetailsWsDTO"/>
+        <property name="fieldMapping">
+            <map>
+                <entry key="id" value="paymentProductId"/>
+                <entry key="paymentProductDirectoryId" value="issuerId"/>
+            </map>
+        </property>
+    </bean>
+
+    <!-- CONVERTER -->
+    <bean class="com.ingenico.ogone.direct.occ.converter.IngenicoCheckoutTypeConverter"/>
 
 </beans>

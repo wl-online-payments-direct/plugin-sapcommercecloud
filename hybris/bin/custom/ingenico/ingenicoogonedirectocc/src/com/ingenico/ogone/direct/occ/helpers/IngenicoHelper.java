@@ -21,6 +21,7 @@ import com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO;
 import com.ingenico.ogone.direct.payment.dto.ProductDirectoryWsDTO;
 import com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO;
+import com.ingenico.ogone.direct.payment.dto.SavedTokenListWsDTO;
 
 
 @Component("ingenicoHelper")
@@ -54,8 +55,9 @@ public class IngenicoHelper {
 
     public void fillSavedTokens(HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO, String fields) {
         final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = ingenicoUserFacade.getIngenicoPaymentInfos(true);
-        final List<SavedTokenWsDTO> savedTokenWsDTOS = getDataMapper().mapAsList(ingenicoPaymentInfos, SavedTokenWsDTO.class, fields);
-        hostedTokenizationResponseWsDTO.setTokens(savedTokenWsDTOS);
+        final SavedTokenListWsDTO savedTokenListWsDTO = new SavedTokenListWsDTO();
+        savedTokenListWsDTO.setTokens(getDataMapper().mapAsList(ingenicoPaymentInfos, SavedTokenWsDTO.class, fields));
+        hostedTokenizationResponseWsDTO.setTokens(savedTokenListWsDTO);
     }
 
 
