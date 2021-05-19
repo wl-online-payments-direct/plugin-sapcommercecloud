@@ -9,7 +9,7 @@ import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.ogone.direct.service.IngenicoServiceMethodsService;
 import org.zkoss.zhtml.Messagebox;
 
-public class IngenicoTestConnectionAction implements CockpitAction {
+public class IngenicoTestConnectionAction implements CockpitAction<IngenicoConfigurationModel, Object> {
 
    private final static String TEST_CONNECTION_OK_RESULT = "OK";
 
@@ -17,15 +17,15 @@ public class IngenicoTestConnectionAction implements CockpitAction {
    private IngenicoServiceMethodsService ingenicoServiceMethodsService;
 
    @Override
-   public ActionResult<String> perform(ActionContext actionContext) {
-      IngenicoConfigurationModel ingenicoConfigurationModel = (IngenicoConfigurationModel) actionContext.getData();
+   public ActionResult<Object> perform(ActionContext<IngenicoConfigurationModel> actionContext) {
+      IngenicoConfigurationModel ingenicoConfigurationModel = actionContext.getData();
       String testConnectionResult = ingenicoServiceMethodsService.testConnection(ingenicoConfigurationModel);
 
-      ActionResult<String> result = null;
+      ActionResult<Object> result = null;
       if (testConnectionResult.equals(TEST_CONNECTION_OK_RESULT)) {
-         result = new ActionResult<String>(ActionResult.SUCCESS, TEST_CONNECTION_OK_RESULT);
+         result = new ActionResult<Object>(ActionResult.SUCCESS, TEST_CONNECTION_OK_RESULT);
       } else {
-         result = new ActionResult<String>(ActionResult.ERROR);
+         result = new ActionResult<Object>(ActionResult.ERROR);
       }
       Messagebox.show(result.getData() + " (" + result.getResultCode() + ")");
       return result;
