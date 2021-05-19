@@ -17,6 +17,12 @@
             <value code="SALE"/>
             <value code="PRE_AUTHORIZATION"/>
         </enumtype>
+        <enumtype code="IngenicoWebhooksEventStatusEnum">
+            <value code="CREATED"/>
+            <value code="FAILED"/>
+            <value code="MAX_ATTEMPT_REACHED"/>
+            <value code="PROCESSED"/>
+        </enumtype>
     </enumtypes>
 
     <itemtypes>
@@ -41,6 +47,14 @@
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="apiSecret" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="webhookKeyId" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="webhookSecret" type="java.lang.String">
                     <modifiers read="true" write="true" optional="false"/>
                     <persistence type="property"/>
                 </attribute>
@@ -104,9 +118,9 @@
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="alias" type="java.lang.String">
-                <modifiers read="true" write="true" search="false" optional="true"/>
-                <persistence type="property"/>
-            </attribute>
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
                 <attribute qualifier="type" type="java.lang.String">
                     <modifiers read="true" write="true" search="true" optional="true"/>
                     <persistence type="property"/>
@@ -118,6 +132,44 @@
                 <attribute qualifier="expiryDate" type="java.lang.String">
                     <modifiers read="true" write="true" search="true" optional="true"/>
                     <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="IngenicoWebhooksEvent" extends="GenericItem">
+            <description>Item type which will keep webhook received as String</description>
+            <deployment table="ingenicoWebhooksEvent" typecode="15002"/>
+            <attributes>
+                <attribute qualifier="body" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <defaultvalue>new java.lang.String("")</defaultvalue>
+                    <persistence type="property">
+                        <columntype database="oracle">
+                            <value>clob</value>
+                        </columntype>
+                        <columntype database="sap">
+                            <value>NCLOB</value>
+                        </columntype>
+                        <columntype>
+                            <value>HYBRIS.LONG_STRING</value>
+                        </columntype>
+                    </persistence>
+                </attribute>
+                <attribute qualifier="attempts" type="java.lang.Integer">
+                    <defaultvalue>Integer.valueOf(0)</defaultvalue>
+                    <modifiers read="true" initial="true" write="true" search="false" optional="false" unique="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="lastProcessedTime" type="java.util.Date">
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="createdTime" type="java.util.Date">
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="status" type="IngenicoWebhooksEventStatusEnum">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("IngenicoWebhooksEventStatusEnum","CREATED")</defaultvalue>
+                    <modifiers read="true" initial="true" write="true" search="false" optional="false" unique="false"/>
                 </attribute>
             </attributes>
         </itemtype>
