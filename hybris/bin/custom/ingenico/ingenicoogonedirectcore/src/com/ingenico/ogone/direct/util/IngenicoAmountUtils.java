@@ -22,6 +22,13 @@ public class IngenicoAmountUtils {
         return createAmount(BigDecimal.valueOf(amount), currencyIso);
     }
 
+    public BigDecimal fromAmount(long amount, String currencyIso) {
+        final CurrencyModel currency = commonI18NService.getCurrency(currencyIso);
+        final Integer digits = currency.getDigits();
+        return new BigDecimal(amount).movePointLeft(digits);
+    }
+
+
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;
     }

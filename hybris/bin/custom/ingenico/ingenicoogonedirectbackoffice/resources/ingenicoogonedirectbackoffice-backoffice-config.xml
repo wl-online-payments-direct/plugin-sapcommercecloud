@@ -59,6 +59,8 @@
 					<ea:attribute qualifier="endpointURL"/>
 					<ea:attribute qualifier="apiKey"/>
 					<ea:attribute qualifier="apiSecret"/>
+					<ea:attribute qualifier="webhookKeyId"/>
+					<ea:attribute qualifier="webhookSecret"/>
 				</ea:section>
 				<ea:section name="hmc.ingenico.ingenicoOperationCodeConfig">
 					<ea:attribute qualifier="defaultOperationCode"/>
@@ -141,5 +143,57 @@
 		</context>
 	</context>
 	<!-- IngenicoPaymentInfo BO appearance END -->
+
+	<!-- IngenicoWebhooksEvent BO appearance -->
+	<context merge-by="type" parent="GenericItem" type="IngenicoWebhooksEvent">
+		<context component="base">
+			<y:base>
+				<y:labels>
+					<y:label>@labelService.getObjectLabel(itemtype) - createdTime</y:label>
+				</y:labels>
+			</y:base>
+		</context>
+		<context component="listview">
+			<lv:list-view >
+				<lv:column qualifier="body" />
+				<lv:column qualifier="status" />
+				<lv:column qualifier="createdTime" />
+				<lv:column qualifier="lastProcessedTime" />
+				<lv:column qualifier="attempts" />
+			</lv:list-view>
+		</context>
+		<context component="simple-search">
+			<ss:simple-search>
+				<ss:field name="body"/>
+				<ss:sort-field name="createdTime" asc="false"/>
+			</ss:simple-search>
+		</context>
+		<context component="advanced-search">
+			<as:advanced-search>
+				<as:field-list>
+					<as:field name="body" operator="contains" selected="true"/>
+					<as:field name="status" operator="equals" selected="true"/>
+					<as:field name="createdTime" operator="greaterOrEquals" selected="true" />
+					<as:field name="lastProcessedTime" operator="equals"/>
+					<as:field name="attempts" operator="greaterOrEquals"/>
+				</as:field-list>
+				<as:sort-field name="createdTime" asc="false"/>
+			</as:advanced-search>
+		</context>
+		<context component="editor-area">
+			<ea:editorArea>
+				<ea:tab name="hmc.ingenico">
+					<ea:section name="hmc.ingenico.ingenicowebhooks">
+						<ea:attribute qualifier="body" readonly="true"/>
+						<ea:attribute qualifier="status"/>
+						<ea:attribute qualifier="createdTime" readonly="true"/>
+						<ea:attribute qualifier="lastProcessedTime" readonly="true"/>
+						<ea:attribute qualifier="attempts" readonly="true"/>
+					</ea:section>
+				</ea:tab>
+			</ea:editorArea>
+		</context>
+	</context>
+	<!-- IngenicoWebhooksEvent BO appearance END -->
 
 </config>

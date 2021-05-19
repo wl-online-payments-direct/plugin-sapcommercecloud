@@ -10,17 +10,8 @@
            eternal="false"
            overflowToDisk="false"
            diskPersistent="false"
-           timeToIdleSeconds="300"
-           timeToLiveSeconds="1800"
-           memoryStoreEvictionPolicy="LRU"/>
-
-    <cache name="ingenicoConfiguration"
-           maxElementsInMemory="100"
-           eternal="false"
-           overflowToDisk="false"
-           diskPersistent="false"
-           timeToIdleSeconds="300"
-           timeToLiveSeconds="1800"
+           timeToIdleSeconds="100"
+           timeToLiveSeconds="300"
            memoryStoreEvictionPolicy="LRU"/>
 
 </ehcache>
