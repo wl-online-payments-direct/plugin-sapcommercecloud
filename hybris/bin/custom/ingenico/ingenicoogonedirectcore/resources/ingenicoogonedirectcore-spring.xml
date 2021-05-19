@@ -61,5 +61,11 @@
         <property name="customerAccountService" ref="customerAccountService"/>
     </bean>
 
+    <!-- strategies -->
+    <alias alias="createOrderFromCartStrategy" name="defaultIngenicoCreateOrderFromCartStrategy"/>
+    <bean id="defaultIngenicoCreateOrderFromCartStrategy"
+          class="com.ingenico.ogone.direct.strategy.impl.DefaultIngenicoCreateOrderFromCartStrategy" parent="defaultCreateOrderFromCartStrategy">
+    </bean>
+
 
 </beans>
