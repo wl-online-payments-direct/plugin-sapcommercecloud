@@ -11,7 +11,7 @@ import com.ingenico.ogone.direct.dao.IngenicoTransactionDao;
 public class IngenicoTransactionDaoImpl implements IngenicoTransactionDao {
 
     private static final String Q_BY_KEY = "SELECT {" + PaymentTransactionModel.PK + "} FROM {" + PaymentTransactionModel._TYPECODE
-            + "} WHERE {" + PaymentTransactionModel.CODE + "} = ?reference AND {" + PaymentTransactionModel.PAYMENTPROVIDER + "} = ?paymentProvider " +
+            + "} WHERE {" + PaymentTransactionModel.CODE + "} = ?code AND {" + PaymentTransactionModel.PAYMENTPROVIDER + "} = ?paymentProvider " +
             "AND {" + PaymentTransactionModel.VERSIONID + "} IS NULL";
 
     private FlexibleSearchService flexibleSearchService;
