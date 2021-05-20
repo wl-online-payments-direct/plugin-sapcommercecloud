@@ -8,6 +8,10 @@
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
 
+    <bean class="de.hybris.platform.commercewebservicescommons.dto.order.AbstractOrderWsDTO">
+        <property name="ingenicoPaymentInfo" type="com.ingenico.ogone.direct.payment.dto.IngenicoPaymentInfoWsDTO"/>
+    </bean>
+
     <bean class="com.ingenico.ogone.direct.payment.dto.PaymentProductDisplayHintsWsDTO">
         <description>PaymentProduct display hints</description>
         <hints>
@@ -39,7 +43,8 @@
             <hint name="wsRelated"/>
             <hint name="alias">PaymentProductList</hint>
         </hints>
-        <property name="paymentProducts" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.PaymentProductWsDTO>">
+        <property name="paymentProducts"
+                  type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.PaymentProductWsDTO>">
             <description>list of PaymentProduct</description>
         </property>
     </bean>
@@ -51,8 +56,8 @@
             <hint name="alias">HostedTokenizationResponse</hint>
         </hints>
         <property name="hostedTokenizationId" type="String"/>
-        <property name="redirectUrl" type="String"/>
-        <property name="tokens" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO>"/>
+        <property name="redirectURL" type="String"/>
+        <property name="tokens" type="com.ingenico.ogone.direct.payment.dto.SavedTokenListWsDTO"/>
     </bean>
 
     <bean class="com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO">
@@ -66,6 +71,15 @@
         <property name="type" type="String"/>
         <property name="cardholderName" type="String"/>
         <property name="expiryDate" type="String"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.SavedTokenListWsDTO">
+        <description>Saved Token List</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">SavedTokenList</hint>
+        </hints>
+        <property name="tokens" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO>"/>
     </bean>
 
     <bean class="com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO">
@@ -125,6 +139,49 @@
         </hints>
         <property name="id" type="String"/>
         <property name="status" type="String"/>
+    </bean>
+
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.IngenicoPaymentDetailsWsDTO">
+        <description>Ingenico Payment Details</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">IngenicoPaymentDetails</hint>
+        </hints>
+        <property name="paymentProductId" type="Integer"/>
+        <property name="paymentMethod" type="String"/>
+        <property name="issuerId" type="String"/>
+        <property name="useDeliveryAddress" type="boolean"/>
+        <property name="billingAddress" type="de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.IngenicoPaymentInfoWsDTO"
+          extends="com.ingenico.ogone.direct.payment.dto.IngenicoPaymentDetailsWsDTO">
+        <description>Ingenico Payment Info</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">IngenicoPaymentInfo</hint>
+        </hints>
+        <property name="ingenicoCheckoutType" type="com.ingenico.ogone.direct.payment.dto.IngenicoCheckoutTypeWsDTO"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.IngenicoCheckoutTypeWsDTO">
+        <description>Ingenico Checkout Type</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">IngenicoCheckoutType</hint>
+        </hints>
+        <property name="ingenicoCheckoutType" type="String"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.HostedCheckoutResponseWsDTO">
+        <description>Hosted Tokenization Response</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">HostedCheckoutResponse</hint>
+        </hints>
+        <property name="hostedCheckoutId" type="String"/>
+        <property name="redirectURL" type="String"/>
     </bean>
 
 
