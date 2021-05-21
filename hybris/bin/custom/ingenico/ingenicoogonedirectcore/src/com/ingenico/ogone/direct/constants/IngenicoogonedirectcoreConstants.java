@@ -17,9 +17,9 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
     public static final String PAYMENT_METHOD_IDEAL_COUNTRY = "NL";
 
     public static final String PAYMENT_PROVIDER = "INGENICO";
-    public static final String INGENICO_EVENT_AUTHORIZED = "ingenico_authorized";
-    public static final String INGENICO_EVENT_CAPTURED = "ingenico_catpured";
-    public static final String INGENICO_EVENT_REFUNDED = "ingenico_refunded";
+    public static final String INGENICO_EVENT_AUTHORIZATION = "ingenico_authorization_received";
+    public static final String INGENICO_EVENT_CAPTURE = "ingenico_capture_received";
+    public static final String INGENICO_EVENT_REFUND = "ingenico_refund_received";
 
 
     public enum PAYMENT_METHOD_TYPE {
@@ -138,6 +138,7 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
         }
 
         private final String value;
+
         public String getValue() {
             return value;
         }
