@@ -9,6 +9,11 @@
         <property name="ingenicoConfigurationDao" ref="ingenicoConfigurationDao"/>
     </bean>
 
+    <bean id="ingenicoServiceMethodService"
+          class="com.ingenico.ogone.direct.service.impl.IngenicoServiceMethodServiceImpl">
+        <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
+    </bean>
+
     <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
         <property name="cartService" ref="cartService"/>
         <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>

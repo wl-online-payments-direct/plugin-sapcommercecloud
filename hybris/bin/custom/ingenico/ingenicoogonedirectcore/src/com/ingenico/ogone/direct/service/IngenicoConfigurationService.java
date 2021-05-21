@@ -15,4 +15,5 @@ public interface IngenicoConfigurationService {
     String getMerchantId(BaseStoreModel baseStoreModel);
 
     String getCurrentMerchantId();
+
 }
