@@ -22,10 +22,10 @@ public class IngenicoTestConnectionAction implements CockpitAction<IngenicoConfi
       String testConnectionResult = ingenicoServiceMethodsService.testConnection(ingenicoConfigurationModel);
 
       ActionResult<Object> result = null;
-      if (testConnectionResult.equals(TEST_CONNECTION_OK_RESULT)) {
+      if (TEST_CONNECTION_OK_RESULT.equals(testConnectionResult)) {
          result = new ActionResult<Object>(ActionResult.SUCCESS, TEST_CONNECTION_OK_RESULT);
       } else {
-         result = new ActionResult<Object>(ActionResult.ERROR);
+         result = new ActionResult<Object>(ActionResult.ERROR, testConnectionResult);
       }
       Messagebox.show(result.getData() + " (" + result.getResultCode() + ")");
       return result;

@@ -25,8 +25,7 @@ public class IngenicoServiceMethodServiceImpl implements IngenicoServiceMethodsS
          return testConnection.getResult();
       } catch (IOException e) {
          LOGGER.error("[ INGENICO ] Errors during performing Test connection operation", e);
-         //TODO Throw Logical Exception
-         return null;
+         return e.getMessage();
       }
    }
 
