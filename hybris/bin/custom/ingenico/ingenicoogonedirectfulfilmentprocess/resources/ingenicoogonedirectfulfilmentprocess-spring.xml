@@ -3,8 +3,14 @@
  Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd">	
-		   
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="ingenicoCheckAuthorizedPaymentAction"
+          class="com.ingenico.ogone.direct.actions.order.IngenicoCheckAuthorizedPaymentAction" parent="abstractAction"/>
+
+    <bean id="ingenicoCheckCapturedPaymentAction"
+          class="com.ingenico.ogone.direct.actions.order.IngenicoCheckCapturedPaymentAction" parent="abstractAction"/>
+
 </beans>
