@@ -50,7 +50,6 @@ public class IngenicoConfigurationServiceImpl implements IngenicoConfigurationSe
         return getMerchantId(baseStoreService.getCurrentBaseStore());
     }
 
-
     public void setBaseStoreService(BaseStoreService baseStoreService) {
         this.baseStoreService = baseStoreService;
     }

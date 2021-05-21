@@ -69,4 +69,12 @@
         <property name="ingenicoWebhookService" ref="ingenicoWebhookService" />
         <property name="ingenicoWebhookDao" ref="ingenicoWebhookDao" />
     </bean>
+
+    <!-- strategies -->
+    <alias alias="createOrderFromCartStrategy" name="defaultIngenicoCreateOrderFromCartStrategy"/>
+    <bean id="defaultIngenicoCreateOrderFromCartStrategy"
+          class="com.ingenico.ogone.direct.strategy.impl.DefaultIngenicoCreateOrderFromCartStrategy" parent="defaultCreateOrderFromCartStrategy">
+    </bean>
+
+
 </beans>

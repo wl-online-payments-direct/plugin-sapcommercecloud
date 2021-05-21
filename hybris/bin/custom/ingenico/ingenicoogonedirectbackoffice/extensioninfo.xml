@@ -5,22 +5,14 @@
         	
     
     <extension abstractclassprefix="Generated" classprefix="Ingenicoogonedirectbackoffice" name="ingenicoogonedirectbackoffice" usemaven="false">
-                		
-        
+
         <requires-extension name="backoffice"/>
-                		
-        
-        
-                		
+        <requires-extension name="ingenicoogonedirectcore"/>
         
         <coremodule generated="true" manager="com.ingenico.ogone.direct.jalo.IngenicoogonedirectbackofficeManager" packageroot="com.ingenico.ogone.direct"/>
-                		
-        
+
         <meta key="backoffice-module" value="true"/>
                 		
-        
-        	
-    
     </extension>
         
 
