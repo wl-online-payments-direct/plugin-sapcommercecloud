@@ -81,9 +81,9 @@
         <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="hostedTokenizationId,redirectURL,tokens(BASIC)"/>
-                <entry key="DEFAULT" value="BASIC,tokens(DEFAULT)"/>
-                <entry key="FULL" value="BASIC,tokens(FULL)"/>
+                <entry key="BASIC" value="hostedTokenizationId,redirectURL,savedTokens(BASIC)"/>
+                <entry key="DEFAULT" value="BASIC,savedTokens(DEFAULT)"/>
+                <entry key="FULL" value="BASIC,savedTokens(FULL)"/>
             </map>
         </property>
     </bean>
