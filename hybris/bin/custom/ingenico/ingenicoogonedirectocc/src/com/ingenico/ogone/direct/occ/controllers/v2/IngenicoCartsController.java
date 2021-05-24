@@ -1,9 +1,10 @@
 package com.ingenico.ogone.direct.occ.controllers.v2;
 
-import static com.ingenico.ogone.direct.occ.controllers.IngenicoogonedirectoccControllerConstants.DEFAULT_FIELD_SET;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.HandlerMapping;
 
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
@@ -48,6 +50,7 @@ import com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.ingenico.ogone.direct.payment.dto.IngenicoCheckoutTypeWsDTO;
 import com.ingenico.ogone.direct.payment.dto.IngenicoPaymentDetailsWsDTO;
 import com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO;
+import com.ingenico.ogone.direct.payment.dto.BrowserDataWsDTO;
 
 @Controller
 @RequestMapping(value = "/{baseSiteId}/users/{userId}/carts")
@@ -179,14 +182,17 @@ public class IngenicoCartsController extends IngenicoBaseController {
 
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/{cartId}/hostedcheckout", method = RequestMethod.GET)
+    @RequestMapping(value = "/{cartId}/hostedcheckout", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(nickname = "getHostedCheckout", value = "get ingenico hosted checkout.", notes =
+    @ApiOperation(nickname = "createHostedCheckout", value = "create ingenico hosted checkout.", notes =
             "Returns a hosted checkout data for the current base store and cart. " +
                     "A delivery address must be set for the cart, otherwise an error will be returned.")
     @ApiBaseSiteIdUserIdAndCartIdParam
     public HostedCheckoutResponseWsDTO createHostedCheckout(
-            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
+            @ApiParam(value = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
+            @RequestBody final BrowserDataWsDTO browserDataWsDTO,
+            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
+            final HttpServletRequest request) {
         if (!checkoutFacade.hasCheckoutCart()) {
             throw new CartException("No cart found.", CartException.NOT_FOUND);
         }
@@ -197,7 +203,8 @@ public class IngenicoCartsController extends IngenicoBaseController {
             throw new CartException("Invalid Ingenico Checkout Type.", CartException.INVALID);
         }
 
-        sessionService.setAttribute("hostedCheckoutReturnUrl", Config.getParameter("ingenico.occ.hostedCheckout.returnUrl"));
+        final String returnURL = ingenicoHelper.buildReturnURL(request,"ingenico.occ.hostedCheckout.returnUrl");
+        sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL);
 
         final CreateHostedCheckoutResponse createHostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout();
         final HostedCheckoutResponseWsDTO hostedCheckoutResponseWsDTO = getDataMapper()
@@ -205,6 +212,8 @@ public class IngenicoCartsController extends IngenicoBaseController {
 
         return hostedCheckoutResponseWsDTO;
     }
+
+
 
     public DataMapper getDataMapper() {
         return dataMapper;

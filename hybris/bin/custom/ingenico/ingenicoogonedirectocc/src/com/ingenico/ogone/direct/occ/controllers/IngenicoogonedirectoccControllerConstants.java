@@ -5,5 +5,4 @@ package com.ingenico.ogone.direct.occ.controllers;
 
 public interface IngenicoogonedirectoccControllerConstants
 {
-    String DEFAULT_FIELD_SET = "BASIC, DEFAULT, FULL";
 }
