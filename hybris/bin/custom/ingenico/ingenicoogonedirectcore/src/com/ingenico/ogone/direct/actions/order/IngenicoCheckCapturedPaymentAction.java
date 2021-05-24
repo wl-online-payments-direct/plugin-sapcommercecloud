@@ -22,10 +22,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
+
 
 public class IngenicoCheckCapturedPaymentAction extends AbstractAction<OrderProcessModel> {
     private static final Logger LOG = LoggerFactory.getLogger(IngenicoCheckCapturedPaymentAction.class);
 
+    private IngenicoAmountUtils ingenicoAmountUtils;
 
     @Override
     public String execute(final OrderProcessModel process) {
@@ -46,24 +49,19 @@ public class IngenicoCheckCapturedPaymentAction extends AbstractAction<OrderProc
             return Transition.WAIT.toString();
         }
 
-        BigDecimal remainingAmount = new BigDecimal(order.getTotalPrice());
+        final String currencyIsoCode = order.getCurrency().getIsocode();
+        BigDecimal remainingAmount = ingenicoAmountUtils.fromAmount(order.getTotalPrice(), currencyIsoCode);
 
         for (PaymentTransactionEntryModel entry : transactionEntries) {
-            if (REJECTED.getValue().equals(entry.getTransactionStatus()) ||
-                    STATUS_UNKNOWN.getValue().equals(entry.getTransactionStatus())) {
+            if (REJECTED.getValue().equals(entry.getTransactionStatus())) {
                 LOG.debug("[INGENICO] Process: " + process.getCode() + " Order Not Captured");
                 return Transition.NOK.toString();
             }
             remainingAmount = remainingAmount.subtract(entry.getAmount());
         }
-
-        BigDecimal zero = BigDecimal.ZERO;
-        //Setting scale to 3, to avoid comparison issues
-        zero = zero.setScale(3, BigDecimal.ROUND_FLOOR);
-        remainingAmount = remainingAmount.setScale(3, BigDecimal.ROUND_FLOOR);
-
         LOG.debug("[INGENICO] Remaining amount: {}", remainingAmount);
 
+        final BigDecimal zero = ingenicoAmountUtils.fromAmount(0.0d, currencyIsoCode);
         if (remainingAmount.compareTo(zero) <= 0) {
             LOG.debug("[INGENICO] Process: {} Order Captured", process.getCode());
             order.setStatus(OrderStatus.PAYMENT_CAPTURED);
@@ -82,6 +80,10 @@ public class IngenicoCheckCapturedPaymentAction extends AbstractAction<OrderProc
                 .stream()
                 .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
                 .collect(Collectors.toList());
+    }
+
+    public void setIngenicoAmountUtils(IngenicoAmountUtils ingenicoAmountUtils) {
+        this.ingenicoAmountUtils = ingenicoAmountUtils;
     }
 
 
