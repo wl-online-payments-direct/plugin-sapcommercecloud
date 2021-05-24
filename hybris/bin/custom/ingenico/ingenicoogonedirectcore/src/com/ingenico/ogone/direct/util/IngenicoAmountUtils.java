@@ -28,6 +28,12 @@ public class IngenicoAmountUtils {
         return new BigDecimal(amount).movePointLeft(digits);
     }
 
+    public BigDecimal fromAmount(double amount, String currencyIso) {
+        final CurrencyModel currency = commonI18NService.getCurrency(currencyIso);
+        final Integer digits = currency.getDigits();
+        return new BigDecimal(amount).setScale(digits,RoundingMode.HALF_UP);
+    }
+
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;
