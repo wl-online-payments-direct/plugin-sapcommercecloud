@@ -56,7 +56,6 @@
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
         <property name="modelService" ref="modelService"/>
         <property name="baseStoreService" ref="baseStoreService"/>
-        <property name="customerAccountService" ref="customerAccountService"/>
     </bean>
 
     <bean id="ingenicoWebhookFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoWebhookFacadeImpl">

@@ -31,6 +31,7 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
@@ -78,7 +79,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     private CheckoutFacade checkoutFacade;
     private CommerceCheckoutService commerceCheckoutService;
     private BaseStoreService baseStoreService;
-    private CustomerAccountService customerAccountService;
+
 
     private IngenicoUserFacade ingenicoUserFacade;
     private IngenicoPaymentService ingenicoPaymentService;
@@ -166,14 +167,20 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         final GetHostedTokenizationResponse hostedTokenization = ingenicoPaymentService.getHostedTokenization(ingenicoHostedTokenizationData.getHostedTokenizationId());
         final CreatePaymentResponse paymentForHostedTokenization = ingenicoPaymentService.createPaymentForHostedTokenization(ingenicoHostedTokenizationData, hostedTokenization);
 
+        final PaymentResponse payment = paymentForHostedTokenization.getPayment();
         if (paymentForHostedTokenization.getMerchantAction() != null) {
-            ingenicoTransactionService.createOrUpdatePaymentTransaction(cartService.getSessionCart(), paymentForHostedTokenization.getPayment(), PaymentTransactionType.AUTHORIZATION);
-            throw new IngenicoNonAuthorizedPaymentException(paymentForHostedTokenization.getPayment(),
+            ingenicoTransactionService.createAuthorizationPaymentTransaction(cartService.getSessionCart(),
+                    payment.getPaymentOutput().getReferences().getMerchantReference(),
+                    payment.getId(),
+                    payment.getStatus(),
+                    payment.getStatusOutput().getStatusCategory(),
+                    payment.getPaymentOutput().getAmountOfMoney());
+            throw new IngenicoNonAuthorizedPaymentException(payment,
                     paymentForHostedTokenization.getMerchantAction(),
                     UNAUTHORIZED_REASON.NEED_3DS);
         }
-        keepPaymentToken(paymentForHostedTokenization.getPayment()); //token exists if customer checks "Save payment details" btn on HOP
-        return handlePaymentResponse(paymentForHostedTokenization.getPayment());
+        keepPaymentToken(payment); //token exists if customer checks "Save payment details" btn on HOP
+        return handlePaymentResponse(payment);
 
     }
 
@@ -229,14 +236,20 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
             case CREATED:
             case REJECTED:
             case REJECTED_CAPTURE:
-                ingenicoTransactionService.createOrUpdatePaymentTransaction(cartService.getSessionCart(),
-                        paymentResponse,
-                        PaymentTransactionType.AUTHORIZATION);
+                ingenicoTransactionService.createAuthorizationPaymentTransaction(cartService.getSessionCart(),
+                        paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                        paymentResponse.getId(),
+                        paymentResponse.getStatus(),
+                        paymentResponse.getStatusOutput().getStatusCategory(),
+                        paymentResponse.getPaymentOutput().getAmountOfMoney());
                 throw new IngenicoNonAuthorizedPaymentException(paymentResponse, UNAUTHORIZED_REASON.REJECTED);
             case CANCELLED:
-                ingenicoTransactionService.createOrUpdatePaymentTransaction(cartService.getSessionCart(),
-                        paymentResponse,
-                        PaymentTransactionType.AUTHORIZATION);
+                ingenicoTransactionService.createAuthorizationPaymentTransaction(cartService.getSessionCart(),
+                        paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                        paymentResponse.getId(),
+                        paymentResponse.getStatus(),
+                        paymentResponse.getStatusOutput().getStatusCategory(),
+                        paymentResponse.getPaymentOutput().getAmountOfMoney());
                 throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.CANCELLED);
             case REDIRECTED:
             case PENDING_PAYMENT:
@@ -254,12 +267,28 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     }
 
     protected OrderData createOrderFromPaymentResponse(final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) throws InvalidCartException {
+        if (PaymentTransactionType.CAPTURE.equals(paymentTransactionType)) {
+            // authorise first
+            final PaymentTransactionModel authorizedPaymentTransaction = ingenicoTransactionService.createAuthorizedPaymentTransaction(cartService.getSessionCart(),
+                    paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                    paymentResponse.getId(),
+                    paymentResponse.getPaymentOutput().getAmountOfMoney());
+            // then capture
+            ingenicoTransactionService.updatePaymentTransaction(authorizedPaymentTransaction,
+                    paymentResponse.getStatus(),
+                    paymentResponse.getStatusOutput().getStatusCategory(),
+                    paymentResponse.getPaymentOutput().getAmountOfMoney(),
+                    paymentTransactionType);
+        } else {
+            ingenicoTransactionService.createAuthorizationPaymentTransaction(cartService.getSessionCart(),
+                    paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                    paymentResponse.getId(),
+                    paymentResponse.getStatus(),
+                    paymentResponse.getStatusOutput().getStatusCategory(),
+                    paymentResponse.getPaymentOutput().getAmountOfMoney());
+        }
 
         OrderData orderData = checkoutFacade.placeOrder();
-        final BaseStoreModel baseStoreModel = baseStoreService.getBaseStoreForUid(orderData.getStore());
-        final OrderModel orderModel = customerAccountService.getOrderForCode(orderData.getCode(), baseStoreModel);
-
-        ingenicoTransactionService.createOrUpdatePaymentTransaction(orderModel, paymentResponse, paymentTransactionType);
         return orderData;
     }
 
@@ -443,10 +472,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
     public void setIngenicoUserFacade(IngenicoUserFacade ingenicoUserFacade) {
         this.ingenicoUserFacade = ingenicoUserFacade;
-    }
-
-    public void setCustomerAccountService(CustomerAccountService customerAccountService) {
-        this.customerAccountService = customerAccountService;
     }
 
     public void setIngenicoTransactionService(IngenicoTransactionService ingenicoTransactionService) {
