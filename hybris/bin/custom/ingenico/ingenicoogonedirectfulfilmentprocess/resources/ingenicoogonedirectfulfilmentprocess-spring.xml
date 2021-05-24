@@ -11,6 +11,8 @@
           class="com.ingenico.ogone.direct.actions.order.IngenicoCheckAuthorizedPaymentAction" parent="abstractAction"/>
 
     <bean id="ingenicoCheckCapturedPaymentAction"
-          class="com.ingenico.ogone.direct.actions.order.IngenicoCheckCapturedPaymentAction" parent="abstractAction"/>
+          class="com.ingenico.ogone.direct.actions.order.IngenicoCheckCapturedPaymentAction" parent="abstractAction">
+        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
+    </bean>
 
 </beans>
