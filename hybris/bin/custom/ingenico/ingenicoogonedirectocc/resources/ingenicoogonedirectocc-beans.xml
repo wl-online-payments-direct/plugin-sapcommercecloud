@@ -57,7 +57,36 @@
         </hints>
         <property name="hostedTokenizationId" type="String"/>
         <property name="redirectURL" type="String"/>
-        <property name="tokens" type="com.ingenico.ogone.direct.payment.dto.SavedTokenListWsDTO"/>
+        <property name="savedTokens" type="com.ingenico.ogone.direct.payment.dto.SavedTokenListWsDTO"/>
+    </bean>
+
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.HostedTokenizationRequestWsDTO">
+        <description>Hosted Tokenization Request</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">HostedTokenizationRequest</hint>
+        </hints>
+        <property name="hostedTokenizationId" type="String"/>
+        <property name="browserData" type="com.ingenico.ogone.direct.payment.dto.BrowserDataWsDTO"/>
+    </bean>
+
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.BrowserDataWsDTO">
+        <description>Browser Data</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">BrowserData</hint>
+        </hints>
+        <property name="screenHeight" type="String"/>
+        <property name="screenWidth" type="String"/>
+        <property name="navigatorJavaEnabled" type="Boolean"/>
+        <property name="timezoneOffsetUtcMinutes" type="String"/>
+        <property name="colorDepth" type="Integer"/>
+        <property name="acceptHeader" type="String"/>
+        <property name="userAgent" type="String"/>
+        <property name="locale" type="String"/>
+        <property name="ipAddress" type="String"/>
     </bean>
 
     <bean class="com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO">
@@ -182,6 +211,16 @@
         </hints>
         <property name="hostedCheckoutId" type="String"/>
         <property name="redirectURL" type="String"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.payment.dto.NonAuthorizedPaymentWsDTO">
+        <description>Non Authorized Payment</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">NonAuthorizedPayment</hint>
+        </hints>
+        <property name="status" type="String"/>
+        <property name="redirectTo" type="String"/>
     </bean>
 
 
