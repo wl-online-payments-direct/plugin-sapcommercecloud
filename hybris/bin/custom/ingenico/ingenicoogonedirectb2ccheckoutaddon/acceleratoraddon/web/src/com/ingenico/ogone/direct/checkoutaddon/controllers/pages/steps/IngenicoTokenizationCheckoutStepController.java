@@ -41,6 +41,7 @@ import com.ingenico.ogone.direct.constants.IngenicoCheckoutConstants;
 import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
+import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 
 @Controller
@@ -188,16 +189,19 @@ public class IngenicoTokenizationCheckoutStepController extends AbstractCheckout
     private IngenicoHostedTokenizationData fillIngenicoHostedTokenizationData(HttpServletRequest request, IngenicoHostedTokenizationForm ingenicoHostedTokenizationForm) {
         IngenicoHostedTokenizationData ingenicoHostedTokenizationData = new IngenicoHostedTokenizationData();
         ingenicoHostedTokenizationData.setHostedTokenizationId(ingenicoHostedTokenizationForm.getHostedTokenizationId());
-        ingenicoHostedTokenizationData.setColorDepth(ingenicoHostedTokenizationForm.getColorDepth());
-        ingenicoHostedTokenizationData.setNavigatorJavaEnabled(ingenicoHostedTokenizationForm.getNavigatorJavaEnabled());
-        ingenicoHostedTokenizationData.setScreenHeight(ingenicoHostedTokenizationForm.getScreenHeight());
-        ingenicoHostedTokenizationData.setScreenWidth(ingenicoHostedTokenizationForm.getScreenWidth());
-        ingenicoHostedTokenizationData.setTimezoneOffsetUtcMinutes(ingenicoHostedTokenizationForm.getTimezoneOffset());
+        BrowserData browserData = new BrowserData();
+        browserData.setColorDepth(ingenicoHostedTokenizationForm.getColorDepth());
+        browserData.setNavigatorJavaEnabled(ingenicoHostedTokenizationForm.getNavigatorJavaEnabled());
+        browserData.setScreenHeight(ingenicoHostedTokenizationForm.getScreenHeight());
+        browserData.setScreenWidth(ingenicoHostedTokenizationForm.getScreenWidth());
+        browserData.setTimezoneOffsetUtcMinutes(ingenicoHostedTokenizationForm.getTimezoneOffset());
 
-        ingenicoHostedTokenizationData.setAcceptHeader(request.getHeader(ACCEPT));
-        ingenicoHostedTokenizationData.setUserAgent(request.getHeader(USER_AGENT));
-        ingenicoHostedTokenizationData.setLocale(request.getLocale().toString());
-        ingenicoHostedTokenizationData.setIpAddress(getIpAddress(request));
+        browserData.setAcceptHeader(request.getHeader(ACCEPT));
+        browserData.setUserAgent(request.getHeader(USER_AGENT));
+        browserData.setLocale(request.getLocale().toString());
+        browserData.setIpAddress(getIpAddress(request));
+
+        ingenicoHostedTokenizationData.setBrowserData(browserData);
         return ingenicoHostedTokenizationData;
     }
 
