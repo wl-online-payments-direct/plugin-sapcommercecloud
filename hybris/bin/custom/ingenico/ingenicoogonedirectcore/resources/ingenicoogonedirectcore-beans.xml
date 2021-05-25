@@ -25,9 +25,14 @@
 
     <bean class="com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData">
         <property name="hostedTokenizationId" type="String"/>
+        <property name="browserData" type="com.ingenico.ogone.direct.order.data.BrowserData"/>
+    </bean>
+
+    <bean class="com.ingenico.ogone.direct.order.data.BrowserData">
         <property name="screenHeight" type="String"/>
         <property name="screenWidth" type="String"/>
         <property name="navigatorJavaEnabled" type="Boolean"/>
+        <property name="navigatorJavaScriptEnabled" type="Boolean"/>
         <property name="timezoneOffsetUtcMinutes" type="String"/>
         <property name="colorDepth" type="Integer"/>
         <property name="acceptHeader" type="String"/>

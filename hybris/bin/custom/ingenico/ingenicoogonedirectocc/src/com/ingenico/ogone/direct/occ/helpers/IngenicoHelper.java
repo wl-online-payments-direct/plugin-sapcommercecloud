@@ -3,13 +3,17 @@ package com.ingenico.ogone.direct.occ.helpers;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
+import de.hybris.platform.util.Config;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 
 import com.google.common.collect.Iterables;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerMapping;
 
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.PaymentProduct;
@@ -57,7 +61,13 @@ public class IngenicoHelper {
         final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = ingenicoUserFacade.getIngenicoPaymentInfos(true);
         final SavedTokenListWsDTO savedTokenListWsDTO = new SavedTokenListWsDTO();
         savedTokenListWsDTO.setTokens(getDataMapper().mapAsList(ingenicoPaymentInfos, SavedTokenWsDTO.class, fields));
-        hostedTokenizationResponseWsDTO.setTokens(savedTokenListWsDTO);
+        hostedTokenizationResponseWsDTO.setSavedTokens(savedTokenListWsDTO);
+    }
+
+    public String buildReturnURL(HttpServletRequest request, String key) {
+        final String returnURL = Config.getParameter(key);
+        final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        return String.format(returnURL, uriVars.get("baseSiteId"), uriVars.get("userId"), uriVars.get("cartId"));
     }
 
 

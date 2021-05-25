@@ -1,23 +1,35 @@
 ACC.ingenicoPaymentPost = {
 
     spinner: $("<img>").attr("src", ACC.config.commonResourcePath + "/images/spinner.gif"),
-    internalData: {
-        "colorDepth": screen.colorDepth,
-        "screenHeight": screen.height,
-        "screenWidth": screen.width,
-        "navigatorJavaEnabled": navigator.javaEnabled(),
-        "timezoneOffset": new Date().getTimezoneOffset()
+    internalData: function() {
+        return {
+            "colorDepth": screen.colorDepth,
+            "screenHeight": screen.height,
+            "screenWidth": screen.width,
+            "navigatorJavaEnabled": navigator.javaEnabled(),
+            "navigatorJavaScriptEnabled": true,
+            "timezoneOffset": new Date().getTimezoneOffset()
+        }
     },
     fillInternalDataIngenicoDoPaymentForm: function () {
-        var json = ACC.ingenicoPaymentPost.internalData;
+        var json = ACC.ingenicoPaymentPost.internalData();
         for (key in json) {
             if (json.hasOwnProperty(key))
                 $('#ingenicoDoPaymentForm  input[name=' + key + ']').val(json[key]);
         }
 
     },
+    fillInternalDataIngenicoPlaceOrderForm: function () {
+        var json = ACC.ingenicoPaymentPost.internalData();
+        for (key in json) {
+            if (json.hasOwnProperty(key))
+                $('#ingenicoPlaceOrderForm  input[name=' + key + ']').val(json[key]);
+        }
+
+    },
     bindSubmitingenicoDoPaymentForm: function () {
         $('.submit_ingenicoDoPaymentForm').click(function () {
+            ACC.ingenicoPaymentPost.fillInternalDataIngenicoDoPaymentForm();
             if (tokenizer !== undefined) {
                 var submitBtn =$(this);
                 var form = submitBtn.parents('form:first');
@@ -39,6 +51,12 @@ ACC.ingenicoPaymentPost = {
 
 
             }
+        });
+    },
+    bindSubmitIngenicoPlaceOrderForm: function () {
+        $('#ingenicoPlaceOrderForm').submit(function (e) {
+            ACC.ingenicoPaymentPost.fillInternalDataIngenicoPlaceOrderForm();
+            return true;
         });
     },
     bindIngenicoSavedPayments:function(){
@@ -80,6 +98,6 @@ ACC.ingenicoPaymentPost = {
 
 $(document).ready(function () {
     ACC.ingenicoPaymentPost.bindSubmitingenicoDoPaymentForm();
-    ACC.ingenicoPaymentPost.fillInternalDataIngenicoDoPaymentForm();
+    ACC.ingenicoPaymentPost.bindSubmitIngenicoPlaceOrderForm();
     ACC.ingenicoPaymentPost.bindIngenicoSavedPayments();
 });
