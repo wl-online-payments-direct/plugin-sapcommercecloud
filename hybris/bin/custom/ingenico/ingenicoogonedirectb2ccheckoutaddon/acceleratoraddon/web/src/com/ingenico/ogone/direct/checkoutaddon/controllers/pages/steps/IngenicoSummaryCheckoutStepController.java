@@ -11,13 +11,11 @@ import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutSt
 import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.AbstractCheckoutStepController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
-import de.hybris.platform.acceleratorstorefrontcommons.forms.PlaceOrderForm;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
 import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.commercefacades.order.data.CartData;
-import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.order.data.OrderEntryData;
 import de.hybris.platform.commercefacades.product.ProductOption;
 import de.hybris.platform.commercefacades.product.data.ProductData;
@@ -25,6 +23,7 @@ import de.hybris.platform.commerceservices.order.CommerceCartModificationExcepti
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,8 +37,10 @@ import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants;
 import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants.URL.Checkout.Summary;
+import com.ingenico.ogone.direct.checkoutaddon.forms.IngenicoPlaceOrderForm;
 import com.ingenico.ogone.direct.constants.IngenicoCheckoutConstants;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
+import com.ingenico.ogone.direct.order.data.BrowserData;
 
 @Controller
 @RequestMapping(value = Summary.root)
@@ -47,6 +48,9 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
     private static final Logger LOGGER = Logger.getLogger(IngenicoSummaryCheckoutStepController.class);
 
     private final static String SUMMARY = "summary";
+    private static final String ACCEPT = "accept";
+    private static final String USER_AGENT = "user-agent";
+    private static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
     @Resource(name = "orderFacade")
     private OrderFacade orderFacade;
@@ -104,7 +108,7 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         model.addAttribute("deliveryMode", cartData.getDeliveryMode());
         model.addAttribute("paymentProduct", paymentProduct);
 
-        model.addAttribute(new PlaceOrderForm());
+        model.addAttribute(new IngenicoPlaceOrderForm());
 
         final ContentPageModel multiCheckoutSummaryPage = getContentPageForLabelOrId(MULTI_CHECKOUT_SUMMARY_CMS_PAGE_LABEL);
         storeCmsPageInModel(model, multiCheckoutSummaryPage);
@@ -119,12 +123,12 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
 
     @RequestMapping(value = Summary.placeOrder)
     @RequireHardLogIn
-    public String placeOrder(@ModelAttribute("placeOrderForm") final PlaceOrderForm placeOrderForm,
+    public String placeOrder(@ModelAttribute("ingenicoPlaceOrderForm") final IngenicoPlaceOrderForm ingenicoPlaceOrderForm,
                              final Model model,
                              final HttpServletRequest request,
                              final RedirectAttributes redirectModel) throws CMSItemNotFoundException, CommerceCartModificationException {
 
-        if (validateOrderForm(placeOrderForm, model)) {
+        if (validateOrderForm(ingenicoPlaceOrderForm, model)) {
             return enterStep(model, redirectModel);
         }
 
@@ -138,7 +142,8 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         switch (cartData.getIngenicoPaymentInfo().getIngenicoCheckoutType()) {
             case HOSTED_CHECKOUT:
                 storeReturnUrlInSession(getOrderCode(cartData));
-                CreateHostedCheckoutResponse hostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout();
+                final BrowserData browserData = fillBrowserData(request, ingenicoPlaceOrderForm);
+                CreateHostedCheckoutResponse hostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout(browserData);
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
                 return REDIRECT_PREFIX +
@@ -159,7 +164,7 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         getSessionService().setAttribute("hostedCheckoutReturnUrl", returnUrl);
     }
 
-    protected boolean validateOrderForm(final PlaceOrderForm placeOrderForm, final Model model) {
+    protected boolean validateOrderForm(final IngenicoPlaceOrderForm ingenicoPlaceOrderForm, final Model model) {
         boolean invalid = false;
 
         if (getCheckoutFlowFacade().hasNoDeliveryAddress()) {
@@ -178,7 +183,7 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         }
 
 
-        if (!placeOrderForm.isTermsCheck()) {
+        if (!ingenicoPlaceOrderForm.isTermsCheck()) {
             GlobalMessages.addErrorMessage(model, "checkout.error.terms.not.accepted");
             invalid = true;
             return invalid;
@@ -205,6 +210,35 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
 
     protected String getOrderCode(AbstractOrderData orderData) {
         return checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
+    }
+
+    private BrowserData fillBrowserData(HttpServletRequest request, IngenicoPlaceOrderForm ingenicoPlaceOrderForm) {
+
+        BrowserData browserData = new BrowserData();
+        browserData.setColorDepth(ingenicoPlaceOrderForm.getColorDepth());
+        browserData.setNavigatorJavaEnabled(ingenicoPlaceOrderForm.getNavigatorJavaEnabled());
+        browserData.setNavigatorJavaScriptEnabled(ingenicoPlaceOrderForm.getNavigatorJavaScriptEnabled());
+        browserData.setScreenHeight(ingenicoPlaceOrderForm.getScreenHeight());
+        browserData.setScreenWidth(ingenicoPlaceOrderForm.getScreenWidth());
+        browserData.setTimezoneOffsetUtcMinutes(ingenicoPlaceOrderForm.getTimezoneOffset());
+
+        browserData.setAcceptHeader(request.getHeader(ACCEPT));
+        browserData.setUserAgent(request.getHeader(USER_AGENT));
+        browserData.setLocale(request.getLocale().toString());
+        browserData.setIpAddress(getIpAddress(request));
+
+        return browserData;
+    }
+
+    private String getIpAddress(HttpServletRequest request) {
+        String remoteAddr = "";
+        if (request != null) {
+            remoteAddr = request.getHeader(X_FORWARDED_FOR);
+            if (StringUtils.isEmpty(remoteAddr)) {
+                remoteAddr = request.getRemoteAddr();
+            }
+        }
+        return remoteAddr;
     }
 
 

@@ -21,17 +21,17 @@ public class IngenicoPaymentDetailsWsDTOValidator implements Validator {
         final IngenicoPaymentDetailsWsDTO wsDTO = (IngenicoPaymentDetailsWsDTO) object;
 
         if (Boolean.FALSE.equals(wsDTO.isUseDeliveryAddress())) {
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.firstName", "address.firstName.invalid");
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.lastName", "address.lastName.invalid");
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.line1", "address.line1.invalid");
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.town", "address.townCity.invalid");
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.postalCode", "address.postcode.invalid");
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.country.isocode", "address.country.invalid");
+            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.firstName", "field.required", new Object[]{"billingAddress.firstName"});
+            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.lastName", "field.required", new Object[]{"billingAddress.lastName"});
+            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.line1", "field.required", new Object[]{"billingAddress.line1"});
+            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.town", "field.required", new Object[]{"billingAddress.town"});
+            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.postalCode", "field.required", new Object[]{"billingAddress.postalCode"});
+            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billingAddress.country.isocode", "field.required", new Object[]{"billingAddress.country.isocode"});
         }
 
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "paymentProductId", "checkout.error.paymentProduct.id.missing");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "paymentProductId", "field.required", new Object[]{"paymentProductId"});
         if (wsDTO.getPaymentProductId() != null && IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL == wsDTO.getPaymentProductId()) {
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "checkout.error.issuer.id.missing");
+            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "field.required", new Object[]{"issuerId"});
         }
 
     }
