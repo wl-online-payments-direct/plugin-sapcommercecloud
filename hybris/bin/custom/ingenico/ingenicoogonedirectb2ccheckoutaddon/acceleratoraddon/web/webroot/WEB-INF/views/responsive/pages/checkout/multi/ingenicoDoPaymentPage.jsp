@@ -108,6 +108,7 @@
                                         <form:input type="hidden" path="screenHeight"/>
                                         <form:input type="hidden" path="screenWidth"/>
                                         <form:input type="hidden" path="navigatorJavaEnabled"/>
+                                        <form:input type="hidden" path="navigatorJavaScriptEnabled"/>
                                         <form:input type="hidden" path="timezoneOffset"/>
                                         <form:input type="hidden" path="colorDepth"/>
                                         <button type="button"
