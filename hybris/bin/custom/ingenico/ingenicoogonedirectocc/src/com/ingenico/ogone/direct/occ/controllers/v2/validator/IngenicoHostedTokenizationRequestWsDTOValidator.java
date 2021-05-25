@@ -18,7 +18,7 @@ public class IngenicoHostedTokenizationRequestWsDTOValidator implements Validato
 
     @Override
     public void validate(final Object object, final Errors errors) {
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedTokenizationId", "hostedTokenization.hostedTokenizationId.missing");
-        ValidationUtils.rejectIfEmpty(errors, "browserData", "hostedTokenization.browserData.missing");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedTokenizationId", "field.required",new Object[] {"hostedTokenizationId"});
+        ValidationUtils.rejectIfEmpty(errors, "browserData", "field.required",new Object[] {"browserData"});
     }
 }

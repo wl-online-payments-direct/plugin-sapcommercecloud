@@ -42,8 +42,10 @@ import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
+import com.ingenico.ogone.direct.occ.controllers.v2.validator.IngenicoBrowserDataWsDTOValidator;
 import com.ingenico.ogone.direct.occ.controllers.v2.validator.IngenicoPaymentDetailsWsDTOValidator;
 import com.ingenico.ogone.direct.occ.helpers.IngenicoHelper;
+import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.payment.dto.HostedCheckoutResponseWsDTO;
 import com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO;
@@ -59,6 +61,7 @@ public class IngenicoCartsController extends IngenicoBaseController {
     private final static Logger LOGGER = LoggerFactory.getLogger(IngenicoCartsController.class);
 
     private static final String ADDRESS_MAPPING = "firstName,lastName,titleCode,phone,line1,line2,town,postalCode,country(isocode),region(isocode),defaultAddress";
+    private static final String BROWSER_MAPPING = "screenHeight,screenWidth,navigatorJavaEnabled,navigatorJavaScriptEnabled,timezoneOffsetUtcMinutes,colorDepth,acceptHeader,userAgent,locale,ipAddress";
 
     @Resource(name = "dataMapper")
     private DataMapper dataMapper;
@@ -77,6 +80,9 @@ public class IngenicoCartsController extends IngenicoBaseController {
 
     @Resource(name = "ingenicoPaymentDetailsWsDTOValidator")
     private IngenicoPaymentDetailsWsDTOValidator ingenicoPaymentDetailsWsDTOValidator;
+
+    @Resource(name = "ingenicoBrowserDataWsDTOValidator")
+    private IngenicoBrowserDataWsDTOValidator browserDataWsDTOValidator;
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @RequestMapping(value = "/{cartId}/paymentproducts", method = RequestMethod.GET)
@@ -203,16 +209,18 @@ public class IngenicoCartsController extends IngenicoBaseController {
             throw new CartException("Invalid Ingenico Checkout Type.", CartException.INVALID);
         }
 
-        final String returnURL = ingenicoHelper.buildReturnURL(request,"ingenico.occ.hostedCheckout.returnUrl");
+        validate(browserDataWsDTO, "browserData", browserDataWsDTOValidator);
+        final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);
+
+        final String returnURL = ingenicoHelper.buildReturnURL(request, "ingenico.occ.hostedCheckout.returnUrl");
         sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL);
 
-        final CreateHostedCheckoutResponse createHostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout();
+        final CreateHostedCheckoutResponse createHostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout(browserData);
         final HostedCheckoutResponseWsDTO hostedCheckoutResponseWsDTO = getDataMapper()
                 .map(createHostedCheckoutResponse, HostedCheckoutResponseWsDTO.class, fields);
 
         return hostedCheckoutResponseWsDTO;
     }
-
 
 
     public DataMapper getDataMapper() {

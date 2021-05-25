@@ -40,7 +40,13 @@
 </div>
 
 <div class="visible-xs clearfix">
-    <form:form action="${placeOrderUrl}" id="placeOrderForm1" modelAttribute="placeOrderForm" class="place-order-form col-xs-12">
+    <form:form action="${placeOrderUrl}" id="ingenicoPlaceOrderForm" modelAttribute="ingenicoPlaceOrderForm" class="place-order-form col-xs-12">
+        <form:input type="hidden" path="screenHeight"/>
+        <form:input type="hidden" path="screenWidth"/>
+        <form:input type="hidden" path="navigatorJavaEnabled"/>
+        <form:input type="hidden" path="navigatorJavaScriptEnabled"/>
+        <form:input type="hidden" path="timezoneOffset"/>
+        <form:input type="hidden" path="colorDepth"/>
         <div class="checkbox">
             <label> <form:checkbox id="Terms1" path="termsCheck" />
                 <spring:theme var="termsAndConditionsHtml" code="checkout.summary.placeOrder.readTermsAndConditions" arguments="${fn:escapeXml(getTermsAndConditionsUrl)}" htmlEscape="false"/>
