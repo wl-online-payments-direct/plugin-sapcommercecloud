@@ -60,6 +60,7 @@ import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
+import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
@@ -191,8 +192,8 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     }
 
     @Override
-    public CreateHostedCheckoutResponse createHostedCheckout() {
-        final CreateHostedCheckoutResponse hostedCheckout = ingenicoPaymentService.createHostedCheckout();
+    public CreateHostedCheckoutResponse createHostedCheckout(BrowserData browserData) {
+        final CreateHostedCheckoutResponse hostedCheckout = ingenicoPaymentService.createHostedCheckout(browserData);
         hostedCheckout.setPartialRedirectUrl(IngenicoUrlUtils.buildFullURL(hostedCheckout.getPartialRedirectUrl()));
         return hostedCheckout;
     }

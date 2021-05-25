@@ -81,6 +81,7 @@
         <property name="screenHeight" type="String"/>
         <property name="screenWidth" type="String"/>
         <property name="navigatorJavaEnabled" type="Boolean"/>
+        <property name="navigatorJavaScriptEnabled" type="Boolean"/>
         <property name="timezoneOffsetUtcMinutes" type="String"/>
         <property name="colorDepth" type="Integer"/>
         <property name="acceptHeader" type="String"/>

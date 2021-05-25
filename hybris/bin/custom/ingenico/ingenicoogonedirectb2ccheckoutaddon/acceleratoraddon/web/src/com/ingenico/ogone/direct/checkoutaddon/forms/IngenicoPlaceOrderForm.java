@@ -1,18 +1,17 @@
+
 package com.ingenico.ogone.direct.checkoutaddon.forms;
 
 
-import javax.validation.constraints.NotNull;
+public class IngenicoPlaceOrderForm {
 
-public class IngenicoHostedTokenizationForm {
-    private String hostedTokenizationId;
     private String screenHeight;
     private String screenWidth;
     private Boolean navigatorJavaEnabled;
     private Boolean navigatorJavaScriptEnabled;
     private String timezoneOffset;
     private Integer colorDepth;
+    private boolean termsCheck;
 
-    @NotNull(message = "{checkout.error.hostedTokenization.height.invalid}")
     public String getScreenHeight() {
         return screenHeight;
     }
@@ -21,7 +20,6 @@ public class IngenicoHostedTokenizationForm {
         this.screenHeight = screenHeight;
     }
 
-    @NotNull(message = "{checkout.error.hostedTokenization.width.invalid}")
     public String getScreenWidth() {
         return screenWidth;
     }
@@ -30,7 +28,6 @@ public class IngenicoHostedTokenizationForm {
         this.screenWidth = screenWidth;
     }
 
-    @NotNull(message = "{checkout.error.hostedTokenization.javaEnabled.invalid}")
     public Boolean getNavigatorJavaEnabled() {
         return navigatorJavaEnabled;
     }
@@ -39,16 +36,6 @@ public class IngenicoHostedTokenizationForm {
         this.navigatorJavaEnabled = navigatorJavaEnabled;
     }
 
-    @NotNull(message = "{checkout.error.hostedTokenization.timezone.invalid}")
-    public String getTimezoneOffset() {
-        return timezoneOffset;
-    }
-
-    public void setTimezoneOffset(String timezoneOffset) {
-        this.timezoneOffset = timezoneOffset;
-    }
-
-    @NotNull(message = "{checkout.error.hostedTokenization.colorDepth.invalid}")
     public Integer getColorDepth() {
         return colorDepth;
     }
@@ -57,12 +44,20 @@ public class IngenicoHostedTokenizationForm {
         this.colorDepth = colorDepth;
     }
 
-    public String getHostedTokenizationId() {
-        return hostedTokenizationId;
+    public boolean isTermsCheck() {
+        return termsCheck;
     }
 
-    public void setHostedTokenizationId(String hostedTokenizationId) {
-        this.hostedTokenizationId = hostedTokenizationId;
+    public void setTermsCheck(boolean termsCheck) {
+        this.termsCheck = termsCheck;
+    }
+
+    public String getTimezoneOffset() {
+        return timezoneOffset;
+    }
+
+    public void setTimezoneOffset(String timezoneOffset) {
+        this.timezoneOffset = timezoneOffset;
     }
 
     public Boolean getNavigatorJavaScriptEnabled() {
