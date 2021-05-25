@@ -1,6 +1,7 @@
 package com.ingenico.ogone.direct.service.impl;
 
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -217,12 +218,13 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     @Override
     @SuppressWarnings("all")
-    public CreateHostedCheckoutResponse createHostedCheckout() {
+    public CreateHostedCheckoutResponse createHostedCheckout(com.ingenico.ogone.direct.order.data.BrowserData browserData) {
+        validateParameterNotNullStandardMessage("browserData", browserData);
         final CartModel sessionCart = getSessionCart();
         validateParameterNotNull(sessionCart, "sessionCart cannot be null");
         try (Client client = ingenicoClientFactory.getClient()) {
             final CreateHostedCheckoutRequest params = ingenicoHostedCheckoutParamConverter.convert(sessionCart);
-
+            params.getOrder().getCustomer().setDevice(getBrowserInfo(browserData));
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
 
             IngenicoLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
@@ -274,6 +276,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         BrowserData browserData = new BrowserData();
         browserData.setColorDepth(internalBrowserData.getColorDepth());
         browserData.setJavaEnabled(internalBrowserData.getNavigatorJavaEnabled());
+        browserData.setJavaScriptEnabled(internalBrowserData.getNavigatorJavaScriptEnabled());
         browserData.setScreenHeight(internalBrowserData.getScreenHeight());
         browserData.setScreenWidth(internalBrowserData.getScreenWidth());
 

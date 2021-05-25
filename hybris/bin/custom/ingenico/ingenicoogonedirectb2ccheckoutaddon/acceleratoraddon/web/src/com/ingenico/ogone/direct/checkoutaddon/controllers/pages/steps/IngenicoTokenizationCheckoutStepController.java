@@ -192,6 +192,7 @@ public class IngenicoTokenizationCheckoutStepController extends AbstractCheckout
         BrowserData browserData = new BrowserData();
         browserData.setColorDepth(ingenicoHostedTokenizationForm.getColorDepth());
         browserData.setNavigatorJavaEnabled(ingenicoHostedTokenizationForm.getNavigatorJavaEnabled());
+        browserData.setNavigatorJavaScriptEnabled(ingenicoHostedTokenizationForm.getNavigatorJavaScriptEnabled());
         browserData.setScreenHeight(ingenicoHostedTokenizationForm.getScreenHeight());
         browserData.setScreenWidth(ingenicoHostedTokenizationForm.getScreenWidth());
         browserData.setTimezoneOffsetUtcMinutes(ingenicoHostedTokenizationForm.getTimezoneOffset());
