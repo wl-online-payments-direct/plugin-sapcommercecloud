@@ -1,6 +1,7 @@
 package com.ingenico.ogone.direct.service.impl;
 
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -200,7 +201,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
                     .setToken(tokenizationResponse.getToken().getId());
             params.getCardPaymentMethodSpecificInput()
                     .setPaymentProductId(tokenizationResponse.getToken().getPaymentProductId());
-            params.getOrder().getCustomer().setDevice(getBrowserInfo(ingenicoHostedTokenizationData));
+            params.getOrder().getCustomer().setDevice(getBrowserInfo(ingenicoHostedTokenizationData.getBrowserData()));
             final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
 
             IngenicoLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, payment);
@@ -217,12 +218,13 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     @Override
     @SuppressWarnings("all")
-    public CreateHostedCheckoutResponse createHostedCheckout() {
+    public CreateHostedCheckoutResponse createHostedCheckout(com.ingenico.ogone.direct.order.data.BrowserData browserData) {
+        validateParameterNotNullStandardMessage("browserData", browserData);
         final CartModel sessionCart = getSessionCart();
         validateParameterNotNull(sessionCart, "sessionCart cannot be null");
         try (Client client = ingenicoClientFactory.getClient()) {
             final CreateHostedCheckoutRequest params = ingenicoHostedCheckoutParamConverter.convert(sessionCart);
-
+            params.getOrder().getCustomer().setDevice(getBrowserInfo(browserData));
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
 
             IngenicoLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
@@ -270,19 +272,20 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     }
 
-    private CustomerDevice getBrowserInfo(IngenicoHostedTokenizationData ingenicoHostedTokenizationData) {
+    private CustomerDevice getBrowserInfo(com.ingenico.ogone.direct.order.data.BrowserData internalBrowserData) {
         BrowserData browserData = new BrowserData();
-        browserData.setColorDepth(ingenicoHostedTokenizationData.getColorDepth());
-        browserData.setJavaEnabled(ingenicoHostedTokenizationData.getNavigatorJavaEnabled());
-        browserData.setScreenHeight(ingenicoHostedTokenizationData.getScreenHeight());
-        browserData.setScreenWidth(ingenicoHostedTokenizationData.getScreenWidth());
+        browserData.setColorDepth(internalBrowserData.getColorDepth());
+        browserData.setJavaEnabled(internalBrowserData.getNavigatorJavaEnabled());
+        browserData.setJavaScriptEnabled(internalBrowserData.getNavigatorJavaScriptEnabled());
+        browserData.setScreenHeight(internalBrowserData.getScreenHeight());
+        browserData.setScreenWidth(internalBrowserData.getScreenWidth());
 
         CustomerDevice browserInfo = new CustomerDevice();
-        browserInfo.setAcceptHeader(ingenicoHostedTokenizationData.getAcceptHeader());
-        browserInfo.setUserAgent(ingenicoHostedTokenizationData.getUserAgent());
-        browserInfo.setLocale(ingenicoHostedTokenizationData.getLocale());
-        browserInfo.setIpAddress(ingenicoHostedTokenizationData.getIpAddress());
-        browserInfo.setTimezoneOffsetUtcMinutes(ingenicoHostedTokenizationData.getTimezoneOffsetUtcMinutes());
+        browserInfo.setAcceptHeader(internalBrowserData.getAcceptHeader());
+        browserInfo.setUserAgent(internalBrowserData.getUserAgent());
+        browserInfo.setLocale(internalBrowserData.getLocale());
+        browserInfo.setIpAddress(internalBrowserData.getIpAddress());
+        browserInfo.setTimezoneOffsetUtcMinutes(internalBrowserData.getTimezoneOffsetUtcMinutes());
         browserInfo.setBrowserData(browserData);
 
         return browserInfo;
