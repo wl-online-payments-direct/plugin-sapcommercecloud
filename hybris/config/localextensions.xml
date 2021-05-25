@@ -262,6 +262,7 @@
     <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectbackoffice"/>
     <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectocc"/>
     <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectwebhook"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectcustomersupportbackoffice"/>
 
     <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectfulfilmentprocess"/>
 
