@@ -9,8 +9,9 @@ import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
 import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
+import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
+import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 
@@ -32,7 +33,7 @@ public interface IngenicoCheckoutFacade {
 
     OrderData handle3dsResponse(String ref, String returnMAC, String paymentId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
-    CreateHostedCheckoutResponse createHostedCheckout();
+    CreateHostedCheckoutResponse createHostedCheckout(BrowserData browserData);
 
     OrderData authorisePaymentForHostedCheckout(String hostedCheckoutId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
