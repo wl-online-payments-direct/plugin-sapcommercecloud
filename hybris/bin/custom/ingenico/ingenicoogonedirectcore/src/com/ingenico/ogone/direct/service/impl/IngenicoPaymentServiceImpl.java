@@ -5,6 +5,7 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 import de.hybris.platform.core.model.order.CartModel;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 
+import com.ingenico.direct.ApiException;
 import com.ingenico.direct.Client;
 import com.ingenico.direct.DeclinedPaymentException;
 import com.ingenico.direct.domain.BrowserData;
@@ -34,6 +36,7 @@ import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentResponse;
 import com.ingenico.direct.domain.ProductDirectory;
+import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.direct.merchant.products.GetPaymentProductParams;
 import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
 import com.ingenico.direct.merchant.products.GetProductDirectoryParams;
@@ -69,6 +72,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             params.setAmount(ingenicoAmountUtils.createAmount(amount, currency));
             params.setCountryCode(countryCode);
             params.setLocale(shopperLocale);
+            params.setHide(Collections.singletonList("fields"));
             final GetPaymentProductsResponse paymentProducts = client.merchant(getMerchantId()).products().getPaymentProducts(params);
 
             IngenicoLogUtils.logAction(LOGGER, "getPaymentProducts", params, paymentProducts);
@@ -252,6 +256,25 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             return null;
         }
 
+    }
+
+    @Override
+    public TokenResponse getToken(String tokenId) {
+        validateParameterNotNullStandardMessage("tokenId", tokenId);
+
+        try (Client client = ingenicoClientFactory.getClient()) {
+            final TokenResponse tokenResponse = client.merchant(getMerchantId()).tokens().getToken(tokenId);
+
+            IngenicoLogUtils.logAction(LOGGER, "getToken", tokenId, tokenResponse);
+
+            return tokenResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getToken", e);
+            return null;
+        } catch (ApiException e) {
+            LOGGER.info("[ INGENICO ] token not found!", e);
+            return null;
+        }
     }
 
     @Override
