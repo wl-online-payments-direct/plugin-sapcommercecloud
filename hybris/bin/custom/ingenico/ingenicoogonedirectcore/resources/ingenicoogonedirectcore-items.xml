@@ -70,7 +70,7 @@
                 </attribute>
                 <attribute qualifier="variant" type="java.lang.String">
                     <description>Template name for Tokenization form.</description>
-                    <modifiers read="true" write="true" />
+                    <modifiers read="true" write="true"/>
                     <persistence type="property"/>
                 </attribute>
             </attributes>
@@ -109,11 +109,14 @@
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="ingenicoCheckoutType" type="IngenicoCheckoutTypesEnum">
-                    <modifiers read="true" write="true" search="true" optional="false"/>
-                    <defaultvalue>em().getEnumerationValue("IngenicoCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
+                    <modifiers read="true" write="true" search="true" optional="true"/>
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="token" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="cardBrand" type="java.lang.String">
                     <modifiers read="true" write="true" search="false" optional="true"/>
                     <persistence type="property"/>
                 </attribute>
