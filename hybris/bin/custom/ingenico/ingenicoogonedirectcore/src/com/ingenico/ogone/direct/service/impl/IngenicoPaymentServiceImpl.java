@@ -12,6 +12,7 @@ import de.hybris.platform.order.CartService;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,6 +157,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             if (StringUtils.isNotBlank(currentIngenicoConfiguration.getVariant())) {
                 params.setVariant(currentIngenicoConfiguration.getVariant());
             }
+            params.setAskConsumerConsent(BooleanUtils.isTrue(currentIngenicoConfiguration.getAskConsumerConsent()));
             if (CollectionUtils.isNotEmpty(savedTokens)) {
                 params.setTokens(String.join(",", savedTokens));
             }
