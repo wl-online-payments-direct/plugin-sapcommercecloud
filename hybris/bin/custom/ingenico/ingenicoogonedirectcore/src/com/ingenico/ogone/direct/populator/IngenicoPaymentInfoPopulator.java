@@ -24,12 +24,14 @@ public class IngenicoPaymentInfoPopulator implements Populator<IngenicoPaymentIn
         ingenicoPaymentInfoData.setCardholderName(ingenicoPaymentInfoModel.getCardholderName());
         ingenicoPaymentInfoData.setExpiryDate(ingenicoPaymentInfoModel.getExpiryDate());
         ingenicoPaymentInfoData.setToken(ingenicoPaymentInfoModel.getToken());
+        ingenicoPaymentInfoData.setCardBrand(ingenicoPaymentInfoModel.getCardBrand());
         ingenicoPaymentInfoData.setType(ingenicoPaymentInfoModel.getType());
 
-        AddressData addressData = new AddressData();
-        addressConverter.convert(ingenicoPaymentInfoModel.getBillingAddress(), addressData);
-        ingenicoPaymentInfoData.setBillingAddress(addressData);
-
+        if (ingenicoPaymentInfoModel.getBillingAddress() != null) {
+            AddressData addressData = new AddressData();
+            addressConverter.convert(ingenicoPaymentInfoModel.getBillingAddress(), addressData);
+            ingenicoPaymentInfoData.setBillingAddress(addressData);
+        }
     }
 
     public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {
