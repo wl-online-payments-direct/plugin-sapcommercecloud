@@ -88,9 +88,8 @@ public class IngenicoTokenizationCheckoutStepController extends AbstractCheckout
 
         final CreateHostedTokenizationResponse hostedTokenization = ingenicoCheckoutFacade.createHostedTokenization();
         model.addAttribute("hostedTokenization", hostedTokenization);
+        model.addAttribute("savedPaymentInfos", ingenicoUserFacade.getIngenicoPaymentInfos(Boolean.TRUE));
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
-        model.addAttribute("savedPaymentInfos", ingenicoUserFacade.getIngenicoPaymentInfoDataForUniqueTokens());
-//        model.addAttribute("savedPaymentInfos", ingenicoUserFacade.getIngenicoPaymentInfos(Boolean.TRUE));
         model.addAttribute("cartData", cartData);
         model.addAttribute("ingenicoDoPaymentForm", new IngenicoHostedTokenizationForm());
 

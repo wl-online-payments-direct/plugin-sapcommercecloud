@@ -33,6 +33,15 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
             this.value = value;
         }
 
+        public static PAYMENT_METHOD_TYPE fromString(String text) {
+            for (PAYMENT_METHOD_TYPE pmt : PAYMENT_METHOD_TYPE.values()) {
+                if (pmt.value.equalsIgnoreCase(text)) {
+                    return pmt;
+                }
+            }
+            return null;
+        }
+
         public String getValue() {
             return value;
         }
