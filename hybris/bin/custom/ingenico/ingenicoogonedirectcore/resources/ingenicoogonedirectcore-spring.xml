@@ -40,6 +40,7 @@
 
     <!-- facades -->
     <bean id="ingenicoUserFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoUserFacadeImpl">
+        <property name="modelService" ref="modelService"/>
         <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
         <property name="ingenicoCustomerAccountService" ref="ingenicoCustomerAccountService"/>
         <property name="ingenicoPaymentInfoConverter" ref="ingenicoPaymentInfoConverter"/>

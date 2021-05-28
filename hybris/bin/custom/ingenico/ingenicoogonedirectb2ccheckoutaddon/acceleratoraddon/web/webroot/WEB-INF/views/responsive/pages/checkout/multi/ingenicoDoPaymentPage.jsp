@@ -22,7 +22,8 @@
         <script>
             var params = {
                 validationCallback: validateHostedTokenizationSubmit,
-                hideCardholderName: false
+                hideCardholderName: false,
+                hideTokenFields: false
             };
             var tokenizer = new Tokenizer("${hostedTokenization.partialRedirectUrl}", 'hostedTokenization', params);
 
@@ -85,7 +86,7 @@
                                                     <div class="saved-payment-entry">
                                                         <ul>
                                                             <strong>${savedPaymentInfo.cardholderName}</strong><br>
-                                                                ${savedPaymentInfo.type}<br>
+                                                                ${savedPaymentInfo.cardBrand}<br>
                                                                 ${savedPaymentInfo.alias}<br>
                                                             <spring:theme code="checkout.multi.tokenization.expire"
                                                                           arguments="${savedPaymentInfo.expiryDate}"/><br>
