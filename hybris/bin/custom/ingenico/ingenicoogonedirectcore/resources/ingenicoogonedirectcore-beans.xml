@@ -8,6 +8,7 @@
         <property name="paymentProductDirectoryId" type="String"/>
         <property name="ingenicoCheckoutType" type="com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum"/>
         <property name="token" type="String"/>
+        <property name="cardBrand" type="String"/>
         <property name="alias" type="String"/>
         <property name="type" type="String"/>
         <property name="cardholderName" type="String"/>

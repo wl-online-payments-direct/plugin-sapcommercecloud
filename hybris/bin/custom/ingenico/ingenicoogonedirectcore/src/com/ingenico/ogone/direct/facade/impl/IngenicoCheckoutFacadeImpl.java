@@ -24,7 +24,6 @@ import de.hybris.platform.commerceservices.order.CommerceCheckoutService;
 import de.hybris.platform.commerceservices.service.data.CommerceCheckoutParameter;
 import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
-import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
@@ -39,11 +38,11 @@ import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ingenico.direct.ApiException;
+import com.ingenico.direct.domain.CardPaymentMethodSpecificOutput;
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.CreatePaymentResponse;
@@ -53,6 +52,8 @@ import com.ingenico.direct.domain.GetHostedTokenizationResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentProductDisplayHints;
 import com.ingenico.direct.domain.PaymentResponse;
+import com.ingenico.direct.domain.RedirectPaymentMethodSpecificOutput;
+import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.HOSTED_CHECKOUT_STATUS_ENUM;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_METHOD_TYPE;
 import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
@@ -169,6 +170,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         final CreatePaymentResponse paymentForHostedTokenization = ingenicoPaymentService.createPaymentForHostedTokenization(ingenicoHostedTokenizationData, hostedTokenization);
 
         final PaymentResponse payment = paymentForHostedTokenization.getPayment();
+        savePaymentTokenIfNeeded(payment);
         if (paymentForHostedTokenization.getMerchantAction() != null) {
             ingenicoTransactionService.createAuthorizationPaymentTransaction(cartService.getSessionCart(),
                     payment.getPaymentOutput().getReferences().getMerchantReference(),
@@ -180,7 +182,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                     paymentForHostedTokenization.getMerchantAction(),
                     UNAUTHORIZED_REASON.NEED_3DS);
         }
-        keepPaymentToken(payment); //token exists if customer checks "Save payment details" btn on HOP
         return handlePaymentResponse(payment);
 
     }
@@ -210,7 +211,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
             case IN_PROGRESS:
                 throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
-                keepPaymentToken(hostedCheckoutData.getCreatedPaymentOutput().getPayment()); //token exists if customer checks "Save payment details" btn on HOP
+                savePaymentTokenIfNeeded(hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 return handlePaymentResponse(hostedCheckoutData.getCreatedPaymentOutput().getPayment());
             default:
                 LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
@@ -350,13 +351,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         paymentInfo.setPaymentProductDirectoryId(ingenicoPaymentInfoData.getPaymentProductDirectoryId());
         paymentInfo.setIngenicoCheckoutType(ingenicoPaymentInfoData.getIngenicoCheckoutType());
 
-        if (StringUtils.isNotEmpty(ingenicoPaymentInfoData.getToken())) {
-            paymentInfo.setSaved(true);
-            paymentInfo.setToken(ingenicoPaymentInfoData.getToken());
-            paymentInfo.setAlias(ingenicoPaymentInfoData.getAlias());
-            paymentInfo.setExpiryDate(ingenicoPaymentInfoData.getExpiryDate());
-        }
-
         AddressModel billingAddress = convertToAddressModel(ingenicoPaymentInfoData.getBillingAddress());
         paymentInfo.setBillingAddress(billingAddress);
         billingAddress.setOwner(paymentInfo);
@@ -399,25 +393,27 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         return cartService.hasSessionCart() ? cartService.getSessionCart() : null;
     }
 
-    private void keepPaymentToken(PaymentResponse paymentResponse) {
+    private void savePaymentTokenIfNeeded(PaymentResponse paymentResponse) {
 
-        String token = "";
-        String cardNumber = "";
-        String expDate = "";
-        if (paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
-            token = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken();
-            cardNumber = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getCard().getCardNumber();
-            expDate = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getCard().getExpiryDate();
-        } else if (paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput() != null) {
-            token = paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput().getToken();
+        String token = null;
+        final String paymentMethod = paymentResponse.getPaymentOutput().getPaymentMethod();
+        switch (PAYMENT_METHOD_TYPE.fromString(paymentMethod)) {
+            case CARD:
+                final CardPaymentMethodSpecificOutput cardPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput();
+                token = cardPaymentMethodSpecificOutput.getToken();
+                break;
+            case REDIRECT:
+                final RedirectPaymentMethodSpecificOutput redirectPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput();
+                token = redirectPaymentMethodSpecificOutput.getToken();
+                break;
         }
 
-        if (StringUtils.isNotEmpty(token)) {
-            final CartData cartData = checkoutFacade.getCheckoutCart();
-            cartData.getIngenicoPaymentInfo().setToken(token);
-            cartData.getIngenicoPaymentInfo().setExpiryDate(expDate);
-            cartData.getIngenicoPaymentInfo().setAlias(cardNumber); //in tokenization response the alias==cardNumber
-            handlePaymentInfo(cartData.getIngenicoPaymentInfo());
+        if (token != null) {
+            final TokenResponse tokenResponse = ingenicoPaymentService.getToken(token);
+            if(tokenResponse!=null) {
+                final PaymentProduct paymentProduct = getPaymentMethodById(tokenResponse.getPaymentProductId());
+                ingenicoUserFacade.saveIngenicoPaymentInfo(tokenResponse, paymentProduct);
+            }
         }
     }
 

@@ -42,24 +42,24 @@ public class IngenicoShoppingCartRequestParamPopulator implements Populator<Cart
       }
 
       //workaround for shipping taxes
-      lineItems.add(setShippingAsProduct(cartModel.getDeliveryCost(), currencyISOCode));
+      lineItems.add(setShippingAsProduct(cartModel, currencyISOCode));
 
       cart.setItems(lineItems);
 
       return cart;
    }
 
-   private LineItem setShippingAsProduct(Double shippingCost, String currencyISOCode) {
+   private LineItem setShippingAsProduct(CartModel cartModel, String currencyISOCode) {
       LineItem shipping = new LineItem();
       AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
-      itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(shippingCost, currencyISOCode));
+      itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(cartModel.getDeliveryCost(), currencyISOCode));
       itemAmountOfMoney.setCurrencyCode(currencyISOCode);
       shipping.setAmountOfMoney(itemAmountOfMoney);
 
       OrderLineDetails orderLineDetails = new OrderLineDetails();
-      orderLineDetails.setProductName("Delivery cost");
+      orderLineDetails.setProductName(cartModel.getDeliveryMode().getName());
       orderLineDetails.setQuantity(1L);
-      orderLineDetails.setProductPrice(ingenicoAmountUtils.createAmount(shippingCost, currencyISOCode));
+      orderLineDetails.setProductPrice(ingenicoAmountUtils.createAmount(cartModel.getDeliveryCost(), currencyISOCode));
 
       shipping.setOrderLineDetails(orderLineDetails);
       return shipping;
