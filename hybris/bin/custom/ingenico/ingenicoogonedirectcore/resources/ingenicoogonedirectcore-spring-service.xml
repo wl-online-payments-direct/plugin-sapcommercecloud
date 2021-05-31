@@ -11,7 +11,7 @@
 
     <bean id="ingenicoServiceMethodService"
           class="com.ingenico.ogone.direct.service.impl.IngenicoServiceMethodServiceImpl">
-        <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
+        <property name="ingenicoClientFactory" ref="ingenicoClientFactory"/>
     </bean>
 
     <bean id="ingenicoPaymentService" class="com.ingenico.ogone.direct.service.impl.IngenicoPaymentServiceImpl">
