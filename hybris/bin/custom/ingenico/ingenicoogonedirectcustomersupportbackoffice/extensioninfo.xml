@@ -6,7 +6,7 @@
     
     <extension abstractclassprefix="Generated" classprefix="Ingenicoogonedirectcustomersupportbackoffice" name="ingenicoogonedirectcustomersupportbackoffice" usemaven="false">
                 		
-        
+        <requires-extension name="ingenicoogonedirectcore"/>
         <requires-extension name="backoffice"/>
         <requires-extension name="customersupportbackoffice" />
         

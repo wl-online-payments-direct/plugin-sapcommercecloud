@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.ingenico.direct.domain.CapturePaymentRequest;
+import com.ingenico.direct.domain.CaptureResponse;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
@@ -47,282 +49,292 @@ import com.ingenico.ogone.direct.util.IngenicoLogUtils;
 
 public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(IngenicoPaymentServiceImpl.class);
+   private final static Logger LOGGER = LoggerFactory.getLogger(IngenicoPaymentServiceImpl.class);
 
-    private CartService cartService;
-    private IngenicoConfigurationService ingenicoConfigurationService;
-    private IngenicoAmountUtils ingenicoAmountUtils;
-    private IngenicoClientFactory ingenicoClientFactory;
-    private Converter<CartModel, CreatePaymentRequest> ingenicoHostedTokenizationParamConverter;
-    private Converter<CartModel, CreateHostedCheckoutRequest> ingenicoHostedCheckoutParamConverter;
+   private CartService cartService;
 
-    @Override
-    public GetPaymentProductsResponse getPaymentProductsResponse(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
-        validateParameterNotNull(amount, "amount cannot be null");
-        validateParameterNotNull(currency, "currency cannot be null");
-        validateParameterNotNull(countryCode, "countryCode cannot be null");
-        validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
+   private IngenicoConfigurationService ingenicoConfigurationService;
 
-        try (Client client = ingenicoClientFactory.getClient()) {
-            final GetPaymentProductsParams params = new GetPaymentProductsParams();
-            params.setCurrencyCode(currency);
-            params.setAmount(ingenicoAmountUtils.createAmount(amount, currency));
-            params.setCountryCode(countryCode);
-            params.setLocale(shopperLocale);
-            final GetPaymentProductsResponse paymentProducts = client.merchant(getMerchantId()).products().getPaymentProducts(params);
+   private IngenicoAmountUtils ingenicoAmountUtils;
 
-            IngenicoLogUtils.logAction(LOGGER, "getPaymentProducts", params, paymentProducts);
+   private IngenicoClientFactory ingenicoClientFactory;
 
-            return paymentProducts;
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting PaymentProducts ", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
-    }
+   private Converter<CartModel, CreatePaymentRequest> ingenicoHostedTokenizationParamConverter;
 
-    @Override
-    public List<PaymentProduct> getPaymentProducts(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
-        final GetPaymentProductsResponse getPaymentProductsResponse = getPaymentProductsResponse(amount, currency, countryCode, shopperLocale);
-        return getPaymentProductsResponse.getPaymentProducts();
-    }
+   private Converter<CartModel, CreateHostedCheckoutRequest> ingenicoHostedCheckoutParamConverter;
 
-    @Override
-    public PaymentProduct getPaymentProduct(Integer id, BigDecimal amount, String currency, String countryCode, String shopperLocale) {
-        validateParameterNotNull(id, "id cannot be null");
-        validateParameterNotNull(amount, "amount cannot be null");
-        validateParameterNotNull(currency, "currency cannot be null");
-        validateParameterNotNull(countryCode, "countryCode cannot be null");
-        validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
+   @Override public GetPaymentProductsResponse getPaymentProductsResponse(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
+      validateParameterNotNull(amount, "amount cannot be null");
+      validateParameterNotNull(currency, "currency cannot be null");
+      validateParameterNotNull(countryCode, "countryCode cannot be null");
+      validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
 
-        try (Client client = ingenicoClientFactory.getClient()) {
+      try (Client client = ingenicoClientFactory.getClient()) {
+         final GetPaymentProductsParams params = new GetPaymentProductsParams();
+         params.setCurrencyCode(currency);
+         params.setAmount(ingenicoAmountUtils.createAmount(amount, currency));
+         params.setCountryCode(countryCode);
+         params.setLocale(shopperLocale);
+         final GetPaymentProductsResponse paymentProducts = client.merchant(getMerchantId()).products().getPaymentProducts(params);
 
-            final GetPaymentProductParams params = new GetPaymentProductParams();
-            params.setCurrencyCode(currency);
-            params.setAmount(ingenicoAmountUtils.createAmount(amount, currency));
-            params.setCountryCode(countryCode);
-            params.setLocale(shopperLocale);
+         IngenicoLogUtils.logAction(LOGGER, "getPaymentProducts", params, paymentProducts);
 
-            final PaymentProduct paymentProduct = client.merchant(getMerchantId()).products().getPaymentProduct(id, params);
+         return paymentProducts;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting PaymentProducts ", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
+   }
 
-            IngenicoLogUtils.logAction(LOGGER, "getPaymentProduct", params, paymentProduct);
+   @Override public List<PaymentProduct> getPaymentProducts(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
+      final GetPaymentProductsResponse getPaymentProductsResponse = getPaymentProductsResponse(amount, currency, countryCode, shopperLocale);
+      return getPaymentProductsResponse.getPaymentProducts();
+   }
 
-            return paymentProduct;
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting PaymentProduct ", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
-    }
+   @Override public PaymentProduct getPaymentProduct(Integer id, BigDecimal amount, String currency, String countryCode, String shopperLocale) {
+      validateParameterNotNull(id, "id cannot be null");
+      validateParameterNotNull(amount, "amount cannot be null");
+      validateParameterNotNull(currency, "currency cannot be null");
+      validateParameterNotNull(countryCode, "countryCode cannot be null");
+      validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
 
-    @Override
-    @Cacheable(value = "productDirectory", key = "T(com.ingenico.ogone.direct.cache.IngenicoCacheKeyGenerator).generateKey(true,'directory',#id,#currency,#countryCode)")
-    public ProductDirectory getProductDirectory(Integer id, String currency, String countryCode) {
-        validateParameterNotNull(id, "id cannot be null");
-        validateParameterNotNull(currency, "currency cannot be null");
-        validateParameterNotNull(countryCode, "countryCode cannot be null");
+      try (Client client = ingenicoClientFactory.getClient()) {
 
-        try (Client client = ingenicoClientFactory.getClient()) {
+         final GetPaymentProductParams params = new GetPaymentProductParams();
+         params.setCurrencyCode(currency);
+         params.setAmount(ingenicoAmountUtils.createAmount(amount, currency));
+         params.setCountryCode(countryCode);
+         params.setLocale(shopperLocale);
 
-            final GetProductDirectoryParams params = new GetProductDirectoryParams();
-            params.setCurrencyCode(currency);
-            params.setCountryCode(countryCode);
+         final PaymentProduct paymentProduct = client.merchant(getMerchantId()).products().getPaymentProduct(id, params);
 
-            final ProductDirectory productDirectory = client.merchant(getMerchantId()).products().getProductDirectory(id, params);
+         IngenicoLogUtils.logAction(LOGGER, "getPaymentProduct", params, paymentProduct);
 
-            IngenicoLogUtils.logAction(LOGGER, "getProductDirectory", params, productDirectory);
+         return paymentProduct;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting PaymentProduct ", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
+   }
 
-            return productDirectory;
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting productDirectory ", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
-    }
+   @Override @Cacheable(value = "productDirectory", key = "T(com.ingenico.ogone.direct.cache.IngenicoCacheKeyGenerator).generateKey(true,'directory',#id,#currency,#countryCode)") public ProductDirectory getProductDirectory(
+         Integer id, String currency, String countryCode) {
+      validateParameterNotNull(id, "id cannot be null");
+      validateParameterNotNull(currency, "currency cannot be null");
+      validateParameterNotNull(countryCode, "countryCode cannot be null");
 
-    @Override
-    @Cacheable(value = "productDirectory", key = "T(com.ingenico.ogone.direct.cache.IngenicoCacheKeyGenerator).generateKey(true,'entry',#id,#currency,#countryCode)")
-    public List<DirectoryEntry> getProductDirectoryEntries(Integer id, String currency, String countryCode) {
-        return getProductDirectory(id, currency, countryCode).getEntries();
-    }
+      try (Client client = ingenicoClientFactory.getClient()) {
 
-    @Override
-    public CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale, List<String> savedTokens) {
-        validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
-        try (Client client = ingenicoClientFactory.getClient()) {
-            final IngenicoConfigurationModel currentIngenicoConfiguration = ingenicoConfigurationService.getCurrentIngenicoConfiguration();
-            CreateHostedTokenizationRequest params = new CreateHostedTokenizationRequest();
-            params.setLocale(shopperLocale);
-            if (StringUtils.isNotBlank(currentIngenicoConfiguration.getVariant())) {
-                params.setVariant(currentIngenicoConfiguration.getVariant());
-            }
-            if (CollectionUtils.isNotEmpty(savedTokens)) {
-                params.setTokens(String.join(",", savedTokens));
-            }
-            final CreateHostedTokenizationResponse hostedTokenization = client.merchant(getMerchantId()).hostedTokenization().createHostedTokenization(params);
+         final GetProductDirectoryParams params = new GetProductDirectoryParams();
+         params.setCurrencyCode(currency);
+         params.setCountryCode(countryCode);
 
-            IngenicoLogUtils.logAction(LOGGER, "createHostedTokenization", params, hostedTokenization);
+         final ProductDirectory productDirectory = client.merchant(getMerchantId()).products().getProductDirectory(id, params);
 
-            return hostedTokenization;
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting createHostedTokenization ", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
-    }
+         IngenicoLogUtils.logAction(LOGGER, "getProductDirectory", params, productDirectory);
 
-    @Override
-    public GetHostedTokenizationResponse getHostedTokenization(String hostedTokenizationId) {
-        validateParameterNotNull(hostedTokenizationId, "hostedTokenizationId cannot be null");
-        try (Client client = ingenicoClientFactory.getClient()) {
+         return productDirectory;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting productDirectory ", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
+   }
 
-            final GetHostedTokenizationResponse hostedTokenization = client.merchant(getMerchantId()).hostedTokenization().getHostedTokenization(hostedTokenizationId);
+   @Override @Cacheable(value = "productDirectory", key = "T(com.ingenico.ogone.direct.cache.IngenicoCacheKeyGenerator).generateKey(true,'entry',#id,#currency,#countryCode)") public List<DirectoryEntry> getProductDirectoryEntries(
+         Integer id, String currency, String countryCode) {
+      return getProductDirectory(id, currency, countryCode).getEntries();
+   }
 
-            IngenicoLogUtils.logAction(LOGGER, "getHostedTokenization", hostedTokenizationId, hostedTokenization);
+   @Override public CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale, List<String> savedTokens) {
+      validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
+      try (Client client = ingenicoClientFactory.getClient()) {
+         final IngenicoConfigurationModel currentIngenicoConfiguration = ingenicoConfigurationService.getCurrentIngenicoConfiguration();
+         CreateHostedTokenizationRequest params = new CreateHostedTokenizationRequest();
+         params.setLocale(shopperLocale);
+         if (StringUtils.isNotBlank(currentIngenicoConfiguration.getVariant())) {
+            params.setVariant(currentIngenicoConfiguration.getVariant());
+         }
+         if (CollectionUtils.isNotEmpty(savedTokens)) {
+            params.setTokens(String.join(",", savedTokens));
+         }
+         final CreateHostedTokenizationResponse hostedTokenization = client.merchant(getMerchantId()).hostedTokenization().createHostedTokenization(params);
 
-            return hostedTokenization;
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting getHostedTokenization ", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
-    }
+         IngenicoLogUtils.logAction(LOGGER, "createHostedTokenization", params, hostedTokenization);
 
-    @Override
-    @SuppressWarnings("all")
-    public CreatePaymentResponse createPaymentForHostedTokenization(IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) {
-        validateParameterNotNull(tokenizationResponse, "tokenizationResponse cannot be null");
-        final CartModel sessionCart = getSessionCart();
-        validateParameterNotNull(sessionCart, "sessionCart cannot be null");
-        try (Client client = ingenicoClientFactory.getClient()) {
+         return hostedTokenization;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting createHostedTokenization ", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
+   }
 
-            final CreatePaymentRequest params = ingenicoHostedTokenizationParamConverter.convert(sessionCart);
-            params.getCardPaymentMethodSpecificInput()
-                    .setToken(tokenizationResponse.getToken().getId());
-            params.getCardPaymentMethodSpecificInput()
-                    .setPaymentProductId(tokenizationResponse.getToken().getPaymentProductId());
-            params.getOrder().getCustomer().setDevice(getBrowserInfo(ingenicoHostedTokenizationData.getBrowserData()));
-            final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
+   @Override public GetHostedTokenizationResponse getHostedTokenization(String hostedTokenizationId) {
+      validateParameterNotNull(hostedTokenizationId, "hostedTokenizationId cannot be null");
+      try (Client client = ingenicoClientFactory.getClient()) {
 
-            IngenicoLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, payment);
+         final GetHostedTokenizationResponse hostedTokenization =
+               client.merchant(getMerchantId()).hostedTokenization().getHostedTokenization(hostedTokenizationId);
 
-            return payment;
-        } catch (DeclinedPaymentException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting createPayment ", e);
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting createPayment ", e);
-            //TODO Throw Logical Exception
-        }
-        return null;
-    }
+         IngenicoLogUtils.logAction(LOGGER, "getHostedTokenization", hostedTokenizationId, hostedTokenization);
 
-    @Override
-    @SuppressWarnings("all")
-    public CreateHostedCheckoutResponse createHostedCheckout(com.ingenico.ogone.direct.order.data.BrowserData browserData) {
-        validateParameterNotNullStandardMessage("browserData", browserData);
-        final CartModel sessionCart = getSessionCart();
-        validateParameterNotNull(sessionCart, "sessionCart cannot be null");
-        try (Client client = ingenicoClientFactory.getClient()) {
-            final CreateHostedCheckoutRequest params = ingenicoHostedCheckoutParamConverter.convert(sessionCart);
-            params.getOrder().getCustomer().setDevice(getBrowserInfo(browserData));
-            final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
+         return hostedTokenization;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting getHostedTokenization ", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
+   }
 
-            IngenicoLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
+   @Override @SuppressWarnings("all") public CreatePaymentResponse createPaymentForHostedTokenization(
+         IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) {
+      validateParameterNotNull(tokenizationResponse, "tokenizationResponse cannot be null");
+      final CartModel sessionCart = getSessionCart();
+      validateParameterNotNull(sessionCart, "sessionCart cannot be null");
+      try (Client client = ingenicoClientFactory.getClient()) {
 
-            return hostedCheckout;
+         final CreatePaymentRequest params = ingenicoHostedTokenizationParamConverter.convert(sessionCart);
+         params.getCardPaymentMethodSpecificInput().setToken(tokenizationResponse.getToken().getId());
+         params.getCardPaymentMethodSpecificInput().setPaymentProductId(tokenizationResponse.getToken().getPaymentProductId());
+         params.getOrder().getCustomer().setDevice(getBrowserInfo(ingenicoHostedTokenizationData.getBrowserData()));
+         final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
 
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting createHostedCheckout ", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
-    }
+         IngenicoLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, payment);
 
-    @Override
-    public GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId) {
-        try (Client client = ingenicoClientFactory.getClient()) {
-            final GetHostedCheckoutResponse hostedCheckoutResponse = client.merchant(getMerchantId()).hostedCheckout().getHostedCheckout(hostedCheckoutId);
+         return payment;
+      } catch (DeclinedPaymentException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting createPayment ", e);
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting createPayment ", e);
+         //TODO Throw Logical Exception
+      }
+      return null;
+   }
 
-            IngenicoLogUtils.logAction(LOGGER, "getHostedCheckout", hostedCheckoutId, hostedCheckoutResponse);
+   @Override @SuppressWarnings("all") public CreateHostedCheckoutResponse createHostedCheckout(com.ingenico.ogone.direct.order.data.BrowserData browserData) {
+      validateParameterNotNullStandardMessage("browserData", browserData);
+      final CartModel sessionCart = getSessionCart();
+      validateParameterNotNull(sessionCart, "sessionCart cannot be null");
+      try (Client client = ingenicoClientFactory.getClient()) {
+         final CreateHostedCheckoutRequest params = ingenicoHostedCheckoutParamConverter.convert(sessionCart);
+         params.getOrder().getCustomer().setDevice(getBrowserInfo(browserData));
+         final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
 
-            return hostedCheckoutResponse;
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting createHostedCheckout ", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
+         IngenicoLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
 
-    }
+         return hostedCheckout;
 
-    @Override
-    public PaymentResponse getPayment(String paymentId) {
-        validateParameterNotNull(paymentId, "paymentId cannot be null");
-        try (Client client = ingenicoClientFactory.getClient()) {
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting createHostedCheckout ", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
+   }
 
-            final PaymentResponse payment = client.merchant(getMerchantId()).payments().getPayment(paymentId);
+   @Override public GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId) {
+      try (Client client = ingenicoClientFactory.getClient()) {
+         final GetHostedCheckoutResponse hostedCheckoutResponse = client.merchant(getMerchantId()).hostedCheckout().getHostedCheckout(hostedCheckoutId);
 
-            IngenicoLogUtils.logAction(LOGGER, "getPayment", paymentId, payment);
+         IngenicoLogUtils.logAction(LOGGER, "getHostedCheckout", hostedCheckoutId, hostedCheckoutResponse);
 
-            return payment;
-        } catch (IOException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting getPayment", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
+         return hostedCheckoutResponse;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting createHostedCheckout ", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
 
-    }
+   }
 
-    private CustomerDevice getBrowserInfo(com.ingenico.ogone.direct.order.data.BrowserData internalBrowserData) {
-        BrowserData browserData = new BrowserData();
-        browserData.setColorDepth(internalBrowserData.getColorDepth());
-        browserData.setJavaEnabled(internalBrowserData.getNavigatorJavaEnabled());
-        browserData.setJavaScriptEnabled(internalBrowserData.getNavigatorJavaScriptEnabled());
-        browserData.setScreenHeight(internalBrowserData.getScreenHeight());
-        browserData.setScreenWidth(internalBrowserData.getScreenWidth());
+   @Override public PaymentResponse getPayment(String paymentId) {
+      validateParameterNotNull(paymentId, "paymentId cannot be null");
+      try (Client client = ingenicoClientFactory.getClient()) {
 
-        CustomerDevice browserInfo = new CustomerDevice();
-        browserInfo.setAcceptHeader(internalBrowserData.getAcceptHeader());
-        browserInfo.setUserAgent(internalBrowserData.getUserAgent());
-        browserInfo.setLocale(internalBrowserData.getLocale());
-        browserInfo.setIpAddress(internalBrowserData.getIpAddress());
-        browserInfo.setTimezoneOffsetUtcMinutes(internalBrowserData.getTimezoneOffsetUtcMinutes());
-        browserInfo.setBrowserData(browserData);
+         final PaymentResponse payment = client.merchant(getMerchantId()).payments().getPayment(paymentId);
 
-        return browserInfo;
-    }
+         IngenicoLogUtils.logAction(LOGGER, "getPayment", paymentId, payment);
 
-    private String getMerchantId() {
-        return ingenicoConfigurationService.getCurrentMerchantId();
-    }
+         return payment;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting getPayment", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
 
-    private CartModel getSessionCart() {
-        if (cartService.hasSessionCart()) {
-            return cartService.getSessionCart();
-        }
-        return null;
-    }
+   }
 
-    public void setIngenicoAmountUtils(IngenicoAmountUtils ingenicoAmountUtils) {
-        this.ingenicoAmountUtils = ingenicoAmountUtils;
-    }
+   @Override
+   public CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
 
-    public void setIngenicoClientFactory(IngenicoClientFactory ingenicoClientFactory) {
-        this.ingenicoClientFactory = ingenicoClientFactory;
-    }
+      try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
+         CapturePaymentRequest capturePaymentRequest =
+               new CapturePaymentRequest(); // there are two fields; both have default values => not mandatory to send values
 
-    public void setCartService(CartService cartService) {
-        this.cartService = cartService;
-    }
+         CaptureResponse captureResponse =
+               client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().capturePayment(paymentId, capturePaymentRequest);
 
-    public void setIngenicoConfigurationService(IngenicoConfigurationService ingenicoConfigurationService) {
-        this.ingenicoConfigurationService = ingenicoConfigurationService;
-    }
+         return captureResponse;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting getPayment", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
+   }
 
-    public void setIngenicoHostedTokenizationParamConverter(Converter<CartModel, CreatePaymentRequest> ingenicoHostedTokenizationParamConverter) {
-        this.ingenicoHostedTokenizationParamConverter = ingenicoHostedTokenizationParamConverter;
-    }
+   private CustomerDevice getBrowserInfo(com.ingenico.ogone.direct.order.data.BrowserData internalBrowserData) {
+      BrowserData browserData = new BrowserData();
+      browserData.setColorDepth(internalBrowserData.getColorDepth());
+      browserData.setJavaEnabled(internalBrowserData.getNavigatorJavaEnabled());
+      browserData.setJavaScriptEnabled(internalBrowserData.getNavigatorJavaScriptEnabled());
+      browserData.setScreenHeight(internalBrowserData.getScreenHeight());
+      browserData.setScreenWidth(internalBrowserData.getScreenWidth());
 
-    public void setIngenicoHostedCheckoutParamConverter(Converter<CartModel, CreateHostedCheckoutRequest> ingenicoHostedCheckoutParamConverter) {
-        this.ingenicoHostedCheckoutParamConverter = ingenicoHostedCheckoutParamConverter;
-    }
+      CustomerDevice browserInfo = new CustomerDevice();
+      browserInfo.setAcceptHeader(internalBrowserData.getAcceptHeader());
+      browserInfo.setUserAgent(internalBrowserData.getUserAgent());
+      browserInfo.setLocale(internalBrowserData.getLocale());
+      browserInfo.setIpAddress(internalBrowserData.getIpAddress());
+      browserInfo.setTimezoneOffsetUtcMinutes(internalBrowserData.getTimezoneOffsetUtcMinutes());
+      browserInfo.setBrowserData(browserData);
+
+      return browserInfo;
+   }
+
+   private String getMerchantId() {
+      return ingenicoConfigurationService.getCurrentMerchantId();
+   }
+
+   private CartModel getSessionCart() {
+      if (cartService.hasSessionCart()) {
+         return cartService.getSessionCart();
+      }
+      return null;
+   }
+
+   public void setIngenicoAmountUtils(IngenicoAmountUtils ingenicoAmountUtils) {
+      this.ingenicoAmountUtils = ingenicoAmountUtils;
+   }
+
+   public void setIngenicoClientFactory(IngenicoClientFactory ingenicoClientFactory) {
+      this.ingenicoClientFactory = ingenicoClientFactory;
+   }
+
+   public void setCartService(CartService cartService) {
+      this.cartService = cartService;
+   }
+
+   public void setIngenicoConfigurationService(IngenicoConfigurationService ingenicoConfigurationService) {
+      this.ingenicoConfigurationService = ingenicoConfigurationService;
+   }
+
+   public void setIngenicoHostedTokenizationParamConverter(Converter<CartModel, CreatePaymentRequest> ingenicoHostedTokenizationParamConverter) {
+      this.ingenicoHostedTokenizationParamConverter = ingenicoHostedTokenizationParamConverter;
+   }
+
+   public void setIngenicoHostedCheckoutParamConverter(Converter<CartModel, CreateHostedCheckoutRequest> ingenicoHostedCheckoutParamConverter) {
+      this.ingenicoHostedCheckoutParamConverter = ingenicoHostedCheckoutParamConverter;
+   }
 }
