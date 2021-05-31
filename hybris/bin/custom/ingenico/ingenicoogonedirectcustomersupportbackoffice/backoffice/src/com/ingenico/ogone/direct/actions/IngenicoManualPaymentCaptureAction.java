@@ -1,6 +1,7 @@
 package com.ingenico.ogone.direct.actions;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -9,7 +10,6 @@ import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
 import com.ingenico.direct.domain.CaptureResponse;
-import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.service.IngenicoTransactionService;
@@ -39,16 +39,17 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
 
       //result
       ActionResult<OrderModel> result = null;
-      Object[] resultMessage = null;
-      if (IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED.equals(captureResponse.getStatus())) {
-         PaymentTransactionModel paymentTransactionModel = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
-         ingenicoTransactionService.updatePaymentTransaction(paymentTransactionModel, captureResponse.getStatus(), captureResponse.getStatus(), captureResponse.getCaptureOutput().getAmountOfMoney(), PaymentTransactionType.CAPTURE);
+      String resultMessage = null;
+      PaymentTransactionModel paymentTransactionModel = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
+      ingenicoTransactionService.updatePaymentTransaction(paymentTransactionModel, captureResponse.getStatus(), captureResponse.getStatus(), captureResponse.getCaptureOutput().getAmountOfMoney(), PaymentTransactionType.CAPTURE);
+
+      if (CAPTURE_REQUESTED.getValue().equals(captureResponse.getStatus())) {
          ingenicoBusinessProcessService.triggerOrderProcessEvent(order, INGENICO_EVENT_CAPTURE);
          result = new ActionResult<OrderModel>(ActionResult.SUCCESS, order);
-         resultMessage = new Object[]{actionContext.getLabel("action.manualpaymentcapture.success")};
+         resultMessage = actionContext.getLabel("action.manualpaymentcapture.success");
       } else {
          result = new ActionResult<OrderModel>(ActionResult.ERROR, order);
-         resultMessage = new Object[]{actionContext.getLabel("action.manualpaymentcapture.error")};
+         resultMessage = actionContext.getLabel("action.manualpaymentcapture.error");
       }
       Messagebox.show(resultMessage + ", " + captureResponse.getStatus() + ", (" + result.getResultCode() + ")");
 
