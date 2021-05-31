@@ -92,9 +92,9 @@
         <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="alias,cardholderName,expiryDate,type"/>
-                <entry key="DEFAULT" value="BASIC,token"/>
-                <entry key="FULL" value="DEFAULT,token"/>
+                <entry key="BASIC" value="token,cardBrand,alias,cardholderName,expiryDate,type"/>
+                <entry key="DEFAULT" value="BASIC"/>
+                <entry key="FULL" value="DEFAULT"/>
             </map>
         </property>
     </bean>
