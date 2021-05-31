@@ -15,6 +15,7 @@ import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentResponse;
 import com.ingenico.direct.domain.ProductDirectory;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
+import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 
@@ -43,5 +44,7 @@ public interface IngenicoPaymentService {
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 
     CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId);
+
+    TokenResponse getToken(String tokenId);
 
 }

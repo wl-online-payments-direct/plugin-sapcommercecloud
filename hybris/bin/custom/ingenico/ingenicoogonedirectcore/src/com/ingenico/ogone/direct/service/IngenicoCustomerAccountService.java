@@ -8,4 +8,6 @@ import de.hybris.platform.core.model.user.CustomerModel;
 public interface IngenicoCustomerAccountService {
 
     List<IngenicoPaymentInfoModel> getIngenicoPaymentInfos(CustomerModel customerModel, boolean saved);
+
+    IngenicoPaymentInfoModel getIngenicoPaymentInfoByToken(CustomerModel customerModel, String token, boolean saved);
 }
