@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <!--
+         Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+        -->
+<action-definition id="com.ingenico.ogone.direct.actions.ingenicomanualpaymentcaptureaction" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   extends="de.hybris.ordermanagementbackoffice.actions.order.manualpaymentcaptureaction" xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/action-definition.xsd">
+
+    <name>Manual Payment Capture Action</name>
+    <description>Action for requesting capture payments manually</description>
+    <author>hybris</author>
+    <version>1.0</version>
+
+    <actionClassName>com.ingenico.ogone.direct.actions.IngenicoManualPaymentCaptureAction</actionClassName>
+
+    <inputType>de.hybris.platform.core.model.order.OrderModel</inputType>
+    <outputType>de.hybris.platform.core.model.order.OrderModel</outputType>
+
+    <!-- folder icons with the icons must be created in the following directory: myextension/backoffice/resources/widgets/actions/myaction -->
+    <iconUri>icons/icon_action_manualpaymentcapture_default.png</iconUri>
+    <iconHoverUri>icons/icon_action_manualpaymentcapture_hover.png</iconHoverUri>
+    <iconDisabledUri>icons/icon_action_manualpaymentcapture_disabled.png</iconDisabledUri>
+
+    <settings>
+        <setting key="viewMode" default-value="iconAndText"/>
+    </settings>
+
+</action-definition>

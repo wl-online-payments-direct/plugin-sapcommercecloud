@@ -24,12 +24,21 @@ public class IngenicoClientFactoryImpl implements IngenicoClientFactory {
         return (Client) Factory.createClient(getCommunicatorConfiguration());
     }
 
+    public Client getClient(IngenicoConfigurationModel ingenicoConfigurationModel) {
+        return (Client) Factory.createClient(getCommunicatorConfiguration(ingenicoConfigurationModel));
+    }
 
     private CommunicatorConfiguration getCommunicatorConfiguration() {
         final IngenicoConfigurationModel ingenicoConfiguration = ingenicoConfigurationService.getCurrentIngenicoConfiguration();
         return communicatorConfiguration.withApiEndpoint(createURI(ingenicoConfiguration.getEndpointURL()))
                 .withApiKeyId(ingenicoConfiguration.getApiKey())
                 .withSecretApiKey(ingenicoConfiguration.getApiSecret());
+    }
+
+    private CommunicatorConfiguration getCommunicatorConfiguration(IngenicoConfigurationModel ingenicoConfiguration) {
+        return communicatorConfiguration.withApiEndpoint(createURI(ingenicoConfiguration.getEndpointURL()))
+              .withApiKeyId(ingenicoConfiguration.getApiKey())
+              .withSecretApiKey(ingenicoConfiguration.getApiSecret());
     }
 
     private URI createURI(String host) {
