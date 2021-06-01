@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
+import com.ingenico.direct.domain.CapturePaymentRequest;
+import com.ingenico.direct.domain.CaptureResponse;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
@@ -287,13 +289,31 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             IngenicoLogUtils.logAction(LOGGER, "getPayment", paymentId, payment);
 
             return payment;
-        } catch (IOException e) {
+         } catch (IOException e) {
             LOGGER.error("[ INGENICO ] Errors during getting getPayment", e);
             //TODO Throw Logical Exception
             return null;
-        }
+         }
 
-    }
+   }
+
+   @Override
+   public CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
+
+      try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
+         CapturePaymentRequest capturePaymentRequest =
+               new CapturePaymentRequest(); // there are two fields; both have default values => not mandatory to send values
+
+         CaptureResponse captureResponse =
+               client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().capturePayment(paymentId, capturePaymentRequest);
+
+         return captureResponse;
+      } catch (IOException e) {
+         LOGGER.error("[ INGENICO ] Errors during getting getPayment", e);
+         //TODO Throw Logical Exception
+         return null;
+      }
+   }
 
     private CustomerDevice getBrowserInfo(com.ingenico.ogone.direct.order.data.BrowserData internalBrowserData) {
         BrowserData browserData = new BrowserData();
