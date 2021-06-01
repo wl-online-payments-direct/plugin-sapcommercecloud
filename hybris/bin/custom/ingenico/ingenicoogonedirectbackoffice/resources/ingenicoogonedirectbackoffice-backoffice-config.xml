@@ -31,7 +31,7 @@
 	<context merge-by="type" parent="GenericItem" type="IngenicoConfiguration" component="listview">
 		<lv:list-view>
 			<lv:column qualifier="merchantID"/>
-			<lv:column qualifier="ApiKey"/>
+			<lv:column qualifier="apiKey"/>
 		</lv:list-view>
 	</context>
 
@@ -82,11 +82,23 @@
 		</y:base>
 	</context>
 
-	<!-- IngenicoConfiguration test connection btn -->
-	<context merge-by="module" component="editorareaactions" type="IngenicoConfiguration">
+	<!-- IngenicoConfiguration actions -->
+	<context merge-by="type" component="editorareaactions" type="IngenicoConfiguration">
 		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
-			<y:group qualifier="common">
-				<y:action action-id="com.ingenico.ogone.direct.action.ingenicotestconnectionaction" property="currentObject" />
+			<y:group qualifier="common" merge-mode="append">
+				<y:label>ingenico.common</y:label>
+				<y:action action-id="com.ingenico.ogone.direct.action.test.connection" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.ingenico.ogone.direct.action.support.contact">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
 			</y:group>
 		</y:actions>
 	</context>
