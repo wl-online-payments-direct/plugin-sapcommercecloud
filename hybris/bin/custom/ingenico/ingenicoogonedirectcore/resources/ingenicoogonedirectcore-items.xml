@@ -16,12 +16,21 @@
             <description>Checkout types for card payments</description>
             <value code="SALE"/>
             <value code="PRE_AUTHORIZATION"/>
+            <value code="FINAL_AUTHORIZATION"/>
         </enumtype>
         <enumtype code="IngenicoWebhooksEventStatusEnum">
             <value code="CREATED"/>
             <value code="FAILED"/>
             <value code="MAX_ATTEMPT_REACHED"/>
             <value code="PROCESSED"/>
+        </enumtype>
+        <enumtype code="PaymentStatus" autocreate="false" generate="true" dynamic="true">
+            <value code="INGENICO_WAITING_AUTH" />
+            <value code="INGENICO_AUTHORIZED" />
+            <value code="INGENICO_CANCELED" />
+            <value code="INGENICO_REJECTED" />
+            <value code="INGENICO_WAITING_CAPTURE" />
+            <value code="INGENICO_CAPTURED" />
         </enumtype>
     </enumtypes>
 
