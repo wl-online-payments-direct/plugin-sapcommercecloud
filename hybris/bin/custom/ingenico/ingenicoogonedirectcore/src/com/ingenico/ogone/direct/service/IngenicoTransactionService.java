@@ -9,6 +9,14 @@ import com.ingenico.direct.domain.WebhooksEvent;
 
 public interface IngenicoTransactionService {
 
+    PaymentTransactionModel createOrUpdatePaymentTransaction(AbstractOrderModel abstractOrderModel,
+                                                             String merchantReference,
+                                                             String paymentTransactionId,
+                                                             String status,
+                                                             String statusDetails,
+                                                             AmountOfMoney amountOfMoney,
+                                                             PaymentTransactionType paymentTransactionType);
+
     PaymentTransactionModel createAuthorizationPaymentTransaction(AbstractOrderModel abstractOrderModel,
                                                                   String merchantReference,
                                                                   String paymentTransactionId,
@@ -16,12 +24,8 @@ public interface IngenicoTransactionService {
                                                                   String statusDetails,
                                                                   AmountOfMoney amountOfMoney);
 
-    PaymentTransactionModel createAuthorizedPaymentTransaction(AbstractOrderModel abstractOrderModel,
-                                                               String merchantReference,
-                                                               String paymentTransactionId,
-                                                               AmountOfMoney amountOfMoney);
-
     PaymentTransactionModel updatePaymentTransaction(PaymentTransactionModel paymentTransactionModel,
+                                                     String paymentTransactionId,
                                                      String status,
                                                      String statusDetails,
                                                      AmountOfMoney amountOfMoney,

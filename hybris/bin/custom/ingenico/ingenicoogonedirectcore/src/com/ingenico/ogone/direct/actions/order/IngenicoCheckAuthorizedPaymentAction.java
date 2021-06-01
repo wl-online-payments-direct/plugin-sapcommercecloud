@@ -1,11 +1,13 @@
 package com.ingenico.ogone.direct.actions.order;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.STATUS_UNKNOWN;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import de.hybris.platform.core.enums.OrderStatus;
+import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.orderprocessing.model.OrderProcessModel;
@@ -48,16 +50,20 @@ public class IngenicoCheckAuthorizedPaymentAction extends AbstractAction<OrderPr
             case "SUCCESSFUL":
                 LOG.debug("[INGENICO] Process: {} Order Authorized", process.getCode());
                 order.setStatus(OrderStatus.PAYMENT_AUTHORIZED);
+                order.setPaymentStatus(PaymentStatus.INGENICO_AUTHORIZED);
                 modelService.save(order);
                 return Transition.OK.toString();
             case "REJECTED":
                 LOG.debug("[INGENICO] Process: {} Order Not Authorized", process.getCode());
                 order.setStatus(OrderStatus.PAYMENT_NOT_AUTHORIZED);
+                order.setPaymentStatus(PaymentStatus.INGENICO_REJECTED);
                 modelService.save(order);
                 return Transition.NOK.toString();
             case "STATUS_UNKNOWN":
             default:
-                LOG.debug("[INGENICO] Process: {} Order Waiting", process.getCode());
+                LOG.debug("[INGENICO] Process: {} Order Waiting Auth", process.getCode());
+                order.setPaymentStatus(PaymentStatus.INGENICO_WAITING_AUTH);
+                modelService.save(order);
                 return Transition.WAIT.toString();
         }
     }
@@ -68,7 +74,14 @@ public class IngenicoCheckAuthorizedPaymentAction extends AbstractAction<OrderPr
                 .stream()
                 .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()))
                 .map(PaymentTransactionEntryModel::getTransactionStatus)
-                .findFirst().orElseGet(STATUS_UNKNOWN::getValue);
+                .reduce((current, next) -> next).orElseGet(()->getCaptureStatus(finalPaymentTransaction));
+    }
+
+    private String getCaptureStatus(final PaymentTransactionModel finalPaymentTransaction) {
+        return finalPaymentTransaction.getEntries()
+                .stream()
+                .anyMatch(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType())) ?
+                SUCCESSFUL.getValue() : STATUS_UNKNOWN.getValue();
     }
 
 

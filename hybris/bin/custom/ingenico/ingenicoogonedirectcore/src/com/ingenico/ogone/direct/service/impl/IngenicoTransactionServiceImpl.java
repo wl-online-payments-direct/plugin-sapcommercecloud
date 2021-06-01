@@ -14,8 +14,10 @@ import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
+import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,53 +40,63 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
 
     @Override
+    public PaymentTransactionModel createOrUpdatePaymentTransaction(AbstractOrderModel abstractOrderModel, String merchantReference, String paymentTransactionId, String status, String statusDetails, AmountOfMoney amountOfMoney, PaymentTransactionType paymentTransactionType) {
+        validateParameterNotNullStandardMessage("abstractOrderModel", abstractOrderModel);
+        validateParameterNotNullStandardMessage("merchantReference", merchantReference);
+        validateParameterNotNullStandardMessage("paymentTransactionId", paymentTransactionId);
+        validateParameterNotNullStandardMessage("status", status);
+        validateParameterNotNullStandardMessage("statusDetails", statusDetails);
+        validateParameterNotNullStandardMessage("amountOfMoney", amountOfMoney);
+        validateParameterNotNullStandardMessage("paymentTransactionType", paymentTransactionType);
+        PaymentTransactionModel paymentTransaction;
+        try {
+            paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(paymentTransactionId));
+        } catch (ModelNotFoundException exception) {
+            paymentTransaction = createPaymentTransaction(
+                    abstractOrderModel,
+                    merchantReference,
+                    paymentTransactionId);
+        }
+
+        return updatePaymentTransaction(
+                paymentTransaction,
+                paymentTransactionId,
+                status,
+                statusDetails,
+                amountOfMoney,
+                paymentTransactionType
+        );
+    }
+
+
+    @Override
     public PaymentTransactionModel createAuthorizationPaymentTransaction(AbstractOrderModel abstractOrderModel,
                                                                          String merchantReference,
                                                                          String paymentTransactionId,
                                                                          String status,
                                                                          String statusDetails,
                                                                          AmountOfMoney amountOfMoney) {
-        final PaymentTransactionModel paymentTransactionModel = createPaymentTransaction(
-                abstractOrderModel,
+        return createOrUpdatePaymentTransaction(abstractOrderModel,
                 merchantReference,
-                paymentTransactionId);
-
-        createPaymentTransactionEntry(
-                paymentTransactionModel,
-                abstractOrderModel,
+                paymentTransactionId,
                 status,
                 statusDetails,
                 amountOfMoney,
-                PaymentTransactionType.AUTHORIZATION
-        );
-
-        modelService.refresh(paymentTransactionModel);
-        return paymentTransactionModel;
+                PaymentTransactionType.AUTHORIZATION);
     }
 
 
     @Override
-    public PaymentTransactionModel createAuthorizedPaymentTransaction(AbstractOrderModel abstractOrderModel,
-                                                                      String merchantReference,
-                                                                      String paymentTransactionId,
-                                                                      AmountOfMoney amountOfMoney) {
-        return createAuthorizationPaymentTransaction(abstractOrderModel,
-                merchantReference,
-                paymentTransactionId,
-                PAYMENT_STATUS_ENUM.PENDING_CAPTURE.getValue(),
-                PAYMENT_STATUS_ENUM.PENDING_CAPTURE.getValue(),
-                amountOfMoney);
-    }
-
-    @Override
-    public PaymentTransactionModel updatePaymentTransaction(PaymentTransactionModel paymentTransaction, String status, String statusDetails, AmountOfMoney amountOfMoney, PaymentTransactionType paymentTransactionType) {
+    public PaymentTransactionModel updatePaymentTransaction(PaymentTransactionModel paymentTransaction, String paymentTransactionId, String status, String statusDetails, AmountOfMoney amountOfMoney, PaymentTransactionType paymentTransactionType) {
         validateParameterNotNullStandardMessage("paymentTransaction", paymentTransaction);
+        validateParameterNotNullStandardMessage("paymentTransactionId", paymentTransactionId);
         validateParameterNotNullStandardMessage("status", status);
         validateParameterNotNullStandardMessage("statusDetails", statusDetails);
         validateParameterNotNullStandardMessage("amountOfMoney", amountOfMoney);
         validateParameterNotNullStandardMessage("paymentTransactionType", paymentTransactionType);
         createPaymentTransactionEntry(
                 paymentTransaction,
+                paymentTransactionId,
                 paymentTransaction.getOrder(),
                 status,
                 statusDetails,
@@ -101,11 +113,11 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
         validateParameterNotNullStandardMessage("webhooksEvent.payment", webhooksEvent.getPayment());
         LOGGER.debug("[INGENICO] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
-        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(webhooksEvent.getPayment().getId());
+        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getPayment().getId()));
         final OrderModel order = (OrderModel) paymentTransaction.getOrder();
-        createPaymentTransactionEntry(
+        updatePaymentTransaction(
                 paymentTransaction,
-                paymentTransaction.getOrder(),
+                webhooksEvent.getPayment().getId(),
                 webhooksEvent.getPayment().getStatus(),
                 webhooksEvent.getPayment().getStatusOutput().getStatusCategory(),
                 webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
@@ -120,10 +132,10 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
         validateParameterNotNullStandardMessage("webhooksEvent.payment", webhooksEvent.getPayment());
         LOGGER.debug("[INGENICO] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
-        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(webhooksEvent.getPayment().getId());
-        createPaymentTransactionEntry(
+        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getPayment().getId()));
+        updatePaymentTransaction(
                 paymentTransaction,
-                paymentTransaction.getOrder(),
+                webhooksEvent.getPayment().getId(),
                 webhooksEvent.getPayment().getStatus(),
                 webhooksEvent.getPayment().getStatusOutput().getStatusCategory(),
                 webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
@@ -136,11 +148,11 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
         validateParameterNotNullStandardMessage("webhooksEvent.refund", webhooksEvent.getRefund());
         LOGGER.debug("[INGENICO] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
-        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(webhooksEvent.getPayment().getId());
+        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getPayment().getId()));
         final OrderModel order = (OrderModel) paymentTransaction.getOrder();
-        createPaymentTransactionEntry(
+        updatePaymentTransaction(
                 paymentTransaction,
-                paymentTransaction.getOrder(),
+                webhooksEvent.getRefund().getId(),
                 webhooksEvent.getRefund().getStatus(),
                 webhooksEvent.getRefund().getStatusOutput().getStatusCategory(),
                 webhooksEvent.getRefund().getRefundOutput().getAmountOfMoney(),
@@ -159,8 +171,9 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         validateParameterNotNullStandardMessage("pspReference", pspReference);
         LOGGER.debug("[INGENICO] Create Payment Transaction for Order : {} ", abstractOrderModel.getCode());
         final PaymentTransactionModel paymentTransactionModel = modelService.create(PaymentTransactionModel.class);
-        paymentTransactionModel.setCode(pspReference);
-        paymentTransactionModel.setRequestId(pspReference);
+        final String paymentId = getPaymentId(pspReference);
+        paymentTransactionModel.setCode(paymentId);
+        paymentTransactionModel.setRequestId(paymentId);
         paymentTransactionModel.setRequestToken(merchantCode);
         paymentTransactionModel.setPaymentProvider(PAYMENT_PROVIDER);
         paymentTransactionModel.setOrder(abstractOrderModel);
@@ -175,6 +188,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
     private PaymentTransactionEntryModel createPaymentTransactionEntry(
             final PaymentTransactionModel paymentTransaction,
+            final String paymentTransactionId,
             final AbstractOrderModel abstractOrderModel,
             final String status,
             final String statusDetails,
@@ -182,6 +196,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
             final PaymentTransactionType transactionType) {
         validateParameterNotNullStandardMessage("order", abstractOrderModel);
         validateParameterNotNullStandardMessage("paymentTransaction", paymentTransaction);
+        validateParameterNotNullStandardMessage("paymentTransactionId", paymentTransactionId);
         validateParameterNotNullStandardMessage("status", status);
         validateParameterNotNullStandardMessage("statusDetails", statusDetails);
         validateParameterNotNullStandardMessage("amountOfMoney", amountOfMoney);
@@ -192,11 +207,11 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                 abstractOrderModel.getCode(),
                 paymentTransaction.getCode(),
                 transactionType);
-        String code = paymentTransaction.getRequestId() + "_" + paymentTransaction.getEntries().size();
+        String code = paymentTransactionId + "_" + paymentTransaction.getEntries().size();
         transactionEntryModel.setCode(code);
         transactionEntryModel.setType(transactionType);
         transactionEntryModel.setPaymentTransaction(paymentTransaction);
-        transactionEntryModel.setRequestId(paymentTransaction.getRequestId());
+        transactionEntryModel.setRequestId(paymentTransactionId);
         transactionEntryModel.setRequestToken(paymentTransaction.getRequestToken());
         transactionEntryModel.setTime(DateTime.now().toDate());
 
@@ -231,6 +246,10 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
             default:
                 return "NOT_SUPPORTED";
         }
+    }
+
+    private String getPaymentId(String paymentTransactionId) {
+        return StringUtils.split(paymentTransactionId, "_")[0];
     }
 
 
