@@ -5,11 +5,13 @@ import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstan
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
 import com.ingenico.direct.domain.CaptureResponse;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.service.IngenicoTransactionService;
@@ -35,12 +37,22 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
    public ActionResult<OrderModel> perform(ActionContext<OrderModel> actionContext) {
       OrderModel order = actionContext.getData();
 
-      CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(order.getStore().getIngenicoConfiguration(), order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1).getCode());
+      PaymentTransactionModel paymentTransactionModel = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
+
+      //TODO use entry ID instead of transaction id after merging ING-665
+//      List<PaymentTransactionEntryModel> paymentTransactionEntryModels = paymentTransactionModel.getEntries()
+//            .stream()
+//            .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()))
+//            .filter(entry -> CAPTURE_REQUESTED.getValue().equals(entry.getTransactionStatus()))
+//            .collect(Collectors.toList());
+//      CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(order.getStore().getIngenicoConfiguration(), paymentTransactionEntryModels.get(paymentTransactionEntryModels.size() - 1).getRequestId());
+
+
+      CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(order.getStore().getIngenicoConfiguration(), paymentTransactionModel.getCode());
 
       //result
       ActionResult<OrderModel> result = null;
       String resultMessage = null;
-      PaymentTransactionModel paymentTransactionModel = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
       ingenicoTransactionService.updatePaymentTransaction(paymentTransactionModel, captureResponse.getStatus(), captureResponse.getStatus(), captureResponse.getCaptureOutput().getAmountOfMoney(), PaymentTransactionType.CAPTURE);
 
       if (CAPTURE_REQUESTED.getValue().equals(captureResponse.getStatus())) {
