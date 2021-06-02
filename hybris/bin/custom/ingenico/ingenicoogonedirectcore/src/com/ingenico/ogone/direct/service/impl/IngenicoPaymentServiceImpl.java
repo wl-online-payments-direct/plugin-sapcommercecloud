@@ -300,19 +300,21 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
    @Override
    public CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
 
-      try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
-         CapturePaymentRequest capturePaymentRequest =
-               new CapturePaymentRequest(); // there are two fields; both have default values => not mandatory to send values
+       try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
+           CapturePaymentRequest capturePaymentRequest =
+                   new CapturePaymentRequest(); // there are two fields; both have default values => not mandatory to send values
 
-         CaptureResponse captureResponse =
-               client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().capturePayment(paymentId, capturePaymentRequest);
+           CaptureResponse captureResponse =
+                   client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().capturePayment(paymentId, capturePaymentRequest);
 
-         return captureResponse;
-      } catch (IOException e) {
-         LOGGER.error("[ INGENICO ] Errors during getting getPayment", e);
-         //TODO Throw Logical Exception
-         return null;
-      }
+           IngenicoLogUtils.logAction(LOGGER, "capturePayment", paymentId, captureResponse);
+
+           return captureResponse;
+       } catch (IOException e) {
+           LOGGER.error("[ INGENICO ] Errors during getting capturePayment", e);
+           //TODO Throw Logical Exception
+           return null;
+       }
    }
 
     private CustomerDevice getBrowserInfo(com.ingenico.ogone.direct.order.data.BrowserData internalBrowserData) {

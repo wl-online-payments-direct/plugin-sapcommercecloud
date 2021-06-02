@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.hybris.platform.core.enums.OrderStatus;
+import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.orderprocessing.model.OrderProcessModel;
@@ -46,6 +47,8 @@ public class IngenicoCheckCapturedPaymentAction extends AbstractAction<OrderProc
 
         if (CollectionUtils.isEmpty(transactionEntries)) {
             LOG.debug("[INGENICO] Process: {} Order Waiting", process.getCode());
+            order.setPaymentStatus(PaymentStatus.INGENICO_WAITING_CAPTURE);
+            modelService.save(order);
             return Transition.WAIT.toString();
         }
 
@@ -55,6 +58,8 @@ public class IngenicoCheckCapturedPaymentAction extends AbstractAction<OrderProc
         for (PaymentTransactionEntryModel entry : transactionEntries) {
             if (REJECTED.getValue().equals(entry.getTransactionStatus())) {
                 LOG.debug("[INGENICO] Process: " + process.getCode() + " Order Not Captured");
+                order.setPaymentStatus(PaymentStatus.INGENICO_REJECTED);
+                modelService.save(order);
                 return Transition.NOK.toString();
             }
             remainingAmount = remainingAmount.subtract(entry.getAmount());
@@ -65,12 +70,15 @@ public class IngenicoCheckCapturedPaymentAction extends AbstractAction<OrderProc
         if (remainingAmount.compareTo(zero) <= 0) {
             LOG.debug("[INGENICO] Process: {} Order Captured", process.getCode());
             order.setStatus(OrderStatus.PAYMENT_CAPTURED);
+            order.setPaymentStatus(PaymentStatus.INGENICO_CAPTURED);
             modelService.save(order);
             return Transition.OK.toString();
         }
 
         //Still remaining non captured amount
         LOG.debug("[INGENICO] Process: {} Order Waiting", process.getCode());
+        order.setPaymentStatus(PaymentStatus.INGENICO_WAITING_CAPTURE);
+        modelService.save(order);
         return Transition.WAIT.toString();
     }
 
