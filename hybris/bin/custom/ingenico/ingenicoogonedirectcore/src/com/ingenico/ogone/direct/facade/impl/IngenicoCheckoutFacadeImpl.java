@@ -36,6 +36,7 @@ import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,7 +169,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         final CreatePaymentResponse paymentForHostedTokenization = ingenicoPaymentService.createPaymentForHostedTokenization(ingenicoHostedTokenizationData, hostedTokenization);
 
         final PaymentResponse payment = paymentForHostedTokenization.getPayment();
-        savePaymentTokenIfNeeded(payment);
+        savePaymentTokenIfNeeded(payment,true);
         if (paymentForHostedTokenization.getMerchantAction() != null) {
             ingenicoTransactionService.createAuthorizationPaymentTransaction(cartService.getSessionCart(),
                     payment.getPaymentOutput().getReferences().getMerchantReference(),
@@ -209,7 +210,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
             case IN_PROGRESS:
                 throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
-                savePaymentTokenIfNeeded(hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                savePaymentTokenIfNeeded(hostedCheckoutData.getCreatedPaymentOutput().getPayment(), false);
                 return handlePaymentResponse(hostedCheckoutData.getCreatedPaymentOutput().getPayment());
             default:
                 LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
@@ -378,7 +379,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
         return cartService.hasSessionCart() ? cartService.getSessionCart() : null;
     }
 
-    private void savePaymentTokenIfNeeded(PaymentResponse paymentResponse) {
+    private void savePaymentTokenIfNeeded(PaymentResponse paymentResponse, boolean isHTP) {
 
         String token = null;
         final String paymentMethod = paymentResponse.getPaymentOutput().getPaymentMethod();
@@ -393,12 +394,15 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 break;
         }
 
-        if (token != null) {
-            final TokenResponse tokenResponse = ingenicoPaymentService.getToken(token);
-            if (tokenResponse != null) {
-                final PaymentProduct paymentProduct = getPaymentMethodById(tokenResponse.getPaymentProductId());
-                ingenicoUserFacade.saveIngenicoPaymentInfo(tokenResponse, paymentProduct);
-            }
+        if (token == null ) {
+            LOGGER.debug("[INGENICO] no token to save!");
+            return;
+        }
+        final TokenResponse tokenResponse = ingenicoPaymentService.getToken(token);
+        if (tokenResponse != null && (!isHTP || BooleanUtils.isFalse(tokenResponse.getIsTemporary()))) {
+            final PaymentProduct paymentProduct = getPaymentMethodById(tokenResponse.getPaymentProductId());
+            ingenicoUserFacade.saveIngenicoPaymentInfo(tokenResponse, paymentProduct);
+
         }
     }
 
