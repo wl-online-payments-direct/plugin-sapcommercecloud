@@ -18,10 +18,14 @@ import com.ingenico.direct.domain.RedirectPaymentMethodSpecificInput;
 import com.ingenico.direct.domain.RedirectPaymentProduct809SpecificInput;
 import com.ingenico.direct.domain.RedirectPaymentProduct840SpecificInput;
 import com.ingenico.direct.domain.RedirectionData;
+import com.ingenico.ogone.direct.enums.OperationCodesEnum;
+import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
+import com.ingenico.ogone.direct.service.IngenicoConfigurationService;
 
 public class IngenicoHostedCheckoutRedirectPopulator implements Populator<CartModel, CreateHostedCheckoutRequest> {
 
     private SessionService sessionService;
+    private IngenicoConfigurationService ingenicoConfigurationService;
 
     @Override
     public void populate(CartModel cartModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
@@ -40,7 +44,7 @@ public class IngenicoHostedCheckoutRedirectPopulator implements Populator<CartMo
     private RedirectPaymentMethodSpecificInput getRedirectPaymentMethodSpecificInput(IngenicoPaymentInfoModel paymentInfo) {
         final RedirectPaymentMethodSpecificInput redirectPaymentMethodSpecificInput = new RedirectPaymentMethodSpecificInput();
         redirectPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
-        redirectPaymentMethodSpecificInput.setRequiresApproval(Boolean.FALSE);
+        redirectPaymentMethodSpecificInput.setRequiresApproval(requiresApproval());
         redirectPaymentMethodSpecificInput.setTokenize(Boolean.FALSE);
         RedirectionData redirectionData = new RedirectionData();
         redirectionData.setReturnUrl(getHostedCheckoutReturnUrl());
@@ -65,6 +69,15 @@ public class IngenicoHostedCheckoutRedirectPopulator implements Populator<CartMo
         return redirectPaymentMethodSpecificInput;
     }
 
+    private Boolean requiresApproval() {
+        final IngenicoConfigurationModel currentIngenicoConfiguration = ingenicoConfigurationService.getCurrentIngenicoConfiguration();
+        OperationCodesEnum defaultOperationCode = currentIngenicoConfiguration.getDefaultOperationCode();
+        if (OperationCodesEnum.SALE.equals(defaultOperationCode)) {
+            return false;
+        }
+        return true;
+    }
+
     private String getHostedCheckoutReturnUrl() {
         return sessionService.getAttribute("hostedCheckoutReturnUrl");
     }
@@ -73,4 +86,7 @@ public class IngenicoHostedCheckoutRedirectPopulator implements Populator<CartMo
         this.sessionService = sessionService;
     }
 
+    public void setIngenicoConfigurationService(IngenicoConfigurationService ingenicoConfigurationService) {
+        this.ingenicoConfigurationService = ingenicoConfigurationService;
+    }
 }
