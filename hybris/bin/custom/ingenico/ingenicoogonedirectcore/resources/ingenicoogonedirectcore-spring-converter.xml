@@ -59,6 +59,8 @@
     <bean id="ingenicoHostedCheckoutRedirectPopulator"
           class="com.ingenico.ogone.direct.populator.hostedcheckout.IngenicoHostedCheckoutRedirectPopulator">
         <property name="sessionService" ref="sessionService"/>
+        <property name="ingenicoConfigurationService" ref="ingenicoConfigurationService"/>
+
     </bean>
 
     <bean id="ingenicoHostedCheckoutMobilePopulator"
