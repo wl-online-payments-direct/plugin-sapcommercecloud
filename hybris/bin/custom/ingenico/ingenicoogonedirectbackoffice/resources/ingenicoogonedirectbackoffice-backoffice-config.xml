@@ -56,11 +56,18 @@
 			</ea:essentials>
 			<ea:tab name="hmc.ingenico">
 				<ea:section name="hmc.ingenico.ingenicoConfiguration">
-					<ea:attribute qualifier="endpointURL"/>
-					<ea:attribute qualifier="apiKey"/>
-					<ea:attribute qualifier="apiSecret"/>
-					<ea:attribute qualifier="webhookKeyId"/>
-					<ea:attribute qualifier="webhookSecret"/>
+					<ea:panel name="parameters" colspan="4">
+						<ea:attribute qualifier="endpointURL"/>
+						<ea:attribute qualifier="apiKey"/>
+						<ea:attribute qualifier="apiSecret"/>
+						<ea:attribute qualifier="webhookKeyId"/>
+						<ea:attribute qualifier="webhookSecret"/>
+					</ea:panel>
+					<ea:panel name="hint" colspan="4">
+						<ea:custom>
+							<ea:default><![CDATA[<h3>[hmc.ingenico.ingenicoConfiguration.hint]</h3>]]></ea:default>
+						</ea:custom>
+					</ea:panel>
 				</ea:section>
 				<ea:section name="hmc.ingenico.ingenicoOperationCodeConfig">
 					<ea:attribute qualifier="defaultOperationCode"/>
