@@ -8,8 +8,12 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
+import com.ingenico.direct.domain.AmountOfMoney;
+import com.ingenico.direct.domain.CancelPaymentResponse;
 import com.ingenico.direct.domain.CapturePaymentRequest;
 import com.ingenico.direct.domain.CaptureResponse;
+import com.ingenico.direct.domain.RefundRequest;
+import com.ingenico.direct.domain.RefundResponse;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
@@ -316,6 +320,43 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
            return null;
        }
    }
+
+    @Override public CancelPaymentResponse cancelPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
+        try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
+
+            CancelPaymentResponse cancelPaymentResponse =
+                  client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().cancelPayment(paymentId);
+
+            IngenicoLogUtils.logAction(LOGGER, "cancelPayment", paymentId, cancelPaymentResponse);
+
+            return cancelPaymentResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting cancelPayment", e);
+            //TODO Throw Logical Exception
+            return null;
+        }
+
+    }
+
+    @Override public RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, Double returnAmount) {
+        try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
+
+            RefundRequest refundRequest = new RefundRequest();
+            AmountOfMoney amountOfMoney = new AmountOfMoney();
+            // TODO fill amount
+            refundRequest.setAmountOfMoney(amountOfMoney);
+            RefundResponse refundResponse =
+                  client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().refundPayment(paymentId, refundRequest);
+
+            IngenicoLogUtils.logAction(LOGGER, "refundPayment", paymentId, refundResponse);
+
+            return refundResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting refundPayment", e);
+            //TODO Throw Logical Exception
+            return null;
+        }
+    }
 
     private CustomerDevice getBrowserInfo(com.ingenico.ogone.direct.order.data.BrowserData internalBrowserData) {
         BrowserData browserData = new BrowserData();
