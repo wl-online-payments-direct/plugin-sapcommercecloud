@@ -69,15 +69,9 @@ public class IngenicoWebhookServiceImpl implements IngenicoWebhookService {
             case PAYMENT_CREATED:
             case PAYMENT_REDIRECTED:
             case PAYMENT_AUTH_REQUESTED:
-                break;
             case PAYMENT_PENDING_APPROVAL:
-                // TODO need to APPROVE in our side ????
-                break;
             case PAYMENT_PENDING_COMPLETION:
-                // TODO need to COMPLETE in our side ????
-                break;
             case PAYMENT_PENDING_CAPTURE:
-                // TODO need to CAPTURE in our side ????
                 break;
             case PAYMENT_CAPTURE_REQUEST:
             case PAYMENT_CAPTURED:
