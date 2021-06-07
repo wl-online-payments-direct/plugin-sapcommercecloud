@@ -43,6 +43,7 @@
         <property name="modelService" ref="modelService"/>
         <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
         <property name="ingenicoCustomerAccountService" ref="ingenicoCustomerAccountService"/>
+        <property name="ingenicoPaymentService" ref="ingenicoPaymentService"/>
         <property name="ingenicoPaymentInfoConverter" ref="ingenicoPaymentInfoConverter"/>
     </bean>
 

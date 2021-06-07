@@ -37,7 +37,7 @@
         <property name="populators">
             <list>
                 <ref bean="ingenicoOrderRequestParamPopulator"/>
-                <ref bean="ingenicoShoppingCartRequestParamPopulator"/>
+<!--                <ref bean="ingenicoShoppingCartRequestParamPopulator"/>-->
                 <ref bean="ingenicoCustomerRequestParamPopulator"/>
             </list>
         </property>
