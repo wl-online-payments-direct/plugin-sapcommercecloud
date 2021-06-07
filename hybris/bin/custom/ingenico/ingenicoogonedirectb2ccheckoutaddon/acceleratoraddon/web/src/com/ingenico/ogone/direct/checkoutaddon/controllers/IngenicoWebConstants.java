@@ -9,10 +9,18 @@ package com.ingenico.ogone.direct.checkoutaddon.controllers;
 public interface IngenicoWebConstants {
     interface URL {
 
+        interface Account {
+            String root = "/my-account/ingenico";
+
+            interface PaymentDetails {
+                String root = Account.root + "/payment-details";
+            }
+        }
+
         interface Checkout {
             String root = "/checkout/multi/ingenico";
 
-            interface OrderConfirmation{
+            interface OrderConfirmation {
                 String root = "/checkout/ingenico/orderConfirmation/";
             }
 
