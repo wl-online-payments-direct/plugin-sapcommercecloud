@@ -16,6 +16,7 @@ public class IngenicoPaymentInfoPopulator implements Populator<IngenicoPaymentIn
     @Override
     public void populate(IngenicoPaymentInfoModel ingenicoPaymentInfoModel, IngenicoPaymentInfoData ingenicoPaymentInfoData) throws ConversionException {
 
+        ingenicoPaymentInfoData.setCode(ingenicoPaymentInfoModel.getCode());
         ingenicoPaymentInfoData.setId(ingenicoPaymentInfoModel.getId());
         ingenicoPaymentInfoData.setPaymentMethod(ingenicoPaymentInfoModel.getPaymentMethod());
         ingenicoPaymentInfoData.setPaymentProductDirectoryId(ingenicoPaymentInfoModel.getPaymentProductDirectoryId());
