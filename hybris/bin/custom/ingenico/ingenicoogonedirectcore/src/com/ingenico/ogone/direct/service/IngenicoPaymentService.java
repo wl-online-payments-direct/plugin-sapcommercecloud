@@ -53,4 +53,6 @@ public interface IngenicoPaymentService {
 
     TokenResponse getToken(String tokenId);
 
+    boolean deleteToken(String tokenId);
+
 }

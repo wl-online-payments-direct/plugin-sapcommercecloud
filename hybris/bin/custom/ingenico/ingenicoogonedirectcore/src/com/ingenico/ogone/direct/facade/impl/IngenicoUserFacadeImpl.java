@@ -1,5 +1,7 @@
 package com.ingenico.ogone.direct.facade.impl;
 
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -7,6 +9,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.core.model.order.payment.CreditCardPaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
@@ -18,6 +21,7 @@ import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 import com.ingenico.ogone.direct.service.IngenicoCustomerAccountService;
+import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 
 public class IngenicoUserFacadeImpl implements IngenicoUserFacade {
 
@@ -26,6 +30,7 @@ public class IngenicoUserFacadeImpl implements IngenicoUserFacade {
     private ModelService modelService;
     private CheckoutCustomerStrategy checkoutCustomerStrategy;
     private IngenicoCustomerAccountService ingenicoCustomerAccountService;
+    private IngenicoPaymentService ingenicoPaymentService;
     private Converter<IngenicoPaymentInfoModel, IngenicoPaymentInfoData> ingenicoPaymentInfoConverter;
 
     @Override
@@ -92,6 +97,20 @@ public class IngenicoUserFacadeImpl implements IngenicoUserFacade {
         modelService.save(ingenicoPaymentInfoByToken);
     }
 
+    @Override
+    public boolean deleteSavedIngenicoPaymentInfo(String code) {
+        validateParameterNotNullStandardMessage("code", code);
+        final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+        final List<IngenicoPaymentInfoModel> ingenicoPaymentInfos = ingenicoCustomerAccountService.getIngenicoPaymentInfos(currentCustomer, true);
+        for (final IngenicoPaymentInfoModel paymentInfoModel : ingenicoPaymentInfos) {
+            if (code.equals(paymentInfoModel.getCode()) && ingenicoPaymentService.deleteToken(paymentInfoModel.getToken())) {
+                modelService.remove(paymentInfoModel);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
         this.checkoutCustomerStrategy = checkoutCustomerStrategy;
     }
@@ -106,5 +125,9 @@ public class IngenicoUserFacadeImpl implements IngenicoUserFacade {
 
     public void setModelService(ModelService modelService) {
         this.modelService = modelService;
+    }
+
+    public void setIngenicoPaymentService(IngenicoPaymentService ingenicoPaymentService) {
+        this.ingenicoPaymentService = ingenicoPaymentService;
     }
 }
