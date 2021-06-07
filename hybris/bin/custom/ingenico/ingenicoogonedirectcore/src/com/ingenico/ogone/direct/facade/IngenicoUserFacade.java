@@ -18,4 +18,6 @@ public interface IngenicoUserFacade {
 
     void saveIngenicoPaymentInfo(TokenResponse tokenResponse, PaymentProduct paymentProduct);
 
+    boolean deleteSavedIngenicoPaymentInfo(String code);
+
 }
