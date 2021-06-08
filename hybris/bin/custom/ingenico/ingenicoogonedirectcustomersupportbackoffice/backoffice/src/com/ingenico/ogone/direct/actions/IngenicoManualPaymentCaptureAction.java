@@ -11,6 +11,7 @@ import java.util.List;
 import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
+import com.ingenico.direct.domain.PaymentResponse;
 import de.hybris.platform.core.enums.OrderStatus;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.omsbackoffice.actions.order.ManualPaymentCaptureAction;
@@ -45,8 +46,9 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
 
         final PaymentTransactionEntryModel paymentTransactionToCapture = getPaymentTransactionToCapture(order);
         final IngenicoConfigurationModel ingenicoConfiguration = getIngenicoConfiguration(order);
-        CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(ingenicoConfiguration,
-                paymentTransactionToCapture.getRequestId());
+
+        CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(ingenicoConfiguration, paymentTransactionToCapture.getRequestId(),
+              paymentTransactionToCapture.getAmount(), paymentTransactionToCapture.getCurrency().getIsocode());
 
         //result
         ActionResult<OrderModel> result = null;
@@ -75,8 +77,7 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
     public boolean canPerform(ActionContext<OrderModel> ctx) {
         OrderModel order = ctx.getData();
 
-        return order != null && !OrderStatus.CANCELLED.equals(order.getStatus()) &&
-              (INGENICO_AUTHORIZED.equals(order.getPaymentStatus()) || INGENICO_WAITING_CAPTURE.equals(order.getPaymentStatus()));
+        return order != null && INGENICO_WAITING_CAPTURE.equals(order.getPaymentStatus());
     }
 
     private PaymentTransactionEntryModel getPaymentTransactionToCapture(final OrderModel order) {

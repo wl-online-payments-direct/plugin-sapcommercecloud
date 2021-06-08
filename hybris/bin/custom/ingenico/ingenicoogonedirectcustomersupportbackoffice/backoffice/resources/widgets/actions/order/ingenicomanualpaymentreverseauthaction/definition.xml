@@ -16,9 +16,9 @@
     <outputType>de.hybris.platform.core.model.order.OrderModel</outputType>
 
     <!-- folder icons with the icons must be created in the following directory: myextension/backoffice/resources/widgets/actions/myaction -->
-    <iconUri>icons/icon_action_manualpaymentcapture_default.png</iconUri>
-    <iconHoverUri>icons/icon_action_manualpaymentcapture_hover.png</iconHoverUri>
-    <iconDisabledUri>icons/icon_action_manualpaymentcapture_disabled.png</iconDisabledUri>
+    <iconUri>icons/icon_action_cancel_default.png</iconUri>
+    <iconHoverUri>icons/icon_action_cancel_hover.png</iconHoverUri>
+    <iconDisabledUri>icons/icon_action_cancel_disabled.png</iconDisabledUri>
 
     <settings>
         <setting key="viewMode" default-value="iconAndText"/>
