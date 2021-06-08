@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.ingenico.direct.domain.CancelPaymentResponse;
 import com.ingenico.direct.domain.CaptureResponse;
+import com.ingenico.direct.domain.CapturesResponse;
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.CreatePaymentResponse;
@@ -20,6 +21,7 @@ import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
 
 public interface IngenicoPaymentService {
 
@@ -45,7 +47,9 @@ public interface IngenicoPaymentService {
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 
-    CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId);
+    CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode);
+
+    CapturesResponse getCaptures(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId);
 
     CancelPaymentResponse cancelPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId);
 

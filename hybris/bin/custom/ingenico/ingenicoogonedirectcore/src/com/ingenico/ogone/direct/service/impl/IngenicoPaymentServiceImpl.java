@@ -7,15 +7,22 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.ingenico.direct.domain.AmountOfMoney;
 import com.ingenico.direct.domain.CancelPaymentResponse;
+import com.ingenico.direct.domain.Capture;
 import com.ingenico.direct.domain.CapturePaymentRequest;
 import com.ingenico.direct.domain.CaptureResponse;
+import com.ingenico.direct.domain.CapturesResponse;
 import com.ingenico.direct.domain.RefundRequest;
 import com.ingenico.direct.domain.RefundResponse;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.order.CartService;
+import de.hybris.platform.payment.enums.PaymentTransactionType;
+import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -314,15 +321,32 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             //TODO Throw Logical Exception
             return null;
          }
-
    }
 
+    @Override
+    public CapturesResponse getCaptures(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
+        validateParameterNotNull(paymentId, "paymentId cannot be null");
+        try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
+
+            final CapturesResponse captures = client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().getCaptures(paymentId);
+
+            IngenicoLogUtils.logAction(LOGGER, "getPayment", paymentId, captures);
+
+            return captures;
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting getPayment", e);
+            //TODO Throw Logical Exception
+            return null;
+        }
+    }
+
    @Override
-   public CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
+   public CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode) {
 
        try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
-           CapturePaymentRequest capturePaymentRequest =
-                   new CapturePaymentRequest(); // there are two fields; both have default values => not mandatory to send values
+           CapturePaymentRequest capturePaymentRequest = new CapturePaymentRequest();
+           capturePaymentRequest.setAmount(getRemainingAmount(ingenicoConfigurationModel, paymentId, plannedAmount, currencyISOcode));
+           capturePaymentRequest.setIsFinal(true);
 
            CaptureResponse captureResponse =
                    client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().capturePayment(paymentId, capturePaymentRequest);
@@ -337,7 +361,8 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
        }
    }
 
-    @Override public CancelPaymentResponse cancelPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
+    @Override
+    public CancelPaymentResponse cancelPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
         try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
 
             CancelPaymentResponse cancelPaymentResponse =
@@ -351,7 +376,6 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             //TODO Throw Logical Exception
             return null;
         }
-
     }
 
     @Override public RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, Double returnAmount) {
@@ -372,6 +396,20 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             //TODO Throw Logical Exception
             return null;
         }
+    }
+
+    private Long getRemainingAmount(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode) {
+        //Find if there was amount that was captured before performing the capture action
+        CapturesResponse capturesResponse = getCaptures(ingenicoConfigurationModel, paymentId);
+
+        Long amountPaid = 0L;
+        for (Capture capture : capturesResponse.getCaptures()) {
+            if (IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURED.getValue().equals(capture.getStatus()) ||
+                IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED.getValue().equals(capture.getStatus())) {
+                amountPaid += capture.getCaptureOutput().getAmountOfMoney().getAmount();
+            }
+        }
+        return ingenicoAmountUtils.createAmount(plannedAmount, currencyISOcode) - amountPaid;
     }
 
     private CustomerDevice getBrowserInfo(com.ingenico.ogone.direct.order.data.BrowserData internalBrowserData) {
