@@ -3,6 +3,8 @@ package com.ingenico.ogone.direct.actions;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CANCELLED;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED;
+import static de.hybris.platform.core.enums.PaymentStatus.INGENICO_AUTHORIZED;
+import static de.hybris.platform.core.enums.PaymentStatus.INGENICO_WAITING_CAPTURE;
 
 import javax.annotation.Resource;
 import java.util.Collection;
@@ -21,6 +23,7 @@ import com.ingenico.ogone.direct.service.IngenicoTransactionService;
 import com.ingenico.ogone.direct.service.impl.IngenicoTransactionServiceImpl;
 import de.hybris.platform.basecommerce.enums.CancelReason;
 import de.hybris.platform.core.enums.OrderStatus;
+import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.OrderEntryModel;
 import de.hybris.platform.core.model.order.OrderModel;
@@ -40,6 +43,8 @@ import org.zkoss.zhtml.Messagebox;
 
 public class IngenicoManualPaymentReverseAuthAction extends CancelOrderAction implements CockpitAction<OrderModel, OrderModel> {
    private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoTransactionServiceImpl.class);
+
+   private static final String SUCCESSFUL_ENTRY_STATUS = "SUCCESSFUL";
 
    @Resource
    private IngenicoPaymentService ingenicoPaymentService;
@@ -79,10 +84,12 @@ public class IngenicoManualPaymentReverseAuthAction extends CancelOrderAction im
             final OrderCancelRequest orderCancelRequest = new OrderCancelRequest(order,
                   Lists.newArrayList(createCancellationEntries(order)));
             orderCancelService.requestOrderCancel(orderCancelRequest, getUserService().getCurrentUser());
+            order.setPaymentStatus(PaymentStatus.INGENICO_CANCELED);
+            modelService.save(order);
             result = new ActionResult<OrderModel>(ActionResult.SUCCESS, order);
             resultMessage = actionContext.getLabel("action.manualpaymentcancelation.success");
          } catch (OrderCancelException ex) {
-            LOGGER.error(ex.getMessage());
+            LOGGER.error(ex.getMessage() + " " + ex.getStackTrace());
             result = new ActionResult<OrderModel>(ActionResult.ERROR, order);
             resultMessage = actionContext.getLabel(ex.getLocalizedMessage());
          }
@@ -97,26 +104,7 @@ public class IngenicoManualPaymentReverseAuthAction extends CancelOrderAction im
 
    @Override public boolean canPerform(ActionContext<OrderModel> ctx) {
       OrderModel order = ctx.getData();
-      boolean isTransactionAuthorizedNotCaptured = false;
-
-      List<PaymentTransactionEntryModel> paymentTransactionEntryModels = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1).getEntries(); // take the last one - it will be the most recent one
-      for (PaymentTransactionEntryModel paymentTransactionEntryModel : paymentTransactionEntryModels) {
-
-         switch (paymentTransactionEntryModel.getType()) {
-            case AUTHORIZATION:
-               isTransactionAuthorizedNotCaptured = "SUCCESSFUL".equals(paymentTransactionEntryModel.getTransactionStatus()); // TODO change this status to PENDING_CAPTURE when the code is ready use PAYMENT_STATUS_ENUM.PENDING_CAPTURE
-               break;
-            case CAPTURE:
-               isTransactionAuthorizedNotCaptured = !"SUCCESSFUL".equals(paymentTransactionEntryModel.getTransactionStatus());
-               break;
-            case CANCEL:
-               isTransactionAuthorizedNotCaptured = !"REJECTED".equals(paymentTransactionEntryModel.getTransactionStatus());
-               break;
-            default: //
-               break;
-         }
-      }
-      return order != null && isTransactionAuthorizedNotCaptured;
+      return order != null && INGENICO_AUTHORIZED.equals(order.getPaymentStatus());
    }
 
    private PaymentTransactionEntryModel getPaymentTransactionToCancel(final OrderModel order) {
