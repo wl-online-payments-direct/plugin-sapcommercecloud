@@ -97,7 +97,7 @@
             <hint name="alias">SavedToken</hint>
         </hints>
         <property name="token" type="String"/>
-        <property name="brandName" type="String"/>
+        <property name="cardBrand" type="String"/>
         <property name="alias" type="String"/>
         <property name="type" type="String"/>
         <property name="cardholderName" type="String"/>
