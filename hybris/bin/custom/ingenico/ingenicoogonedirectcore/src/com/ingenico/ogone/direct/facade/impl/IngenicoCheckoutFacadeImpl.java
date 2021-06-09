@@ -48,6 +48,7 @@ import com.ingenico.direct.domain.CreatePaymentResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.GetHostedCheckoutResponse;
 import com.ingenico.direct.domain.GetHostedTokenizationResponse;
+import com.ingenico.direct.domain.PaymentOutput;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentProductDisplayHints;
 import com.ingenico.direct.domain.PaymentResponse;
@@ -268,8 +269,9 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     }
 
     protected OrderData createOrderFromPaymentResponse(final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) throws InvalidCartException {
-
-        ingenicoTransactionService.createOrUpdatePaymentTransaction(cartService.getSessionCart(),
+        final CartModel sessionCart = cartService.getSessionCart();
+        updatePaymentInfoIfNeeded(sessionCart,paymentResponse);
+        ingenicoTransactionService.createOrUpdatePaymentTransaction(sessionCart,
                 paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
@@ -343,6 +345,18 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
         modelService.save(paymentInfo);
         return paymentInfo;
+    }
+
+    protected void updatePaymentInfoIfNeeded(final CartModel cartModel, PaymentResponse paymentResponse) {
+        if (cartModel.getPaymentInfo() instanceof IngenicoPaymentInfoModel) {
+            final IngenicoPaymentInfoModel paymentInfo = (IngenicoPaymentInfoModel) cartModel.getPaymentInfo();
+            final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
+            if (paymentOutput.getCardPaymentMethodSpecificOutput() != null && paymentInfo.getId().equals(GROUPED_CARDS_ID)) {
+                paymentInfo.setId(paymentOutput.getCardPaymentMethodSpecificOutput().getPaymentProductId());
+                modelService.save(paymentInfo);
+                modelService.refresh(cartModel);
+            }
+        }
     }
 
     protected AddressModel convertToAddressModel(AddressData addressData) {
