@@ -2,6 +2,8 @@ package com.ingenico.ogone.direct.actions;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED;
+import static de.hybris.platform.core.enums.PaymentStatus.INGENICO_AUTHORIZED;
+import static de.hybris.platform.core.enums.PaymentStatus.INGENICO_WAITING_CAPTURE;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -9,6 +11,8 @@ import java.util.List;
 import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
+import com.ingenico.direct.domain.PaymentResponse;
+import de.hybris.platform.core.enums.OrderStatus;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.omsbackoffice.actions.order.ManualPaymentCaptureAction;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
@@ -42,8 +46,9 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
 
         final PaymentTransactionEntryModel paymentTransactionToCapture = getPaymentTransactionToCapture(order);
         final IngenicoConfigurationModel ingenicoConfiguration = getIngenicoConfiguration(order);
-        CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(ingenicoConfiguration,
-                paymentTransactionToCapture.getRequestId());
+
+        CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(ingenicoConfiguration, paymentTransactionToCapture.getRequestId(),
+              paymentTransactionToCapture.getAmount(), paymentTransactionToCapture.getCurrency().getIsocode());
 
         //result
         ActionResult<OrderModel> result = null;
@@ -71,17 +76,8 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
     @Override
     public boolean canPerform(ActionContext<OrderModel> ctx) {
         OrderModel order = ctx.getData();
-        boolean isTransactionAuthorizedNotCaptured = false;
 
-        List<PaymentTransactionEntryModel> paymentTransactionEntryModels = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1).getEntries(); // take the last one - it will be the most recent one
-        for (PaymentTransactionEntryModel paymentTransactionEntryModel : paymentTransactionEntryModels) {
-            if (PaymentTransactionType.AUTHORIZATION.equals(paymentTransactionEntryModel.getType())) {
-                isTransactionAuthorizedNotCaptured = "SUCCESSFUL".equals(paymentTransactionEntryModel.getTransactionStatus()); // TODO change this status to PENDING_CAPTURE when the code is ready use PAYMENT_STATUS_ENUM.PENDING_CAPTURE
-            } else if (PaymentTransactionType.CAPTURE.equals(paymentTransactionEntryModel.getType())) {
-                isTransactionAuthorizedNotCaptured = !"SUCCESSFUL".equals(paymentTransactionEntryModel.getTransactionStatus());
-            }
-        }
-        return order != null && isTransactionAuthorizedNotCaptured;
+        return order != null && INGENICO_WAITING_CAPTURE.equals(order.getPaymentStatus());
     }
 
     private PaymentTransactionEntryModel getPaymentTransactionToCapture(final OrderModel order) {
