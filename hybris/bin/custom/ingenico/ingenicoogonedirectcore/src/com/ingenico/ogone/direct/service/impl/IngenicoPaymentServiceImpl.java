@@ -378,12 +378,13 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         }
     }
 
-    @Override public RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, Double returnAmount) {
+    @Override public RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal returnAmount, String currencyISOCode) {
         try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
 
             RefundRequest refundRequest = new RefundRequest();
             AmountOfMoney amountOfMoney = new AmountOfMoney();
-            // TODO fill amount
+            amountOfMoney.setCurrencyCode(currencyISOCode);
+            amountOfMoney.setAmount(ingenicoAmountUtils.createAmount(returnAmount, currencyISOCode));
             refundRequest.setAmountOfMoney(amountOfMoney);
             RefundResponse refundResponse =
                   client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().refundPayment(paymentId, refundRequest);
