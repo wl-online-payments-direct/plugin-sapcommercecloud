@@ -107,6 +107,9 @@ ACC.ingenicoOrderPost = {
                 }
             }
         });
+        if($('.ingenico_payment_product .payment_product.ideal').is(":checked")){
+            $('#select_issuer').show();
+        }
     }
 }
 
