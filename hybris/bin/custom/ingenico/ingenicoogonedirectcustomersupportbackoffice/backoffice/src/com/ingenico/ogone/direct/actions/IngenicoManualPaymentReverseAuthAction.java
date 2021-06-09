@@ -1,14 +1,10 @@
 package com.ingenico.ogone.direct.actions;
 
-import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CANCELLED;
-import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED;
 import static de.hybris.platform.core.enums.PaymentStatus.INGENICO_AUTHORIZED;
-import static de.hybris.platform.core.enums.PaymentStatus.INGENICO_WAITING_CAPTURE;
 
 import javax.annotation.Resource;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
@@ -17,12 +13,10 @@ import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
 import com.ingenico.direct.domain.CancelPaymentResponse;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
-import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.service.IngenicoTransactionService;
 import com.ingenico.ogone.direct.service.impl.IngenicoTransactionServiceImpl;
 import de.hybris.platform.basecommerce.enums.CancelReason;
-import de.hybris.platform.core.enums.OrderStatus;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.OrderEntryModel;
@@ -44,8 +38,6 @@ import org.zkoss.zhtml.Messagebox;
 public class IngenicoManualPaymentReverseAuthAction extends CancelOrderAction implements CockpitAction<OrderModel, OrderModel> {
    private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoTransactionServiceImpl.class);
 
-   private static final String SUCCESSFUL_ENTRY_STATUS = "SUCCESSFUL";
-
    @Resource
    private IngenicoPaymentService ingenicoPaymentService;
 
@@ -57,9 +49,6 @@ public class IngenicoManualPaymentReverseAuthAction extends CancelOrderAction im
 
    @Resource
    private ModelService modelService;
-
-   @Resource
-   private IngenicoBusinessProcessService ingenicoBusinessProcessService;
 
    @Override public ActionResult<OrderModel> perform(ActionContext<OrderModel> actionContext) {
       OrderModel order = actionContext.getData();
@@ -139,10 +128,6 @@ public class IngenicoManualPaymentReverseAuthAction extends CancelOrderAction im
 
    public void setIngenicoTransactionService(IngenicoTransactionService ingenicoTransactionService) {
       this.ingenicoTransactionService = ingenicoTransactionService;
-   }
-
-   public void setIngenicoBusinessProcessService(IngenicoBusinessProcessService ingenicoBusinessProcessService) {
-      this.ingenicoBusinessProcessService = ingenicoBusinessProcessService;
    }
 
    public void setOrderCancelService(OrderCancelService orderCancelService) {
