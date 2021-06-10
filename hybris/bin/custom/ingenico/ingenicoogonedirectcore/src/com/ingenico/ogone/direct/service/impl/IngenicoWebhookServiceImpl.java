@@ -72,17 +72,13 @@ public class IngenicoWebhookServiceImpl implements IngenicoWebhookService {
             case PAYMENT_PENDING_APPROVAL:
             case PAYMENT_PENDING_COMPLETION:
             case PAYMENT_PENDING_CAPTURE:
-                break;
+            case PAYMENT_CANCELLED:
+            case PAYMENT_REJECTED:
             case PAYMENT_CAPTURE_REQUEST:
+                break;
             case PAYMENT_CAPTURED:
             case PAYMENT_REJECTED_CAPTURE:
                 ingenicoTransactionService.processCapturedEvent(webhooksEvent);
-                break;
-            case PAYMENT_REJECTED:
-                // TODO need to REJECT in our side ????
-                break;
-            case PAYMENT_CANCELLED:
-                ingenicoTransactionService.processCancelledEvent(webhooksEvent);
                 break;
             case PAYMENT_REFUNDED:
                 ingenicoTransactionService.processRefundedEvent(webhooksEvent);

@@ -8,4 +8,6 @@ import de.hybris.platform.order.daos.OrderDao;
 public interface IngenicoOrderDao extends OrderDao {
 
     List<OrderModel> findIngenicoOrdersToCapture();
+
+    OrderModel findIngenicoOrder(String orderCode);
 }
