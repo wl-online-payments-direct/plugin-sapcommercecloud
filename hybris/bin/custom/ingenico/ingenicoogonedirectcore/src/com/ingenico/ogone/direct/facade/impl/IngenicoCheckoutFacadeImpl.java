@@ -29,6 +29,7 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
@@ -271,13 +272,18 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     protected OrderData createOrderFromPaymentResponse(final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) throws InvalidCartException {
         final CartModel sessionCart = cartService.getSessionCart();
         updatePaymentInfoIfNeeded(sessionCart,paymentResponse);
-        ingenicoTransactionService.createOrUpdatePaymentTransaction(sessionCart,
+        final PaymentTransactionModel paymentTransaction = ingenicoTransactionService.getOrCreatePaymentTransaction(sessionCart,
                 paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                paymentResponse.getId());
+
+        ingenicoTransactionService.updatePaymentTransaction(
+                paymentTransaction,
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
                 paymentResponse.getStatusOutput().getStatusCategory(),
                 paymentResponse.getPaymentOutput().getAmountOfMoney(),
-                paymentTransactionType);
+                paymentTransactionType
+        );
 
         return checkoutFacade.placeOrder();
     }
@@ -307,9 +313,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 if (isCardsPresent) {
                     paymentProducts.add(0, createGroupedCardPaymentProduct());
                 }
-                break;
-            default:
-                // Happy Sonar
                 break;
         }
         return paymentProducts;

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.ingenico.direct.webhooks.ApiVersionMismatchException;
 import com.ingenico.direct.webhooks.SignatureValidationException;
+import com.ingenico.ogone.direct.exception.IngenicoNonValidWebhooksEventException;
 
 
 /**
@@ -35,6 +36,14 @@ public class IngenicoErrorsHandlerController {
     public String handleException(final SignatureValidationException ex) {
         LOGGER.error("[INGENICO] Webhook : " + HttpStatus.UNAUTHORIZED.getReasonPhrase(), ex);
 
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(IngenicoNonValidWebhooksEventException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public String handleException(final IngenicoNonValidWebhooksEventException ex) {
+        LOGGER.error("[INGENICO] Webhook - invalid : " + ex.getMessage());
         return ex.getMessage();
     }
 
