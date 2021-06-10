@@ -1,5 +1,7 @@
 package com.ingenico.ogone.direct.dao.impl;
 
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +21,10 @@ public class IngenicoOrderDaoImpl extends DefaultOrderDao implements IngenicoOrd
             + "} WHERE {" + OrderModel.PAYMENTSTATUS + "} IN (?paymentStatuses) " +
             "AND {" + OrderModel.VERSIONID + "} IS NULL";
 
+    private static final String Q_ORDER_BY_CODE = "SELECT {" + OrderModel.PK + "} FROM {" + OrderModel._TYPECODE
+            + "} WHERE {" + OrderModel.CODE + "} = ?code " +
+            "AND {" + OrderModel.VERSIONID + "} IS NULL";
+
     private static final List<PaymentStatus> PAYMENT_STATUSES = Collections.unmodifiableList(
             Arrays.asList(PaymentStatus.INGENICO_WAITING_CAPTURE, PaymentStatus.INGENICO_AUTHORIZED));
 
@@ -31,6 +37,15 @@ public class IngenicoOrderDaoImpl extends DefaultOrderDao implements IngenicoOrd
 
         final SearchResult<OrderModel> search = flexibleSearchService.search(flexibleSearchQuery);
         return search.getResult();
+    }
+
+    @Override
+    public OrderModel findIngenicoOrder(String orderCode) {
+        validateParameterNotNull(orderCode, "orderCode cannot be null");
+        FlexibleSearchQuery flexibleSearchQuery = new FlexibleSearchQuery(Q_ORDER_BY_CODE);
+        flexibleSearchQuery.addQueryParameter("code", orderCode);
+
+        return flexibleSearchService.searchUnique(flexibleSearchQuery);
     }
 
     @Override
