@@ -24,6 +24,12 @@ public class IngenicoConfigurationServiceImpl implements IngenicoConfigurationSe
     }
 
     @Override
+    public IngenicoConfigurationModel getIngenicoConfigurationByMerchantId(String merchantId) {
+        validateParameterNotNull(merchantId, "merchantId cannot be null");
+        return ingenicoConfigurationDao.findIngenicoConfigurationByMerchantId(merchantId);
+    }
+
+    @Override
     public IngenicoConfigurationModel getIngenicoConfiguration(final BaseStoreModel baseStoreModel) {
         validateParameterNotNull(baseStoreModel, "baseStore cannot be null");
         final IngenicoConfigurationModel ingenicoConfiguration = baseStoreModel.getIngenicoConfiguration();

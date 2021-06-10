@@ -8,6 +8,8 @@ public interface IngenicoConfigurationService {
 
     IngenicoConfigurationModel getIngenicoConfigurationByWebhookKey(String webhookKey);
 
+    IngenicoConfigurationModel getIngenicoConfigurationByMerchantId(String merchantId);
+
     IngenicoConfigurationModel getIngenicoConfiguration(BaseStoreModel baseStoreModel);
 
     IngenicoConfigurationModel getCurrentIngenicoConfiguration();

@@ -62,6 +62,7 @@
 
     <bean id="ingenicoWebhookFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoWebhookFacadeImpl">
         <property name="ingenicoWebhookService" ref="ingenicoWebhookService"/>
+        <property name="ingenicoOrderDao" ref="ingenicoOrderDao"/>
     </bean>
 
     <!-- Job -->
