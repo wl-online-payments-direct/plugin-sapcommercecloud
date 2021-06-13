@@ -40,14 +40,10 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
 
     @Override
-    public PaymentTransactionModel createOrUpdatePaymentTransaction(AbstractOrderModel abstractOrderModel, String merchantReference, String paymentTransactionId, String status, String statusDetails, AmountOfMoney amountOfMoney, PaymentTransactionType paymentTransactionType) {
+    public PaymentTransactionModel getOrCreatePaymentTransaction(AbstractOrderModel abstractOrderModel, String merchantReference, String paymentTransactionId) {
         validateParameterNotNullStandardMessage("abstractOrderModel", abstractOrderModel);
         validateParameterNotNullStandardMessage("merchantReference", merchantReference);
         validateParameterNotNullStandardMessage("paymentTransactionId", paymentTransactionId);
-        validateParameterNotNullStandardMessage("status", status);
-        validateParameterNotNullStandardMessage("statusDetails", statusDetails);
-        validateParameterNotNullStandardMessage("amountOfMoney", amountOfMoney);
-        validateParameterNotNullStandardMessage("paymentTransactionType", paymentTransactionType);
         PaymentTransactionModel paymentTransaction;
         try {
             paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(paymentTransactionId));
@@ -58,14 +54,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                     paymentTransactionId);
         }
 
-        return updatePaymentTransaction(
-                paymentTransaction,
-                paymentTransactionId,
-                status,
-                statusDetails,
-                amountOfMoney,
-                paymentTransactionType
-        );
+        return paymentTransaction;
     }
 
 
@@ -76,8 +65,12 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                                                                          String status,
                                                                          String statusDetails,
                                                                          AmountOfMoney amountOfMoney) {
-        return createOrUpdatePaymentTransaction(abstractOrderModel,
+        final PaymentTransactionModel paymentTransaction = getOrCreatePaymentTransaction(abstractOrderModel,
                 merchantReference,
+                paymentTransactionId);
+
+        return updatePaymentTransaction(
+                paymentTransaction,
                 paymentTransactionId,
                 status,
                 statusDetails,
@@ -113,35 +106,28 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
         validateParameterNotNullStandardMessage("webhooksEvent.payment", webhooksEvent.getPayment());
         LOGGER.debug("[INGENICO] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
-        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getPayment().getId()));
+        final String paymentTransactionId = webhooksEvent.getPayment().getId();
+        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(paymentTransactionId));
+
+        final boolean alreadyProcessed = paymentTransaction.getEntries().stream()
+                .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
+                .anyMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
+
         final OrderModel order = (OrderModel) paymentTransaction.getOrder();
-        updatePaymentTransaction(
-                paymentTransaction,
-                webhooksEvent.getPayment().getId(),
-                webhooksEvent.getPayment().getStatus(),
-                webhooksEvent.getPayment().getStatusOutput().getStatusCategory(),
-                webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
-                PaymentTransactionType.CAPTURE
-        );
+        if (!alreadyProcessed) {
+            updatePaymentTransaction(
+                    paymentTransaction,
+                    webhooksEvent.getPayment().getId(),
+                    webhooksEvent.getPayment().getStatus(),
+                    webhooksEvent.getPayment().getStatusOutput().getStatusCategory(),
+                    webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
+                    PaymentTransactionType.CAPTURE
+            );
+        }
         //Trigger Captured event
         ingenicoBusinessProcessService.triggerOrderProcessEvent(order, INGENICO_EVENT_CAPTURE);
     }
 
-    @Override
-    public void processCancelledEvent(WebhooksEvent webhooksEvent) {
-        validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
-        validateParameterNotNullStandardMessage("webhooksEvent.payment", webhooksEvent.getPayment());
-        LOGGER.debug("[INGENICO] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
-        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getPayment().getId()));
-        updatePaymentTransaction(
-                paymentTransaction,
-                webhooksEvent.getPayment().getId(),
-                webhooksEvent.getPayment().getStatus(),
-                webhooksEvent.getPayment().getStatusOutput().getStatusCategory(),
-                webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
-                PaymentTransactionType.CANCEL
-        );
-    }
 
     @Override
     public void processRefundedEvent(WebhooksEvent webhooksEvent) {
