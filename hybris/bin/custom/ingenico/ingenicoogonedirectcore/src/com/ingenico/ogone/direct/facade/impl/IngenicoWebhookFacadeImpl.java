@@ -10,12 +10,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.ingenico.direct.RequestHeader;
 import com.ingenico.direct.domain.WebhooksEvent;
+import com.ingenico.ogone.direct.dao.IngenicoOrderDao;
+import com.ingenico.ogone.direct.exception.IngenicoNonValidWebhooksEventException;
 import com.ingenico.ogone.direct.facade.IngenicoWebhookFacade;
 import com.ingenico.ogone.direct.service.IngenicoWebhookService;
 
 public class IngenicoWebhookFacadeImpl implements IngenicoWebhookFacade {
 
     private IngenicoWebhookService ingenicoWebhookService;
+    private IngenicoOrderDao ingenicoOrderDao;
 
 
     @Override
@@ -36,7 +39,27 @@ public class IngenicoWebhookFacadeImpl implements IngenicoWebhookFacade {
         ingenicoWebhookService.saveWebhooksEvent(webhookAsString, webhooksEvent.getCreated());
     }
 
+    @Override
+    public void validateWebhooksEvent(WebhooksEvent webhooksEvent) throws IngenicoNonValidWebhooksEventException {
+        validateParameterNotNull(webhooksEvent, "webhooksEvent cannot be null");
+        try {
+            String orderCode = null;
+            if (webhooksEvent.getPayment() != null) {
+                orderCode = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
+            } else if (webhooksEvent.getRefund() != null) {
+                orderCode = webhooksEvent.getRefund().getRefundOutput().getReferences().getMerchantReference();
+            }
+            ingenicoOrderDao.findIngenicoOrder(orderCode);
+        } catch (Exception exception) {
+            throw new IngenicoNonValidWebhooksEventException(exception.getMessage());
+        }
+    }
+
     public void setIngenicoWebhookService(IngenicoWebhookService ingenicoWebhookService) {
         this.ingenicoWebhookService = ingenicoWebhookService;
+    }
+
+    public void setIngenicoOrderDao(IngenicoOrderDao ingenicoOrderDao) {
+        this.ingenicoOrderDao = ingenicoOrderDao;
     }
 }

@@ -29,6 +29,7 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
@@ -48,6 +49,7 @@ import com.ingenico.direct.domain.CreatePaymentResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.GetHostedCheckoutResponse;
 import com.ingenico.direct.domain.GetHostedTokenizationResponse;
+import com.ingenico.direct.domain.PaymentOutput;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentProductDisplayHints;
 import com.ingenico.direct.domain.PaymentResponse;
@@ -268,14 +270,20 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
     }
 
     protected OrderData createOrderFromPaymentResponse(final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) throws InvalidCartException {
-
-        ingenicoTransactionService.createOrUpdatePaymentTransaction(cartService.getSessionCart(),
+        final CartModel sessionCart = cartService.getSessionCart();
+        updatePaymentInfoIfNeeded(sessionCart,paymentResponse);
+        final PaymentTransactionModel paymentTransaction = ingenicoTransactionService.getOrCreatePaymentTransaction(sessionCart,
                 paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                paymentResponse.getId());
+
+        ingenicoTransactionService.updatePaymentTransaction(
+                paymentTransaction,
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
                 paymentResponse.getStatusOutput().getStatusCategory(),
                 paymentResponse.getPaymentOutput().getAmountOfMoney(),
-                paymentTransactionType);
+                paymentTransactionType
+        );
 
         return checkoutFacade.placeOrder();
     }
@@ -305,9 +313,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 if (isCardsPresent) {
                     paymentProducts.add(0, createGroupedCardPaymentProduct());
                 }
-                break;
-            default:
-                // Happy Sonar
                 break;
         }
         return paymentProducts;
@@ -343,6 +348,18 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
 
         modelService.save(paymentInfo);
         return paymentInfo;
+    }
+
+    protected void updatePaymentInfoIfNeeded(final CartModel cartModel, PaymentResponse paymentResponse) {
+        if (cartModel.getPaymentInfo() instanceof IngenicoPaymentInfoModel) {
+            final IngenicoPaymentInfoModel paymentInfo = (IngenicoPaymentInfoModel) cartModel.getPaymentInfo();
+            final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
+            if (paymentOutput.getCardPaymentMethodSpecificOutput() != null && paymentInfo.getId().equals(GROUPED_CARDS_ID)) {
+                paymentInfo.setId(paymentOutput.getCardPaymentMethodSpecificOutput().getPaymentProductId());
+                modelService.save(paymentInfo);
+                modelService.refresh(cartModel);
+            }
+        }
     }
 
     protected AddressModel convertToAddressModel(AddressData addressData) {
