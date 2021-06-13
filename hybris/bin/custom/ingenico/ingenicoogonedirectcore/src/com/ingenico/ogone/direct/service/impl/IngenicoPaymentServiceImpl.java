@@ -388,7 +388,6 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             refundRequest.setAmountOfMoney(amountOfMoney);
             RefundResponse refundResponse =
                   client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().refundPayment(paymentId, refundRequest);
-
             IngenicoLogUtils.logAction(LOGGER, "refundPayment", paymentId, refundResponse);
 
             return refundResponse;
