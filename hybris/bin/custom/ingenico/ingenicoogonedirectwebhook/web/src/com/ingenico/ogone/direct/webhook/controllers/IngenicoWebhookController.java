@@ -45,6 +45,7 @@ public class IngenicoWebhookController {
         final WebhooksEvent webhooksEvent = ingenicoWebhookFacade.retrieveWebhooksEvent(bodyString, keyId, signature);
         LOGGER.debug("[INGENICO] webhookevent received : {}", bodyString);
 
+        ingenicoWebhookFacade.validateWebhooksEvent(webhooksEvent);
         ingenicoWebhookFacade.saveWebhooksEvent(webhooksEvent);
 
         return "ok";

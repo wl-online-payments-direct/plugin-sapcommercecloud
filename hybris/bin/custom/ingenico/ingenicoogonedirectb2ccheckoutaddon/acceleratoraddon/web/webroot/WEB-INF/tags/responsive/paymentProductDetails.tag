@@ -22,7 +22,9 @@
                               value="${paymentProduct.id}" tabindex="${tabindex}"
                               checked="${isSelected ? 'checked' : '' }"/>
             <span>
-                <img src="${paymentProduct.displayHints.logo}" alt="${paymentProduct.displayHints.label}"/>
+                <c:if test="${not empty paymentProduct.displayHints.logo}">
+                    <img src="${paymentProduct.displayHints.logo}" alt="${paymentProduct.displayHints.label}"/>
+                </c:if>
                 ${paymentProduct.displayHints.label}
             </span>
             <c:if test="${not empty idealIssuers && isIdeal}">

@@ -9,13 +9,9 @@ import com.ingenico.direct.domain.WebhooksEvent;
 
 public interface IngenicoTransactionService {
 
-    PaymentTransactionModel createOrUpdatePaymentTransaction(AbstractOrderModel abstractOrderModel,
-                                                             String merchantReference,
-                                                             String paymentTransactionId,
-                                                             String status,
-                                                             String statusDetails,
-                                                             AmountOfMoney amountOfMoney,
-                                                             PaymentTransactionType paymentTransactionType);
+    PaymentTransactionModel getOrCreatePaymentTransaction(AbstractOrderModel abstractOrderModel,
+                                                          String merchantReference,
+                                                          String paymentTransactionId);
 
     PaymentTransactionModel createAuthorizationPaymentTransaction(AbstractOrderModel abstractOrderModel,
                                                                   String merchantReference,
@@ -32,8 +28,6 @@ public interface IngenicoTransactionService {
                                                      PaymentTransactionType paymentTransactionType);
 
     void processCapturedEvent(WebhooksEvent webhooksEvent);
-
-    void processCancelledEvent(WebhooksEvent webhooksEvent);
 
     void processRefundedEvent(WebhooksEvent webhooksEvent);
 
