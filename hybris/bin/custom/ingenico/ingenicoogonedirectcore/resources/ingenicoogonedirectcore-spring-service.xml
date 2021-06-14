@@ -39,6 +39,7 @@
         <property name="ingenicoBusinessProcessService" ref="ingenicoBusinessProcessService"/>
         <property name="ingenicoTransactionDao" ref="ingenicoTransactionDao"/>
         <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
+        <property name="ingenicoPaymentService" ref="ingenicoPaymentService"/>
         <property name="modelService" ref="modelService"/>
     </bean>
 
