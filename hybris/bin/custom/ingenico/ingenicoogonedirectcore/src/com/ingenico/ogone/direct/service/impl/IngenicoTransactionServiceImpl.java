@@ -9,6 +9,7 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 
 import java.math.BigDecimal;
 
+import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
@@ -16,6 +17,7 @@ import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.store.BaseStoreModel;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -23,9 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ingenico.direct.domain.AmountOfMoney;
+import com.ingenico.direct.domain.Capture;
 import com.ingenico.direct.domain.WebhooksEvent;
 import com.ingenico.ogone.direct.dao.IngenicoTransactionDao;
+import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
+import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.service.IngenicoTransactionService;
 import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
 
@@ -35,6 +40,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
     private IngenicoTransactionDao ingenicoTransactionDao;
     private IngenicoBusinessProcessService ingenicoBusinessProcessService;
+    private IngenicoPaymentService ingenicoPaymentService;
     private IngenicoAmountUtils ingenicoAmountUtils;
     private ModelService modelService;
 
@@ -128,6 +134,32 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         ingenicoBusinessProcessService.triggerOrderProcessEvent(order, INGENICO_EVENT_CAPTURE);
     }
 
+    @Override
+    public void processCapture(Capture capture) {
+        validateParameterNotNullStandardMessage("capture", capture);
+        final String paymentTransactionId = capture.getId();
+        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(paymentTransactionId));
+
+        final boolean notProcessed = paymentTransaction.getEntries().stream()
+                .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
+                .noneMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
+
+        if (notProcessed) {
+            createPaymentTransactionEntry(
+                    paymentTransaction,
+                    paymentTransactionId,
+                    paymentTransaction.getOrder(),
+                    capture.getStatus(),
+                    "N/A",
+                    capture.getCaptureOutput().getAmountOfMoney(),
+                    PaymentTransactionType.CAPTURE
+            );
+            //Trigger Capture event
+            ingenicoBusinessProcessService.triggerReturnProcessEvent((OrderModel) paymentTransaction.getOrder(), INGENICO_EVENT_CAPTURE);
+        }
+
+    }
+
 
     @Override
     public void processRefundedEvent(WebhooksEvent webhooksEvent) {
@@ -210,7 +242,28 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
         modelService.save(transactionEntryModel);
 
+        setOrderPaymentStatusIfNeeded(abstractOrderModel, transactionEntryModel);
+
         return transactionEntryModel;
+    }
+
+    private void setOrderPaymentStatusIfNeeded(AbstractOrderModel abstractOrderModel, PaymentTransactionEntryModel transactionEntryModel) {
+        if (transactionEntryModel.getType() == PaymentTransactionType.CAPTURE) {
+            if (PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(transactionEntryModel.getTransactionStatus())) {
+                final Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(getIngenicoConfiguration(abstractOrderModel),
+                        transactionEntryModel.getRequestId(),
+                        transactionEntryModel.getPaymentTransaction().getPlannedAmount(),
+                        transactionEntryModel.getCurrency().getIsocode());
+                if (nonCapturedAmount > 0L) {
+                    abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_WAITING_CAPTURE);
+                } else {
+                    abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_CAPTURED);
+                }
+            } else {
+                abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_REJECTED);
+            }
+            modelService.save(abstractOrderModel);
+        }
     }
 
     private String getTransactionStatus(String status) {
@@ -234,6 +287,11 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         }
     }
 
+    private IngenicoConfigurationModel getIngenicoConfiguration(AbstractOrderModel orderModel) {
+        final BaseStoreModel store = orderModel.getStore();
+        return store != null ? store.getIngenicoConfiguration() : null;
+    }
+
     private String getPaymentId(String paymentTransactionId) {
         return StringUtils.split(paymentTransactionId, "_")[0];
     }
@@ -253,5 +311,9 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
     public void setIngenicoAmountUtils(IngenicoAmountUtils ingenicoAmountUtils) {
         this.ingenicoAmountUtils = ingenicoAmountUtils;
+    }
+
+    public void setIngenicoPaymentService(IngenicoPaymentService ingenicoPaymentService) {
+        this.ingenicoPaymentService = ingenicoPaymentService;
     }
 }
