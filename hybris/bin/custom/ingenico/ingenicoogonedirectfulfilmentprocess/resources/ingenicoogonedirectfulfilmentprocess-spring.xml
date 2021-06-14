@@ -15,4 +15,9 @@
         <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
     </bean>
 
+    <bean id="ingenicoCaptureRefundPaymentAction"
+          class="com.ingenico.ogone.direct.actions.returns.IngenicoCaptureRefundPaymentAction" parent="abstractAction">
+    </bean>
+
+
 </beans>

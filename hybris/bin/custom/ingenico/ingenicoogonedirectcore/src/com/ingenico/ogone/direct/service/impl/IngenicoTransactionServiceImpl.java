@@ -229,6 +229,9 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
             case CAPTURE_REQUESTED:
             case CAPTURED:
                 return PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue();
+            case REFUND_REQUESTED:
+            case REFUNDED:
+                return PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue();
             default:
                 return "NOT_SUPPORTED";
         }

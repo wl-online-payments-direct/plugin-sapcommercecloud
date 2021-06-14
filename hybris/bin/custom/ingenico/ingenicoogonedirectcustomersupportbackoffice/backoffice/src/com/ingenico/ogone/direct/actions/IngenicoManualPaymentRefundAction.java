@@ -1,5 +1,6 @@
 package com.ingenico.ogone.direct.actions;
 
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_REFUND;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUND_REQUESTED;
 
 import javax.annotation.Resource;
@@ -9,9 +10,9 @@ import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
 import com.ingenico.direct.domain.RefundResponse;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
+import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.service.IngenicoTransactionService;
-import de.hybris.platform.basecommerce.enums.ReturnStatus;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.omsbackoffice.actions.returns.ManualRefundAction;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
@@ -28,6 +29,9 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
 
    @Resource
    private IngenicoTransactionService ingenicoTransactionService;
+
+   @Resource
+   private IngenicoBusinessProcessService ingenicoBusinessProcessService;
 
    @Override public ActionResult<ReturnRequestModel> perform(ActionContext<ReturnRequestModel> actionContext) {
       ReturnRequestModel returnRequestModel = actionContext.getData();
@@ -49,7 +53,7 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
                refundResponse.getStatus(),
                refundResponse.getRefundOutput().getAmountOfMoney(),
                PaymentTransactionType.REFUND_FOLLOW_ON);
-         setReturnRequestStatus(returnRequestModel, ReturnStatus.PAYMENT_REVERSED);
+         ingenicoBusinessProcessService.triggerReturnProcessEvent(order, INGENICO_EVENT_REFUND);
          result = new ActionResult<ReturnRequestModel>(ActionResult.SUCCESS, returnRequestModel);
          resultMessage = actionContext.getLabel("action.manualrefund.success");
       } else {
@@ -74,16 +78,6 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
             .findFirst().orElse(null);
    }
 
-   protected void setReturnRequestStatus(final ReturnRequestModel returnRequest, final ReturnStatus status)
-   {
-      returnRequest.setStatus(status);
-      returnRequest.getReturnEntries().stream().forEach(entry -> {
-         entry.setStatus(status);
-         getModelService().save(entry);
-      });
-      getModelService().save(returnRequest);
-   }
-
    public void setIngenicoPaymentService(IngenicoPaymentService ingenicoPaymentService) {
       this.ingenicoPaymentService = ingenicoPaymentService;
    }
@@ -92,4 +86,7 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
       this.ingenicoTransactionService = ingenicoTransactionService;
    }
 
+   public void setIngenicoBusinessProcessService(IngenicoBusinessProcessService ingenicoBusinessProcessService) {
+      this.ingenicoBusinessProcessService = ingenicoBusinessProcessService;
+   }
 }
