@@ -15,7 +15,6 @@
         <enumtype generate="true" code="OperationCodesEnum" autocreate="true">
             <description>Checkout types for card payments</description>
             <value code="SALE"/>
-            <value code="PRE_AUTHORIZATION"/>
             <value code="FINAL_AUTHORIZATION"/>
         </enumtype>
         <enumtype code="IngenicoWebhooksEventStatusEnum">
