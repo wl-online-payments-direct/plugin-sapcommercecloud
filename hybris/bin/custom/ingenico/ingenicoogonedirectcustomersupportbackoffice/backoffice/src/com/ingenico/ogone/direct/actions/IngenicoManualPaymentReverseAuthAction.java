@@ -15,7 +15,6 @@ import com.ingenico.direct.domain.CancelPaymentResponse;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.service.IngenicoTransactionService;
-import com.ingenico.ogone.direct.service.impl.IngenicoTransactionServiceImpl;
 import de.hybris.platform.basecommerce.enums.CancelReason;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
@@ -36,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.zkoss.zhtml.Messagebox;
 
 public class IngenicoManualPaymentReverseAuthAction extends CancelOrderAction implements CockpitAction<OrderModel, OrderModel> {
-   private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoTransactionServiceImpl.class);
+   private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoManualPaymentReverseAuthAction.class);
 
    @Resource
    private IngenicoPaymentService ingenicoPaymentService;
