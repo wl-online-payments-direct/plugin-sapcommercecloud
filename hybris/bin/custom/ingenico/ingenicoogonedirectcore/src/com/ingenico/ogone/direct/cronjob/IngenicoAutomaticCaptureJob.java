@@ -2,6 +2,7 @@ package com.ingenico.ogone.direct.cronjob;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import de.hybris.platform.core.model.order.OrderModel;
@@ -9,7 +10,6 @@ import de.hybris.platform.cronjob.enums.CronJobResult;
 import de.hybris.platform.cronjob.enums.CronJobStatus;
 import de.hybris.platform.cronjob.model.CronJobModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
-import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.cronjob.AbstractJobPerformable;
 import de.hybris.platform.servicelayer.cronjob.PerformResult;
@@ -21,11 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ingenico.direct.domain.CaptureResponse;
+import com.ingenico.direct.domain.CapturesResponse;
 import com.ingenico.ogone.direct.dao.IngenicoOrderDao;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.service.IngenicoTransactionService;
+import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
 
 public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobModel> {
     private static final Logger LOGGER = LoggerFactory.getLogger(IngenicoAutomaticCaptureJob.class);
@@ -34,6 +36,7 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
     private IngenicoPaymentService ingenicoPaymentService;
     private IngenicoTransactionService ingenicoTransactionService;
     private IngenicoBusinessProcessService ingenicoBusinessProcessService;
+    private IngenicoAmountUtils ingenicoAmountUtils;
 
     @Override
     public PerformResult perform(final CronJobModel cronJob) {
@@ -55,21 +58,35 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
                     fail++;
                     continue;
                 }
-                PaymentTransactionEntryModel paymentTransactionEntry = getPaymentTransactionToCapture(orderModel);
-                if (paymentTransactionEntry == null) {
-                    LOGGER.error("[INGENICO] Order {} has no authorized PaymentTransaction", orderModel.getCode());
-                    fail++;
-                    continue;
-                }
-                IngenicoConfigurationModel ingenicoConfiguration = getIngenicoConfiguration(orderModel);
 
-                CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(ingenicoConfiguration, paymentTransactionEntry.getRequestId(), paymentTransactionEntry.getPaymentTransaction().getPlannedAmount(), paymentTransactionEntry.getCurrency().getIsocode());
-                ingenicoTransactionService.updatePaymentTransaction(paymentTransactionEntry.getPaymentTransaction(),
-                        paymentTransactionEntry.getRequestId(),
-                        captureResponse.getStatus(),
-                        captureResponse.getStatus(),
-                        captureResponse.getCaptureOutput().getAmountOfMoney(),
-                        PaymentTransactionType.CAPTURE);
+                final PaymentTransactionModel lastPaymentTransaction = getLastPaymentTransaction(orderModel);
+                final String paymentId = lastPaymentTransaction.getRequestId() + "_0";
+                final IngenicoConfigurationModel ingenicoConfiguration = getIngenicoConfiguration(orderModel);
+                final CapturesResponse captures = ingenicoPaymentService.getCaptures(ingenicoConfiguration, paymentId);
+
+                if (CollectionUtils.isNotEmpty(captures.getCaptures())) {
+                    captures.getCaptures().forEach(capture -> ingenicoTransactionService.processCapture(capture));
+                }
+
+                final Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(ingenicoConfiguration,
+                        captures,
+                        lastPaymentTransaction.getPlannedAmount(),
+                        orderModel.getCurrency().getIsocode());
+                if (nonCapturedAmount > 0) {
+
+                    final BigDecimal amount = ingenicoAmountUtils.fromAmount(nonCapturedAmount, orderModel.getCurrency().getIsocode());
+                    final CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(ingenicoConfiguration,
+                            paymentId,
+                            amount,
+                            orderModel.getCurrency().getIsocode());
+                    ingenicoTransactionService.updatePaymentTransaction(lastPaymentTransaction,
+                            captureResponse.getId(),
+                            captureResponse.getStatus(),
+                            captureResponse.getStatus(),
+                            captureResponse.getCaptureOutput().getAmountOfMoney(),
+                            PaymentTransactionType.CAPTURE);
+                    LOGGER.info("[INGENICO] Order {}, remaining amount {} captured", orderModel.getCode(), amount);
+                }
 
                 ingenicoBusinessProcessService.triggerOrderProcessEvent(orderModel, INGENICO_EVENT_CAPTURE);
 
@@ -83,24 +100,19 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
         }
         LOGGER.info("[INGENICO] End processing.");
         if (fail > 0) {
-            LOGGER.info("[INGENICO] {} error occured!!", fail);
+            LOGGER.info("[INGENICO] {} errors occurred!!", fail);
             return new PerformResult(CronJobResult.ERROR, CronJobStatus.FINISHED);
         }
         return new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED);
     }
 
+    private PaymentTransactionModel getLastPaymentTransaction(OrderModel orderModel) {
+        return orderModel.getPaymentTransactions().get(orderModel.getPaymentTransactions().size() - 1);
+    }
+
     private IngenicoConfigurationModel getIngenicoConfiguration(OrderModel orderModel) {
         final BaseStoreModel store = orderModel.getStore();
         return store != null ? store.getIngenicoConfiguration() : null;
-    }
-
-
-    private PaymentTransactionEntryModel getPaymentTransactionToCapture(final OrderModel order) {
-        final PaymentTransactionModel finalPaymentTransaction = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
-        return finalPaymentTransaction.getEntries()
-                .stream()
-                .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()))
-                .findFirst().orElse(null);
     }
 
     public ModelService getModelService() {
@@ -127,5 +139,9 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
 
     public void setIngenicoBusinessProcessService(IngenicoBusinessProcessService ingenicoBusinessProcessService) {
         this.ingenicoBusinessProcessService = ingenicoBusinessProcessService;
+    }
+
+    public void setIngenicoAmountUtils(IngenicoAmountUtils ingenicoAmountUtils) {
+        this.ingenicoAmountUtils = ingenicoAmountUtils;
     }
 }
