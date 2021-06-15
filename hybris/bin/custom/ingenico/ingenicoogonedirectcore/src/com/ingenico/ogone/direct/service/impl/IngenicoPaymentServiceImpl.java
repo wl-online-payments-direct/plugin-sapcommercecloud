@@ -399,7 +399,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     }
 
     @Override
-    public RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, Double returnAmount) {
+    public RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId,  BigDecimal returnAmount, String currencyISOCode) {
         try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
 
             RefundRequest refundRequest = new RefundRequest();
