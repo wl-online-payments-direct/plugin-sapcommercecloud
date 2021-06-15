@@ -166,7 +166,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
         validateParameterNotNullStandardMessage("webhooksEvent.refund", webhooksEvent.getRefund());
         LOGGER.debug("[INGENICO] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
-        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getPayment().getId()));
+        final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getRefund().getId()));
         final OrderModel order = (OrderModel) paymentTransaction.getOrder();
         updatePaymentTransaction(
                 paymentTransaction,
@@ -274,6 +274,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
             case CANCELLED:
                 return PAYMENT_STATUS_CATEGORY_ENUM.REJECTED.getValue();
             case REDIRECTED:
+            case REFUND_REQUESTED:
                 return PAYMENT_STATUS_CATEGORY_ENUM.STATUS_UNKNOWN.getValue();
             case PENDING_PAYMENT:
             case PENDING_COMPLETION:
@@ -282,7 +283,6 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
             case CAPTURE_REQUESTED:
             case CAPTURED:
                 return PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue();
-            case REFUND_REQUESTED:
             case REFUNDED:
                 return PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue();
             default:
