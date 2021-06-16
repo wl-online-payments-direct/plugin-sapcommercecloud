@@ -57,7 +57,16 @@
         </hints>
         <property name="hostedTokenizationId" type="String"/>
         <property name="redirectURL" type="String"/>
-        <property name="savedTokens" type="com.ingenico.ogone.direct.payment.dto.SavedTokenListWsDTO"/>
+        <property name="savedPaymentDetails" type="de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO"/>
+    </bean>
+
+    <bean class="de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO">
+        <property name="cardBrand" type="String">
+            <description>Ingenico Card Brand</description>
+        </property>
+        <property name="token" type="String">
+            <description>Ingenico token</description>
+        </property>
     </bean>
 
 
@@ -88,29 +97,6 @@
         <property name="userAgent" type="String"/>
         <property name="locale" type="String"/>
         <property name="ipAddress" type="String"/>
-    </bean>
-
-    <bean class="com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO">
-        <description>Saved Token</description>
-        <hints>
-            <hint name="wsRelated"/>
-            <hint name="alias">SavedToken</hint>
-        </hints>
-        <property name="token" type="String"/>
-        <property name="cardBrand" type="String"/>
-        <property name="alias" type="String"/>
-        <property name="type" type="String"/>
-        <property name="cardholderName" type="String"/>
-        <property name="expiryDate" type="String"/>
-    </bean>
-
-    <bean class="com.ingenico.ogone.direct.payment.dto.SavedTokenListWsDTO">
-        <description>Saved Token List</description>
-        <hints>
-            <hint name="wsRelated"/>
-            <hint name="alias">SavedTokenList</hint>
-        </hints>
-        <property name="tokens" type="java.util.List&lt;com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO>"/>
     </bean>
 
     <bean class="com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO">
