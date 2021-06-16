@@ -289,17 +289,15 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     }
 
     @Override
-    public boolean deleteToken(String tokenId) {
+    public void deleteToken(String tokenId) {
         validateParameterNotNullStandardMessage("tokenId", tokenId);
 
         try (Client client = ingenicoClientFactory.getClient()) {
             client.merchant(getMerchantId()).tokens().deleteToken(tokenId);
             IngenicoLogUtils.logAction(LOGGER, "deleteToken", tokenId, "Token deleted!");
-            return true;
-        } catch (IOException | ApiException e) {
+        } catch (IOException e) {
             LOGGER.error("[ INGENICO ] Errors during deleteToken", e);
         }
-        return false;
     }
 
     @Override

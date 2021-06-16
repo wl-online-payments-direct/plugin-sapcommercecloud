@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.ingenico.direct.ApiException;
 import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.payment.dto.NonAuthorizedPaymentWsDTO;
 
@@ -60,6 +61,15 @@ public class IngenicoBaseController {
 
         return handleErrorInternal(UnknownIdentifierException.class.getSimpleName(), ex.getMessage());
     }
+
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    @ExceptionHandler({ApiException.class})
+    public ErrorListWsDTO handleModelNotFoundException(final ApiException ex) {
+        LOGGER.debug("An exception occurred while using Ingenico API!", ex);
+        return handleErrorInternal(ApiException.class.getSimpleName(), ex.getMessage());
+    }
+
 
     @ResponseStatus(value = HttpStatus.OK)
     @ResponseBody
