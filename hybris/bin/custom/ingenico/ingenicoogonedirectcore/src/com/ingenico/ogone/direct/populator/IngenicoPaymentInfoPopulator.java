@@ -7,6 +7,8 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 
 public class IngenicoPaymentInfoPopulator implements Populator<IngenicoPaymentInfoModel, IngenicoPaymentInfoData> {
@@ -24,6 +26,11 @@ public class IngenicoPaymentInfoPopulator implements Populator<IngenicoPaymentIn
         ingenicoPaymentInfoData.setAlias(ingenicoPaymentInfoModel.getAlias());
         ingenicoPaymentInfoData.setCardholderName(ingenicoPaymentInfoModel.getCardholderName());
         ingenicoPaymentInfoData.setExpiryDate(ingenicoPaymentInfoModel.getExpiryDate());
+        String[] splittedDate = StringUtils.split(ingenicoPaymentInfoModel.getExpiryDate(), "/");
+        if (splittedDate != null && splittedDate.length == 2) {
+            ingenicoPaymentInfoData.setExpiryMonth(splittedDate[0]);
+            ingenicoPaymentInfoData.setExpiryYear(splittedDate[1]);
+        }
         ingenicoPaymentInfoData.setToken(ingenicoPaymentInfoModel.getToken());
         ingenicoPaymentInfoData.setCardBrand(ingenicoPaymentInfoModel.getCardBrand());
         ingenicoPaymentInfoData.setType(ingenicoPaymentInfoModel.getType());
