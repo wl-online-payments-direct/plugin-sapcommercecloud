@@ -35,9 +35,7 @@
                                 <div class="checkout-indent">
 
                                     <div class="headline"><spring:theme code="checkout.multi.ingenicoPaymentMethod.paymentMethod.subtitle"/></div>
-                                    <c:if test="${empty availablePaymentMethods}">
-                                        <p><spring:theme code="payment.methods.not.found"/></p>
-                                    </c:if>
+
                                     <form:form id="ingenicoSelectPaymentForm" name="ingenicoSelectPaymentForm"
                                                modelAttribute="ingenicoPaymentDetailsForm" method="POST"
                                                action="${selectPaymentMethod}">
