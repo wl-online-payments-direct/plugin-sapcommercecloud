@@ -4,7 +4,6 @@ package com.ingenico.ogone.direct.occ.controllers.v2;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
 
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -13,7 +12,6 @@ import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartAddressException;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartException;
-import de.hybris.platform.util.Config;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdUserIdAndCartIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
@@ -33,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.HandlerMapping;
 
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
@@ -47,12 +44,12 @@ import com.ingenico.ogone.direct.occ.controllers.v2.validator.IngenicoPaymentDet
 import com.ingenico.ogone.direct.occ.helpers.IngenicoHelper;
 import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
+import com.ingenico.ogone.direct.payment.dto.BrowserDataWsDTO;
 import com.ingenico.ogone.direct.payment.dto.HostedCheckoutResponseWsDTO;
 import com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.ingenico.ogone.direct.payment.dto.IngenicoCheckoutTypeWsDTO;
 import com.ingenico.ogone.direct.payment.dto.IngenicoPaymentDetailsWsDTO;
 import com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO;
-import com.ingenico.ogone.direct.payment.dto.BrowserDataWsDTO;
 
 @Controller
 @RequestMapping(value = "/{baseSiteId}/users/{userId}/carts")
@@ -181,7 +178,7 @@ public class IngenicoCartsController extends IngenicoBaseController {
         final HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO = getDataMapper()
                 .map(hostedTokenization, HostedTokenizationResponseWsDTO.class, fields);
 
-        ingenicoHelper.fillSavedTokens(hostedTokenizationResponseWsDTO, fields);
+        ingenicoHelper.fillSavedPaymentDetails(hostedTokenizationResponseWsDTO, fields);
 
         return hostedTokenizationResponseWsDTO;
     }

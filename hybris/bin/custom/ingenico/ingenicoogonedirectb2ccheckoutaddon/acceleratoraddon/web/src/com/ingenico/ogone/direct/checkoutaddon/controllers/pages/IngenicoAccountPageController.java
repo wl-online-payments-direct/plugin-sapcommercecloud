@@ -61,13 +61,13 @@ public class IngenicoAccountPageController extends AbstractSearchPageController 
     )
     @RequireHardLogIn
     public String removePaymentMethod(@RequestParam("paymentInfoId") String paymentMethodId, RedirectAttributes redirectAttributes) throws CMSItemNotFoundException {
-        if(ingenicoUserFacade.deleteSavedIngenicoPaymentInfo(paymentMethodId)){
+        try {
+            ingenicoUserFacade.deleteSavedIngenicoPaymentInfo(paymentMethodId);
             GlobalMessages.addFlashMessage(redirectAttributes, "accConfMsgs", "text.account.profile.paymentCart.removed");
-        }else{
+        } catch (Exception exception) {
             GlobalMessages.addFlashMessage(redirectAttributes, "accErrorMsgs", "text.account.profile.paymentCart.remove.fail");
         }
-
-        return "redirect:"+ Account.PaymentDetails.root;
+        return "redirect:" + Account.PaymentDetails.root;
     }
 
 
