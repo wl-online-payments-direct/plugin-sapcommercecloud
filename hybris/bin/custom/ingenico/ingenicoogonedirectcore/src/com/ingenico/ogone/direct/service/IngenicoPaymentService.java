@@ -21,7 +21,6 @@ import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
-import de.hybris.platform.payment.model.PaymentTransactionModel;
 
 public interface IngenicoPaymentService {
 
@@ -61,6 +60,6 @@ public interface IngenicoPaymentService {
 
     TokenResponse getToken(String tokenId);
 
-    boolean deleteToken(String tokenId);
+    void deleteToken(String tokenId);
 
 }

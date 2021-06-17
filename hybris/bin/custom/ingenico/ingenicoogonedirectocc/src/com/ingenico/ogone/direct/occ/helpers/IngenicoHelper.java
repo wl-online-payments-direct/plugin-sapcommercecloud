@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
+import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
+import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
 import de.hybris.platform.util.Config;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 
@@ -24,8 +26,6 @@ import com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO;
 import com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO;
 import com.ingenico.ogone.direct.payment.dto.ProductDirectoryWsDTO;
-import com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO;
-import com.ingenico.ogone.direct.payment.dto.SavedTokenListWsDTO;
 
 
 @Component("ingenicoHelper")
@@ -57,11 +57,11 @@ public class IngenicoHelper {
         }
     }
 
-    public void fillSavedTokens(HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO, String fields) {
+    public void fillSavedPaymentDetails(HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO, String fields) {
         final List<IngenicoPaymentInfoData> ingenicoPaymentInfos = ingenicoUserFacade.getIngenicoPaymentInfos(true);
-        final SavedTokenListWsDTO savedTokenListWsDTO = new SavedTokenListWsDTO();
-        savedTokenListWsDTO.setTokens(getDataMapper().mapAsList(ingenicoPaymentInfos, SavedTokenWsDTO.class, fields));
-        hostedTokenizationResponseWsDTO.setSavedTokens(savedTokenListWsDTO);
+        final PaymentDetailsListWsDTO paymentDetailsListWsDTO = new PaymentDetailsListWsDTO();
+        paymentDetailsListWsDTO.setPayments(getDataMapper().mapAsList(ingenicoPaymentInfos, PaymentDetailsWsDTO.class, fields));
+        hostedTokenizationResponseWsDTO.setSavedPaymentDetails(paymentDetailsListWsDTO);
     }
 
     public String buildReturnURL(HttpServletRequest request, String key) {
