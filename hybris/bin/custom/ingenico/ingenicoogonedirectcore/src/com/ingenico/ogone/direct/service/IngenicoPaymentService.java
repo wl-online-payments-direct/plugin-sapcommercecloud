@@ -56,7 +56,7 @@ public interface IngenicoPaymentService {
 
     CancelPaymentResponse cancelPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId);
 
-    RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, Double returnAmount);
+    RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal returnAmount, String currencyISOCode);
 
     TokenResponse getToken(String tokenId);
 
