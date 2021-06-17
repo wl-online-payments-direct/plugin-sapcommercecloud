@@ -81,20 +81,21 @@
         <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="hostedTokenizationId,redirectURL,savedTokens(BASIC)"/>
-                <entry key="DEFAULT" value="BASIC,savedTokens(DEFAULT)"/>
-                <entry key="FULL" value="BASIC,savedTokens(FULL)"/>
+                <entry key="BASIC" value="hostedTokenizationId,redirectURL,savedPaymentDetails(BASIC)"/>
+                <entry key="DEFAULT" value="BASIC,savedPaymentDetails(DEFAULT)"/>
+                <entry key="FULL" value="BASIC,savedPaymentDetails(FULL)"/>
             </map>
         </property>
     </bean>
 
-    <bean parent="fieldSetLevelMapping" id="savedTokenFieldSetLevelMapping">
-        <property name="dtoClass" value="com.ingenico.ogone.direct.payment.dto.SavedTokenWsDTO"/>
+    <bean parent="fieldSetLevelMapping" id="ingenicoPaymentDetailsWsDTOFieldSetLevelMapping">
+        <property name="dtoClass"
+                  value="de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="token,cardBrand,alias,cardholderName,expiryDate,type"/>
-                <entry key="DEFAULT" value="BASIC"/>
-                <entry key="FULL" value="DEFAULT"/>
+                <entry key="BASIC" value="cardBrand,token"/>
+                <entry key="DEFAULT" value="cardBrand,token"/>
+                <entry key="FULL" value="cardBrand,token"/>
             </map>
         </property>
     </bean>
@@ -158,7 +159,7 @@
         </property>
     </bean>
 
-    <bean id="IngenicoPaymentDetailsFieldMapper" parent="fieldMapper">
+    <bean parent="fieldMapper">
         <property name="sourceClass"
                   value="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
         <property name="destClass"
@@ -167,6 +168,20 @@
             <map>
                 <entry key="id" value="paymentProductId"/>
                 <entry key="paymentProductDirectoryId" value="issuerId"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldMapper">
+        <property name="sourceClass"
+                  value="com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData"/>
+        <property name="destClass"
+                  value="de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO"/>
+        <property name="fieldMapping">
+            <map>
+                <entry key="code" value="id"/>
+                <entry key="cardholderName" value="accountHolderName"/>
+                <entry key="alias" value="cardNumber"/>
             </map>
         </property>
     </bean>
