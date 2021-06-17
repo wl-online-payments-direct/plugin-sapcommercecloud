@@ -87,10 +87,8 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         model.addAttribute("paymentProducts", availablePaymentMethods);
         model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
         model.addAttribute("idealIssuers", ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods));
-
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
-
         return IngenicoCheckoutConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
     }
 
