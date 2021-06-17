@@ -12,6 +12,7 @@ import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartAddressException;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartException;
+import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdUserIdAndCartIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
@@ -116,7 +117,10 @@ public class IngenicoCartsController extends IngenicoBaseController {
         validate(ingenicoPaymentDetailsWsDTO, "ingenicoPaymentDetailsWsDTO", ingenicoPaymentDetailsWsDTOValidator);
         final IngenicoPaymentInfoData ingenicoPaymentInfoData = new IngenicoPaymentInfoData();
 
-        ingenicoCheckoutFacade.fillIngenicoPaymentInfoData(ingenicoPaymentInfoData, ingenicoPaymentDetailsWsDTO.getPaymentProductId(), ingenicoPaymentDetailsWsDTO.getIssuerId());
+        ingenicoCheckoutFacade.fillIngenicoPaymentInfoData(ingenicoPaymentInfoData,
+                ingenicoPaymentDetailsWsDTO.getPaymentProductId(),
+                ingenicoPaymentDetailsWsDTO.getIssuerId(),
+                ingenicoPaymentDetailsWsDTO.getHostedTokenizationId());
 
         final AddressData addressData;
         if (Boolean.TRUE.equals(ingenicoPaymentDetailsWsDTO.isUseDeliveryAddress())) {
@@ -192,7 +196,7 @@ public class IngenicoCartsController extends IngenicoBaseController {
             @ApiParam(value = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
             @RequestBody final BrowserDataWsDTO browserDataWsDTO,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
-            final HttpServletRequest request) {
+            final HttpServletRequest request) throws InvalidCartException {
         if (!checkoutFacade.hasCheckoutCart()) {
             throw new CartException("No cart found.", CartException.NOT_FOUND);
         }

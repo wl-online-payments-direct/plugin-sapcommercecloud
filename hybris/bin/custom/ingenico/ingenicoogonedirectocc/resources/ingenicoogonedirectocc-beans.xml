@@ -69,18 +69,6 @@
         </property>
     </bean>
 
-
-    <bean class="com.ingenico.ogone.direct.payment.dto.HostedTokenizationRequestWsDTO">
-        <description>Hosted Tokenization Request</description>
-        <hints>
-            <hint name="wsRelated"/>
-            <hint name="alias">HostedTokenizationRequest</hint>
-        </hints>
-        <property name="hostedTokenizationId" type="String"/>
-        <property name="browserData" type="com.ingenico.ogone.direct.payment.dto.BrowserDataWsDTO"/>
-    </bean>
-
-
     <bean class="com.ingenico.ogone.direct.payment.dto.BrowserDataWsDTO">
         <description>Browser Data</description>
         <hints>
@@ -164,6 +152,7 @@
         <property name="paymentProductId" type="Integer"/>
         <property name="paymentMethod" type="String"/>
         <property name="issuerId" type="String"/>
+        <property name="hostedTokenizationId" type="String"/>
         <property name="useDeliveryAddress" type="boolean"/>
         <property name="billingAddress" type="de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO"/>
     </bean>

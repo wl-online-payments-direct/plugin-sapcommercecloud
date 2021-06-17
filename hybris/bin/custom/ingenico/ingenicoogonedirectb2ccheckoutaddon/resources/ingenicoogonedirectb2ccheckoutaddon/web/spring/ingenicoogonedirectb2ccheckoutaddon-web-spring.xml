@@ -87,21 +87,6 @@
         <property name="progressBarId" value="ingenicoConfirmOrder"/>
     </bean>
 
-    <alias name="defaultIngenicoB2CResponsiveDoPaymentCheckoutStep" alias="ingenicoB2CResponsiveDoPaymentCheckoutStep" />
-    <bean id="defaultIngenicoB2CResponsiveDoPaymentCheckoutStep"  parent="checkoutStep">
-        <property name="checkoutGroup" ref="ingenicoB2CResponsiveCheckoutGroup"/>
-        <property name="checkoutStepValidator" ref="ingenicoPaymentWithTokenCheckoutStepValidator"/>
-        <property name="transitions">
-            <map merge="true">
-                <entry key="previous" value-ref="REDIRECT_TO_SUMMARY_INGENICO"/>
-                <entry key="current" value-ref="REDIRECT_TO_PAYMENT_INGENICO"/>
-                <entry key="next" value="REDIRECT_TO_ORDER_CONFIRMATION_INGENICO"/>
-            </map>
-        </property>
-        <property name="progressBarId" value="ingenicoPayOrder"/>
-    </bean>
-
-
     <bean id="ingenicoB2CResponsiveCheckoutGroup"  class="de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutGroup">
         <property name="groupId"  value="ingenicoB2CResponsiveCheckoutGroup"/>
         <property name="checkoutStepMap">
@@ -111,7 +96,6 @@
                 <entry key="delivery-method" value-ref="ingenicoB2CResponsiveDeliveryMethodCheckoutStep"/>
                 <entry key="choose-payment-method" value-ref="ingenicoB2CResponsiveChoosePaymentCheckoutStep"/>
                 <entry key="summary" value-ref="ingenicoB2CResponsiveSummaryCheckoutStep"/>
-                <entry key="do-payment" value-ref="ingenicoB2CResponsiveDoPaymentCheckoutStep"/>
             </map>
         </property>
         <property name="validationResultsMap">
@@ -130,7 +114,6 @@
                 <entry key="2" value-ref="ingenicoB2CResponsiveDeliveryMethodCheckoutStep"/>
                 <entry key="3" value-ref="ingenicoB2CResponsiveChoosePaymentCheckoutStep"/>
                 <entry key="4" value-ref="ingenicoB2CResponsiveSummaryCheckoutStep"/>
-                <entry key="5" value-ref="ingenicoB2CResponsiveDoPaymentCheckoutStep"/>
             </map>
         </property>
     </bean>
@@ -142,21 +125,12 @@
         <property name="value" ref="ingenicoB2CResponsiveCheckoutGroup"/>
     </bean>
 
-    <bean id="ingenicoPaymentWithTokenCheckoutStepValidator" class="com.ingenico.ogone.direct.checkoutaddon.checkout.steps.validation.impl.IngenicoPaymentWithTokenCheckoutStepValidator" parent="abstractCheckoutStepValidator" >
-        <property name="ingenicoCheckoutFlowFacade" ref="ingenicoCheckoutFlowFacade"/>
-    </bean>
-
-
     <bean id="REDIRECT_TO_SUMMARY_INGENICO" class="java.lang.String">
         <constructor-arg value="redirect:/checkout/multi/ingenico/summary/view"/>
     </bean>
 
     <bean id="REDIRECT_TO_PAYMENT_METHOD_INGENICO" class="java.lang.String">
         <constructor-arg value="redirect:/checkout/multi/ingenico/select-payment-method"/>
-    </bean>
-
-    <bean id="REDIRECT_TO_PAYMENT_INGENICO" class="java.lang.String">
-        <constructor-arg value="redirect:/checkout/multi/ingenico/hosted-tokenization/view"/>
     </bean>
 
     <bean id="REDIRECT_TO_ORDER_CONFIRMATION_INGENICO" class="java.lang.String">
