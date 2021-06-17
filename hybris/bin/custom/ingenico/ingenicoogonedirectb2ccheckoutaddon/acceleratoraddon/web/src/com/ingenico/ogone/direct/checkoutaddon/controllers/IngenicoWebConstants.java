@@ -37,8 +37,6 @@ public interface IngenicoWebConstants {
 
                 interface HTP {
                     String root = Checkout.root + "/hosted-tokenization";
-                    String view = "/view";
-                    String create = "/do";
                     String handleResponse = "/handle3ds";
                 }
 

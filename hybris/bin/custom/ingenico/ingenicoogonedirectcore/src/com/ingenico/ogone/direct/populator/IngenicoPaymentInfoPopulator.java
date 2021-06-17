@@ -22,6 +22,7 @@ public class IngenicoPaymentInfoPopulator implements Populator<IngenicoPaymentIn
         ingenicoPaymentInfoData.setId(ingenicoPaymentInfoModel.getId());
         ingenicoPaymentInfoData.setPaymentMethod(ingenicoPaymentInfoModel.getPaymentMethod());
         ingenicoPaymentInfoData.setPaymentProductDirectoryId(ingenicoPaymentInfoModel.getPaymentProductDirectoryId());
+        ingenicoPaymentInfoData.setHostedTokenizationId(ingenicoPaymentInfoModel.getHostedTokenizationId());
         ingenicoPaymentInfoData.setIngenicoCheckoutType(ingenicoPaymentInfoModel.getIngenicoCheckoutType());
         ingenicoPaymentInfoData.setAlias(ingenicoPaymentInfoModel.getAlias());
         ingenicoPaymentInfoData.setCardholderName(ingenicoPaymentInfoModel.getCardholderName());

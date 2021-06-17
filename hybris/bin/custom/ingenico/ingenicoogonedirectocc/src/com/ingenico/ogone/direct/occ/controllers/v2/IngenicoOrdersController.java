@@ -19,6 +19,7 @@ import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
@@ -32,12 +33,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
+import com.ingenico.ogone.direct.exception.IngenicoNonValidReturnMACException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.occ.controllers.v2.validator.IngenicoBrowserDataWsDTOValidator;
-import com.ingenico.ogone.direct.occ.controllers.v2.validator.IngenicoHostedTokenizationRequestWsDTOValidator;
 import com.ingenico.ogone.direct.occ.helpers.IngenicoHelper;
+import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
-import com.ingenico.ogone.direct.payment.dto.HostedTokenizationRequestWsDTO;
+import com.ingenico.ogone.direct.payment.dto.BrowserDataWsDTO;
 
 @Controller
 @RequestMapping(value = "/{baseSiteId}/users/{userId}/orders")
@@ -66,9 +68,6 @@ public class IngenicoOrdersController extends IngenicoBaseController {
     @Resource(name = "ingenicoCheckoutFacade")
     private IngenicoCheckoutFacade ingenicoCheckoutFacade;
 
-    @Resource(name = "ingenicoHostedTokenizationRequestWsDTOValidator")
-    private IngenicoHostedTokenizationRequestWsDTOValidator hostedTokenizationRequestWsDTOValidator;
-
     @Resource(name = "ingenicoBrowserDataWsDTOValidator")
     private IngenicoBrowserDataWsDTOValidator browserDataWsDTOValidator;
 
@@ -82,7 +81,7 @@ public class IngenicoOrdersController extends IngenicoBaseController {
             @ApiParam(value = "Cart code for logged in user, cart GUID for guest checkout", required = true)
             @PathVariable final String cartId,
             @ApiParam(value = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true)
-            @RequestBody final HostedTokenizationRequestWsDTO hostedTokenizationRequestWsDTO,
+            @RequestBody final BrowserDataWsDTO browserDataWsDTO,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
             final HttpServletRequest request)
             throws IngenicoNonAuthorizedPaymentException, InvalidCartException {
@@ -94,23 +93,27 @@ public class IngenicoOrdersController extends IngenicoBaseController {
             throw new CartException("No Ingenico Payment Info found.", CartException.INVALID);
         } else if (!IngenicoCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(cartData.getIngenicoPaymentInfo().getIngenicoCheckoutType())) {
             throw new CartException("Invalid Ingenico Checkout Type.", CartException.INVALID);
+        } else if (StringUtils.isBlank(cartData.getIngenicoPaymentInfo().getHostedTokenizationId())) {
+            throw new CartException("Invalid Ingenico HostedTokenizationId.", CartException.INVALID);
         }
+        validate(browserDataWsDTO, "browserDataWsDTO", browserDataWsDTOValidator);
 
-        validate(hostedTokenizationRequestWsDTO, "hostedTokenizationRequestWsDTO", hostedTokenizationRequestWsDTOValidator);
-        validate(hostedTokenizationRequestWsDTO.getBrowserData(), "browserData", browserDataWsDTOValidator);
+        final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);
+        fillBrowserData(request, browserData);
 
-        final IngenicoHostedTokenizationData hostedTokenizationData = getDataMapper().map(
-                hostedTokenizationRequestWsDTO,
-                IngenicoHostedTokenizationData.class,
-                HTP_MAPPING);
+        final IngenicoHostedTokenizationData hostedTokenizationData = new IngenicoHostedTokenizationData();
+        hostedTokenizationData.setHostedTokenizationId(cartData.getIngenicoPaymentInfo().getHostedTokenizationId());
+        hostedTokenizationData.setBrowserData(browserData);
 
-        fillBrowserData(request,hostedTokenizationData.getBrowserData());
-
-        final String returnURL = ingenicoHelper.buildReturnURL(request, "ingenico.occ.hostedTokenization.returnUrl");
-        sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL);
+        storeHTPReturnUrlInSession(request);
 
         final OrderData orderData = ingenicoCheckoutFacade.authorisePaymentForHostedTokenization(hostedTokenizationData);
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
+    }
+
+    private void storeHTPReturnUrlInSession(HttpServletRequest request) {
+        final String returnURL = ingenicoHelper.buildReturnURL(request, "ingenico.occ.hostedTokenization.returnUrl");
+        sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL);
     }
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
@@ -125,7 +128,7 @@ public class IngenicoOrdersController extends IngenicoBaseController {
             @RequestParam(value = "REF", required = true) final String ref,
             @RequestParam(value = "paymentId", required = true) final String paymentId,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-            throws IngenicoNonAuthorizedPaymentException, InvalidCartException {
+            throws IngenicoNonAuthorizedPaymentException, InvalidCartException, IngenicoNonValidReturnMACException {
 
         cartLoaderStrategy.loadCart(cartId);
 
@@ -136,6 +139,7 @@ public class IngenicoOrdersController extends IngenicoBaseController {
             throw new CartException("Invalid Ingenico Checkout Type.", CartException.INVALID);
         }
 
+        ingenicoCheckoutFacade.validateReturnMAC(returnMAC);
         final OrderData orderData = ingenicoCheckoutFacade.handle3dsResponse(cartId, returnMAC, paymentId);
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
     }
@@ -153,7 +157,7 @@ public class IngenicoOrdersController extends IngenicoBaseController {
             @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
             @RequestParam(value = "hostedCheckoutId", required = true) final String hostedCheckoutId,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-            throws IngenicoNonAuthorizedPaymentException, InvalidCartException {
+            throws IngenicoNonAuthorizedPaymentException, InvalidCartException, IngenicoNonValidReturnMACException {
 
         cartLoaderStrategy.loadCart(cartId);
 
@@ -164,6 +168,7 @@ public class IngenicoOrdersController extends IngenicoBaseController {
             throw new CartException("Invalid Ingenico Checkout Type.", CartException.INVALID);
         }
 
+        ingenicoCheckoutFacade.validateReturnMAC(returnMAC);
         final OrderData orderData = ingenicoCheckoutFacade.authorisePaymentForHostedCheckout(hostedCheckoutId);
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
     }
