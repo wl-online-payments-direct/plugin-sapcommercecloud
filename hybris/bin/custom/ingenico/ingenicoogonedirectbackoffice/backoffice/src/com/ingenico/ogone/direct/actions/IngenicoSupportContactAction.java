@@ -18,12 +18,15 @@ import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 public class IngenicoSupportContactAction implements CockpitAction<IngenicoConfigurationModel, Object> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(IngenicoSupportContactAction.class);
+    private static final String SUPPORT_INGENICO_EMAIL = "support.ecom@ingenico.com";
+    private static final String MAILTO = "mailto:";
 
     @Override
     public ActionResult<Object> perform(ActionContext<IngenicoConfigurationModel> actionContext) {
 
-        //TODO to define a real mail
-        StringBuilder mailto = new StringBuilder("mailto:support@ingenico.com?");
+        StringBuilder mailto = new StringBuilder(MAILTO)
+                .append(SUPPORT_INGENICO_EMAIL)
+                .append("?");
 
         String cc = Config.getString("ingenico.contact.support.default.cc", "");
         String bcc = Config.getString("ingenico.contact.support.default.bcc", "");
@@ -40,6 +43,7 @@ public class IngenicoSupportContactAction implements CockpitAction<IngenicoConfi
             parameters.add("subject=" + subject);
         }
         mailto.append(parameters);
+        LOGGER.debug("[INGENICO] Contact support using {}",mailto.toString());
         Executions.getCurrent().sendRedirect(mailto.toString(), "_blank");
 
         return new ActionResult<>(ActionResult.SUCCESS);
