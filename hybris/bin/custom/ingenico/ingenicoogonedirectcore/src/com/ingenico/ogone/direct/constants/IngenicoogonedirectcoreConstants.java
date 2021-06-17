@@ -140,7 +140,7 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
         PAYMENT_REJECTED_CAPTURE("payment.rejected_capture"),
         PAYMENT_CANCELLED("payment.cancelled"),
         PAYMENT_REFUNDED("payment.refunded"),
-        PAYMENT_REFUND_REQUESTED("refund_requested");
+        PAYMENT_REFUND_REQUESTED("refund.refund_requested");
 
         WEBHOOK_TYPE_ENUM(String value) {
             this.value = value;
