@@ -29,15 +29,6 @@ ACC.ingenicoOrderPost = {
         }
     },
 
-    bindSubmitIngenicoSelectPaymentForm: function () {
-        $('.submit_ingenicoSelectPaymentForm').click(function () {
-            ACC.common.blockFormAndShowProcessingMessage($(this));
-            $('.ingenicoBillingAddressForm').filter(":hidden").remove();
-            ACC.ingenicoOrderPost.enableAddressForm();
-            $('#ingenicoSelectPaymentForm').submit();
-        });
-    },
-
     bindCycleFocusEvent: function () {
         $('#lastInTheForm').blur(function () {
             $('#ingenicoSelectPaymentForm [tabindex$="10"]').focus();
@@ -94,30 +85,11 @@ ACC.ingenicoOrderPost = {
                 callback.call();
             }
         });
-    },
-
-    bindSelectIngenicoPaymentProduct: function () {
-        $('.ingenico_payment_product .payment_product').on('change', function () {
-            var paymentProduct = $(this);
-            if (paymentProduct.is(":checked")) {
-                if (paymentProduct.hasClass("ideal")) {
-                    $('#select_issuer').show();
-                } else {
-                    $('#select_issuer').hide();
-                }
-            }
-        });
-        if($('.ingenico_payment_product .payment_product.ideal').is(":checked")){
-            $('#select_issuer').show();
-        }
     }
 }
 
 $(document).ready(function () {
     ACC.ingenicoOrderPost.binduseIngenicoDeliveryAddress();
-    ACC.ingenicoOrderPost.bindSubmitIngenicoSelectPaymentForm();
-    ACC.ingenicoOrderPost.bindSelectIngenicoPaymentProduct();
-
     // check the checkbox
     $("#useIngenicoDeliveryAddress").click();
 });
