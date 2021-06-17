@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
-import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import de.hybris.platform.basecommerce.enums.ReturnStatus;
 import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
@@ -29,38 +29,31 @@ public class IngenicoCaptureRefundPaymentAction extends AbstractAction<ReturnPro
       final List<PaymentTransactionModel> transactions = returnRequest.getOrder().getPaymentTransactions();
 
       if (transactions.isEmpty()) {
-         LOG.info("Unable to refund for ReturnRequest {}, no PaymentTransactions found", returnRequest.getCode());
+         LOG.info("[INGENICO] Unable to refund for ReturnRequest {}, no PaymentTransactions found", returnRequest.getCode());
          setReturnRequestStatus(returnRequest, ReturnStatus.PAYMENT_REVERSAL_FAILED);
          return Transition.NOK.toString();
       }
 
       final PaymentTransactionModel transaction = transactions.get(0);
 
-      if (transaction.getPaymentProvider() != null) {
-         if (!transaction.getPaymentProvider().equals("INGENICO")) {
-            LOG.info("Payment Provider is not Ingenico in the Payment Transaction.");
-            return Transition.OK.toString();
-         }
-
-         List<PaymentTransactionEntryModel> paymentTransactionEntryModels = getPaymentTransactionToRefund(returnRequest.getOrder());
-         if (paymentTransactionEntryModels.size() == 0) {
-            return Transition.WAIT.toString();
-         } else {
-            PaymentTransactionEntryModel paymentTransactionEntryModel = paymentTransactionEntryModels.get(paymentTransactionEntryModels.size() - 1);
-            if (paymentTransactionEntryModel.getTransactionStatusDetails().equals(IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUND_REQUESTED.getValue()) ||
-                  paymentTransactionEntryModel.getTransactionStatusDetails().equals(IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUNDED.getValue())) {
-               setReturnRequestStatus(returnRequest, ReturnStatus.PAYMENT_REVERSED);
-               return Transition.OK.toString();
-            } else {
-               setReturnRequestStatus(returnRequest, ReturnStatus.PAYMENT_REVERSAL_FAILED);
-               return Transition.NOK.toString();
-            }
-         }
-
-
-      } else {
-         LOG.info("Payment Provider not available in the Payment Transaction.");
+      if (!(returnRequest.getOrder().getPaymentInfo() instanceof IngenicoPaymentInfoModel)) {
+         LOG.info("[INGENICO] Skip capture check!");
          return Transition.OK.toString();
+      }
+
+      List<PaymentTransactionEntryModel> paymentTransactionEntryModels = getPaymentTransactionToRefund(returnRequest.getOrder());
+      if (paymentTransactionEntryModels.size() == 0) {
+         return Transition.WAIT.toString();
+      } else {
+         PaymentTransactionEntryModel paymentTransactionEntryModel = paymentTransactionEntryModels.get(paymentTransactionEntryModels.size() - 1);
+         if (paymentTransactionEntryModel.getTransactionStatusDetails().equals(IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUND_REQUESTED.getValue()) ||
+               paymentTransactionEntryModel.getTransactionStatusDetails().equals(IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUNDED.getValue())) {
+            setReturnRequestStatus(returnRequest, ReturnStatus.PAYMENT_REVERSED);
+            return Transition.OK.toString();
+         } else {
+            setReturnRequestStatus(returnRequest, ReturnStatus.PAYMENT_REVERSAL_FAILED);
+            return Transition.NOK.toString();
+         }
       }
    }
 
@@ -80,8 +73,7 @@ public class IngenicoCaptureRefundPaymentAction extends AbstractAction<ReturnPro
       return IngenicoCaptureRefundPaymentAction.Transition.getStringValues();
    }
 
-   protected void setReturnRequestStatus(final ReturnRequestModel returnRequest, final ReturnStatus status)
-   {
+   protected void setReturnRequestStatus(final ReturnRequestModel returnRequest, final ReturnStatus status) {
       returnRequest.setStatus(status);
       returnRequest.getReturnEntries().stream().forEach(entry -> {
          entry.setStatus(status);
