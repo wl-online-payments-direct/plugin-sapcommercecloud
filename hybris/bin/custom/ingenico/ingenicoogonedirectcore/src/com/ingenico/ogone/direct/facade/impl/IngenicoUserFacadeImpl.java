@@ -9,10 +9,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
-import de.hybris.platform.core.model.order.payment.CreditCardPaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
+import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
 
 import com.ingenico.direct.domain.CardWithoutCvv;
@@ -98,17 +98,18 @@ public class IngenicoUserFacadeImpl implements IngenicoUserFacade {
     }
 
     @Override
-    public boolean deleteSavedIngenicoPaymentInfo(String code) {
+    public void deleteSavedIngenicoPaymentInfo(String code) {
         validateParameterNotNullStandardMessage("code", code);
         final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
-        final List<IngenicoPaymentInfoModel> ingenicoPaymentInfos = ingenicoCustomerAccountService.getIngenicoPaymentInfos(currentCustomer, true);
-        for (final IngenicoPaymentInfoModel paymentInfoModel : ingenicoPaymentInfos) {
-            if (code.equals(paymentInfoModel.getCode()) && ingenicoPaymentService.deleteToken(paymentInfoModel.getToken())) {
-                modelService.remove(paymentInfoModel);
-                return true;
-            }
-        }
-        return false;
+        final IngenicoPaymentInfoModel ingenicoPaymentInfoModel = ingenicoCustomerAccountService.getIngenicoPaymentInfos(currentCustomer, true)
+                .stream()
+                .filter(paymentInfo -> code.equals(paymentInfo.getCode()))
+                .findFirst()
+                .orElseThrow(() -> new ModelNotFoundException("Failed to find IngenicoPaymentInfo for the given code : " + code));
+
+        ingenicoPaymentService.deleteToken(ingenicoPaymentInfoModel.getToken());
+        modelService.remove(ingenicoPaymentInfoModel);
+
     }
 
     public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
