@@ -1,6 +1,7 @@
 package com.ingenico.ogone.direct.occ.controllers.v2;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
@@ -13,6 +14,7 @@ import de.hybris.platform.webservicescommons.mapping.FieldSetLevelHelper;
 import de.hybris.platform.webservicescommons.util.YSanitizer;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,9 +27,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.ingenico.direct.ApiException;
 import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
+import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.payment.dto.NonAuthorizedPaymentWsDTO;
 
 public class IngenicoBaseController {
+
+    private static final String ACCEPT = "accept";
+    private static final String USER_AGENT = "user-agent";
+    private static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
+    protected static final String BROWSER_MAPPING = "screenHeight,screenWidth,navigatorJavaEnabled,navigatorJavaScriptEnabled,timezoneOffsetUtcMinutes,colorDepth";
+    protected static final String ADDRESS_MAPPING = "firstName,lastName,titleCode,phone,line1,line2,town,postalCode,country(isocode),region(isocode),defaultAddress";
 
     @Resource(name = "sessionService")
     protected SessionService sessionService;
@@ -103,6 +112,24 @@ public class IngenicoBaseController {
         if (errors.hasErrors()) {
             throw new WebserviceValidationException(errors);
         }
+    }
+
+    protected void fillBrowserData(HttpServletRequest request, BrowserData browserData) {
+        browserData.setAcceptHeader(request.getHeader(ACCEPT));
+        browserData.setUserAgent(request.getHeader(USER_AGENT));
+        browserData.setLocale(request.getLocale().toString());
+        browserData.setIpAddress(getIpAddress(request));
+    }
+
+    protected String getIpAddress(HttpServletRequest request) {
+        String remoteAddr = "";
+        if (request != null) {
+            remoteAddr = request.getHeader(X_FORWARDED_FOR);
+            if (StringUtils.isEmpty(remoteAddr)) {
+                remoteAddr = request.getRemoteAddr();
+            }
+        }
+        return remoteAddr;
     }
 
 }
