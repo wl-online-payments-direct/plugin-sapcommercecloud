@@ -57,9 +57,6 @@ import com.ingenico.ogone.direct.payment.dto.PaymentProductListWsDTO;
 public class IngenicoCartsController extends IngenicoBaseController {
     private final static Logger LOGGER = LoggerFactory.getLogger(IngenicoCartsController.class);
 
-    private static final String ADDRESS_MAPPING = "firstName,lastName,titleCode,phone,line1,line2,town,postalCode,country(isocode),region(isocode),defaultAddress";
-    private static final String BROWSER_MAPPING = "screenHeight,screenWidth,navigatorJavaEnabled,navigatorJavaScriptEnabled,timezoneOffsetUtcMinutes,colorDepth,acceptHeader,userAgent,locale,ipAddress";
-
     @Resource(name = "dataMapper")
     private DataMapper dataMapper;
 
@@ -208,6 +205,7 @@ public class IngenicoCartsController extends IngenicoBaseController {
 
         validate(browserDataWsDTO, "browserData", browserDataWsDTOValidator);
         final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);
+        fillBrowserData(request, browserData);
 
         final String returnURL = ingenicoHelper.buildReturnURL(request, "ingenico.occ.hostedCheckout.returnUrl");
         sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL);
