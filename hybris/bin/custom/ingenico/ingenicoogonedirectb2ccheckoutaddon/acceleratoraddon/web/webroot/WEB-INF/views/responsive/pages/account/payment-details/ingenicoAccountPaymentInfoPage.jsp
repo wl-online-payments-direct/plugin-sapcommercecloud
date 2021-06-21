@@ -88,3 +88,12 @@
         </div>
     </c:otherwise>
 </c:choose>
+<div class="row">
+    <div class="col-sm-12 col-lg-12">
+        <div class="checkout-help">
+            <div class="content">
+                <spring:theme htmlEscape="false" code="text.account.paymentDetails.newPaymentInformation"/>
+            </div>
+        </div>
+    </div>
+</div>
