@@ -45,7 +45,7 @@ import com.ingenico.ogone.direct.payment.dto.HostedTokenizationRequestWsDTO;
 public class IngenicoOrdersController extends IngenicoBaseController {
     private final static Logger LOGGER = LoggerFactory.getLogger(IngenicoOrdersController.class);
 
-    private static final String HTP_MAPPING = "hostedTokenizationId,browserData(screenHeight,screenWidth,navigatorJavaEnabled,navigatorJavaScriptEnabled,timezoneOffsetUtcMinutes,colorDepth,acceptHeader,userAgent,locale,ipAddress)";
+    private static final String HTP_MAPPING = "hostedTokenizationId,browserData(screenHeight,screenWidth,navigatorJavaEnabled,navigatorJavaScriptEnabled,timezoneOffsetUtcMinutes,colorDepth)";
 
 
     @Resource(name = "dataMapper")
@@ -103,6 +103,8 @@ public class IngenicoOrdersController extends IngenicoBaseController {
                 hostedTokenizationRequestWsDTO,
                 IngenicoHostedTokenizationData.class,
                 HTP_MAPPING);
+
+        fillBrowserData(request,hostedTokenizationData.getBrowserData());
 
         final String returnURL = ingenicoHelper.buildReturnURL(request, "ingenico.occ.hostedTokenization.returnUrl");
         sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL);
