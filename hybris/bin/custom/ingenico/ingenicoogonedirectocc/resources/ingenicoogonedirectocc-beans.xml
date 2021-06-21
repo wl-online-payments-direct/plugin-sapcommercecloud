@@ -93,10 +93,6 @@
         <property name="navigatorJavaScriptEnabled" type="Boolean"/>
         <property name="timezoneOffsetUtcMinutes" type="String"/>
         <property name="colorDepth" type="Integer"/>
-        <property name="acceptHeader" type="String"/>
-        <property name="userAgent" type="String"/>
-        <property name="locale" type="String"/>
-        <property name="ipAddress" type="String"/>
     </bean>
 
     <bean class="com.ingenico.ogone.direct.payment.dto.DirectoryEntryWsDTO">
