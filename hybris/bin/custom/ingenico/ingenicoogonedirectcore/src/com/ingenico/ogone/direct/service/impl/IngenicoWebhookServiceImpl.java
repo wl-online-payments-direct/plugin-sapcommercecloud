@@ -75,6 +75,7 @@ public class IngenicoWebhookServiceImpl implements IngenicoWebhookService {
             case PAYMENT_CANCELLED:
             case PAYMENT_REJECTED:
             case PAYMENT_CAPTURE_REQUEST:
+            case PAYMENT_REFUND_REQUESTED:
                 break;
             case PAYMENT_CAPTURED:
             case PAYMENT_REJECTED_CAPTURE:

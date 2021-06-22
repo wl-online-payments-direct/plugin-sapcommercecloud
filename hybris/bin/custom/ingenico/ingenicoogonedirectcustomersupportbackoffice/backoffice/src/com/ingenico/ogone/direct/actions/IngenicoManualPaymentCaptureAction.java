@@ -96,6 +96,10 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
     public boolean canPerform(ActionContext<OrderModel> ctx) {
         OrderModel order = ctx.getData();
 
+        if (getPaymentTransactionToCapture(order) == null) { // if payment is directly captured
+            return false;
+        }
+
         return order != null && (INGENICO_WAITING_CAPTURE.equals(order.getPaymentStatus()) || INGENICO_AUTHORIZED.equals(order.getPaymentStatus()));
     }
 
