@@ -13,11 +13,14 @@ import com.ingenico.direct.domain.CreatePaymentRequest;
 import com.ingenico.direct.domain.Order;
 import com.ingenico.direct.domain.RedirectionData;
 import com.ingenico.direct.domain.ThreeDSecure;
+import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
+import com.ingenico.ogone.direct.service.IngenicoConfigurationService;
 
 public class IngenicoHostedTokenizationPaymentPopulator implements Populator<CartModel, CreatePaymentRequest> {
 
     private static final String ECOMMERCE = "ECOMMERCE";
     private SessionService sessionService;
+    private IngenicoConfigurationService ingenicoConfigurationService;
 
     private Converter<CartModel, Order> ingenicoOrderParamConverter;
 
@@ -30,7 +33,12 @@ public class IngenicoHostedTokenizationPaymentPopulator implements Populator<Car
     }
 
     private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput() {
+        final IngenicoConfigurationModel currentIngenicoConfiguration = ingenicoConfigurationService.getCurrentIngenicoConfiguration();
+
         CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
+        if (currentIngenicoConfiguration.getDefaultOperationCode() != null) {
+            cardPaymentMethodSpecificInput.setAuthorizationMode(currentIngenicoConfiguration.getDefaultOperationCode().getCode());
+        }
         cardPaymentMethodSpecificInput.setTokenize(false);
         cardPaymentMethodSpecificInput.setIsRecurring(false);
         cardPaymentMethodSpecificInput.setSkipAuthentication(false);
@@ -55,4 +63,7 @@ public class IngenicoHostedTokenizationPaymentPopulator implements Populator<Car
     }
 
 
+    public void setIngenicoConfigurationService(IngenicoConfigurationService ingenicoConfigurationService) {
+        this.ingenicoConfigurationService = ingenicoConfigurationService;
+    }
 }
