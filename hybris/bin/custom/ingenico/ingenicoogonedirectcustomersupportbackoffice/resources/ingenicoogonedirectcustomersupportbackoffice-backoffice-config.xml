@@ -22,4 +22,15 @@
 		</y:actions>
 	</context>
 
+	<context component="cseditorareaactions" type="ReturnRequest" merge-by="type">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common">
+				<y:label>actiongroup.common</y:label>
+				<y:action action-id="de.hybris.ordermanagementbackoffice.actions.returns.manualrefundaction"
+						  property="currentObject" merge-mode="remove"/>
+				<y:action action-id="com.ingenico.ogone.direct.actions.ingenicomanualpaymentrefundaction" property="currentObject"/>
+			</y:group>
+		</y:actions>
+	</context>
+
 </config>
