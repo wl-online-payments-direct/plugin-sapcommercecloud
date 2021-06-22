@@ -23,8 +23,5 @@ public class IngenicoBrowserDataWsDTOValidator implements Validator {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "navigatorJavaScriptEnabled", "field.required",new Object[] {"navigatorJavaScriptEnabled"});
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "timezoneOffsetUtcMinutes", "field.required",new Object[] {"timezoneOffsetUtcMinutes"});
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "colorDepth", "field.required",new Object[] {"colorDepth"});
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "acceptHeader", "field.required",new Object[] {"acceptHeader"});
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "userAgent", "field.required",new Object[] {"userAgent"});
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "ipAddress", "field.required",new Object[] {"ipAddress"});
     }
 }

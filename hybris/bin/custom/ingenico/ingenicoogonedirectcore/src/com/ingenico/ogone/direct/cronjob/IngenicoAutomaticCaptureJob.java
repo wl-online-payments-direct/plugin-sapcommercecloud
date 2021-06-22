@@ -3,6 +3,10 @@ package com.ingenico.ogone.direct.cronjob;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 import de.hybris.platform.core.model.order.OrderModel;
@@ -59,9 +63,24 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
                     continue;
                 }
 
+                final IngenicoConfigurationModel ingenicoConfiguration = getIngenicoConfiguration(orderModel);
+                if (ingenicoConfiguration == null) {
+                    LOGGER.error("[INGENICO] Order {} has no IngenicoConfiguration in the attached Store", orderModel.getCode());
+                    fail++;
+                    continue;
+                }
+
+                final int captureTimeFrame = ingenicoConfiguration.getCaptureTimeFrame() == null ? 0 : ingenicoConfiguration.getCaptureTimeFrame().intValue();
+                final LocalDate actualTime = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                final LocalDate creationTime = orderModel.getCreationtime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                if (Period.between(creationTime, actualTime).getDays() < captureTimeFrame) {
+                    LOGGER.info("[INGENICO] Order {} skipped", orderModel.getCode());
+                    continue;
+                }
+
                 final PaymentTransactionModel lastPaymentTransaction = getLastPaymentTransaction(orderModel);
                 final String paymentId = lastPaymentTransaction.getRequestId() + "_0";
-                final IngenicoConfigurationModel ingenicoConfiguration = getIngenicoConfiguration(orderModel);
+
                 final CapturesResponse captures = ingenicoPaymentService.getCaptures(ingenicoConfiguration, paymentId);
 
                 if (CollectionUtils.isNotEmpty(captures.getCaptures())) {
