@@ -9,6 +9,7 @@ import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
 import com.ingenico.direct.domain.RefundResponse;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
@@ -50,7 +51,6 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
          ingenicoTransactionService.updatePaymentTransaction(paymentTransactionToRefund.getPaymentTransaction(),
                paymentTransactionToRefund.getRequestId(),
                refundResponse.getStatus(),
-               refundResponse.getStatus(),
                refundResponse.getRefundOutput().getAmountOfMoney(),
                PaymentTransactionType.REFUND_FOLLOW_ON);
          ingenicoBusinessProcessService.triggerReturnProcessEvent(order, INGENICO_EVENT_REFUND);
@@ -75,6 +75,7 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
       return finalPaymentTransaction.getEntries()
             .stream()
             .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
+            .filter(entry -> IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(entry.getTransactionStatus()))
             .findFirst().orElse(null);
    }
 

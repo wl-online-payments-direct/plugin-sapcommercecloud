@@ -1,6 +1,7 @@
 package com.ingenico.ogone.direct.actions;
 
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
+import static de.hybris.platform.core.enums.PaymentStatus.INGENICO_AUTHORIZED;
 import static de.hybris.platform.core.enums.PaymentStatus.INGENICO_WAITING_CAPTURE;
 
 import javax.annotation.Resource;
@@ -72,7 +73,6 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
                 ingenicoTransactionService.updatePaymentTransaction(paymentTransactionToCapture.getPaymentTransaction(),
                         captureResponse.getId(),
                         captureResponse.getStatus(),
-                        captureResponse.getStatus(),
                         captureResponse.getCaptureOutput().getAmountOfMoney(),
                         PaymentTransactionType.CAPTURE);
             }
@@ -95,7 +95,11 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
     public boolean canPerform(ActionContext<OrderModel> ctx) {
         OrderModel order = ctx.getData();
 
-        return order != null && INGENICO_WAITING_CAPTURE.equals(order.getPaymentStatus());
+        if (getPaymentTransactionToCapture(order) == null) { // if payment is directly captured
+            return false;
+        }
+
+        return order != null && (INGENICO_WAITING_CAPTURE.equals(order.getPaymentStatus()) || INGENICO_AUTHORIZED.equals(order.getPaymentStatus()));
     }
 
     private PaymentTransactionEntryModel getPaymentTransactionToCapture(final OrderModel order) {
