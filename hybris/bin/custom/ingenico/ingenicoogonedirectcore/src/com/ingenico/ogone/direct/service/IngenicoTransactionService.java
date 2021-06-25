@@ -18,13 +18,11 @@ public interface IngenicoTransactionService {
                                                                   String merchantReference,
                                                                   String paymentTransactionId,
                                                                   String status,
-                                                                  String statusDetails,
                                                                   AmountOfMoney amountOfMoney);
 
     PaymentTransactionModel updatePaymentTransaction(PaymentTransactionModel paymentTransactionModel,
                                                      String paymentTransactionId,
                                                      String status,
-                                                     String statusDetails,
                                                      AmountOfMoney amountOfMoney,
                                                      PaymentTransactionType paymentTransactionType);
 

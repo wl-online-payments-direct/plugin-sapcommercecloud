@@ -101,7 +101,6 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
                     ingenicoTransactionService.updatePaymentTransaction(lastPaymentTransaction,
                             captureResponse.getId(),
                             captureResponse.getStatus(),
-                            captureResponse.getStatus(),
                             captureResponse.getCaptureOutput().getAmountOfMoney(),
                             PaymentTransactionType.CAPTURE);
                     LOGGER.info("[INGENICO] Order {}, remaining amount {} captured", orderModel.getCode(), amount);

@@ -65,7 +65,6 @@ public class IngenicoManualPaymentReverseAuthAction extends CancelOrderAction im
             ingenicoTransactionService.updatePaymentTransaction(paymentTransactionToCancel.getPaymentTransaction(),
                   paymentTransactionToCancel.getRequestId(),
                   cancelPaymentResponse.getPayment().getStatus(),
-                  cancelPaymentResponse.getPayment().getStatus(),
                   cancelPaymentResponse.getPayment().getPaymentOutput().getAmountOfMoney(),
                   PaymentTransactionType.CANCEL);
 

@@ -51,7 +51,6 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
          ingenicoTransactionService.updatePaymentTransaction(paymentTransactionToRefund.getPaymentTransaction(),
                paymentTransactionToRefund.getRequestId(),
                refundResponse.getStatus(),
-               refundResponse.getStatus(),
                refundResponse.getRefundOutput().getAmountOfMoney(),
                PaymentTransactionType.REFUND_FOLLOW_ON);
          ingenicoBusinessProcessService.triggerReturnProcessEvent(order, INGENICO_EVENT_REFUND);
