@@ -49,6 +49,8 @@ public class IngenicoCaptureRefundPaymentAction extends AbstractAction<ReturnPro
          if (paymentTransactionEntryModel.getTransactionStatusDetails().equals(IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUND_REQUESTED.getValue()) ||
                paymentTransactionEntryModel.getTransactionStatusDetails().equals(IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUNDED.getValue())) {
             setReturnRequestStatus(returnRequest, ReturnStatus.PAYMENT_REVERSED);
+
+            //TODO update order
             return Transition.OK.toString();
          } else {
             setReturnRequestStatus(returnRequest, ReturnStatus.PAYMENT_REVERSAL_FAILED);

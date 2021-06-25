@@ -177,7 +177,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                     payment.getPaymentOutput().getReferences().getMerchantReference(),
                     payment.getId(),
                     payment.getStatus(),
-                    payment.getStatusOutput().getStatusCategory(),
                     payment.getPaymentOutput().getAmountOfMoney());
             throw new IngenicoNonAuthorizedPaymentException(payment,
                     paymentForHostedTokenization.getMerchantAction(),
@@ -243,7 +242,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                         paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
                         paymentResponse.getId(),
                         paymentResponse.getStatus(),
-                        paymentResponse.getStatusOutput().getStatusCategory(),
                         paymentResponse.getPaymentOutput().getAmountOfMoney());
                 throw new IngenicoNonAuthorizedPaymentException(paymentResponse, UNAUTHORIZED_REASON.REJECTED);
             case CANCELLED:
@@ -251,7 +249,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                         paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
                         paymentResponse.getId(),
                         paymentResponse.getStatus(),
-                        paymentResponse.getStatusOutput().getStatusCategory(),
                         paymentResponse.getPaymentOutput().getAmountOfMoney());
                 throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.CANCELLED);
             case REDIRECTED:
@@ -280,7 +277,6 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 paymentTransaction,
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
-                paymentResponse.getStatusOutput().getStatusCategory(),
                 paymentResponse.getPaymentOutput().getAmountOfMoney(),
                 paymentTransactionType
         );
