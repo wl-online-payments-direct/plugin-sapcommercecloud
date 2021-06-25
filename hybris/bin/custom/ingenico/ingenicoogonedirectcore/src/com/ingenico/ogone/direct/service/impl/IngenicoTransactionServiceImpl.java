@@ -4,25 +4,12 @@ import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstan
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_REFUND;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_PROVIDER;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.STATUS_UNKNOWN;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 import java.math.BigDecimal;
-
-import de.hybris.platform.core.enums.PaymentStatus;
-import de.hybris.platform.core.model.order.AbstractOrderModel;
-import de.hybris.platform.core.model.order.OrderModel;
-import de.hybris.platform.payment.enums.PaymentTransactionType;
-import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
-import de.hybris.platform.payment.model.PaymentTransactionModel;
-import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
-import de.hybris.platform.servicelayer.model.ModelService;
-import de.hybris.platform.store.BaseStoreModel;
-
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ingenico.direct.domain.AmountOfMoney;
 import com.ingenico.direct.domain.Capture;
@@ -33,6 +20,19 @@ import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
 import com.ingenico.ogone.direct.service.IngenicoPaymentService;
 import com.ingenico.ogone.direct.service.IngenicoTransactionService;
 import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
+import de.hybris.platform.core.enums.PaymentStatus;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.payment.enums.PaymentTransactionType;
+import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
+import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
+import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.store.BaseStoreModel;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class IngenicoTransactionServiceImpl implements IngenicoTransactionService {
@@ -55,9 +55,9 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
             paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(paymentTransactionId));
         } catch (ModelNotFoundException exception) {
             paymentTransaction = createPaymentTransaction(
-                    abstractOrderModel,
-                    merchantReference,
-                    paymentTransactionId);
+                  abstractOrderModel,
+                  merchantReference,
+                  paymentTransactionId);
         }
 
         return paymentTransaction;
@@ -69,7 +69,6 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                                                                          String merchantReference,
                                                                          String paymentTransactionId,
                                                                          String status,
-                                                                         String statusDetails,
                                                                          AmountOfMoney amountOfMoney) {
         final PaymentTransactionModel paymentTransaction = getOrCreatePaymentTransaction(abstractOrderModel,
                 merchantReference,
@@ -79,18 +78,16 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                 paymentTransaction,
                 paymentTransactionId,
                 status,
-                statusDetails,
                 amountOfMoney,
                 PaymentTransactionType.AUTHORIZATION);
     }
 
 
     @Override
-    public PaymentTransactionModel updatePaymentTransaction(PaymentTransactionModel paymentTransaction, String paymentTransactionId, String status, String statusDetails, AmountOfMoney amountOfMoney, PaymentTransactionType paymentTransactionType) {
+    public PaymentTransactionModel updatePaymentTransaction(PaymentTransactionModel paymentTransaction, String paymentTransactionId, String status, AmountOfMoney amountOfMoney, PaymentTransactionType paymentTransactionType) {
         validateParameterNotNullStandardMessage("paymentTransaction", paymentTransaction);
         validateParameterNotNullStandardMessage("paymentTransactionId", paymentTransactionId);
         validateParameterNotNullStandardMessage("status", status);
-        validateParameterNotNullStandardMessage("statusDetails", statusDetails);
         validateParameterNotNullStandardMessage("amountOfMoney", amountOfMoney);
         validateParameterNotNullStandardMessage("paymentTransactionType", paymentTransactionType);
         createPaymentTransactionEntry(
@@ -98,7 +95,6 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                 paymentTransactionId,
                 paymentTransaction.getOrder(),
                 status,
-                statusDetails,
                 amountOfMoney,
                 paymentTransactionType
         );
@@ -116,8 +112,9 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         final PaymentTransactionModel paymentTransaction = ingenicoTransactionDao.findPaymentTransaction(getPaymentId(paymentTransactionId));
 
         final boolean alreadyProcessed = paymentTransaction.getEntries().stream()
-                .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
-                .anyMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
+              .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
+              .filter(entry-> getTransactionStatus(webhooksEvent.getPayment().getStatus()).equals(entry.getTransactionStatusDetails()))
+              .anyMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
 
         final OrderModel order = (OrderModel) paymentTransaction.getOrder();
         if (!alreadyProcessed) {
@@ -125,7 +122,6 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                     paymentTransaction,
                     webhooksEvent.getPayment().getId(),
                     webhooksEvent.getPayment().getStatus(),
-                    webhooksEvent.getPayment().getStatusOutput().getStatusCategory(),
                     webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
                     PaymentTransactionType.CAPTURE
             );
@@ -142,20 +138,20 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
         final boolean notProcessed = paymentTransaction.getEntries().stream()
                 .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
+                .filter(entry -> capture.getStatus().equals(entry.getTransactionStatusDetails()))
                 .noneMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
 
         if (notProcessed) {
             createPaymentTransactionEntry(
-                    paymentTransaction,
-                    paymentTransactionId,
-                    paymentTransaction.getOrder(),
-                    capture.getStatus(),
-                    "N/A",
-                    capture.getCaptureOutput().getAmountOfMoney(),
-                    PaymentTransactionType.CAPTURE
+                  paymentTransaction,
+                  paymentTransactionId,
+                  paymentTransaction.getOrder(),
+                  capture.getStatus(),
+                  capture.getCaptureOutput().getAmountOfMoney(),
+                  PaymentTransactionType.CAPTURE
             );
             //Trigger Capture event
-            ingenicoBusinessProcessService.triggerReturnProcessEvent((OrderModel) paymentTransaction.getOrder(), INGENICO_EVENT_CAPTURE);
+            ingenicoBusinessProcessService.triggerOrderProcessEvent((OrderModel) paymentTransaction.getOrder(), INGENICO_EVENT_CAPTURE);
         }
 
     }
@@ -172,7 +168,6 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                 paymentTransaction,
                 webhooksEvent.getRefund().getId(),
                 webhooksEvent.getRefund().getStatus(),
-                webhooksEvent.getRefund().getStatusOutput().getStatusCategory(),
                 webhooksEvent.getRefund().getRefundOutput().getAmountOfMoney(),
                 PaymentTransactionType.REFUND_FOLLOW_ON
         );
@@ -209,14 +204,12 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
             final String paymentTransactionId,
             final AbstractOrderModel abstractOrderModel,
             final String status,
-            final String statusDetails,
             final AmountOfMoney amountOfMoney,
             final PaymentTransactionType transactionType) {
         validateParameterNotNullStandardMessage("order", abstractOrderModel);
         validateParameterNotNullStandardMessage("paymentTransaction", paymentTransaction);
         validateParameterNotNullStandardMessage("paymentTransactionId", paymentTransactionId);
         validateParameterNotNullStandardMessage("status", status);
-        validateParameterNotNullStandardMessage("statusDetails", statusDetails);
         validateParameterNotNullStandardMessage("amountOfMoney", amountOfMoney);
         validateParameterNotNullStandardMessage("transactionType", transactionType);
 
@@ -238,7 +231,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         transactionEntryModel.setCurrency(abstractOrderModel.getCurrency());
 
         transactionEntryModel.setTransactionStatus(getTransactionStatus(status));
-        transactionEntryModel.setTransactionStatusDetails(statusDetails);
+        transactionEntryModel.setTransactionStatusDetails(status);
 
         modelService.save(transactionEntryModel);
 
@@ -249,11 +242,11 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
     private void setOrderPaymentStatusIfNeeded(AbstractOrderModel abstractOrderModel, PaymentTransactionEntryModel transactionEntryModel) {
         if (transactionEntryModel.getType() == PaymentTransactionType.CAPTURE) {
-            if (PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(transactionEntryModel.getTransactionStatus())) {
-                final Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(getIngenicoConfiguration(abstractOrderModel),
-                        transactionEntryModel.getRequestId(),
-                        transactionEntryModel.getPaymentTransaction().getPlannedAmount(),
-                        transactionEntryModel.getCurrency().getIsocode());
+            if (STATUS_UNKNOWN.getValue().equals(transactionEntryModel.getTransactionStatus())) {
+                abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_WAITING_CAPTURE);
+            } else if (SUCCESSFUL.getValue().equals(transactionEntryModel.getTransactionStatus())) {
+                final Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(getIngenicoConfiguration(abstractOrderModel), transactionEntryModel.getRequestId(),
+                      transactionEntryModel.getPaymentTransaction().getPlannedAmount(), transactionEntryModel.getCurrency().getIsocode());
                 if (nonCapturedAmount > 0L) {
                     abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_WAITING_CAPTURE);
                 } else {
@@ -275,16 +268,15 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                 return PAYMENT_STATUS_CATEGORY_ENUM.REJECTED.getValue();
             case REDIRECTED:
             case REFUND_REQUESTED:
-                return PAYMENT_STATUS_CATEGORY_ENUM.STATUS_UNKNOWN.getValue();
+            case AUTHORIZATION_REQUESTED:
+            case CAPTURE_REQUESTED:
+                return STATUS_UNKNOWN.getValue();
             case PENDING_PAYMENT:
             case PENDING_COMPLETION:
             case PENDING_CAPTURE:
-            case AUTHORIZATION_REQUESTED:
-            case CAPTURE_REQUESTED:
             case CAPTURED:
-                return PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue();
             case REFUNDED:
-                return PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue();
+                return SUCCESSFUL.getValue();
             default:
                 return "NOT_SUPPORTED";
         }
