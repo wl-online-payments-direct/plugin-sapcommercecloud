@@ -73,7 +73,6 @@ public class IngenicoManualPaymentCaptureAction extends ManualPaymentCaptureActi
                 ingenicoTransactionService.updatePaymentTransaction(paymentTransactionToCapture.getPaymentTransaction(),
                         captureResponse.getId(),
                         captureResponse.getStatus(),
-                        captureResponse.getStatus(),
                         captureResponse.getCaptureOutput().getAmountOfMoney(),
                         PaymentTransactionType.CAPTURE);
             }
