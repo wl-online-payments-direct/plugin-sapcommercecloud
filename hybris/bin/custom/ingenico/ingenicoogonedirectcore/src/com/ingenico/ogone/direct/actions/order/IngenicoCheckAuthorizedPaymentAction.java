@@ -34,6 +34,10 @@ public class IngenicoCheckAuthorizedPaymentAction extends AbstractAction<OrderPr
             return Transition.OK.toString();
         }
 
+        if (PaymentStatus.INGENICO_CANCELED.equals(order.getPaymentStatus())) {
+            return Transition.NOK.toString();
+        }
+
         if (CollectionUtils.isEmpty(order.getPaymentTransactions())) {
             LOG.debug("[INGENICO] Process: {} Order Waiting", process.getCode());
             return Transition.WAIT.toString();

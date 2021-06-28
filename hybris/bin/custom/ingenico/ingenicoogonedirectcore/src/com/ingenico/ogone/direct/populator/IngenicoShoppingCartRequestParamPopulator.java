@@ -12,24 +12,25 @@ import com.ingenico.direct.domain.ShoppingCart;
 import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 
-public class IngenicoShoppingCartRequestParamPopulator implements Populator<CartModel, Order> {
+public class IngenicoShoppingCartRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
    private IngenicoAmountUtils ingenicoAmountUtils;
 
-   @Override public void populate(CartModel cartModel, Order order) throws ConversionException {
+   @Override public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
 
-      order.setShoppingCart(createShoppingCart(cartModel));
+      order.setShoppingCart(createShoppingCart(abstractOrderModel));
    }
 
-   private ShoppingCart createShoppingCart(CartModel cartModel) {
-      String currencyISOCode = cartModel.getCurrency().getIsocode();
+   private ShoppingCart createShoppingCart(AbstractOrderModel abstractOrderModel) {
+      String currencyISOCode = abstractOrderModel.getCurrency().getIsocode();
       ShoppingCart cart = new ShoppingCart();
 
       List<LineItem> lineItems = new ArrayList<>();
-      for (AbstractOrderEntryModel orderEntry : cartModel.getEntries()) {
+      for (AbstractOrderEntryModel orderEntry : abstractOrderModel.getEntries()) {
 
          LineItem item = new LineItem();
          AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
@@ -42,24 +43,24 @@ public class IngenicoShoppingCartRequestParamPopulator implements Populator<Cart
       }
 
       //workaround for shipping taxes
-      lineItems.add(setShippingAsProduct(cartModel, currencyISOCode));
+      lineItems.add(setShippingAsProduct(abstractOrderModel, currencyISOCode));
 
       cart.setItems(lineItems);
 
       return cart;
    }
 
-   private LineItem setShippingAsProduct(CartModel cartModel, String currencyISOCode) {
+   private LineItem setShippingAsProduct(AbstractOrderModel abstractOrderModel, String currencyISOCode) {
       LineItem shipping = new LineItem();
       AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
-      itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(cartModel.getDeliveryCost(), currencyISOCode));
+      itemAmountOfMoney.setAmount(ingenicoAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(), currencyISOCode));
       itemAmountOfMoney.setCurrencyCode(currencyISOCode);
       shipping.setAmountOfMoney(itemAmountOfMoney);
 
       OrderLineDetails orderLineDetails = new OrderLineDetails();
-      orderLineDetails.setProductName(cartModel.getDeliveryMode().getName());
+      orderLineDetails.setProductName(abstractOrderModel.getDeliveryMode().getName());
       orderLineDetails.setQuantity(1L);
-      orderLineDetails.setProductPrice(ingenicoAmountUtils.createAmount(cartModel.getDeliveryCost(), currencyISOCode));
+      orderLineDetails.setProductPrice(ingenicoAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(), currencyISOCode));
 
       shipping.setOrderLineDetails(orderLineDetails);
       return shipping;
