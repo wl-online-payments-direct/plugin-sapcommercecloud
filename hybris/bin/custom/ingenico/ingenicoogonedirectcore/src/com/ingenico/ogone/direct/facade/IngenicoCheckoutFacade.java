@@ -33,14 +33,14 @@ public interface IngenicoCheckoutFacade {
 
     void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId, String paymentDirId, String hostedTokenizationId) throws IngenicoNonValidPaymentProductException;
 
-    OrderData authorisePaymentForHostedTokenization(IngenicoHostedTokenizationData hostedTokenizationId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
+    OrderData authorisePaymentForHostedTokenization(String orderCode, IngenicoHostedTokenizationData hostedTokenizationId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
-    OrderData handle3dsResponse(String ref, String returnMAC, String paymentId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
+    OrderData handle3dsResponse(String ref, String paymentId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
-    CreateHostedCheckoutResponse createHostedCheckout(BrowserData browserData) throws InvalidCartException;
+    CreateHostedCheckoutResponse createHostedCheckout(String orderCode, BrowserData browserData) throws InvalidCartException;
 
-    OrderData authorisePaymentForHostedCheckout(String hostedCheckoutId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
+    OrderData authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
-    void validateReturnMAC(String returnMAC) throws IngenicoNonValidReturnMACException;
+    void validateReturnMAC(OrderData orderDetails, String returnMAC) throws IngenicoNonValidReturnMACException;
 
 }

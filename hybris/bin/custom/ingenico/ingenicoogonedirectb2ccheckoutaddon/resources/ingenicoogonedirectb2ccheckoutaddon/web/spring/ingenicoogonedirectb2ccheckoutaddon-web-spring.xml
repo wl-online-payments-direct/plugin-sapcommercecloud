@@ -84,7 +84,7 @@
                 <entry key="next" value="REDIRECT_TO_ORDER_CONFIRMATION_INGENICO"/>
             </map>
         </property>
-        <property name="progressBarId" value="ingenicoConfirmOrder"/>
+        <property name="progressBarId" value="confirmOrder"/>
     </bean>
 
     <bean id="ingenicoB2CResponsiveCheckoutGroup"  class="de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutGroup">

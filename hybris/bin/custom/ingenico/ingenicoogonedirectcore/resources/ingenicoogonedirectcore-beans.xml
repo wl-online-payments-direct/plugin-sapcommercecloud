@@ -18,6 +18,7 @@
         <property name="expiryMonth" type="String"/>
         <property name="expiryYear" type="String"/>
         <property name="billingAddress" type="de.hybris.platform.commercefacades.user.data.AddressData"/>
+        <property name="returnMAC" type="String"/>
     </bean>
 
     <bean class="de.hybris.platform.commercefacades.order.data.CartData">
