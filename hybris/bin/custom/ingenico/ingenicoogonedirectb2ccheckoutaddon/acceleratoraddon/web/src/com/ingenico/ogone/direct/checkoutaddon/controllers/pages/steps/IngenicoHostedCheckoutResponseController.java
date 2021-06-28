@@ -9,6 +9,7 @@ import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.order.InvalidCartException;
+import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
@@ -50,14 +51,17 @@ public class IngenicoHostedCheckoutResponseController extends AbstractCheckoutCo
                                                       final Model model,
                                                       final RedirectAttributes redirectAttributes) throws InvalidCartException {
 
-        if (BooleanUtils.isFalse(getCartFacade().hasSessionCart())) { // if cart doesn't exist an order exists return order confirmation page
-            OrderData orderData = orderFacade.getOrderDetailsForCode(orderCode);
-            return redirectToOrderConfirmationPage(orderData);
+        final OrderData orderDetails;
+        try {
+            orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+        } catch (final UnknownIdentifierException e) {
+            LOGGER.warn("[INGENICO] Attempted to handle hosted checkout payment on an order that does not exist. Redirect to cart page.");
+            return REDIRECT_PREFIX + "/cart";
         }
 
         try {
-            ingenicoCheckoutFacade.validateReturnMAC(returnMAC);
-            final OrderData orderData = ingenicoCheckoutFacade.authorisePaymentForHostedCheckout(hostedCheckoutId);
+            ingenicoCheckoutFacade.validateReturnMAC(orderDetails, returnMAC);
+            final OrderData orderData = ingenicoCheckoutFacade.authorisePaymentForHostedCheckout(orderDetails.getCode(), hostedCheckoutId);
             return redirectToOrderConfirmationPage(orderData);
         } catch (IngenicoNonAuthorizedPaymentException e) {
             switch (e.getReason()) {

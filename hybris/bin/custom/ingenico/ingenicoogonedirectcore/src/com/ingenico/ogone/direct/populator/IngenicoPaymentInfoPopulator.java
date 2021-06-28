@@ -41,6 +41,9 @@ public class IngenicoPaymentInfoPopulator implements Populator<IngenicoPaymentIn
             addressConverter.convert(ingenicoPaymentInfoModel.getBillingAddress(), addressData);
             ingenicoPaymentInfoData.setBillingAddress(addressData);
         }
+
+
+        ingenicoPaymentInfoData.setReturnMAC(ingenicoPaymentInfoModel.getReturnMAC());
     }
 
     public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {
