@@ -5,6 +5,7 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 import java.math.BigDecimal;
 
 import de.hybris.platform.converters.Populator;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.core.model.user.UserModel;
@@ -20,25 +21,25 @@ import com.ingenico.direct.domain.PersonalName;
 import com.ingenico.direct.domain.Shipping;
 import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
 
-public class IngenicoOrderRequestParamPopulator implements Populator<CartModel, Order> {
+public class IngenicoOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
     private IngenicoAmountUtils ingenicoAmountUtils;
 
     @Override
-    public void populate(CartModel cartModel, Order order) throws ConversionException {
-        validateParameterNotNull(cartModel, "cart cannot be null!");
-        validateParameterNotNull(cartModel.getPaymentInfo(), "paymentInfo cannot be null!");
-        validateParameterNotNull(cartModel.getPaymentInfo().getBillingAddress(), "billingAddress cannot be null!");
+    public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
+        validateParameterNotNull(abstractOrderModel, "order cannot be null!");
+        validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "paymentInfo cannot be null!");
+        validateParameterNotNull(abstractOrderModel.getPaymentInfo().getBillingAddress(), "billingAddress cannot be null!");
 
-        order.setAmountOfMoney(getAmoutOfMoney(cartModel));
-        order.setShipping(getShipping(cartModel));
-        order.setReferences(getReferences(cartModel));
+        order.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
+        order.setShipping(getShipping(abstractOrderModel));
+        order.setReferences(getReferences(abstractOrderModel));
 
     }
 
-    private Shipping getShipping(CartModel cartModel) {
+    private Shipping getShipping(AbstractOrderModel abstractOrderModel) {
         Shipping shipping = new Shipping();
-        final AddressModel deliveryAddress = cartModel.getDeliveryAddress();
+        final AddressModel deliveryAddress = abstractOrderModel.getDeliveryAddress();
 
         AddressPersonal address = new AddressPersonal();
         address.setZip(deliveryAddress.getPostalcode());
@@ -64,16 +65,16 @@ public class IngenicoOrderRequestParamPopulator implements Populator<CartModel, 
         return shipping;
     }
 
-    private OrderReferences getReferences(CartModel cartModel) {
+    private OrderReferences getReferences(AbstractOrderModel abstractOrderModel) {
         final OrderReferences orderReferences = new OrderReferences();
-        orderReferences.setMerchantReference(cartModel.getCode());
+        orderReferences.setMerchantReference(abstractOrderModel.getCode());
         return orderReferences;
     }
 
-    private AmountOfMoney getAmoutOfMoney(CartModel cartModel) {
+    private AmountOfMoney getAmoutOfMoney(AbstractOrderModel abstractOrderModel) {
         final AmountOfMoney amountOfMoney = new AmountOfMoney();
-        final String currencyCode = cartModel.getCurrency().getIsocode();
-        final long amount = ingenicoAmountUtils.createAmount(cartModel.getTotalPrice(), currencyCode);
+        final String currencyCode = abstractOrderModel.getCurrency().getIsocode();
+        final long amount = ingenicoAmountUtils.createAmount(abstractOrderModel.getTotalPrice(), currencyCode);
         amountOfMoney.setAmount(amount);
         amountOfMoney.setCurrencyCode(currencyCode);
 

@@ -7,9 +7,13 @@ import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstan
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.STATUS_UNKNOWN;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL;
 import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURED;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.REJECTED_CAPTURE;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.ingenico.direct.domain.AmountOfMoney;
 import com.ingenico.direct.domain.Capture;
@@ -98,7 +102,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
                 amountOfMoney,
                 paymentTransactionType
         );
-        modelService.refresh(paymentTransaction);
+
         return paymentTransaction;
     }
 
@@ -234,30 +238,58 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
         transactionEntryModel.setTransactionStatusDetails(status);
 
         modelService.save(transactionEntryModel);
-
-        setOrderPaymentStatusIfNeeded(abstractOrderModel, transactionEntryModel);
+        modelService.refresh(paymentTransaction);
+        setOrderPaymentStatus(paymentTransaction, transactionEntryModel);
 
         return transactionEntryModel;
     }
 
-    private void setOrderPaymentStatusIfNeeded(AbstractOrderModel abstractOrderModel, PaymentTransactionEntryModel transactionEntryModel) {
-        if (transactionEntryModel.getType() == PaymentTransactionType.CAPTURE) {
-            if (STATUS_UNKNOWN.getValue().equals(transactionEntryModel.getTransactionStatus())) {
-                abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_WAITING_CAPTURE);
-            } else if (SUCCESSFUL.getValue().equals(transactionEntryModel.getTransactionStatus())) {
-                final Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(getIngenicoConfiguration(abstractOrderModel), transactionEntryModel.getRequestId(),
-                      transactionEntryModel.getPaymentTransaction().getPlannedAmount(), transactionEntryModel.getCurrency().getIsocode());
-                if (nonCapturedAmount > 0L) {
-                    abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_WAITING_CAPTURE);
+    private void setOrderPaymentStatus(PaymentTransactionModel paymentTransactionModel, PaymentTransactionEntryModel transactionEntryModel) {
+        final AbstractOrderModel order = paymentTransactionModel.getOrder();
+        final String transactionStatus = transactionEntryModel.getTransactionStatus();
+        switch (transactionEntryModel.getType()) {
+            case AUTHORIZATION:
+                if (PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(transactionStatus)) {
+                    order.setPaymentStatus(PaymentStatus.INGENICO_AUTHORIZED);
+                } else if (PAYMENT_STATUS_CATEGORY_ENUM.REJECTED.getValue().equals(transactionStatus)) {
+                    order.setPaymentStatus(PaymentStatus.INGENICO_REJECTED);
                 } else {
-                    abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_CAPTURED);
+                    order.setPaymentStatus(PaymentStatus.INGENICO_WAITING_AUTH);
                 }
-            } else {
-                abstractOrderModel.setPaymentStatus(PaymentStatus.INGENICO_REJECTED);
-            }
-            modelService.save(abstractOrderModel);
+                modelService.save(order);
+                break;
+            case CAPTURE:
+                final String currencyIsoCode = order.getCurrency().getIsocode();
+                BigDecimal remainingAmount = ingenicoAmountUtils.fromAmount(order.getTotalPrice(), currencyIsoCode);
+                for (PaymentTransactionEntryModel entry : getCapturePaymentTransactionEntries(paymentTransactionModel)) {
+                    if (PAYMENT_STATUS_CATEGORY_ENUM.REJECTED.getValue().equals(transactionStatus)) {
+                        order.setPaymentStatus(PaymentStatus.INGENICO_REJECTED);
+                        modelService.save(order);
+                        return;
+                    } else if (PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(transactionStatus)) {
+                        remainingAmount = remainingAmount.subtract(entry.getAmount());
+                    }
+                }
+
+                final BigDecimal zero = ingenicoAmountUtils.fromAmount(0.0d, currencyIsoCode);
+                if (remainingAmount.compareTo(zero) <= 0) {
+                    order.setPaymentStatus(PaymentStatus.INGENICO_CAPTURED);
+                } else {
+                    order.setPaymentStatus(PaymentStatus.INGENICO_WAITING_CAPTURE);
+                }
+                modelService.save(order);
+                break;
         }
+
     }
+
+    private List<PaymentTransactionEntryModel> getCapturePaymentTransactionEntries(final PaymentTransactionModel paymentTransactionModel) {
+        return paymentTransactionModel.getEntries()
+                .stream()
+                .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
+                .collect(Collectors.toList());
+    }
+
 
     private String getTransactionStatus(String status) {
         switch (PAYMENT_STATUS_ENUM.valueOf(status)) {
