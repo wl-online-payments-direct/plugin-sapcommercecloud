@@ -6,7 +6,7 @@ import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstan
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 import de.hybris.platform.converters.Populator;
-import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
@@ -22,18 +22,18 @@ import com.ingenico.ogone.direct.enums.OperationCodesEnum;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.ogone.direct.service.IngenicoConfigurationService;
 
-public class IngenicoHostedCheckoutRedirectPopulator implements Populator<CartModel, CreateHostedCheckoutRequest> {
+public class IngenicoHostedCheckoutRedirectPopulator implements Populator<AbstractOrderModel, CreateHostedCheckoutRequest> {
 
     private SessionService sessionService;
     private IngenicoConfigurationService ingenicoConfigurationService;
 
     @Override
-    public void populate(CartModel cartModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
-        validateParameterNotNull(cartModel, "cart cannot be null!");
-        validateParameterNotNull(cartModel.getPaymentInfo(), "PaymentInfo cannot be null!");
-        Preconditions.checkArgument(cartModel.getPaymentInfo() instanceof IngenicoPaymentInfoModel, "Payment has to be IngenicoPaymentInfo");
+    public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
+        validateParameterNotNull(abstractOrderModel, "order cannot be null!");
+        validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "PaymentInfo cannot be null!");
+        Preconditions.checkArgument(abstractOrderModel.getPaymentInfo() instanceof IngenicoPaymentInfoModel, "Payment has to be IngenicoPaymentInfo");
 
-        final IngenicoPaymentInfoModel paymentInfo = (IngenicoPaymentInfoModel) cartModel.getPaymentInfo();
+        final IngenicoPaymentInfoModel paymentInfo = (IngenicoPaymentInfoModel) abstractOrderModel.getPaymentInfo();
 
         if (REDIRECT.getValue().equals(paymentInfo.getPaymentMethod())) {
             createHostedCheckoutRequest.setRedirectPaymentMethodSpecificInput(getRedirectPaymentMethodSpecificInput(paymentInfo));

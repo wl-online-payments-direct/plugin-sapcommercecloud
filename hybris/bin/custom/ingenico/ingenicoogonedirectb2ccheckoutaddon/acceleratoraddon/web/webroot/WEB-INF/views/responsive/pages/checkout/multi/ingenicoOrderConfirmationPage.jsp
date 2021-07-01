@@ -9,6 +9,7 @@
 
 <template:page pageTitle="${pageTitle}" hideHeaderLinks="true">
     <jsp:body>
+        <div class="account-section">
         <jsp:include page="/WEB-INF/views/responsive/pages/checkout/checkoutConfirmationThankMessage.jsp" />
 
         <order:accountOrderDetailsOverview order="${orderData}"/>
@@ -29,7 +30,6 @@
                                     <ingenico:ingenicoBillingAddressDetailsItem order="${orderData}"/>
                                 </div>
                                 <c:if test="${not empty orderData.ingenicoPaymentInfo}">
-                                    ${orderData.ingenicoPaymentInfo.paymentMethod}
                                     <div class="col-sm-6 col-md-4 order-payment-data">
                                         <ingenico:ingenicoPaymentDetails order="${orderData}"/>
                                     </div>
@@ -43,6 +43,6 @@
 
         <order:accountOrderDetailOrderTotals order="${orderData}"/>
         <jsp:include page="/WEB-INF/views/responsive/pages/checkout/checkoutConfirmationContinueButton.jsp" />
-
+        </div>
     </jsp:body>
 </template:page>
