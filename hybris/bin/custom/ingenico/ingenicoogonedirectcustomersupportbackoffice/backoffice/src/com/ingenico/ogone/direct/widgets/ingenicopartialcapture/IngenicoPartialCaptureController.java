@@ -126,8 +126,9 @@ public class IngenicoPartialCaptureController extends DefaultWidgetController {
             final Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(ingenicoConfiguration,
                     captures,
                     paymentTransactionToCapture.getPaymentTransaction().getPlannedAmount(),
-                    paymentTransactionToCapture.getCurrency().getIsocode()); //check checkbox value if true=full capture
-            final Long amountToCapture = this.fullAmount.isChecked() ? nonCapturedAmount : ingenicoAmountUtils.createAmount(amount.doubleValue(), paymentTransactionToCapture.getCurrency().getIsocode());
+                    paymentTransactionToCapture.getCurrency().getIsocode());
+            final Long requestedAmount = ingenicoAmountUtils.createAmount(amount.doubleValue(), paymentTransactionToCapture.getCurrency().getIsocode());
+            final Long amountToCapture = this.fullAmount.isChecked() || nonCapturedAmount < requestedAmount ? nonCapturedAmount : requestedAmount;
             if (nonCapturedAmount > 0 && amountToCapture <= nonCapturedAmount) {
                 final CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(ingenicoConfiguration,
                         paymentTransactionToCapture.getRequestId(),
@@ -138,7 +139,7 @@ public class IngenicoPartialCaptureController extends DefaultWidgetController {
                         captureResponse.getId(),
                         captureResponse.getStatus(),
                         captureResponse.getCaptureOutput().getAmountOfMoney(),
-                        amountToCapture.equals(nonCapturedAmount) ? PaymentTransactionType.CAPTURE : PaymentTransactionType.PARTIAL_CAPTURE);
+                        PaymentTransactionType.CAPTURE);
             }
 
             ingenicoBusinessProcessService.triggerOrderProcessEvent(this.orderModel, INGENICO_EVENT_CAPTURE);
