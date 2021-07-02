@@ -3,6 +3,8 @@ package com.ingenico.ogone.direct.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import de.hybris.platform.core.model.order.OrderModel;
+
 import com.ingenico.direct.domain.CancelPaymentResponse;
 import com.ingenico.direct.domain.CaptureResponse;
 import com.ingenico.direct.domain.CapturesResponse;
@@ -38,11 +40,11 @@ public interface IngenicoPaymentService {
 
     GetHostedTokenizationResponse getHostedTokenization(String hostedTokenizationId);
 
-    CreatePaymentResponse createPaymentForHostedTokenization(IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse);
+    CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse);
 
     PaymentResponse getPayment(String paymentId);
 
-    CreateHostedCheckoutResponse createHostedCheckout(BrowserData browserData);
+    CreateHostedCheckoutResponse createHostedCheckout(OrderModel orderForCode, BrowserData browserData);
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 

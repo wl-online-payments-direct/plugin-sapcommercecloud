@@ -23,23 +23,28 @@ import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commerceservices.enums.CountryType;
+import de.hybris.platform.util.Config;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.ogone.direct.checkoutaddon.forms.IngenicoPaymentDetailsForm;
 import com.ingenico.ogone.direct.checkoutaddon.forms.validation.IngenicoPaymentDetailsValidator;
 import com.ingenico.ogone.direct.constants.IngenicoCheckoutConstants;
+import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
+import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 
 @Controller
@@ -59,6 +64,9 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
 
     @Resource(name = "ingenicoCheckoutFacade")
     private IngenicoCheckoutFacade ingenicoCheckoutFacade;
+
+    @Resource(name = "ingenicoUserFacade")
+    private IngenicoUserFacade ingenicoUserFacade;
 
     @Resource(name = "ingenicoPaymentDetailsValidator")
     private IngenicoPaymentDetailsValidator ingenicoPaymentDetailsValidator;
@@ -85,8 +93,16 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         model.addAttribute("ingenicoPaymentDetailsForm", new IngenicoPaymentDetailsForm());
         final List<PaymentProduct> availablePaymentMethods = ingenicoCheckoutFacade.getAvailablePaymentMethods();
         model.addAttribute("paymentProducts", availablePaymentMethods);
+
         model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
         model.addAttribute("idealIssuers", ingenicoCheckoutFacade.getIdealIssuers(availablePaymentMethods));
+
+        if (IngenicoCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(ingenicoCheckoutFacade.getIngenicoCheckoutType())) {
+            final CreateHostedTokenizationResponse hostedTokenization = ingenicoCheckoutFacade.createHostedTokenization();
+            model.addAttribute("hostedTokenization", hostedTokenization);
+            model.addAttribute("savedPaymentInfos", ingenicoUserFacade.getIngenicoPaymentInfos(Boolean.TRUE));
+        }
+
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
         return IngenicoCheckoutConstants.Views.Pages.MultiStepCheckout.ingenicoPaymentMethod;
@@ -106,7 +122,10 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
 
         final IngenicoPaymentInfoData ingenicoPaymentInfoData = new IngenicoPaymentInfoData();
         try {
-            ingenicoCheckoutFacade.fillIngenicoPaymentInfoData(ingenicoPaymentInfoData, ingenicoPaymentDetailsForm.getPaymentProductId(), ingenicoPaymentDetailsForm.getIssuerId());
+            ingenicoCheckoutFacade.fillIngenicoPaymentInfoData(ingenicoPaymentInfoData,
+                    ingenicoPaymentDetailsForm.getPaymentProductId(),
+                    ingenicoPaymentDetailsForm.getIssuerId(),
+                    ingenicoPaymentDetailsForm.getHostedTokenizationId());
         } catch (IngenicoNonValidPaymentProductException e) {
             GlobalMessages.addErrorMessage(model, "checkout.error.paymentproduct.invalid");
             return enterStep(model, redirectAttributes);
@@ -170,6 +189,11 @@ public class SelectIngenicoPaymentMethodCheckoutStepController extends AbstractC
         storeCmsPageInModel(model, contentPage);
         setUpMetaDataForContentPage(model, contentPage);
         setCheckoutStepLinksForModel(model, getCheckoutStep());
+    }
+
+    @ModelAttribute("hostedTokenizationJs")
+    String getHostedTokenizationJs(){
+        return Config.getParameter("ingenico.hosted.tokenization.js");
     }
 
 

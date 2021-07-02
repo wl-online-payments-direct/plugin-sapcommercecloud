@@ -1,8 +1,5 @@
 package com.ingenico.ogone.direct.actions.order;
 
-import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.STATUS_UNKNOWN;
-import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,9 +8,6 @@ import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.orderprocessing.model.OrderProcessModel;
-import de.hybris.platform.payment.enums.PaymentTransactionType;
-import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
-import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.processengine.action.AbstractAction;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -23,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 public class IngenicoCheckAuthorizedPaymentAction extends AbstractAction<OrderProcessModel> {
     private static final Logger LOG = LoggerFactory.getLogger(IngenicoCheckAuthorizedPaymentAction.class);
-
 
     @Override
     public String execute(final OrderProcessModel process) {
@@ -41,49 +34,34 @@ public class IngenicoCheckAuthorizedPaymentAction extends AbstractAction<OrderPr
             return Transition.OK.toString();
         }
 
+        if (PaymentStatus.INGENICO_CANCELED.equals(order.getPaymentStatus())) {
+            return Transition.NOK.toString();
+        }
+
         if (CollectionUtils.isEmpty(order.getPaymentTransactions())) {
             LOG.debug("[INGENICO] Process: {} Order Waiting", process.getCode());
             return Transition.WAIT.toString();
         }
 
-        switch (getAuthorizationStatus(order)) {
-            case "SUCCESSFUL":
-                LOG.debug("[INGENICO] Process: {} Order Authorized", process.getCode());
-                order.setStatus(OrderStatus.PAYMENT_AUTHORIZED);
-                order.setPaymentStatus(PaymentStatus.INGENICO_AUTHORIZED);
-                modelService.save(order);
-                return Transition.OK.toString();
-            case "REJECTED":
-                LOG.debug("[INGENICO] Process: {} Order Not Authorized", process.getCode());
-                order.setStatus(OrderStatus.PAYMENT_NOT_AUTHORIZED);
-                order.setPaymentStatus(PaymentStatus.INGENICO_REJECTED);
-                modelService.save(order);
-                return Transition.NOK.toString();
-            case "STATUS_UNKNOWN":
-            default:
-                LOG.debug("[INGENICO] Process: {} Order Waiting Auth", process.getCode());
-                order.setPaymentStatus(PaymentStatus.INGENICO_WAITING_AUTH);
-                modelService.save(order);
-                return Transition.WAIT.toString();
+        if (PaymentStatus.INGENICO_AUTHORIZED.equals(order.getPaymentStatus())
+                || PaymentStatus.INGENICO_WAITING_CAPTURE.equals(order.getPaymentStatus())
+                || PaymentStatus.INGENICO_CAPTURED.equals(order.getPaymentStatus())) {
+            LOG.debug("[INGENICO] Process: {} Order Authorized", process.getCode());
+            order.setStatus(OrderStatus.PAYMENT_AUTHORIZED);
+            modelService.save(order);
+            return Transition.OK.toString();
+        } else if (PaymentStatus.INGENICO_REJECTED.equals(order.getPaymentStatus())) {
+            LOG.debug("[INGENICO] Process: {} Order Not Authorized", process.getCode());
+            order.setStatus(OrderStatus.PAYMENT_NOT_AUTHORIZED);
+            modelService.save(order);
+            return Transition.NOK.toString();
+        } else {
+            LOG.debug("[INGENICO] Process: {} Order Waiting Auth", process.getCode());
+            order.setPaymentStatus(PaymentStatus.INGENICO_WAITING_AUTH);
+            modelService.save(order);
+            return Transition.WAIT.toString();
         }
     }
-
-    private String getAuthorizationStatus(final OrderModel order) {
-        final PaymentTransactionModel finalPaymentTransaction = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
-        return finalPaymentTransaction.getEntries()
-                .stream()
-                .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()))
-                .map(PaymentTransactionEntryModel::getTransactionStatus)
-                .reduce((current, next) -> next).orElseGet(()->getCaptureStatus(finalPaymentTransaction));
-    }
-
-    private String getCaptureStatus(final PaymentTransactionModel finalPaymentTransaction) {
-        return finalPaymentTransaction.getEntries()
-                .stream()
-                .anyMatch(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType())) ?
-                SUCCESSFUL.getValue() : STATUS_UNKNOWN.getValue();
-    }
-
 
     enum Transition {
         OK, NOK, WAIT;

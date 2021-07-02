@@ -8,7 +8,9 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 
@@ -66,8 +68,8 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     private IngenicoConfigurationService ingenicoConfigurationService;
     private IngenicoAmountUtils ingenicoAmountUtils;
     private IngenicoClientFactory ingenicoClientFactory;
-    private Converter<CartModel, CreatePaymentRequest> ingenicoHostedTokenizationParamConverter;
-    private Converter<CartModel, CreateHostedCheckoutRequest> ingenicoHostedCheckoutParamConverter;
+    private Converter<AbstractOrderModel, CreatePaymentRequest> ingenicoHostedTokenizationParamConverter;
+    private Converter<AbstractOrderModel, CreateHostedCheckoutRequest> ingenicoHostedCheckoutParamConverter;
 
     @Override
     public GetPaymentProductsResponse getPaymentProductsResponse(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
@@ -205,13 +207,12 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     @Override
     @SuppressWarnings("all")
-    public CreatePaymentResponse createPaymentForHostedTokenization(IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) {
+    public CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) {
         validateParameterNotNull(tokenizationResponse, "tokenizationResponse cannot be null");
-        final CartModel sessionCart = getSessionCart();
-        validateParameterNotNull(sessionCart, "sessionCart cannot be null");
+        validateParameterNotNull(orderForCode, "order cannot be null");
         try (Client client = ingenicoClientFactory.getClient()) {
 
-            final CreatePaymentRequest params = ingenicoHostedTokenizationParamConverter.convert(sessionCart);
+            final CreatePaymentRequest params = ingenicoHostedTokenizationParamConverter.convert(orderForCode);
             params.getCardPaymentMethodSpecificInput()
                     .setToken(tokenizationResponse.getToken().getId());
             params.getCardPaymentMethodSpecificInput()
@@ -233,12 +234,11 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     @Override
     @SuppressWarnings("all")
-    public CreateHostedCheckoutResponse createHostedCheckout(com.ingenico.ogone.direct.order.data.BrowserData browserData) {
+    public CreateHostedCheckoutResponse createHostedCheckout(OrderModel orderForCode, com.ingenico.ogone.direct.order.data.BrowserData browserData) {
         validateParameterNotNullStandardMessage("browserData", browserData);
-        final CartModel sessionCart = getSessionCart();
-        validateParameterNotNull(sessionCart, "sessionCart cannot be null");
+        validateParameterNotNull(orderForCode, "order cannot be null");
         try (Client client = ingenicoClientFactory.getClient()) {
-            final CreateHostedCheckoutRequest params = ingenicoHostedCheckoutParamConverter.convert(sessionCart);
+            final CreateHostedCheckoutRequest params = ingenicoHostedCheckoutParamConverter.convert(orderForCode);
             params.getOrder().getCustomer().setDevice(getBrowserInfo(browserData));
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
 
@@ -463,11 +463,11 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         this.ingenicoConfigurationService = ingenicoConfigurationService;
     }
 
-    public void setIngenicoHostedTokenizationParamConverter(Converter<CartModel, CreatePaymentRequest> ingenicoHostedTokenizationParamConverter) {
+    public void setIngenicoHostedTokenizationParamConverter(Converter<AbstractOrderModel, CreatePaymentRequest> ingenicoHostedTokenizationParamConverter) {
         this.ingenicoHostedTokenizationParamConverter = ingenicoHostedTokenizationParamConverter;
     }
 
-    public void setIngenicoHostedCheckoutParamConverter(Converter<CartModel, CreateHostedCheckoutRequest> ingenicoHostedCheckoutParamConverter) {
+    public void setIngenicoHostedCheckoutParamConverter(Converter<AbstractOrderModel, CreateHostedCheckoutRequest> ingenicoHostedCheckoutParamConverter) {
         this.ingenicoHostedCheckoutParamConverter = ingenicoHostedCheckoutParamConverter;
     }
 }

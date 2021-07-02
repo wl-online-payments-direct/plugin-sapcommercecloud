@@ -10,6 +10,5 @@
 <div class="value-order">
     ${fn:escapeXml(order.ingenicoPaymentInfo.paymentMethod)}
     ${fn:escapeXml(order.ingenicoPaymentInfo.cardholderName)}
-    ${fn:escapeXml(order.ingenicoPaymentInfo.cardholderName)}
 </div>
 
