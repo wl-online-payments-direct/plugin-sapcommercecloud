@@ -46,7 +46,7 @@ public interface IngenicoPaymentService {
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 
-    CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode);
+    CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode, Boolean isFinal);
 
     CapturesResponse getCaptures(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId);
 
