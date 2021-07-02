@@ -16,6 +16,7 @@
 			<y:group qualifier="common">
 				<y:label>actiongroup.common</y:label>
 				<y:action action-id="de.hybris.ordermanagementbackoffice.actions.order.manualpaymentcaptureaction" property="currentObject" merge-mode="remove"/>
+				<y:action action-id="de.hybris.ordermanagementbackoffice.actions.order.cancelorderaction" property="currentObject" merge-mode="remove" />
 				<y:action action-id="com.ingenico.ogone.direct.actions.ingenicomanualpaymentcaptureaction" property="currentObject"/>
 				<y:action action-id="com.ingenico.ogone.direct.actions.ingenicomanualpaymentreverseauthaction" property="currentObject"/>
 			</y:group>
