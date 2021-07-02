@@ -15,6 +15,10 @@
     <inputType>de.hybris.platform.core.model.order.OrderModel</inputType>
     <outputType>de.hybris.platform.core.model.order.OrderModel</outputType>
 
+    <sockets>
+        <output id="capturePaymentContext"/>
+    </sockets>
+
     <!-- folder icons with the icons must be created in the following directory: myextension/backoffice/resources/widgets/actions/myaction -->
     <iconUri>icons/icon_action_manualpaymentcapture_default.png</iconUri>
     <iconHoverUri>icons/icon_action_manualpaymentcapture_hover.png</iconHoverUri>
