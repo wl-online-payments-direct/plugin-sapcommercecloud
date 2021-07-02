@@ -1,0 +1,76 @@
+@import "cockpitng-globals.scss";
+
+$oms-widget-popup-bottom-toolbar--height: 80px;
+$oms-widget-capturepayment-header--height: 60px;
+$oms-widget-capturepayment-separator--height: 2*$container-spacing-default__third;
+$oms-widget-footer-gutter: 2*$container-spacing-default__third;
+$oms-widget-gutter: 2*$container-spacing-default__third;
+$oms-widget-footer--border: 1px solid $grey__default--300;
+
+$oms-widget-capturepayment-list-container__checkbox-label--margin-left: 3px;
+$oms-widget-capturepayment-listbox-header__column-header--padding: 4px;
+$oms-widget-capturepayment-listbox-header__comment--margin-top: -3px;
+
+//implementing the footer buttons styling
+.oms-widget-footer{
+    padding: $oms-widget-footer-gutter;
+    text-align: right;
+    border-top: $oms-widget-footer--border;
+}
+
+.oms-widget-capturepayment-configuration-footer,
+.oms-widget-footer{
+    height: $oms-widget-popup-bottom-toolbar--height;
+}
+
+.oms-widget-capturepayment-configuration--separator{
+    height: $oms-widget-capturepayment-separator--height;
+}
+
+.oms-widget-capturepayment-header{
+    height: $oms-widget-capturepayment-header--height;
+}
+
+.oms-widget-capturepayment-header,
+.oms-widget-capturepayment-list{
+    padding-left: $oms-widget-gutter;
+    padding-right: $oms-widget-gutter;
+}
+
+.oms-widget-capturepayment-configuration,
+.oms-widget-capturepayment-list-container{
+    border-top: $oms-widget-footer--border;
+}
+
+//overwriting grid styling to match the listbox - header
+.oms-widget-capturepayment-list-container .z-grid-header{
+    background: transparent;
+}
+
+.oms-widget-capturepayment-list{
+    height: calc(100% - #{$oms-widget-popup-bottom-toolbar--height + 2*$oms-widget-capturepayment-separator--height + $oms-widget-capturepayment-header--height});
+}
+
+.oms-widget-capturepayment--amount-label{
+    display: inline-block;
+    text-align: right;
+    padding-right: 30px;
+}
+
+.oms-widget-capturepayment--qty-label__centered{
+    display: inline-block;
+    text-align: center;
+
+}
+
+.oms-widget-capturepayment-listbox-header .z-column-content{
+    padding: $oms-widget-capturepayment-listbox-header__column-header--padding;
+}
+
+.oms-widget-capturepayment-listbox-header__comment .z-column-content{
+    margin-top: $oms-widget-capturepayment-listbox-header__comment--margin-top;
+}
+
+.oms-widget-capturepayment-list-container .z-grid-header{
+    background: transparent;
+}
