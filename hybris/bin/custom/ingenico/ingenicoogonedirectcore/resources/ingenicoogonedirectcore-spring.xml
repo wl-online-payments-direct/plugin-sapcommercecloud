@@ -21,17 +21,20 @@
     </bean>
 
     <bean id="communicatorConfiguration" class="com.ingenico.direct.CommunicatorConfiguration">
-        <property name="authorizationType"
-                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.authorizationType')}"/>
-        <property name="connectTimeout"
-                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.connectTimeout')}"/>
-        <property name="socketTimeout"
-                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.socketTimeout')}"/>
-        <property name="maxConnections"
-                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.maxConnections')}"/>
-        <property name="integrator"
-                  value="#{configurationService.configuration.getProperty('ingenico.direct.api.integrator')}"/>
+        <property name="authorizationType" value="${ingenico.direct.api.authorizationType}"/>
+        <property name="connectTimeout" value="${ingenico.direct.api.connectTimeout}"/>
+        <property name="socketTimeout" value="${ingenico.direct.api.socketTimeout}"/>
+        <property name="maxConnections" value="${ingenico.direct.api.maxConnections}"/>
+        <property name="integrator" value="${ingenico.direct.api.integrator}"/>
+        <property name="shoppingCartExtension" ref="ingenicoShoppingCartExtension"/>
     </bean>
+    <bean id="ingenicoShoppingCartExtension" class="com.ingenico.direct.domain.ShoppingCartExtension">
+        <constructor-arg name="creator" value="${ingenico.direct.api.shoppingCartExtension.creator}"/>
+        <constructor-arg name="name" value="${ingenico.direct.api.shoppingCartExtension.name}"/>
+        <constructor-arg name="version" value="${ingenico.direct.api.shoppingCartExtension.version}"/>
+        <constructor-arg name="extensionId" value="${ingenico.direct.api.shoppingCartExtension.extensionId}"/>
+    </bean>
+
     <!-- utils -->
 
     <bean id="ingenicoAmountUtils" class="com.ingenico.ogone.direct.util.IngenicoAmountUtils">
