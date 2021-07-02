@@ -30,9 +30,7 @@ public class IngenicoClientFactoryImpl implements IngenicoClientFactory {
 
     private CommunicatorConfiguration getCommunicatorConfiguration() {
         final IngenicoConfigurationModel ingenicoConfiguration = ingenicoConfigurationService.getCurrentIngenicoConfiguration();
-        return communicatorConfiguration.withApiEndpoint(createURI(ingenicoConfiguration.getEndpointURL()))
-                .withApiKeyId(ingenicoConfiguration.getApiKey())
-                .withSecretApiKey(ingenicoConfiguration.getApiSecret());
+        return getCommunicatorConfiguration(ingenicoConfiguration);
     }
 
     private CommunicatorConfiguration getCommunicatorConfiguration(IngenicoConfigurationModel ingenicoConfiguration) {
