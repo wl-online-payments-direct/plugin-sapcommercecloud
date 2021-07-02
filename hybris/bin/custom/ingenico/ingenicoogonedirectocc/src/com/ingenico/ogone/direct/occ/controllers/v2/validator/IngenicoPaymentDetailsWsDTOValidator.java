@@ -30,8 +30,12 @@ public class IngenicoPaymentDetailsWsDTOValidator implements Validator {
         }
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "paymentProductId", "field.required", new Object[]{"paymentProductId"});
-        if (wsDTO.getPaymentProductId() != null && IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL == wsDTO.getPaymentProductId()) {
-            ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "field.required", new Object[]{"issuerId"});
+        if (wsDTO.getPaymentProductId() != null) {
+            if (IngenicoogonedirectcoreConstants.PAYMENT_METHOD_IDEAL == wsDTO.getPaymentProductId()) {
+                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "field.required", new Object[]{"issuerId"});
+            } else if (IngenicoogonedirectcoreConstants.PAYMENT_METHOD_HTP == wsDTO.getPaymentProductId()) {
+                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedTokenizationId", "field.required", new Object[]{"hostedTokenizationId"});
+            }
         }
 
     }

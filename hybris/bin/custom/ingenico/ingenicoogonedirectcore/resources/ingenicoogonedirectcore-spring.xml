@@ -53,12 +53,19 @@
         <property name="ingenicoUserFacade" ref="ingenicoUserFacade"/>
         <property name="ingenicoPaymentService" ref="ingenicoPaymentService"/>
         <property name="ingenicoTransactionService" ref="ingenicoTransactionService"/>
+        <property name="ingenicoBusinessProcessService" ref="ingenicoBusinessProcessService"/>
         <property name="addressReverseConverter" ref="addressReverseConverter"/>
+        <property name="orderConverter" ref="orderConverter"/>
         <property name="cartService" ref="cartService"/>
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
         <property name="modelService" ref="modelService"/>
         <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
     </bean>
+
+    <bean id="ingenicoExtendedCheckoutFacade"
+          class="com.ingenico.ogone.direct.facade.impl.IngenicoExtendedCheckoutFacadeImpl"
+          parent="defaultCheckoutFacade"/>
 
     <bean id="ingenicoWebhookFacade" class="com.ingenico.ogone.direct.facade.impl.IngenicoWebhookFacadeImpl">
         <property name="ingenicoWebhookService" ref="ingenicoWebhookService"/>
@@ -66,25 +73,23 @@
     </bean>
 
     <!-- Job -->
-    <bean id="ingenicoProcessWebhooksEventJob" class="com.ingenico.ogone.direct.cronjob.IngenicoProcessWebhooksEventJob" parent="abstractJobPerformable">
-        <property name="modelService" ref="modelService" />
-        <property name="ingenicoWebhookService" ref="ingenicoWebhookService" />
-        <property name="ingenicoWebhookDao" ref="ingenicoWebhookDao" />
+    <bean id="ingenicoProcessWebhooksEventJob" class="com.ingenico.ogone.direct.cronjob.IngenicoProcessWebhooksEventJob"
+          parent="abstractJobPerformable">
+        <property name="modelService" ref="modelService"/>
+        <property name="ingenicoWebhookService" ref="ingenicoWebhookService"/>
+        <property name="ingenicoWebhookDao" ref="ingenicoWebhookDao"/>
     </bean>
 
-    <bean id="ingenicoAutomaticCaptureJob" class="com.ingenico.ogone.direct.cronjob.IngenicoAutomaticCaptureJob" parent="abstractJobPerformable">
-        <property name="ingenicoOrderDao" ref="ingenicoOrderDao" />
-        <property name="ingenicoPaymentService" ref="ingenicoPaymentService" />
-        <property name="ingenicoTransactionService" ref="ingenicoTransactionService" />
-        <property name="ingenicoBusinessProcessService" ref="ingenicoBusinessProcessService" />
-        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils" />
+    <bean id="ingenicoAutomaticCaptureJob" class="com.ingenico.ogone.direct.cronjob.IngenicoAutomaticCaptureJob"
+          parent="abstractJobPerformable">
+        <property name="ingenicoOrderDao" ref="ingenicoOrderDao"/>
+        <property name="ingenicoPaymentService" ref="ingenicoPaymentService"/>
+        <property name="ingenicoTransactionService" ref="ingenicoTransactionService"/>
+        <property name="ingenicoBusinessProcessService" ref="ingenicoBusinessProcessService"/>
+        <property name="ingenicoAmountUtils" ref="ingenicoAmountUtils"/>
     </bean>
 
     <!-- strategies -->
-    <alias alias="createOrderFromCartStrategy" name="defaultIngenicoCreateOrderFromCartStrategy"/>
-    <bean id="defaultIngenicoCreateOrderFromCartStrategy"
-          class="com.ingenico.ogone.direct.strategy.impl.DefaultIngenicoCreateOrderFromCartStrategy" parent="defaultCreateOrderFromCartStrategy">
-    </bean>
 
 
 </beans>

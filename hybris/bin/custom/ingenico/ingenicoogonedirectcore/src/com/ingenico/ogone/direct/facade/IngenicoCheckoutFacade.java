@@ -9,8 +9,10 @@ import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
 import com.ingenico.direct.domain.PaymentProduct;
+import com.ingenico.ogone.direct.enums.IngenicoCheckoutTypesEnum;
 import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.exception.IngenicoNonValidPaymentProductException;
+import com.ingenico.ogone.direct.exception.IngenicoNonValidReturnMACException;
 import com.ingenico.ogone.direct.order.data.BrowserData;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
@@ -18,6 +20,8 @@ import com.ingenico.ogone.direct.order.data.IngenicoPaymentInfoData;
 public interface IngenicoCheckoutFacade {
 
     List<PaymentProduct> getAvailablePaymentMethods();
+
+    IngenicoCheckoutTypesEnum getIngenicoCheckoutType();
 
     PaymentProduct getPaymentMethodById(int paymentId);
 
@@ -27,14 +31,16 @@ public interface IngenicoCheckoutFacade {
 
     void handlePaymentInfo(IngenicoPaymentInfoData paymentInfoData);
 
-    void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId, String paymentDirId) throws IngenicoNonValidPaymentProductException;
+    void fillIngenicoPaymentInfoData(IngenicoPaymentInfoData paymentInfoData, int paymentId, String paymentDirId, String hostedTokenizationId) throws IngenicoNonValidPaymentProductException;
 
-    OrderData authorisePaymentForHostedTokenization(IngenicoHostedTokenizationData hostedTokenizationId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
+    OrderData authorisePaymentForHostedTokenization(String orderCode, IngenicoHostedTokenizationData hostedTokenizationId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
-    OrderData handle3dsResponse(String ref, String returnMAC, String paymentId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
+    OrderData handle3dsResponse(String ref, String paymentId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
 
-    CreateHostedCheckoutResponse createHostedCheckout(BrowserData browserData);
+    CreateHostedCheckoutResponse createHostedCheckout(String orderCode, BrowserData browserData) throws InvalidCartException;
 
-    OrderData authorisePaymentForHostedCheckout(String hostedCheckoutId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
+    OrderData authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId) throws IngenicoNonAuthorizedPaymentException, InvalidCartException;
+
+    void validateReturnMAC(OrderData orderDetails, String returnMAC) throws IngenicoNonValidReturnMACException;
 
 }
