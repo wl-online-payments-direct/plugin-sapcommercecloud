@@ -4,8 +4,8 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 
 import java.util.List;
 
-import com.ingenico.ogone.direct.constants.GeneratedIngenicoogonedirectcoreConstants;
 import de.hybris.platform.converters.Populator;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.payment.IngenicoPaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
@@ -21,28 +21,28 @@ import com.ingenico.direct.domain.HostedCheckoutSpecificInput;
 import com.ingenico.direct.domain.Order;
 import com.ingenico.ogone.direct.facade.IngenicoUserFacade;
 
-public class IngenicoHostedCheckoutBasicPopulator implements Populator<CartModel, CreateHostedCheckoutRequest> {
+public class IngenicoHostedCheckoutBasicPopulator implements Populator<AbstractOrderModel, CreateHostedCheckoutRequest> {
 
     private SessionService sessionService;
     private I18NService i18NService;
 
     private IngenicoUserFacade ingenicoUserFacade;
-    private Converter<CartModel, Order> ingenicoOrderParamConverter;
+    private Converter<AbstractOrderModel, Order> ingenicoOrderParamConverter;
 
     @Override
-    public void populate(CartModel cartModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
-        validateParameterNotNull(cartModel, "cart cannot be null!");
-        createHostedCheckoutRequest.setHostedCheckoutSpecificInput(getHostedCheckoutSpecificInput(cartModel));
-        createHostedCheckoutRequest.setOrder(ingenicoOrderParamConverter.convert(cartModel));
+    public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
+        validateParameterNotNull(abstractOrderModel, "abstractOrderModel cannot be null!");
+        createHostedCheckoutRequest.setHostedCheckoutSpecificInput(getHostedCheckoutSpecificInput(abstractOrderModel));
+        createHostedCheckoutRequest.setOrder(ingenicoOrderParamConverter.convert(abstractOrderModel));
     }
 
-    private HostedCheckoutSpecificInput getHostedCheckoutSpecificInput(CartModel cartModel) {
+    private HostedCheckoutSpecificInput getHostedCheckoutSpecificInput(AbstractOrderModel abstractOrderModel) {
         HostedCheckoutSpecificInput hostedCheckoutSpecificInput = new HostedCheckoutSpecificInput();
         hostedCheckoutSpecificInput.setIsRecurring(Boolean.FALSE);
         hostedCheckoutSpecificInput.setShowResultPage(Boolean.FALSE);
         hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
 
-        final IngenicoPaymentInfoModel paymentInfo = (IngenicoPaymentInfoModel) cartModel.getPaymentInfo();
+        final IngenicoPaymentInfoModel paymentInfo = (IngenicoPaymentInfoModel) abstractOrderModel.getPaymentInfo();
         hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
 
         hostedCheckoutSpecificInput.setReturnUrl(getReturnUrlFromSession());
@@ -74,7 +74,7 @@ public class IngenicoHostedCheckoutBasicPopulator implements Populator<CartModel
         this.ingenicoUserFacade = ingenicoUserFacade;
     }
 
-    public void setIngenicoOrderParamConverter(Converter<CartModel, Order> ingenicoOrderParamConverter) {
+    public void setIngenicoOrderParamConverter(Converter<AbstractOrderModel, Order> ingenicoOrderParamConverter) {
         this.ingenicoOrderParamConverter = ingenicoOrderParamConverter;
     }
 }

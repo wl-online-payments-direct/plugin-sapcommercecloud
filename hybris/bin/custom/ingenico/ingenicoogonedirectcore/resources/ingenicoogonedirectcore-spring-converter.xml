@@ -84,6 +84,7 @@
           class="com.ingenico.ogone.direct.populator.hostedtokenization.IngenicoHostedTokenizationPaymentPopulator">
         <property name="ingenicoOrderParamConverter" ref="ingenicoOrderParamConverter"/>
         <property name="sessionService" ref="sessionService"/>
+        <property name="ingenicoConfigurationService" ref="ingenicoConfigurationService"/>
     </bean>
 
     <bean id="ingenicoHostedTokenizationParamConverter" parent="abstractPopulatingConverter">

@@ -156,6 +156,13 @@
 					<as:field name="paymentMethod" operator="contains" selected="true"/>
 					<as:field name="ingenicoCheckoutType" operator="equals" selected="true"/>
 					<as:field name="creationTime" operator="greaterOrEquals"/>
+					<as:field name="paymentProductDirectoryId" operator="contains"/>
+					<as:field name="hostedTokenizationId" operator="contains"/>
+					<as:field name="returnMAC" operator="contains"/>
+					<as:field name="token" operator="contains"/>
+					<as:field name="type" operator="contains"/>
+					<as:field name="cardholderName" operator="contains"/>
+					<as:field name="expiryDate" operator="contains"/>
 				</as:field-list>
 				<as:sort-field name="creationTime" asc="false"/>
 			</as:advanced-search>
@@ -166,7 +173,18 @@
 					<ea:section name="hmc.ingenico.ingenicoPaymentInfo">
 						<ea:attribute qualifier="id"/>
 						<ea:attribute qualifier="paymentMethod"/>
+						<ea:attribute qualifier="paymentProductDirectoryId"/>
+						<ea:attribute qualifier="hostedTokenizationId"/>
+						<ea:attribute qualifier="returnMAC"/>
+						<ea:attribute qualifier="type"/>
 						<ea:attribute qualifier="ingenicoCheckoutType"/>
+					</ea:section>
+					<ea:section name="hmc.ingenico.ingenicoSavedPaymentInfo">
+						<ea:attribute qualifier="token"/>
+						<ea:attribute qualifier="cardBrand"/>
+						<ea:attribute qualifier="alias"/>
+						<ea:attribute qualifier="cardholderName"/>
+						<ea:attribute qualifier="expiryDate"/>
 					</ea:section>
 				</ea:tab>
 			</ea:editorArea>

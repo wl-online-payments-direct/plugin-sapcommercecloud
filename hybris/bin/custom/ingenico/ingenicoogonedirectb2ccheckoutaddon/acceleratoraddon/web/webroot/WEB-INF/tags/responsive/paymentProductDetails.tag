@@ -6,19 +6,23 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="paymentproduct"
+           tagdir="/WEB-INF/tags/addons/ingenicoogonedirectb2ccheckoutaddon/responsive/paymentproducts" %>
+
 <c:choose>
     <c:when test="${paymentProduct.id==-1}">
         <spring:theme code="checkout.paymentProduct.groupedCards.display.label" var="groupedCardsLabel"/>
         <div class="ingenico_payment_product" title="${groupedCardsLabel}">
-            <form:radiobutton path="paymentProductId" value="${paymentProduct.id}" tabindex="${tabindex}"
+            <form:radiobutton path="paymentProductId" cssClass="payment_product htp"  value="${paymentProduct.id}" tabindex="${tabindex}"
                               checked="${isSelected ? 'checked' : '' }"/>
             <span>${groupedCardsLabel}</span>
+            <paymentproduct:hostedTokenizationDetail hostedTokenization="${hostedTokenization}"
+                                                     savedPaymentInfos="${savedPaymentInfos}"/>
         </div>
     </c:when>
     <c:otherwise>
-        <c:set value="${idealID eq paymentProduct.id}" var="isIdeal"/>
         <div class="ingenico_payment_product" title="${paymentProduct.displayHints.label}">
-            <form:radiobutton path="paymentProductId" cssClass="payment_product ${isIdeal? 'ideal':''}"
+            <form:radiobutton path="paymentProductId" cssClass="payment_product"
                               value="${paymentProduct.id}" tabindex="${tabindex}"
                               checked="${isSelected ? 'checked' : '' }"/>
             <span>
@@ -27,17 +31,8 @@
                 </c:if>
                 ${paymentProduct.displayHints.label}
             </span>
-            <c:if test="${not empty idealIssuers && isIdeal}">
-                <form:select id="select_issuer" path="issuerId" cssClass="form-control" cssStyle="display: none">
-                    <c:forEach var="idealIssuer" items="${idealIssuers}">
-                        <option value="">
-                            <spring:theme code="payment.methods.issuer.selector"/>
-                        </option>
-                        <form:option class="issuerOption" value="${idealIssuer.issuerId}">
-                            ${idealIssuer.issuerName}
-                        </form:option>
-                    </c:forEach>
-                </form:select>
+            <c:if test="${idealID eq paymentProduct.id}">
+                <paymentproduct:idealDetail idealIssuers="${idealIssuers}"/>
             </c:if>
         </div>
     </c:otherwise>

@@ -13,14 +13,17 @@ import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkou
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
+import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.commercefacades.order.data.CartData;
+import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.order.data.OrderEntryData;
 import de.hybris.platform.commercefacades.product.ProductOption;
 import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.commerceservices.order.CommerceCartModificationException;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 
 import org.apache.commons.lang.StringUtils;
@@ -39,8 +42,10 @@ import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants;
 import com.ingenico.ogone.direct.checkoutaddon.controllers.IngenicoWebConstants.URL.Checkout.Summary;
 import com.ingenico.ogone.direct.checkoutaddon.forms.IngenicoPlaceOrderForm;
 import com.ingenico.ogone.direct.constants.IngenicoCheckoutConstants;
+import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.facade.IngenicoCheckoutFacade;
 import com.ingenico.ogone.direct.order.data.BrowserData;
+import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
 
 @Controller
 @RequestMapping(value = Summary.root)
@@ -66,6 +71,9 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
 
     @Resource(name = "checkoutCustomerStrategy")
     private CheckoutCustomerStrategy checkoutCustomerStrategy;
+
+    @Resource(name = "ingenicoExtendedCheckoutFacade")
+    private CheckoutFacade extendedCheckoutFacade;
 
     @Autowired
     private HttpServletRequest httpServletRequest;
@@ -126,7 +134,7 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
     public String placeOrder(@ModelAttribute("ingenicoPlaceOrderForm") final IngenicoPlaceOrderForm ingenicoPlaceOrderForm,
                              final Model model,
                              final HttpServletRequest request,
-                             final RedirectAttributes redirectModel) throws CMSItemNotFoundException, CommerceCartModificationException {
+                             final RedirectAttributes redirectModel) throws CMSItemNotFoundException, CommerceCartModificationException, InvalidCartException {
 
         if (validateOrderForm(ingenicoPlaceOrderForm, model)) {
             return enterStep(model, redirectModel);
@@ -139,16 +147,40 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         }
 
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
+        final BrowserData browserData = fillBrowserData(request, ingenicoPlaceOrderForm);
         switch (cartData.getIngenicoPaymentInfo().getIngenicoCheckoutType()) {
             case HOSTED_CHECKOUT:
-                storeReturnUrlInSession(getOrderCode(cartData));
-                final BrowserData browserData = fillBrowserData(request, ingenicoPlaceOrderForm);
-                CreateHostedCheckoutResponse hostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout(browserData);
+                final OrderData orderHOP = extendedCheckoutFacade.placeOrder();
+                storeHOPReturnUrlInSession(getOrderCode(orderHOP));
+                CreateHostedCheckoutResponse hostedCheckoutResponse = ingenicoCheckoutFacade.createHostedCheckout(orderHOP.getCode(), browserData);
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
-                return REDIRECT_PREFIX +
-                        IngenicoWebConstants.URL.Checkout.Payment.HTP.root +
-                        IngenicoWebConstants.URL.Checkout.Payment.HTP.view;
+                try {
+                    OrderData orderHTP = extendedCheckoutFacade.placeOrder();
+                    storeHTPReturnUrlInSession(getOrderCode(orderHTP));
+                    final String hostedTokenizationId = orderHTP.getIngenicoPaymentInfo().getHostedTokenizationId();
+                    IngenicoHostedTokenizationData ingenicoHostedTokenizationData = new IngenicoHostedTokenizationData();
+                    ingenicoHostedTokenizationData.setBrowserData(browserData);
+                    ingenicoHostedTokenizationData.setHostedTokenizationId(hostedTokenizationId);
+
+                    orderHTP = ingenicoCheckoutFacade.authorisePaymentForHostedTokenization(orderHTP.getCode(), ingenicoHostedTokenizationData);
+                    return redirectToOrderConfirmationPage(orderHTP);
+                } catch (IngenicoNonAuthorizedPaymentException e) {
+                    switch (e.getReason()) {
+                        case NEED_3DS:
+                            return REDIRECT_PREFIX + e.getMerchantAction().getRedirectData().getRedirectURL();
+                        case REJECTED:
+                            GlobalMessages.addFlashMessage(redirectModel,
+                                    GlobalMessages.ERROR_MESSAGES_HOLDER,
+                                    "checkout.error.payment.rejected");
+                            return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
+                        case CANCELLED:
+                            GlobalMessages.addFlashMessage(redirectModel,
+                                    GlobalMessages.INFO_MESSAGES_HOLDER,
+                                    "checkout.error.payment.cancelled");
+                            return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
+                    }
+                }
             default:
                 break;
         }
@@ -157,11 +189,18 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         return enterStep(model, redirectModel);
     }
 
-    private void storeReturnUrlInSession(String code) {
+    private void storeHOPReturnUrlInSession(String code) {
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
                 true, IngenicoWebConstants.URL.Checkout.Payment.HOP.root +
                         IngenicoWebConstants.URL.Checkout.Payment.HOP.handleResponse + code);
         getSessionService().setAttribute("hostedCheckoutReturnUrl", returnUrl);
+    }
+
+    private void storeHTPReturnUrlInSession(String code) {
+        final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
+                true, IngenicoWebConstants.URL.Checkout.Payment.HTP.root +
+                        IngenicoWebConstants.URL.Checkout.Payment.HTP.handleResponse + code);
+        getSessionService().setAttribute("hostedTokenizationReturnUrl", returnUrl);
     }
 
     protected boolean validateOrderForm(final IngenicoPlaceOrderForm ingenicoPlaceOrderForm, final Model model) {
@@ -212,6 +251,11 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         return checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
     }
 
+    @Override
+    protected String redirectToOrderConfirmationPage(OrderData orderData) {
+        return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
+    }
+
     private BrowserData fillBrowserData(HttpServletRequest request, IngenicoPlaceOrderForm ingenicoPlaceOrderForm) {
 
         BrowserData browserData = new BrowserData();
@@ -240,7 +284,6 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
         }
         return remoteAddr;
     }
-
 
 
     @RequestMapping(value = "/back", method = RequestMethod.GET)

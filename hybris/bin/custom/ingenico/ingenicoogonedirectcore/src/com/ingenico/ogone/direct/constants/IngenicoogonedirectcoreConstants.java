@@ -8,6 +8,7 @@ public final class IngenicoogonedirectcoreConstants extends GeneratedIngenicoogo
 
     // Payment methods
 
+    public static final int PAYMENT_METHOD_HTP = -1;
     public static final int PAYMENT_METHOD_IDEAL = 809;
     public static final int PAYMENT_METHOD_PAYPAL = 840;
     public static final int PAYMENT_METHOD_ILLICADO = 3112;
