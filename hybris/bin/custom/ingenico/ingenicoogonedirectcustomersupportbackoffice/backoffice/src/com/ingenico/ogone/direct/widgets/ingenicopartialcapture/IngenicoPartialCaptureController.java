@@ -140,6 +140,8 @@ public class IngenicoPartialCaptureController extends DefaultWidgetController {
                         captureResponse.getStatus(),
                         captureResponse.getCaptureOutput().getAmountOfMoney(),
                         PaymentTransactionType.CAPTURE);
+            } else {
+               LOGGER.debug("[INGENICO] Don't send request to Ingenico when nonCapturedAmount=" + nonCapturedAmount + " is less than amountToCapture=" + amountToCapture + ".");
             }
 
             ingenicoBusinessProcessService.triggerOrderProcessEvent(this.orderModel, INGENICO_EVENT_CAPTURE);
