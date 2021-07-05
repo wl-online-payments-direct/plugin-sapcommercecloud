@@ -335,12 +335,12 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     }
 
     @Override
-    public CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal amountToCapture, String currencyISOcode) {
+    public CaptureResponse capturePayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal amountToCapture, String currencyISOcode, Boolean isFinal) {
 
         try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
             CapturePaymentRequest capturePaymentRequest = new CapturePaymentRequest();
             capturePaymentRequest.setAmount(ingenicoAmountUtils.createAmount(amountToCapture, currencyISOcode));
-            capturePaymentRequest.setIsFinal(true);
+            capturePaymentRequest.setIsFinal(isFinal);
 
             CaptureResponse captureResponse =
                     client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().capturePayment(paymentId, capturePaymentRequest);

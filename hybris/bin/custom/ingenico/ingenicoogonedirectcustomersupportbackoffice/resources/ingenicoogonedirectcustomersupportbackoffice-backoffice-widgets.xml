@@ -11,6 +11,33 @@
             <setting key="perspectiveImageUrl" value="/cng/images/perspective.png"
                 type="String" />
         </widget>
+
+        <widget id="omsIngenicoPartialCapturePopup" widgetDefinitionId="com.ingenico.ogone.direct.widgets.order.partialcapturewidget" slotId="cockpitWidgetChildrenInvisible"
+                title="Capture Order Payment" template="true">
+
+            <instance-settings socketEventRoutingMode="LAST_USED">
+                <create onInit="false" reuseExisting="true">
+                    <all-incoming-events/>
+                </create>
+                <close>
+                    <all-outgoing-events/>
+                </close>
+                <select onInit="false">
+                    <all-incoming-events/>
+                </select>
+            </instance-settings>
+
+            <setting key="widgetStyleClass" type="String"></setting>
+            <setting key="__externalLocationPath" type="String">extension://ingenicoogonedirectcustomersupportbackoffice</setting>
+            <setting key="widgetStyleAttribute" type="String"></setting>
+            <setting key="_width" type="String">1140px</setting>
+            <setting key="_height" type="String">650px</setting>
+            <virtual-sockets />
+        </widget>
     </widget-extension>
+
+    <!-- Action widget connection -->
+    <widget-connection sourceWidgetId="STUB_com.ingenico.ogone.direct.actions.ingenicomanualpaymentcaptureaction" outputId="capturePaymentContext" targetWidgetId="omsIngenicoPartialCapturePopup" inputId="inputObject"/>
+
 
 </widgets>
