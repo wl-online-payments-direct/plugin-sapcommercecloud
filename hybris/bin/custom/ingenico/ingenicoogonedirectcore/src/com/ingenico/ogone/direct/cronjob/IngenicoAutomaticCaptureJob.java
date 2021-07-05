@@ -97,7 +97,8 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
                     final CaptureResponse captureResponse = ingenicoPaymentService.capturePayment(ingenicoConfiguration,
                             paymentId,
                             amount,
-                            orderModel.getCurrency().getIsocode());
+                            orderModel.getCurrency().getIsocode(),
+                            Boolean.TRUE);
                     ingenicoTransactionService.updatePaymentTransaction(lastPaymentTransaction,
                             captureResponse.getId(),
                             captureResponse.getStatus(),
