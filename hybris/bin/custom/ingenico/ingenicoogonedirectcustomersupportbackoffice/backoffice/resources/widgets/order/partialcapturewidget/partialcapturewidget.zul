@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2018 SAP SE or an SAP affiliate company.
+ All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<widget xmlns="http://www.zkoss.org/2005/zul" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.hybris.com/schema/cockpitng/zul/zul.xsd"
+        sclass="oms-widget-capturepayment-configuration"
+        id="capturepaymentview" height="100%" width="100%">
+
+    <separator width="100%" sclass="oms-widget-capturepayment-configuration--separator"/>
+
+    <hlayout sclass="oms-widget-capturepayment-header">
+        <hbox sclass="oms-widget-capturepayment-body">
+            <vbox>
+                <label value="${labels.ingenicoogonedirectcustomersupportbackoffice.partial.capture.ordernumber}" width="140px" />
+                <textbox sclass="oms-widget-capturepayment-input-text-box" readonly="true" id="orderNumber" width="140px" />
+            </vbox>
+        </hbox>
+        <hbox sclass="oms-widget-capturepayment-body">
+            <vbox>
+                <label value="${labels.ingenicoogonedirectcustomersupportbackoffice.partial.capture.customer}" width="100%" />
+                <textbox sclass="oms-widget-capturepayment-input-text-box" readonly="true" id="customerName" width="240px" />
+            </vbox>
+        </hbox>
+    </hlayout>
+
+    <separator width="100%" sclass="oms-widget-capturepayment-configuration--separator"/>
+
+    <hlayout width="100%" sclass="oms-widget-capturepayment-list">
+        <hbox sclass="oms-widget-capturepayment-body">
+            <vbox>
+                <label value="${labels.ingenicoogonedirectcustomersupportbackoffice.partial.capture.amount}" width="240px" class="oms-widget-capturepayment--amount-label"/>
+                <doublebox width="50%" style="margin-left:15px;text-align:center;"
+                           constraint="no empty,no negative: Amount Must be Greater Than Zero" id="amount"/>
+            </vbox>
+        </hbox>
+        <hbox sclass="oms-widget-capturepayment-body">
+            <vbox>
+                <label value="${labels.ingenicoogonedirectcustomersupportbackoffice.partial.capture.remaining.amount}" width="240px" class="oms-widget-capturepayment--amount-label"/>
+                <checkbox sclass="oms-widget-capturepayment-list-container__checkbox" id="fullAmount"/>
+            </vbox>
+        </hbox>
+    </hlayout>
+
+<!-- Buttons -->
+    <div class="oms-widget-capturepayment-configuration-footer oms-widget-footer">
+        <button id="clearamount"
+                label="${labels.ingenicoogonedirectcustomersupportbackoffice.partial.capture.button.undo}"
+                sclass="oms-widget-capturepayment-configuration-button oms-widget-capturepayment-configuration-revert-button" />
+        <button id="confirmpayment"
+                label="${labels.ingenicoogonedirectcustomersupportbackoffice.partial.capture.button.confirm}"
+                sclass="y-btn-primary oms-widget-capturepayment-configuration-button oms-widget-capturepayment-configuration-save-button" />
+    </div>
+
+</widget>
