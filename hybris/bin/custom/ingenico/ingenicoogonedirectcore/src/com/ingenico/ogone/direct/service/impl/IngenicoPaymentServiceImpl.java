@@ -51,7 +51,9 @@ import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.direct.merchant.products.GetPaymentProductParams;
 import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
 import com.ingenico.direct.merchant.products.GetProductDirectoryParams;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
 import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM;
+import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.factory.IngenicoClientFactory;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
@@ -207,7 +209,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
     @Override
     @SuppressWarnings("all")
-    public CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) {
+    public CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) throws IngenicoNonAuthorizedPaymentException {
         validateParameterNotNull(tokenizationResponse, "tokenizationResponse cannot be null");
         validateParameterNotNull(orderForCode, "order cannot be null");
         try (Client client = ingenicoClientFactory.getClient()) {
@@ -224,7 +226,8 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.error("[ INGENICO ] Errors during getting createPayment ", e);
+            LOGGER.debug("[ INGENICO ] Errors during getting createPayment ", e.getMessage());
+            throw new IngenicoNonAuthorizedPaymentException(IngenicoogonedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (IOException e) {
             LOGGER.error("[ INGENICO ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
