@@ -318,6 +318,23 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     }
 
     @Override
+    public PaymentResponse getPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
+        validateParameterNotNull(paymentId, "paymentId cannot be null");
+        try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
+
+            final PaymentResponse payment = client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().getPayment(paymentId);
+
+            IngenicoLogUtils.logAction(LOGGER, "getPayment", paymentId, payment);
+
+            return payment;
+        } catch (IOException e) {
+            LOGGER.error("[ INGENICO ] Errors during getting getPayment", e);
+            //TODO Throw Logical Exception
+            return null;
+        }
+    }
+
+    @Override
     public CapturesResponse getCaptures(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId) {
         validateParameterNotNull(paymentId, "paymentId cannot be null");
         try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
@@ -367,7 +384,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
         final long fullAmount = ingenicoAmountUtils.createAmount(plannedAmount, currencyISOcode);
         Long amountPaid = 0L;
 
-        final PaymentResponse paymentResponse = getPayment(paymentId);
+        final PaymentResponse paymentResponse = getPayment(ingenicoConfigurationModel,paymentId);
         if (PAYMENT_STATUS_ENUM.valueOf(paymentResponse.getStatus()).equals(PAYMENT_STATUS_ENUM.CAPTURED)) {
             amountPaid = paymentResponse.getPaymentOutput().getAmountOfMoney().getAmount();
         }
