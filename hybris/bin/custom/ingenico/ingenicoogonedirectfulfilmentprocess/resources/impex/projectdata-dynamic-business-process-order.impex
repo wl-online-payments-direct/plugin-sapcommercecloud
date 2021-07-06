@@ -18,7 +18,7 @@ name='ingenico-order-process' processClass='de.hybris.platform.orderprocessing.m
 
 <!-- Wait Authorization completion-->
 <wait id='waitForIngenicoAuthorization' then='ingenicoCheckAuthorizedPayment' prependProcessCode='true'>
-    <event>ingenico_authorization_received</event>
+    <event>ingenico_payment_received</event>
     <timeout delay='P1D' then='cancelOrder'/>
 </wait>
 
@@ -109,7 +109,7 @@ name='ingenico-order-process' processClass='de.hybris.platform.orderprocessing.m
 
 <!-- Wait Capture completion -->
 <wait id='waitForIngenicoCapture' then='ingenicoCheckCapturedPayment' prependProcessCode='true'>
-    <event>ingenico_capture_received</event>
+    <event>ingenico_payment_received</event>
     <timeout delay='P5D' then='sendPaymentFailedNotification'/>
 </wait>
 

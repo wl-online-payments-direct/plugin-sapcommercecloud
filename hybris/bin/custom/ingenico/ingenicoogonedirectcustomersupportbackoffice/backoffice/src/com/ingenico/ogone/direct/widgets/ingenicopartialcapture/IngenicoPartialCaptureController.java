@@ -1,26 +1,17 @@
 package com.ingenico.ogone.direct.widgets.ingenicopartialcapture;
 
-import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
-
-import java.math.BigDecimal;
-
-import de.hybris.platform.payment.model.PaymentTransactionModel;
-import org.apache.commons.collections.CollectionUtils;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_PAYMENT;
 
 import com.hybris.cockpitng.annotations.SocketEvent;
 import com.hybris.cockpitng.annotations.ViewEvent;
 import com.hybris.cockpitng.util.DefaultWidgetController;
-import com.ingenico.direct.domain.CaptureResponse;
-import com.ingenico.direct.domain.CapturesResponse;
-import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
-import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
-import com.ingenico.ogone.direct.service.IngenicoPaymentService;
-import com.ingenico.ogone.direct.service.IngenicoTransactionService;
-import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.store.BaseStoreModel;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zk.ui.WrongValueException;
@@ -29,10 +20,16 @@ import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Doublebox;
-import org.zkoss.zul.Grid;
 import org.zkoss.zul.Messagebox;
-import org.zkoss.zul.Row;
 import org.zkoss.zul.Textbox;
+
+import com.ingenico.direct.domain.CaptureResponse;
+import com.ingenico.direct.domain.CapturesResponse;
+import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
+import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
+import com.ingenico.ogone.direct.service.IngenicoPaymentService;
+import com.ingenico.ogone.direct.service.IngenicoTransactionService;
+import com.ingenico.ogone.direct.util.IngenicoAmountUtils;
 
 public class IngenicoPartialCaptureController extends DefaultWidgetController {
    private final static Logger LOGGER = LoggerFactory.getLogger(IngenicoPartialCaptureController.class);
@@ -124,6 +121,7 @@ public class IngenicoPartialCaptureController extends DefaultWidgetController {
             }
 
             final Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(ingenicoConfiguration,
+                    paymentTransactionToCapture.getRequestId(),
                     captures,
                     paymentTransactionToCapture.getPaymentTransaction().getPlannedAmount(),
                     paymentTransactionToCapture.getCurrency().getIsocode());
@@ -144,7 +142,7 @@ public class IngenicoPartialCaptureController extends DefaultWidgetController {
                LOGGER.debug("[INGENICO] Don't send request to Ingenico when nonCapturedAmount=" + nonCapturedAmount + " is less than amountToCapture=" + amountToCapture + ".");
             }
 
-            ingenicoBusinessProcessService.triggerOrderProcessEvent(this.orderModel, INGENICO_EVENT_CAPTURE);
+            ingenicoBusinessProcessService.triggerOrderProcessEvent(this.orderModel, INGENICO_EVENT_PAYMENT);
             LOGGER.info("[INGENICO] order business process triggered for capturing amount " + amountToCapture + " for order " + this.orderModel.getCode());
         } catch (Exception exception) {
             LOGGER.error("[INGENICO] Error while capturing : ", exception);
