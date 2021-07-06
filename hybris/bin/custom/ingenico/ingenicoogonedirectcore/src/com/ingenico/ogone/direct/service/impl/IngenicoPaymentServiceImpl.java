@@ -51,7 +51,7 @@ import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.direct.merchant.products.GetPaymentProductParams;
 import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
 import com.ingenico.direct.merchant.products.GetProductDirectoryParams;
-import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants;
+import com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM;
 import com.ingenico.ogone.direct.factory.IngenicoClientFactory;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.ogone.direct.order.data.IngenicoHostedTokenizationData;
@@ -359,20 +359,27 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     public Long getNonCapturedAmount(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode) {
         //Find if there was amount that was captured before performing the capture action
         CapturesResponse capturesResponse = getCaptures(ingenicoConfigurationModel, paymentId);
-        return getNonCapturedAmount(ingenicoConfigurationModel, capturesResponse, plannedAmount, currencyISOcode);
+        return getNonCapturedAmount(ingenicoConfigurationModel, paymentId, capturesResponse, plannedAmount, currencyISOcode);
     }
 
     @Override
-    public Long getNonCapturedAmount(IngenicoConfigurationModel ingenicoConfigurationModel, CapturesResponse capturesResponse, BigDecimal plannedAmount, String currencyISOcode) {
+    public Long getNonCapturedAmount(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, CapturesResponse capturesResponse, BigDecimal plannedAmount, String currencyISOcode) {
         final long fullAmount = ingenicoAmountUtils.createAmount(plannedAmount, currencyISOcode);
-        if (CollectionUtils.isEmpty(capturesResponse.getCaptures())) {
-            return fullAmount;
+        Long amountPaid = 0L;
+
+        final PaymentResponse paymentResponse = getPayment(paymentId);
+        if (PAYMENT_STATUS_ENUM.valueOf(paymentResponse.getStatus()).equals(PAYMENT_STATUS_ENUM.CAPTURED)) {
+            amountPaid = paymentResponse.getPaymentOutput().getAmountOfMoney().getAmount();
         }
 
-        Long amountPaid = 0L;
+        if (CollectionUtils.isEmpty(capturesResponse.getCaptures())) {
+            return fullAmount - amountPaid;
+        }
+
+
         for (Capture capture : capturesResponse.getCaptures()) {
-            if (IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURED.getValue().equals(capture.getStatus()) ||
-                    IngenicoogonedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED.getValue().equals(capture.getStatus())) {
+            if (PAYMENT_STATUS_ENUM.CAPTURED.getValue().equals(capture.getStatus()) ||
+                    PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED.getValue().equals(capture.getStatus())) {
                 amountPaid += capture.getCaptureOutput().getAmountOfMoney().getAmount();
             }
         }
@@ -397,7 +404,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
     }
 
     @Override
-    public RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId,  BigDecimal returnAmount, String currencyISOCode) {
+    public RefundResponse refundPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal returnAmount, String currencyISOCode) {
         try (Client client = ingenicoClientFactory.getClient(ingenicoConfigurationModel)) {
 
             RefundRequest refundRequest = new RefundRequest();
@@ -406,7 +413,7 @@ public class IngenicoPaymentServiceImpl implements IngenicoPaymentService {
             amountOfMoney.setAmount(ingenicoAmountUtils.createAmount(returnAmount, currencyISOCode));
             refundRequest.setAmountOfMoney(amountOfMoney);
             RefundResponse refundResponse =
-                  client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().refundPayment(paymentId, refundRequest);
+                    client.merchant(ingenicoConfigurationModel.getMerchantID()).payments().refundPayment(paymentId, refundRequest);
             IngenicoLogUtils.logAction(LOGGER, "refundPayment", paymentId, refundResponse);
 
             return refundResponse;

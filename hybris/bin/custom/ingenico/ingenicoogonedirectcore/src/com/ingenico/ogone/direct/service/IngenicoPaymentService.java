@@ -54,7 +54,7 @@ public interface IngenicoPaymentService {
 
     Long getNonCapturedAmount(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode);
 
-    Long getNonCapturedAmount(IngenicoConfigurationModel ingenicoConfigurationModel, CapturesResponse capturesResponse, BigDecimal plannedAmount, String currencyISOcode);
+    Long getNonCapturedAmount(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, CapturesResponse capturesResponse, BigDecimal plannedAmount, String currencyISOcode);
 
     CancelPaymentResponse cancelPayment(IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId);
 

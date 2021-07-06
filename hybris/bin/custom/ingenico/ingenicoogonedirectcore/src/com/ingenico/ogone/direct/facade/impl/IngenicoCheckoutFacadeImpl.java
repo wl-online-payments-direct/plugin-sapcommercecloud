@@ -221,7 +221,7 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 orderForCode.setPaymentStatus(PaymentStatus.INGENICO_CANCELED);
                 modelService.save(orderForCode);
                 modelService.refresh(orderForCode);
-                ingenicoBusinessProcessService.triggerOrderProcessEvent(orderForCode, INGENICO_EVENT_AUTHORIZATION);
+                ingenicoBusinessProcessService.triggerOrderProcessEvent(orderForCode, INGENICO_EVENT_PAYMENT);
                 throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.CANCELLED);
             case IN_PROGRESS:
                 throw new IngenicoNonAuthorizedPaymentException(UNAUTHORIZED_REASON.IN_PROGRESS);
