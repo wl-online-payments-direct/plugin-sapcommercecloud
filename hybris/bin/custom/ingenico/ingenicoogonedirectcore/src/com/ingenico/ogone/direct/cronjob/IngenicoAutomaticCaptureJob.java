@@ -1,6 +1,6 @@
 package com.ingenico.ogone.direct.cronjob;
 
-import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_CAPTURE;
+import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstants.INGENICO_EVENT_PAYMENT;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -88,6 +88,7 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
                 }
 
                 final Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(ingenicoConfiguration,
+                        paymentId,
                         captures,
                         lastPaymentTransaction.getPlannedAmount(),
                         orderModel.getCurrency().getIsocode());
@@ -107,7 +108,7 @@ public class IngenicoAutomaticCaptureJob extends AbstractJobPerformable<CronJobM
                     LOGGER.info("[INGENICO] Order {}, remaining amount {} captured", orderModel.getCode(), amount);
                 }
 
-                ingenicoBusinessProcessService.triggerOrderProcessEvent(orderModel, INGENICO_EVENT_CAPTURE);
+                ingenicoBusinessProcessService.triggerOrderProcessEvent(orderModel, INGENICO_EVENT_PAYMENT);
 
                 LOGGER.info("[INGENICO] Order {} has been processed", orderModel.getCode());
 
