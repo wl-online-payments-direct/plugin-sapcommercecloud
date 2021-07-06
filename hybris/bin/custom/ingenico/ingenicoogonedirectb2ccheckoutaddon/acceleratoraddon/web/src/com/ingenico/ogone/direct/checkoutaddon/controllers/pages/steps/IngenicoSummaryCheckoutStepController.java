@@ -173,12 +173,16 @@ public class IngenicoSummaryCheckoutStepController extends AbstractCheckoutStepC
                             GlobalMessages.addFlashMessage(redirectModel,
                                     GlobalMessages.ERROR_MESSAGES_HOLDER,
                                     "checkout.error.payment.rejected");
-                            return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
+                            return REDIRECT_PREFIX +
+                                    IngenicoWebConstants.URL.Checkout.Payment.root +
+                                    IngenicoWebConstants.URL.Checkout.Payment.select;
                         case CANCELLED:
                             GlobalMessages.addFlashMessage(redirectModel,
                                     GlobalMessages.INFO_MESSAGES_HOLDER,
                                     "checkout.error.payment.cancelled");
-                            return REDIRECT_PREFIX + IngenicoWebConstants.URL.Checkout.Payment.select;
+                            return REDIRECT_PREFIX +
+                                    IngenicoWebConstants.URL.Checkout.Payment.root +
+                                    IngenicoWebConstants.URL.Checkout.Payment.select;
                     }
                 }
             default:
