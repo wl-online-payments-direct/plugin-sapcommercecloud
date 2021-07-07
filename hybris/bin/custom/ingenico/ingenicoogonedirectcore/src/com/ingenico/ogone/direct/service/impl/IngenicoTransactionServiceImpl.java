@@ -117,7 +117,7 @@ public class IngenicoTransactionServiceImpl implements IngenicoTransactionServic
 
         final boolean alreadyProcessed = paymentTransaction.getEntries().stream()
                 .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
-                .filter(entry -> getTransactionStatus(webhooksEvent.getPayment().getStatus()).equals(entry.getTransactionStatusDetails()))
+                .filter(entry -> webhooksEvent.getPayment().getStatus().equals(entry.getTransactionStatusDetails()))
                 .anyMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
 
         final OrderModel order = (OrderModel) paymentTransaction.getOrder();
