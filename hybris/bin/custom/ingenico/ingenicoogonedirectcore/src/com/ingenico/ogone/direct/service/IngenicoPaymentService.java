@@ -19,6 +19,7 @@ import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.PaymentResponse;
 import com.ingenico.direct.domain.ProductDirectory;
 import com.ingenico.direct.domain.RefundResponse;
+import com.ingenico.ogone.direct.exception.IngenicoNonAuthorizedPaymentException;
 import com.ingenico.ogone.direct.model.IngenicoConfigurationModel;
 import com.ingenico.direct.domain.TokenResponse;
 import com.ingenico.ogone.direct.order.data.BrowserData;
@@ -40,7 +41,7 @@ public interface IngenicoPaymentService {
 
     GetHostedTokenizationResponse getHostedTokenization(String hostedTokenizationId);
 
-    CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse);
+    CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, IngenicoHostedTokenizationData ingenicoHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) throws IngenicoNonAuthorizedPaymentException;
 
     PaymentResponse getPayment(String paymentId);
 
