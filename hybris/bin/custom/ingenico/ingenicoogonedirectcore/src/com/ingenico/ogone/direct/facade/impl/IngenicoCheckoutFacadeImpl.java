@@ -3,21 +3,27 @@ package com.ingenico.ogone.direct.facade.impl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.ingenico.ogone.direct.service.IngenicoBusinessProcessService;
+
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.order.data.OrderData;
+import de.hybris.platform.commercefacades.order.data.PickupOrderEntryGroupData;
 import de.hybris.platform.commercefacades.product.data.PriceData;
+import de.hybris.platform.commercefacades.storelocator.data.PointOfServiceData;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commercefacades.user.data.CountryData;
 import de.hybris.platform.commerceservices.customer.CustomerAccountService;
 import de.hybris.platform.commerceservices.order.CommerceCheckoutService;
 import de.hybris.platform.commerceservices.service.data.CommerceCheckoutParameter;
 import de.hybris.platform.core.enums.PaymentStatus;
+import de.hybris.platform.core.model.c2l.C2LItemModel;
 import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
@@ -409,6 +415,32 @@ public class IngenicoCheckoutFacadeImpl implements IngenicoCheckoutFacade {
                 return deliveryCountry.getIsocode();
             }
         }
+        if (cartData.getPickupItemsQuantity() > 0) {
+            final List<PickupOrderEntryGroupData> pickupOrderGroups = cartData.getPickupOrderGroups();
+            final Optional<String> pickupCountry = pickupOrderGroups.stream()
+                    .map(PickupOrderEntryGroupData::getDeliveryPointOfService)
+                    .filter(Objects::nonNull)
+                    .map(PointOfServiceData::getAddress)
+                    .filter(Objects::nonNull)
+                    .map(AddressData::getCountry)
+                    .filter(Objects::nonNull)
+                    .map(CountryData::getIsocode)
+                    .findFirst();
+            if (pickupCountry.isPresent()) {
+                return pickupCountry.get();
+            }
+        }
+        final BaseStoreModel currentBaseStore = baseStoreService.getCurrentBaseStore();
+        if (currentBaseStore != null) {
+            final Optional<String> firstBillingCountry = currentBaseStore.getBillingCountries()
+                    .stream()
+                    .map(C2LItemModel::getIsocode)
+                    .findFirst();
+            if (firstBillingCountry.isPresent()) {
+                return firstBillingCountry.get();
+            }
+        }
+
         return null;
     }
 

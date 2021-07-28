@@ -28,8 +28,6 @@ public class IngenicoOrderRequestParamPopulator implements Populator<AbstractOrd
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null!");
-        validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "paymentInfo cannot be null!");
-        validateParameterNotNull(abstractOrderModel.getPaymentInfo().getBillingAddress(), "billingAddress cannot be null!");
 
         order.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
         order.setShipping(getShipping(abstractOrderModel));
@@ -38,6 +36,9 @@ public class IngenicoOrderRequestParamPopulator implements Populator<AbstractOrd
     }
 
     private Shipping getShipping(AbstractOrderModel abstractOrderModel) {
+        if (abstractOrderModel.getDeliveryAddress() == null) {
+            return null;
+        }
         Shipping shipping = new Shipping();
         final AddressModel deliveryAddress = abstractOrderModel.getDeliveryAddress();
 
