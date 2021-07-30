@@ -5,6 +5,8 @@ import static com.ingenico.ogone.direct.constants.IngenicoogonedirectcoreConstan
 
 import javax.annotation.Resource;
 
+import java.math.BigDecimal;
+
 import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
@@ -41,11 +43,21 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
       final PaymentTransactionEntryModel paymentTransactionToRefund = getPaymentTransactionToRefund(order);
       final IngenicoConfigurationModel ingenicoConfiguration = getIngenicoConfiguration(order);
 
-      RefundResponse refundResponse = ingenicoPaymentService.refundPayment(ingenicoConfiguration, paymentTransactionToRefund.getRequestId(), paymentTransactionToRefund.getPaymentTransaction().getPlannedAmount(), paymentTransactionToRefund.getCurrency().getIsocode());
-
       //result
       ActionResult<ReturnRequestModel> result = null;
       String resultMessage = null;
+
+      BigDecimal refundAmount = calculateRefundAmount(returnRequestModel, ingenicoConfiguration, paymentTransactionToRefund.getRequestId(), paymentTransactionToRefund.getPaymentTransaction().getPlannedAmount(), paymentTransactionToRefund.getCurrency().getIsocode());
+      if (refundAmount.compareTo(BigDecimal.ZERO) == 0) {
+         result = new ActionResult<ReturnRequestModel>(ActionResult.ERROR, returnRequestModel);
+         resultMessage = actionContext.getLabel("action.manualrefund.failure");
+         Messagebox.show(resultMessage + ", (" + result.getResultCode() + ")");
+
+         return result;
+      }
+
+      RefundResponse refundResponse = ingenicoPaymentService.refundPayment(ingenicoConfiguration, paymentTransactionToRefund.getRequestId(), refundAmount, paymentTransactionToRefund.getCurrency().getIsocode());
+
 
       if (REFUND_REQUESTED.getValue().equals(refundResponse.getStatus())) {
          ingenicoTransactionService.updatePaymentTransaction(paymentTransactionToRefund.getPaymentTransaction(),
@@ -63,6 +75,17 @@ public class IngenicoManualPaymentRefundAction extends ManualRefundAction implem
       Messagebox.show(resultMessage + ", " + refundResponse.getStatus() + ", (" + result.getResultCode() + ")");
 
       return result;
+   }
+
+   private BigDecimal calculateRefundAmount(ReturnRequestModel returnRequestModel, IngenicoConfigurationModel ingenicoConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode) {
+     Long nonCapturedAmount = ingenicoPaymentService.getNonCapturedAmount(ingenicoConfigurationModel, paymentId, plannedAmount, currencyISOcode);
+     BigDecimal capturedAmount = plannedAmount.subtract(new BigDecimal(nonCapturedAmount));
+     if (capturedAmount.compareTo(returnRequestModel.getSubtotal()) == 1
+           || capturedAmount.compareTo(returnRequestModel.getSubtotal()) == 0) { // we have fully captured order or captured amount is greater than refund amount
+        return returnRequestModel.getSubtotal();
+     } else { // we have partly captured order and the return amount is gr than captured amount
+        return new BigDecimal(0);
+     }
    }
 
    private IngenicoConfigurationModel getIngenicoConfiguration(OrderModel orderModel) {
