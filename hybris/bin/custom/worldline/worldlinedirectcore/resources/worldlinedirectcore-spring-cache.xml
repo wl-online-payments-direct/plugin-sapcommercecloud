@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:utils="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/cache
+     	http://www.springframework.org/schema/cache/spring-cache.xsd
+     	http://www.springframework.org/schema/util
+     	http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+    <cache:annotation-driven cache-manager="worldlineCacheManager" key-generator="worldlineCacheKeyGenerator"/>
+
+    <bean id="worldlineCacheKeyGenerator" class="com.worldline.direct.cache.WorldlineCacheKeyGenerator" lazy-init="true"/>
+
+    <bean id="worldlineCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="worldlineEhCache"/>
+    </bean>
+
+    <bean id="worldlineEhCache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="cache/worldline-ehcache.xml"/>
+    </bean>
+</beans>

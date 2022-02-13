@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean name="worldlinePaymentInfoPopulator" class="com.worldline.direct.populator.WorldlinePaymentInfoPopulator">
+        <property name="addressConverter" ref="addressConverter"/>
+    </bean>
+
+    <bean id="worldlinePaymentInfoConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.worldline.direct.order.data.WorldlinePaymentInfoData"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlinePaymentInfoPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="worldlineOrderRequestParamPopulator"
+          class="com.worldline.direct.populator.WorldlineOrderRequestParamPopulator">
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+    </bean>
+
+    <bean id="worldlineShoppingCartRequestParamPopulator"
+          class="com.worldline.direct.populator.WorldlineShoppingCartRequestParamPopulator">
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+    </bean>
+
+    <bean id="worldlineCustomerRequestParamPopulator"
+          class="com.worldline.direct.populator.WorldlineCustomerRequestParamPopulator">
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="customerEmailResolutionService" ref="customerEmailResolutionService"/>
+    </bean>
+
+    <bean id="worldlineOrderParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.ingenico.direct.domain.Order"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineOrderRequestParamPopulator"/>
+<!--                <ref bean="worldlineShoppingCartRequestParamPopulator"/>-->
+                <ref bean="worldlineCustomerRequestParamPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="worldlineHostedCheckoutBasicPopulator"
+          class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="i18NService" ref="i18NService"/>
+        <property name="worldlineUserFacade" ref="worldlineUserFacade"/>
+        <property name="worldlineOrderParamConverter" ref="worldlineOrderParamConverter"/>
+    </bean>
+
+    <bean id="worldlineHostedCheckoutCardPopulator"
+          class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator">
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+    </bean>
+
+    <bean id="worldlineHostedCheckoutRedirectPopulator"
+          class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutRedirectPopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+
+    </bean>
+
+    <bean id="worldlineHostedCheckoutMobilePopulator"
+          class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutMobilePopulator">
+    </bean>
+
+    <bean id="worldlineHostedCheckoutParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.ingenico.direct.domain.CreateHostedCheckoutRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineHostedCheckoutBasicPopulator"/>
+                <ref bean="worldlineHostedCheckoutCardPopulator"/>
+                <ref bean="worldlineHostedCheckoutRedirectPopulator"/>
+                <ref bean="worldlineHostedCheckoutMobilePopulator"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="worldlineHostedTokenizationPaymentPopulator"
+          class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationPaymentPopulator">
+        <property name="worldlineOrderParamConverter" ref="worldlineOrderParamConverter"/>
+        <property name="sessionService" ref="sessionService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+    </bean>
+
+    <bean id="worldlineHostedTokenizationParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.ingenico.direct.domain.CreatePaymentRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineHostedTokenizationPaymentPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean name="worldlineCartPopulator" class="com.worldline.direct.populator.WorldlineCartPopulator">
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="cartConverter"/>
+        <property name="add" ref="worldlineCartPopulator"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="extendedCartConverter"/>
+        <property name="add" ref="worldlineCartPopulator"/>
+    </bean>
+
+    <bean name="worldlineOrderPopulator" class="com.worldline.direct.populator.WorldlineOrderPopulator">
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="orderConverter"/>
+        <property name="add" ref="worldlineOrderPopulator"/>
+    </bean>
+</beans>

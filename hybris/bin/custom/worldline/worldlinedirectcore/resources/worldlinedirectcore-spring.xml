@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/util
+            http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="worldlinedirectcore-spring-dao.xml"/>
+    <import resource="worldlinedirectcore-spring-service.xml"/>
+    <import resource="worldlinedirectcore-spring-converter.xml"/>
+
+
+    <bean id="worldlineClientFactory" class="com.worldline.direct.factory.impl.WorldlineClientFactoryImpl">
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
+    </bean>
+
+    <bean id="communicatorConfiguration" class="com.ingenico.direct.CommunicatorConfiguration">
+        <property name="authorizationType" value="${worldline.direct.api.authorizationType}"/>
+        <property name="connectTimeout" value="${worldline.direct.api.connectTimeout}"/>
+        <property name="socketTimeout" value="${worldline.direct.api.socketTimeout}"/>
+        <property name="maxConnections" value="${worldline.direct.api.maxConnections}"/>
+        <property name="integrator" value="${worldline.direct.api.integrator}"/>
+        <property name="shoppingCartExtension" ref="worldlineShoppingCartExtension"/>
+    </bean>
+    <bean id="worldlineShoppingCartExtension" class="com.ingenico.direct.domain.ShoppingCartExtension">
+        <constructor-arg name="creator" value="${worldline.direct.api.shoppingCartExtension.creator}"/>
+        <constructor-arg name="name" value="${worldline.direct.api.shoppingCartExtension.name}"/>
+        <constructor-arg name="version" value="${worldline.direct.api.shoppingCartExtension.version}"/>
+        <constructor-arg name="extensionId" value="${worldline.direct.api.shoppingCartExtension.extensionId}"/>
+    </bean>
+
+    <!-- utils -->
+
+    <bean id="worldlineAmountUtils" class="com.worldline.direct.util.WorldlineAmountUtils">
+        <property name="commonI18NService" ref="commonI18NService"/>
+    </bean>
+
+    <!-- facades -->
+    <alias name="worldlineUserFacade" alias="worldlineUserFacade"/>
+    <bean id="worldlineUserFacade" class="com.worldline.direct.facade.impl.WorldlineUserFacadeImpl">
+        <property name="modelService" ref="modelService"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
+        <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+    </bean>
+
+    <bean id="worldlineCheckoutFacade" class="com.worldline.direct.facade.impl.WorldlineCheckoutFacadeImpl">
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="checkoutFacade" ref="checkoutFacade"/>
+        <property name="worldlineUserFacade" ref="worldlineUserFacade"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlineTransactionService" ref="worldlineTransactionService"/>
+        <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
+        <property name="addressReverseConverter" ref="addressReverseConverter"/>
+        <property name="orderConverter" ref="orderConverter"/>
+        <property name="cartService" ref="cartService"/>
+        <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
+    </bean>
+
+    <bean id="worldlineExtendedCheckoutFacade"
+          class="com.worldline.direct.facade.impl.WorldLineExtendedCheckoutFacadeImpl"
+          parent="defaultCheckoutFacade"/>
+
+    <bean id="worldlineWebhookFacade" class="com.worldline.direct.facade.impl.WorldlineWebhookFacadeImpl">
+        <property name="worldlineWebhookService" ref="worldlineWebhookService"/>
+        <property name="worldlineOrderDao" ref="worldlineOrderDao"/>
+    </bean>
+
+    <!-- Job -->
+    <bean id="worldlineProcessWebhooksEventJob" class="com.worldline.direct.cronjob.WorldlineProcessWebhooksEventJob"
+          parent="abstractJobPerformable">
+        <property name="modelService" ref="modelService"/>
+        <property name="worldlineWebhookService" ref="worldlineWebhookService"/>
+        <property name="worldlineWebhookDao" ref="worldlineWebhookDao"/>
+    </bean>
+
+    <bean id="worldlineAutomaticCaptureJob" class="com.worldline.direct.cronjob.WorldlineAutomaticCaptureJob"
+          parent="abstractJobPerformable">
+        <property name="worldlineOrderDao" ref="worldlineOrderDao"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlineTransactionService" ref="worldlineTransactionService"/>
+        <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+    </bean>
+
+    <!-- strategies -->
+
+
+</beans>

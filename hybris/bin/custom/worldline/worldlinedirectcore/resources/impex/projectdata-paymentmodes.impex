@@ -1,0 +1,6 @@
+# Create PaymentModes by group
+INSERT_UPDATE PaymentMode; code[unique = true]       ; name[lang = en]              ; description[lang = en] ; active; paymentinfotype(code);
+                         ; worldlineCardPaymentMode   ; card worldline payment mode   ; payment mode by cards  ; true  ; WorldlinePaymentInfo  ;
+                         ; worldlinePayPalPaymentMode ; Paypal worldline payment mode ; payment mode by paypal ; true  ; WorldlinePaymentInfo  ;
+                         ; worldlineIDEALPaymentMode  ; IDEAL worldline payment mode  ; payment mode by ideal  ; true  ; WorldlinePaymentInfo  ;
+                         ; worldlineOtherPaymentMode  ; other worldline payment mode  ; other payment mode     ; true  ; WorldlinePaymentInfo  ;

@@ -256,15 +256,15 @@
     <extension name='xyformsservices' />
     <extension name='xyformsstorefrontcommons' />
     <extension name='xyformsweb' />
-        <!-- INGENICO -->
-    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectcore"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectb2ccheckoutaddon"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectbackoffice"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectocc"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectwebhook"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectcustomersupportbackoffice"/>
+        <!-- WORLDLINE -->
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectcore"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectb2ccheckoutaddon"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectbackoffice"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectocc"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectwebhook"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectcustomersupportbackoffice"/>
 
-    <extension dir="${HYBRIS_BIN_DIR}/custom/ingenico/ingenicoogonedirectfulfilmentprocess"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectfulfilmentprocess"/>
 
   </extensions>
 </hybrisconfig>

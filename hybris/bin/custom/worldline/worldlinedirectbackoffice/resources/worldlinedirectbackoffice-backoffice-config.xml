@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved
+-->
+<config xmlns="http://www.hybris.com/cockpit/config"
+		xmlns:yc="http://www.hybris.com/cockpitng/config/common"
+		xmlns:y="http://www.hybris.com/cockpit/config/hybris"
+		xmlns:wz="http://www.hybris.com/cockpitng/config/wizard-config"
+		xmlns:cb="http://www.hybris.com/cockpitng/config/collectionbrowser"
+		xmlns:cv="http://www.hybris.com/cockpitng/component/compareview"
+		xmlns:lv="http://www.hybris.com/cockpitng/component/listView"
+		xmlns:ea="http://www.hybris.com/cockpitng/component/editorArea"
+		xmlns:et="http://www.hybris.com/cockpitng/config/explorertree"
+		xmlns:ss="http://www.hybris.com/cockpitng/config/simplesearch"
+		xmlns:as="http://www.hybris.com/cockpitng/config/advancedsearch"
+		xmlns:df="http://www.hybris.com/cockpitng/component/dynamicForms"
+		xmlns:dsb="http://www.hybris.com/cockpitng/config/dashboard"
+		xmlns:na="http://www.hybris.com/cockpitng/config/notifications"
+		xmlns:gv="http://www.hybris.com/cockpitng/component/gridView">
+
+	<!-- WorldlineConfiguration BO appearance START -->
+
+	<context merge-by="module" parent="auto" component="explorer-tree">
+		<et:explorer-tree>
+			<et:navigation-node id="hmc.worldline">
+				<et:type-node code="WorldlineConfiguration" id="hmc.worldline.worldlineConfiguration"/>
+			</et:navigation-node>
+		</et:explorer-tree>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineConfiguration" component="listview">
+		<lv:list-view>
+			<lv:column qualifier="merchantID"/>
+			<lv:column qualifier="apiKey"/>
+		</lv:list-view>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineConfiguration" component="advanced-search">
+		<as:advanced-search>
+			<as:field-list>
+				<as:field name="merchantID" selected="true"/>
+				<as:field name="apiKey" />
+				<as:field name="defaultOperationCode" />
+				<as:field name="captureTimeFrame" />
+				<as:field name="askConsumerConsent" />
+				<as:field name="variant" />
+			</as:field-list>
+		</as:advanced-search>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineConfiguration" component="editor-area">
+		<ea:editorArea name="">
+			<ea:essentials>
+				<ea:essentialSection name="hmc.essential">
+					<ea:attribute qualifier="merchantID"/>
+				</ea:essentialSection>
+			</ea:essentials>
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.worldlineConfiguration">
+					<ea:panel name="parameters" colspan="4">
+						<ea:attribute qualifier="endpointURL"/>
+						<ea:attribute qualifier="apiKey"/>
+						<ea:attribute qualifier="apiSecret"/>
+						<ea:attribute qualifier="webhookKeyId"/>
+						<ea:attribute qualifier="webhookSecret"/>
+					</ea:panel>
+					<ea:panel name="hint" colspan="4">
+						<ea:custom>
+							<ea:default><![CDATA[<h3>[hmc.worldline.worldlineConfiguration.hint]</h3>]]></ea:default>
+						</ea:custom>
+					</ea:panel>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineOperationCodeConfig">
+					<ea:attribute qualifier="defaultOperationCode"/>
+					<ea:attribute qualifier="captureTimeFrame"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineTokenizationConfig">
+					<ea:attribute qualifier="askConsumerConsent"/>
+					<ea:attribute qualifier="variant"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+
+	<!-- WorldlineConfiguration display name when viewing all attributes -->
+	<context type="WorldlineConfiguration" component="base" merge-by="type" parent="GenericItem">
+		<y:base>
+			<y:labels>
+				<y:label>merchantID</y:label>
+			</y:labels>
+		</y:base>
+	</context>
+
+	<!-- WorldlineConfiguration actions -->
+	<context merge-by="type" component="editorareaactions" type="WorldlineConfiguration">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common" merge-mode="append">
+				<y:label>worldline.common</y:label>
+				<y:action action-id="com.worldline.direct.action.test.connection" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.action.support.contact">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+			</y:group>
+		</y:actions>
+	</context>
+
+	<!-- WorldlineConfiguration BO appearance END -->
+
+	<!-- BaseStore update BO appearance START -->
+	<context merge-by="type" parent="GenericItem" type="BaseStore" component="editor-area">
+		<ea:editorArea name="">
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.worldlineConfiguration">
+					<ea:attribute qualifier="worldlineConfiguration"/>
+					<ea:attribute qualifier="worldlineCheckoutType"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+	<!-- BaseStore update BO appearance END -->
+
+	<!-- WorldlinePaymentInfo BO appearance -->
+	<context merge-by="type" parent="PaymentInfo" type="WorldlinePaymentInfo">
+		<context component="base">
+			<y:base>
+				<y:labels>
+					<y:label>id - paymentMethod</y:label>
+				</y:labels>
+			</y:base>
+		</context>
+		<context component="listview">
+			<lv:list-view >
+				<lv:column qualifier="id" />
+				<lv:column qualifier="paymentMethod" />
+				<lv:column qualifier="worldlineCheckoutType" />
+			</lv:list-view>
+		</context>
+		<context component="simple-search">
+			<ss:simple-search>
+				<ss:field name="id"/>
+				<ss:sort-field name="id" asc="true"/>
+			</ss:simple-search>
+		</context>
+		<context component="advanced-search">
+			<as:advanced-search>
+				<as:field-list>
+					<as:field name="id" operator="contains" selected="true"/>
+					<as:field name="paymentMethod" operator="contains" selected="true"/>
+					<as:field name="worldlineCheckoutType" operator="equals" selected="true"/>
+					<as:field name="creationTime" operator="greaterOrEquals"/>
+					<as:field name="paymentProductDirectoryId" operator="contains"/>
+					<as:field name="hostedTokenizationId" operator="contains"/>
+					<as:field name="returnMAC" operator="contains"/>
+					<as:field name="token" operator="contains"/>
+					<as:field name="type" operator="contains"/>
+					<as:field name="cardholderName" operator="contains"/>
+					<as:field name="expiryDate" operator="contains"/>
+				</as:field-list>
+				<as:sort-field name="creationTime" asc="false"/>
+			</as:advanced-search>
+		</context>
+		<context component="editor-area">
+			<ea:editorArea>
+				<ea:tab name="hmc.worldline">
+					<ea:section name="hmc.worldline.worldlinePaymentInfo">
+						<ea:attribute qualifier="id"/>
+						<ea:attribute qualifier="paymentMethod"/>
+						<ea:attribute qualifier="paymentProductDirectoryId"/>
+						<ea:attribute qualifier="hostedTokenizationId"/>
+						<ea:attribute qualifier="returnMAC"/>
+						<ea:attribute qualifier="type"/>
+						<ea:attribute qualifier="worldlineCheckoutType"/>
+					</ea:section>
+					<ea:section name="hmc.worldline.worldlineSavedPaymentInfo">
+						<ea:attribute qualifier="token"/>
+						<ea:attribute qualifier="cardBrand"/>
+						<ea:attribute qualifier="alias"/>
+						<ea:attribute qualifier="cardholderName"/>
+						<ea:attribute qualifier="expiryDate"/>
+					</ea:section>
+				</ea:tab>
+			</ea:editorArea>
+		</context>
+	</context>
+	<!-- WorldlinePaymentInfo BO appearance END -->
+
+	<!-- WorldlineWebhooksEvent BO appearance -->
+	<context merge-by="type" parent="GenericItem" type="WorldlineWebhooksEvent">
+		<context component="base">
+			<y:base>
+				<y:labels>
+					<y:label>@labelService.getObjectLabel(itemtype) - createdTime</y:label>
+				</y:labels>
+			</y:base>
+		</context>
+		<context component="listview">
+			<lv:list-view >
+				<lv:column qualifier="body" />
+				<lv:column qualifier="status" />
+				<lv:column qualifier="createdTime" />
+				<lv:column qualifier="lastProcessedTime" />
+				<lv:column qualifier="attempts" />
+			</lv:list-view>
+		</context>
+		<context component="simple-search">
+			<ss:simple-search>
+				<ss:field name="body"/>
+				<ss:sort-field name="createdTime" asc="false"/>
+			</ss:simple-search>
+		</context>
+		<context component="advanced-search">
+			<as:advanced-search>
+				<as:field-list>
+					<as:field name="body" operator="contains" selected="true"/>
+					<as:field name="status" operator="equals" selected="true"/>
+					<as:field name="createdTime" operator="greaterOrEquals" selected="true" />
+					<as:field name="lastProcessedTime" operator="equals"/>
+					<as:field name="attempts" operator="greaterOrEquals"/>
+				</as:field-list>
+				<as:sort-field name="createdTime" asc="false"/>
+			</as:advanced-search>
+		</context>
+		<context component="editor-area">
+			<ea:editorArea>
+				<ea:tab name="hmc.worldline">
+					<ea:section name="hmc.worldline.worldlinewebhooks">
+						<ea:attribute qualifier="body" readonly="true"/>
+						<ea:attribute qualifier="status"/>
+						<ea:attribute qualifier="createdTime" readonly="true"/>
+						<ea:attribute qualifier="lastProcessedTime" readonly="true"/>
+						<ea:attribute qualifier="attempts" readonly="true"/>
+					</ea:section>
+				</ea:tab>
+			</ea:editorArea>
+		</context>
+	</context>
+	<!-- WorldlineWebhooksEvent BO appearance END -->
+
+</config>
