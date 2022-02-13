@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<action-definition id="com.worldline.direct.action.support.contact"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/action-definition.xsd">
+
+    <name>Contact Worldline Support</name>
+    <description>Action to contact Worldline Support</description>
+    <author>worldline</author>
+    <version>1.0</version>
+
+    <actionClassName>com.worldline.direct.actions.WorldlineSupportContactAction</actionClassName>
+
+    <settings>
+        <setting key="viewMode" default-value="textOnly"/>
+    </settings>
+</action-definition>

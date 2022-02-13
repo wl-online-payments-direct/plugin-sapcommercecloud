@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+--><extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+
+    <extension abstractclassprefix="Generated" classprefix="Worldlinedirectb2ccheckoutaddon" description="worldlinedirectb2ccheckoutaddon extension" managername="Worldlinedirectb2ccheckoutaddonManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="worldlinedirectb2ccheckoutaddon">
+
+        <!-- you should add all required extensions to this list, except platform extensions which are automatically required -->
+        <requires-extension name="addonsupport"/>
+        <requires-extension name="worldlinedirectcore"/>
+        <requires-extension name="acceleratorstorefrontcommons"/>
+
+
+        <coremodule generated="true" manager="com.worldline.direct.jalo.Worldlinedirectb2ccheckoutaddonManager" packageroot="com.worldline.direct"/>
+        <meta key="classpathgen" value="false"/>
+
+    </extension>
+
+
+</extensioninfo>

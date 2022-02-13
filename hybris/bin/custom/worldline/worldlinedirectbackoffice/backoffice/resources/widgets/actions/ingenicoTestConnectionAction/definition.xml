@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<action-definition id="com.worldline.direct.action.test.connection"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/action-definition.xsd">
+
+    <name>Test Worldline Connection</name>
+    <description>Action for testing if connection to Worldline server works</description>
+    <author>worldline</author>
+    <version>1.0</version>
+
+    <actionClassName>com.worldline.direct.actions.WorldlineTestConnectionAction</actionClassName>
+
+    <inputType>com.worldline.direct.model.WorldlineConfigurationModel</inputType>
+    <outputType>java.lang.Object</outputType>
+
+    <settings>
+        <setting key="viewMode" default-value="textOnly"/>
+    </settings>
+
+</action-definition>
