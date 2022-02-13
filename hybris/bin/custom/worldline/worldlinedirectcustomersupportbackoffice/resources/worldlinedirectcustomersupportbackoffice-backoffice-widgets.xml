@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved
+-->
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/widgets.xsd">
+
+    <widget-extension widgetId="backofficeMainSlot">
+        <widget id="worldlinedirectcustomersupportbackoffice-perspective" widgetDefinitionId="com.worldline.direct.widgets.worldlinedirectcustomersupportbackofficewidget"
+            template="false" slotId="perspectives" title="Hello worldlinedirectcustomersupportbackoffice">
+            <setting key="perspectiveImageUrl" value="/cng/images/perspective.png"
+                type="String" />
+        </widget>
+
+        <widget id="omsWorldlinePartialCapturePopup" widgetDefinitionId="com.worldline.direct.widgets.order.partialcapturewidget" slotId="cockpitWidgetChildrenInvisible"
+                title="Capture Order Payment" template="true">
+
+            <instance-settings socketEventRoutingMode="LAST_USED">
+                <create onInit="false" reuseExisting="true">
+                    <all-incoming-events/>
+                </create>
+                <close>
+                    <all-outgoing-events/>
+                </close>
+                <select onInit="false">
+                    <all-incoming-events/>
+                </select>
+            </instance-settings>
+
+            <setting key="widgetStyleClass" type="String"></setting>
+            <setting key="__externalLocationPath" type="String">extension://worldlinedirectcustomersupportbackoffice</setting>
+            <setting key="widgetStyleAttribute" type="String"></setting>
+            <setting key="_width" type="String">1140px</setting>
+            <setting key="_height" type="String">650px</setting>
+            <virtual-sockets />
+        </widget>
+    </widget-extension>
+
+    <!-- Action widget connection -->
+    <widget-connection sourceWidgetId="STUB_com.worldline.direct.actions.worldlinemanualpaymentcaptureaction" outputId="capturePaymentContext" targetWidgetId="omsWorldlinePartialCapturePopup" inputId="inputObject"/>
+
+
+</widgets>

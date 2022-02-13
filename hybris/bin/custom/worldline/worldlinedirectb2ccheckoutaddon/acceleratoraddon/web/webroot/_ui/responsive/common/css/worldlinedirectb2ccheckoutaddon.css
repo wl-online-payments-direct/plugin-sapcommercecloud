@@ -1,0 +1,11 @@
+/*Worldline Css*/
+
+#hostedTokenization iframe[name=htpIframe0] {
+    border: none;
+    width: 100%;
+}
+
+
+.worldline_payment_product_detail {
+    padding: 0 30px 20px 30px;
+}
