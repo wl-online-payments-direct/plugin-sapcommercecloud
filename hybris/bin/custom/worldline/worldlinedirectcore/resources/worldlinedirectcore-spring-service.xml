@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="worldlineConfigurationService"
+          class="com.worldline.direct.service.impl.WorldlineConfigurationServiceImpl">
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="worldlineConfigurationDao" ref="worldlineConfigurationDao"/>
+    </bean>
+
+    <bean id="worldlineServiceMethodService"
+          class="com.worldline.direct.service.impl.WorldlineServiceMethodServiceImpl">
+        <property name="worldlineClientFactory" ref="worldlineClientFactory"/>
+    </bean>
+
+    <bean id="worldlinePaymentService" class="com.worldline.direct.service.impl.WorldlinePaymentServiceImpl">
+        <property name="cartService" ref="cartService"/>
+        <property name="worldlineClientFactory" ref="worldlineClientFactory"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="worldlineHostedCheckoutParamConverter" ref="worldlineHostedCheckoutParamConverter"/>
+        <property name="worldlineHostedTokenizationParamConverter" ref="worldlineHostedTokenizationParamConverter"/>
+    </bean>
+
+
+    <bean id="worldlineCustomerAccountService"
+          class="com.worldline.direct.service.impl.WorldlineCustomerAccountServiceImpl">
+        <property name="worldlineCustomerAccountDao" ref="worldlineCustomerAccountDao"/>
+    </bean>
+
+    <bean id="worldlineBusinessProcessService"
+          class="com.worldline.direct.service.impl.WorldlineBusinessProcessServiceImpl">
+        <property name="businessProcessService" ref="businessProcessService"/>
+    </bean>
+
+    <bean id="worldlineTransactionService"
+          class="com.worldline.direct.service.impl.WorldlineTransactionServiceImpl">
+        <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
+        <property name="worldlineTransactionDao" ref="worldlineTransactionDao"/>
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="modelService" ref="modelService"/>
+    </bean>
+
+    <bean id="worldlineWebhookService" class="com.worldline.direct.service.impl.WorldlineWebhookServiceImpl">
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlineTransactionService" ref="worldlineTransactionService"/>
+        <property name="modelService" ref="modelService"/>
+    </bean>
+
+
+</beans>
