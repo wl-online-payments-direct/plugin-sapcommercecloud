@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+--><extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+        	
+    
+    <extension abstractclassprefix="Generated" classprefix="Worldlinedirectocc" description="worldlinedirectocc extension" managername="WorldlinedirectoccManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="worldlinedirectocc">
+
+        <!-- you should add all required extensions to this list, except platform extensions which are automatically required -->
+        
+        <requires-extension name="commercewebservices"/>
+        <requires-extension name="worldlinedirectcore"/>
+        
+        <coremodule generated="true" manager="com.worldline.direct.jalo.WorldlinedirectoccManager" packageroot="com.worldline.direct"/>
+    </extension>
+        
+
+</extensioninfo>

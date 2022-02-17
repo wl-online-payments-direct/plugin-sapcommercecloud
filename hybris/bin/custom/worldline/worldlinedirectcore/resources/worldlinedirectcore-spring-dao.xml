@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="worldlineCustomerAccountDao" class="com.worldline.direct.dao.impl.WorldlineCustomerAccountDaoImpl"
+          parent="abstractItemDao"/>
+
+    <bean id="worldlineConfigurationDao" class="com.worldline.direct.dao.impl.WorldlineConfigurationDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="worldlineWebhookDao" class="com.worldline.direct.dao.impl.WorldlineWebhookDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="worldlineTransactionDao" class="com.worldline.direct.dao.impl.WorldlineTransactionDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="worldlineOrderDao" class="com.worldline.direct.dao.impl.WorldlineOrderDaoImpl" parent="defaultOrderDao" >
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+</beans>

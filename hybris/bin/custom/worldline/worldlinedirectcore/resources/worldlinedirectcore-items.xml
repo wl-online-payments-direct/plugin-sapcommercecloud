@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved
+-->
+
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
+
+    <enumtypes>
+        <enumtype generate="true" code="WorldlineCheckoutTypesEnum" autocreate="true">
+            <description>Checkout types for card payments</description>
+            <value code="HOSTED_CHECKOUT"/>
+            <value code="HOSTED_TOKENIZATION"/>
+        </enumtype>
+        <enumtype generate="true" code="OperationCodesEnum" autocreate="true">
+            <description>Checkout types for card payments</description>
+            <value code="SALE"/>
+            <value code="FINAL_AUTHORIZATION"/>
+        </enumtype>
+        <enumtype code="WorldlineWebhooksEventStatusEnum">
+            <value code="CREATED"/>
+            <value code="FAILED"/>
+            <value code="MAX_ATTEMPT_REACHED"/>
+            <value code="PROCESSED"/>
+        </enumtype>
+        <enumtype code="PaymentStatus" autocreate="false" generate="true" dynamic="true">
+            <value code="WORLDLINE_WAITING_AUTH" />
+            <value code="WORLDLINE_AUTHORIZED" />
+            <value code="WORLDLINE_CANCELED" />
+            <value code="WORLDLINE_REJECTED" />
+            <value code="WORLDLINE_WAITING_CAPTURE" />
+            <value code="WORLDLINE_CAPTURED" />
+        </enumtype>
+    </enumtypes>
+
+    <itemtypes>
+        <itemtype code="WorldlineConfiguration"
+                  extends="GenericItem"
+                  autocreate="true"
+                  generate="true">
+            <description>Item type which will keep all required data for exchanging information with payment provider
+            </description>
+            <deployment table="worldlineConfiguration" typecode="15003"/>
+            <attributes>
+                <attribute qualifier="merchantID" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="endpointURL" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="apiKey" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="apiSecret" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="webhookKeyId" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="webhookSecret" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="defaultOperationCode" type="OperationCodesEnum">
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("OperationCodesEnum","SALE")</defaultvalue>
+                </attribute>
+                <attribute qualifier="captureTimeFrame" type="java.lang.Integer">
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>Integer.valueOf(0)</defaultvalue>
+                </attribute>
+                <attribute qualifier="askConsumerConsent" type="java.lang.Boolean">
+                    <description>Consent to Save used card in Worldline.</description>
+                    <modifiers read="true" write="true" optional="false"/>
+                    <defaultvalue>Boolean.TRUE</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="variant" type="java.lang.String">
+                    <description>Template name for Tokenization form.</description>
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="BaseStore" autocreate="false" generate="false" extends="GenericItem">
+            <description>Extending BaseStore type with additional worldline attributes.</description>
+            <attributes>
+                <attribute qualifier="worldlineConfiguration" type="WorldlineConfiguration">
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineCheckoutType" type="WorldlineCheckoutTypesEnum">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="WorldlinePaymentInfo" extends="PaymentInfo"
+                  jaloclass="de.hybris.platform.jalo.order.payment.PaymentInfo"
+                  generate="false">
+            <attributes>
+                <attribute qualifier="id" type="java.lang.Integer">
+                    <description>worldline paymentProduct ID</description>
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentMethod" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentProductDirectoryId" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="hostedTokenizationId" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="returnMAC" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineCheckoutType" type="WorldlineCheckoutTypesEnum">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="token" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="cardBrand" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="alias" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="type" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="cardholderName" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="expiryDate" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="WorldlineWebhooksEvent" extends="GenericItem">
+            <description>Item type which will keep webhook received as String</description>
+            <deployment table="worldlineWebhooksEvent" typecode="15006"/>
+            <attributes>
+                <attribute qualifier="body" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <defaultvalue>new java.lang.String("")</defaultvalue>
+                    <persistence type="property">
+                        <columntype database="oracle">
+                            <value>clob</value>
+                        </columntype>
+                        <columntype database="sap">
+                            <value>NCLOB</value>
+                        </columntype>
+                        <columntype>
+                            <value>HYBRIS.LONG_STRING</value>
+                        </columntype>
+                    </persistence>
+                </attribute>
+                <attribute qualifier="attempts" type="java.lang.Integer">
+                    <defaultvalue>Integer.valueOf(0)</defaultvalue>
+                    <modifiers read="true" initial="true" write="true" search="false" optional="false" unique="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="lastProcessedTime" type="java.util.Date">
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="createdTime" type="java.util.Date">
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="status" type="WorldlineWebhooksEventStatusEnum">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineWebhooksEventStatusEnum","CREATED")</defaultvalue>
+                    <modifiers read="true" initial="true" write="true" search="false" optional="false" unique="false"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+    </itemtypes>
+</items>
