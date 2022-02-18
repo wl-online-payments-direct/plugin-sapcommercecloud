@@ -9,3 +9,10 @@
 .worldline_payment_product_detail {
     padding: 0 30px 20px 30px;
 }
+
+
+.payment_product img{
+    margin: 10px;
+    box-shadow: 3px 3px 8px 0 rgb(0 0 0 / 30%);
+    max-width: 45px;
+}
