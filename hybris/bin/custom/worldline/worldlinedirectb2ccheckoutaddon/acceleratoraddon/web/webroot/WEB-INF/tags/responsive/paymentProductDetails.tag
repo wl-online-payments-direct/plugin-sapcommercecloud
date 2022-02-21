@@ -25,7 +25,7 @@
             <form:radiobutton path="paymentProductId" cssClass="payment_product"
                               value="${paymentProduct.id}" tabindex="${tabindex}"
                               checked="${isSelected ? 'checked' : '' }"/>
-            <span>
+            <span class="payment_product">
                 <c:if test="${not empty paymentProduct.displayHints.logo}">
                     <img src="${paymentProduct.displayHints.logo}" alt="${paymentProduct.displayHints.label}"/>
                 </c:if>
