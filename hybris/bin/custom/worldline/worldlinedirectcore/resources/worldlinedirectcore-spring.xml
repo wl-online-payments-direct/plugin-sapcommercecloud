@@ -65,6 +65,7 @@
         <property name="modelService" ref="modelService"/>
         <property name="baseStoreService" ref="baseStoreService"/>
         <property name="customerAccountService" ref="customerAccountService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
     </bean>
 
     <bean id="worldlineExtendedCheckoutFacade"

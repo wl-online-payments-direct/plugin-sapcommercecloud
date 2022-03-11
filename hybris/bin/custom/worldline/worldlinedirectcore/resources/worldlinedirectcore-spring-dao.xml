@@ -22,4 +22,6 @@
         <property name="flexibleSearchService" ref="flexibleSearchService"/>
     </bean>
 
+    <bean id="worldlinePaymentModeDao" class="com.worldline.direct.dao.impl.WorldlinePaymentModeDaoImpl" parent="defaultPaymentModeDao"/>
+
 </beans>
