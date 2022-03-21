@@ -76,6 +76,7 @@
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineTokenizationConfig">
 					<ea:attribute qualifier="askConsumerConsent"/>
+					<ea:attribute qualifier="submitOrderPromotion"/>
 					<ea:attribute qualifier="variant"/>
 				</ea:section>
 			</ea:tab>
