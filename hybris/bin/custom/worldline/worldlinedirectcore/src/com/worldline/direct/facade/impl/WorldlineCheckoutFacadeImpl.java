@@ -1,23 +1,19 @@
 package com.worldline.direct.facade.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
+import com.ingenico.direct.ApiException;
+import com.ingenico.direct.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
-import com.worldline.direct.facade.WorldlineUserFacade;
-import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
-import com.worldline.direct.service.WorldlineBusinessProcessService;
-
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
+import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.order.data.BrowserData;
+import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
+import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.service.WorldlineBusinessProcessService;
+import com.worldline.direct.service.WorldlinePaymentModeService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineTransactionService;
 import com.worldline.direct.util.WorldlineUrlUtils;
@@ -37,8 +33,9 @@ import de.hybris.platform.core.model.c2l.C2LItemModel;
 import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
-import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
+import de.hybris.platform.core.model.order.payment.PaymentModeModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
@@ -49,30 +46,15 @@ import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ingenico.direct.ApiException;
-import com.ingenico.direct.domain.CardPaymentMethodSpecificOutput;
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
-import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
-import com.ingenico.direct.domain.CreatePaymentResponse;
-import com.ingenico.direct.domain.DirectoryEntry;
-import com.ingenico.direct.domain.GetHostedCheckoutResponse;
-import com.ingenico.direct.domain.GetHostedTokenizationResponse;
-import com.ingenico.direct.domain.PaymentOutput;
-import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.direct.domain.PaymentProductDisplayHints;
-import com.ingenico.direct.domain.PaymentResponse;
-import com.ingenico.direct.domain.RedirectPaymentMethodSpecificOutput;
-import com.ingenico.direct.domain.TokenResponse;
-import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
-import com.worldline.direct.order.data.BrowserData;
-import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineCheckoutFacadeImpl.class);
@@ -88,6 +70,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private CommerceCheckoutService commerceCheckoutService;
     private BaseStoreService baseStoreService;
     private CustomerAccountService customerAccountService;
+    private WorldlinePaymentModeService worldlinePaymentModeService;
 
 
     private WorldlineUserFacade worldlineUserFacade;
@@ -104,10 +87,16 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 totalPrice.getCurrencyIso(),
                 getCountryCode(cartData),
                 getShopperLocale());
-
+        paymentProducts = filterByAvailablePaymentModes(paymentProducts);
         paymentProducts = filterByCheckoutType(paymentProducts);
 
         return paymentProducts;
+    }
+
+    private List<PaymentProduct> filterByAvailablePaymentModes(List<PaymentProduct> paymentProducts) {
+        List<String> activePaymentModeCodes = worldlinePaymentModeService.getActivePaymentModes().stream().map(PaymentModeModel::getCode).collect(Collectors.toList());
+        return paymentProducts.stream()
+                .filter(paymentProduct -> activePaymentModeCodes.contains(String.valueOf(paymentProduct.getId()))).collect(Collectors.toList());
     }
 
     @Override
@@ -322,10 +311,10 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                         .collect(Collectors.toList());
                 break;
             case HOSTED_TOKENIZATION:
-                final boolean isCardsPresent = paymentProducts.stream()
-                        .anyMatch(paymentProduct -> WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentProduct.getPaymentMethod()));
-
                 final Predicate<PaymentProduct> isCard = paymentProduct -> WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentProduct.getPaymentMethod());
+                final boolean isCardsPresent = paymentProducts.stream()
+                        .anyMatch(isCard);
+
                 final Predicate<PaymentProduct> isBCMC = paymentProduct -> WorldlinedirectcoreConstants.PAYMENT_METHOD_BCC == paymentProduct.getId();
                 paymentProducts = paymentProducts.stream()
                         .filter(isCard.negate().or(isBCMC))
@@ -557,5 +546,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     public void setWorldlineBusinessProcessService(WorldlineBusinessProcessService worldlineBusinessProcessService) {
         this.worldlineBusinessProcessService = worldlineBusinessProcessService;
+    }
+
+    public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
+        this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 }
