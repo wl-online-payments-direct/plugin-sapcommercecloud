@@ -7,7 +7,7 @@ import de.hybris.platform.core.model.user.CustomerModel;
 
 public interface WorldlineCustomerAccountDao {
 
-    List<WorldlinePaymentInfoModel> findIgenicoPaymentInfosByCustomer(CustomerModel customerModel, boolean saved);
+    List<WorldlinePaymentInfoModel> findWorldlinePaymentInfosByCustomer(CustomerModel customerModel, boolean saved);
 
-    WorldlinePaymentInfoModel findIgenicoPaymentInfosByCustomerAndToken(CustomerModel customerModel, String token, boolean saved);
+    WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndToken(CustomerModel customerModel, String token, boolean saved);
 }
