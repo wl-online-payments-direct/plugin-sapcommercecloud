@@ -19,11 +19,19 @@
     <bean id="worldlineOrderRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineOrderRequestParamPopulator">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
-    <bean id="worldlineShoppingCartRequestParamPopulator"
-          class="com.worldline.direct.populator.WorldlineShoppingCartRequestParamPopulator">
+    <bean id="worldlineShoppingCartWithoutDiscountRequestParamPopulator"
+          class="com.worldline.direct.populator.WorldlineShoppingCartWithoutDiscountRequestParamPopulator">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+    </bean>
+
+    <bean id="worldlineShoppingCartWithDiscountRequestParamPopulator"
+          class="com.worldline.direct.populator.WorldlineShoppingCartWithDiscountRequestParamPopulator">
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
     <bean id="worldlineCustomerRequestParamPopulator"
@@ -37,7 +45,8 @@
         <property name="populators">
             <list>
                 <ref bean="worldlineOrderRequestParamPopulator"/>
-<!--                <ref bean="worldlineShoppingCartRequestParamPopulator"/>-->
+                <ref bean="worldlineShoppingCartWithoutDiscountRequestParamPopulator"/>
+                <ref bean="worldlineShoppingCartWithDiscountRequestParamPopulator"/>
                 <ref bean="worldlineCustomerRequestParamPopulator"/>
             </list>
         </property>
