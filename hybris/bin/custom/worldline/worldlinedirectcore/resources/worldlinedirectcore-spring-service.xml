@@ -48,5 +48,8 @@
         <property name="modelService" ref="modelService"/>
     </bean>
 
+    <bean id="worldlinePaymentModeService" class="com.worldline.direct.service.impl.WorldlinePaymentModeServiceImpl" parent="defaultPaymentModeService">
+        <property name="worldlinePaymentModeDao" ref="worldlinePaymentModeDao"/>
+    </bean>
 
 </beans>

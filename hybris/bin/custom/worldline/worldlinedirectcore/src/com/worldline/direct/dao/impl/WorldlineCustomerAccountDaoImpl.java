@@ -30,7 +30,7 @@ public class WorldlineCustomerAccountDaoImpl extends AbstractItemDao implements 
             + " AND {" + WorldlinePaymentInfoModel.SAVED + "} = ?saved";
 
     @Override
-    public List<WorldlinePaymentInfoModel> findIgenicoPaymentInfosByCustomer(CustomerModel customerModel, boolean saved) {
+    public List<WorldlinePaymentInfoModel> findWorldlinePaymentInfosByCustomer(CustomerModel customerModel, boolean saved) {
         validateParameterNotNull(customerModel, "Customer must not be null");
         final Map<String, Object> queryParams = new HashMap<String, Object>();
         queryParams.put("customer", customerModel);
@@ -44,7 +44,7 @@ public class WorldlineCustomerAccountDaoImpl extends AbstractItemDao implements 
     }
 
     @Override
-    public WorldlinePaymentInfoModel findIgenicoPaymentInfosByCustomerAndToken(CustomerModel customerModel, String token, boolean saved) {
+    public WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndToken(CustomerModel customerModel, String token, boolean saved) {
         final Map<String, Object> queryParams = new HashMap<String, Object>();
         queryParams.put("customer", customerModel);
         queryParams.put("token", token);

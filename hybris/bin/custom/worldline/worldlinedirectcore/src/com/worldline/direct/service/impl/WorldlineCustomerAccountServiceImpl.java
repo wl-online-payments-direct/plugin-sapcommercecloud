@@ -17,7 +17,7 @@ public class WorldlineCustomerAccountServiceImpl implements WorldlineCustomerAcc
     @Override
     public List<WorldlinePaymentInfoModel> getWorldlinePaymentInfos(CustomerModel customerModel, boolean saved) {
         validateParameterNotNull(customerModel, "Customer model cannot be null");
-        return worldlineCustomerAccountDao.findIgenicoPaymentInfosByCustomer(customerModel, saved);
+        return worldlineCustomerAccountDao.findWorldlinePaymentInfosByCustomer(customerModel, saved);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class WorldlineCustomerAccountServiceImpl implements WorldlineCustomerAcc
         validateParameterNotNull(customerModel, "Customer model cannot be null");
         validateParameterNotNull(token, "token cannot be null");
         try {
-            return worldlineCustomerAccountDao.findIgenicoPaymentInfosByCustomerAndToken(customerModel, token, saved);
+            return worldlineCustomerAccountDao.findWorldlinePaymentInfosByCustomerAndToken(customerModel, token, saved);
         } catch (ModelNotFoundException ex) {
             return null;
         }
