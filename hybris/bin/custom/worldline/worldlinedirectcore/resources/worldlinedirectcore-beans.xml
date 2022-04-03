@@ -30,6 +30,7 @@
     </bean>
 
     <bean class="com.worldline.direct.order.data.WorldlineHostedTokenizationData">
+        <property name="returnUrl" type="String"/>
         <property name="hostedTokenizationId" type="String"/>
         <property name="browserData" type="com.worldline.direct.order.data.BrowserData"/>
     </bean>

@@ -1,26 +1,24 @@
 package com.worldline.direct.service.impl;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-
+import com.ingenico.direct.ApiException;
+import com.ingenico.direct.Client;
+import com.ingenico.direct.DeclinedPaymentException;
 import com.ingenico.direct.domain.*;
+import com.ingenico.direct.merchant.products.GetPaymentProductParams;
+import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
+import com.ingenico.direct.merchant.products.GetProductDirectoryParams;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.factory.WorldlineClientFactory;
+import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.util.WorldlineAmountUtils;
+import com.worldline.direct.util.WorldlineLogUtils;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
-import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
-import de.hybris.platform.order.CartService;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,26 +26,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 
-import com.ingenico.direct.ApiException;
-import com.ingenico.direct.Client;
-import com.ingenico.direct.DeclinedPaymentException;
-import com.ingenico.direct.merchant.products.GetPaymentProductParams;
-import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
-import com.ingenico.direct.merchant.products.GetProductDirectoryParams;
-import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
-import com.worldline.direct.util.WorldlineLogUtils;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlinePaymentServiceImpl.class);
 
-    private CartService cartService;
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlineAmountUtils worldlineAmountUtils;
     private WorldlineClientFactory worldlineClientFactory;
     private Converter<AbstractOrderModel, CreatePaymentRequest> worldlineHostedTokenizationParamConverter;
     private Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter;
+    private Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter;
 
     @Override
     public GetPaymentProductsResponse getPaymentProductsResponse(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
@@ -185,17 +181,12 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     @Override
     @SuppressWarnings("all")
-    public CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) throws WorldlineNonAuthorizedPaymentException {
-        validateParameterNotNull(tokenizationResponse, "tokenizationResponse cannot be null");
+    public CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(orderForCode, "order cannot be null");
         try (Client client = worldlineClientFactory.getClient()) {
 
             final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(orderForCode);
-            params.getCardPaymentMethodSpecificInput()
-                    .setToken(tokenizationResponse.getToken().getId());
-            params.getCardPaymentMethodSpecificInput()
-                    .setPaymentProductId(tokenizationResponse.getToken().getPaymentProductId());
-            params.getOrder().getCustomer().setDevice(getBrowserInfo(worldlineHostedTokenizationData.getBrowserData()));
+            params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
             final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, payment);
@@ -218,7 +209,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         validateParameterNotNull(orderForCode, "order cannot be null");
         try (Client client = worldlineClientFactory.getClient()) {
             final CreateHostedCheckoutRequest params = worldlineHostedCheckoutParamConverter.convert(orderForCode);
-            params.getOrder().getCustomer().setDevice(getBrowserInfo(browserData));
+            params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(browserData));
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
@@ -420,38 +411,8 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         }
     }
 
-    private CustomerDevice getBrowserInfo(com.worldline.direct.order.data.BrowserData internalBrowserData) {
-        BrowserData browserData = new BrowserData();
-        browserData.setColorDepth(internalBrowserData.getColorDepth());
-        browserData.setJavaEnabled(internalBrowserData.getNavigatorJavaEnabled());
-        browserData.setJavaScriptEnabled(internalBrowserData.getNavigatorJavaScriptEnabled());
-        browserData.setScreenHeight(internalBrowserData.getScreenHeight());
-        browserData.setScreenWidth(internalBrowserData.getScreenWidth());
-
-        CustomerDevice browserInfo = new CustomerDevice();
-        browserInfo.setAcceptHeader(internalBrowserData.getAcceptHeader());
-        browserInfo.setUserAgent(internalBrowserData.getUserAgent());
-        browserInfo.setLocale(internalBrowserData.getLocale());
-        browserInfo.setIpAddress(internalBrowserData.getIpAddress());
-        browserInfo.setTimezoneOffsetUtcMinutes(internalBrowserData.getTimezoneOffsetUtcMinutes());
-        browserInfo.setBrowserData(browserData);
-
-        return browserInfo;
-    }
-
     private String getMerchantId() {
         return worldlineConfigurationService.getCurrentMerchantId();
-    }
-
-    private CartModel getSessionCart() {
-        if (cartService.hasSessionCart()) {
-            return cartService.getSessionCart();
-        }
-        return null;
-    }
-
-    public void setCartService(CartService cartService) {
-        this.cartService = cartService;
     }
 
     public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
@@ -472,5 +433,9 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     public void setWorldlineHostedCheckoutParamConverter(Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter) {
         this.worldlineHostedCheckoutParamConverter = worldlineHostedCheckoutParamConverter;
+    }
+
+    public void setWorldlineBrowserCustomerDeviceConverter(Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter) {
+        this.worldlineBrowserCustomerDeviceConverter = worldlineBrowserCustomerDeviceConverter;
     }
 }
