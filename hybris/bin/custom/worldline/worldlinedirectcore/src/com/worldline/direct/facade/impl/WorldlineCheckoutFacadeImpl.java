@@ -154,9 +154,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final PaymentProduct paymentProduct = getPaymentMethodById(paymentId);
         if (isValidPaymentMethod(paymentProduct)) {
             worldlinePaymentInfoData.setId(paymentProduct.getId());
-            worldlinePaymentInfoData.setPaymentProductDirectoryId(paymentDirId);
             worldlinePaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
-            if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP) {
+            if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP || paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL) {
+                worldlinePaymentInfoData.setPaymentProductDirectoryId(paymentDirId);
                 worldlinePaymentInfoData.setHostedTokenizationId(hostedTokenizationId);
                 worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
             } else {
@@ -171,8 +171,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     @Override
     public OrderData authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
-        final GetHostedTokenizationResponse hostedTokenization = worldlinePaymentService.getHostedTokenization(worldlineHostedTokenizationData.getHostedTokenizationId());
-        final CreatePaymentResponse paymentForHostedTokenization = worldlinePaymentService.createPaymentForHostedTokenization(orderForCode, worldlineHostedTokenizationData, hostedTokenization);
+        final CreatePaymentResponse paymentForHostedTokenization = worldlinePaymentService.createPaymentForHostedTokenization(orderForCode, worldlineHostedTokenizationData);
+
         cleanHostedCheckoutId();
         final PaymentResponse payment = paymentForHostedTokenization.getPayment();
         savePaymentTokenIfNeeded(payment, true);

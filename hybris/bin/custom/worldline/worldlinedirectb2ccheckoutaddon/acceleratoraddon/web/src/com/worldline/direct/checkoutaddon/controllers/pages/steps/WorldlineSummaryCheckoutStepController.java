@@ -1,10 +1,15 @@
 package com.worldline.direct.checkoutaddon.controllers.pages.steps;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-
+import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
+import com.ingenico.direct.domain.PaymentProduct;
+import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
+import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants.URL.Checkout.Summary;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePlaceOrderForm;
+import com.worldline.direct.constants.WorldlineCheckoutConstants;
+import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
+import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.order.data.BrowserData;
+import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
@@ -26,7 +31,6 @@ import de.hybris.platform.commerceservices.order.CommerceCartModificationExcepti
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +41,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
-import com.ingenico.direct.domain.PaymentProduct;
-import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
-import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants.URL.Checkout.Summary;
-import com.worldline.direct.constants.WorldlineCheckoutConstants;
-import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
-import com.worldline.direct.facade.WorldlineCheckoutFacade;
-import com.worldline.direct.order.data.BrowserData;
-import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+
+import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator.HOSTED_CHECKOUT_RETURN_URL;
+import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 
 @Controller
 @RequestMapping(value = Summary.root)
@@ -162,7 +163,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
                     WorldlineHostedTokenizationData worldlineHostedTokenizationData = new WorldlineHostedTokenizationData();
                     worldlineHostedTokenizationData.setBrowserData(browserData);
                     worldlineHostedTokenizationData.setHostedTokenizationId(hostedTokenizationId);
-
+                    worldlineHostedTokenizationData.setReturnUrl(getSessionService().getAttribute(HOSTED_TOKENIZATION_RETURN_URL));
                     orderHTP = worldlineCheckoutFacade.authorisePaymentForHostedTokenization(orderHTP.getCode(), worldlineHostedTokenizationData);
                     return redirectToOrderConfirmationPage(orderHTP);
                 } catch (WorldlineNonAuthorizedPaymentException e) {
@@ -197,14 +198,14 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
                 true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root +
                         WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + code);
-        getSessionService().setAttribute("hostedCheckoutReturnUrl", returnUrl);
+        getSessionService().setAttribute(HOSTED_CHECKOUT_RETURN_URL, returnUrl);
     }
 
     private void storeHTPReturnUrlInSession(String code) {
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
                 true, WorldlineWebConstants.URL.Checkout.Payment.HTP.root +
                         WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + code);
-        getSessionService().setAttribute("hostedTokenizationReturnUrl", returnUrl);
+        getSessionService().setAttribute(HOSTED_TOKENIZATION_RETURN_URL, returnUrl);
     }
 
     protected boolean validateOrderForm(final WorldlinePlaceOrderForm worldlinePlaceOrderForm, final Model model) {
