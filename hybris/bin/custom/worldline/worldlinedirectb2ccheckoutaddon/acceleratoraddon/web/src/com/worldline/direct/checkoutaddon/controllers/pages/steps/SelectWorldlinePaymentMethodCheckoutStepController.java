@@ -1,15 +1,16 @@
 package com.worldline.direct.checkoutaddon.controllers.pages.steps;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
-import javax.annotation.Resource;
-import javax.validation.Valid;
-import java.util.List;
-
+import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
+import com.ingenico.direct.domain.PaymentProduct;
 import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePaymentDetailsForm;
 import com.worldline.direct.checkoutaddon.forms.validation.WorldlinePaymentDetailsValidator;
+import com.worldline.direct.constants.WorldlineCheckoutConstants;
+import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
+import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -25,7 +26,6 @@ import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commerceservices.enums.CountryType;
 import de.hybris.platform.util.Config;
-
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,14 +36,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
-import com.ingenico.direct.domain.PaymentProduct;
-import com.worldline.direct.constants.WorldlineCheckoutConstants;
-import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
-import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
-import com.worldline.direct.facade.WorldlineCheckoutFacade;
-import com.worldline.direct.facade.WorldlineUserFacade;
-import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import javax.annotation.Resource;
+import javax.validation.Valid;
+import java.util.List;
+
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(value = WorldlineWebConstants.URL.Checkout.Payment.root)
@@ -95,8 +93,8 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
             final CreateHostedTokenizationResponse hostedTokenization = worldlineCheckoutFacade.createHostedTokenization();
             model.addAttribute("hostedTokenization", hostedTokenization);
-            model.addAttribute("savedPaymentInfos", worldlineUserFacade.getWorldlinePaymentInfos(Boolean.TRUE));
         }
+        model.addAttribute("savedPaymentInfos", worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE));
 
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
@@ -120,7 +118,8 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
             worldlineCheckoutFacade.fillWorldlinePaymentInfoData(worldlinePaymentInfoData,
                     worldlinePaymentDetailsForm.getPaymentProductId(),
                     worldlinePaymentDetailsForm.getIssuerId(),
-                    worldlinePaymentDetailsForm.getHostedTokenizationId());
+                    worldlinePaymentDetailsForm.getHostedTokenizationId(),
+                    worldlinePaymentDetailsForm.getHostedCheckoutToken());
         } catch (WorldlineNonValidPaymentProductException e) {
             GlobalMessages.addErrorMessage(model, "checkout.error.paymentproduct.invalid");
             return enterStep(model, redirectAttributes);
