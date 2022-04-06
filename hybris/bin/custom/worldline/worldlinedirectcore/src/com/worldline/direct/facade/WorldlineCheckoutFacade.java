@@ -1,10 +1,5 @@
 package com.worldline.direct.facade;
 
-import java.util.List;
-
-import de.hybris.platform.commercefacades.order.data.OrderData;
-import de.hybris.platform.order.InvalidCartException;
-
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.DirectoryEntry;
@@ -16,6 +11,10 @@ import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import de.hybris.platform.commercefacades.order.data.OrderData;
+import de.hybris.platform.order.InvalidCartException;
+
+import java.util.List;
 
 public interface WorldlineCheckoutFacade {
 
@@ -31,7 +30,7 @@ public interface WorldlineCheckoutFacade {
 
     void handlePaymentInfo(WorldlinePaymentInfoData paymentInfoData);
 
-    void fillWorldlinePaymentInfoData(WorldlinePaymentInfoData paymentInfoData, int paymentId, String paymentDirId, String hostedTokenizationId) throws WorldlineNonValidPaymentProductException;
+    void fillWorldlinePaymentInfoData(WorldlinePaymentInfoData paymentInfoData, int paymentId, String paymentDirId, String hostedTokenizationId, String hostedCheckoutToken) throws WorldlineNonValidPaymentProductException;
 
     OrderData authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData hostedTokenizationId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
