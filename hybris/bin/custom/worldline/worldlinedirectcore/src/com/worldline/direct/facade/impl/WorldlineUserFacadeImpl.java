@@ -1,14 +1,11 @@
 package com.worldline.direct.facade.impl;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.ingenico.direct.domain.CardWithoutCvv;
+import com.ingenico.direct.domain.PaymentProduct;
+import com.ingenico.direct.domain.TokenResponse;
+import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.WorldlineCustomerAccountService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
@@ -18,10 +15,14 @@ import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
 
-import com.ingenico.direct.domain.CardWithoutCvv;
-import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.direct.domain.TokenResponse;
-import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
 
@@ -42,6 +43,23 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         for (final WorldlinePaymentInfoModel worldlinePaymentInfoModel : worldlinePaymentInfos) {
             final WorldlinePaymentInfoData paymentInfoData = worldlinePaymentInfoConverter.convert(worldlinePaymentInfoModel);
             worldlinePaymentInfoDataList.add(paymentInfoData);
+        }
+        return worldlinePaymentInfoDataList;
+    }
+
+    @Override
+    public List<WorldlinePaymentInfoData> getWorldlinePaymentInfosForPaymentProducts(List<PaymentProduct> paymentProducts, boolean saved) {
+        final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+        final List<WorldlinePaymentInfoModel> worldlinePaymentInfos = worldlineCustomerAccountService.getWorldlinePaymentInfos(currentCustomer, saved);
+        final List<WorldlinePaymentInfoData> worldlinePaymentInfoDataList = new ArrayList<>();
+
+        for (final WorldlinePaymentInfoModel worldlinePaymentInfoModel : worldlinePaymentInfos) {
+            Optional<PaymentProduct> optionalPaymentProduct = paymentProducts.stream().filter(paymentProduct -> paymentProduct.getId().equals(worldlinePaymentInfoModel.getId())).findFirst();
+            if (optionalPaymentProduct.isPresent()) {
+                final WorldlinePaymentInfoData paymentInfoData = worldlinePaymentInfoConverter.convert(worldlinePaymentInfoModel);
+                paymentInfoData.setPaymentMethodImageUrl(optionalPaymentProduct.get().getDisplayHints().getLogo());
+                worldlinePaymentInfoDataList.add(paymentInfoData);
+            }
         }
         return worldlinePaymentInfoDataList;
     }
@@ -88,12 +106,12 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         worldlinePaymentInfoByToken.setCardholderName(cardWithoutCvv.getCardholderName());
         worldlinePaymentInfoByToken.setAlias(cardWithoutCvv.getCardNumber());
         worldlinePaymentInfoByToken.setExpiryDate(String.join("/", EXPIRY_DATE_PATTERN.split(cardWithoutCvv.getExpiryDate())));
-
         worldlinePaymentInfoByToken.setToken(tokenResponse.getId());
         worldlinePaymentInfoByToken.setCardBrand(paymentProduct.getDisplayHints().getLabel());
-
+        worldlinePaymentInfoByToken.setId(tokenResponse.getPaymentProductId());
         worldlinePaymentInfoByToken.setSaved(true);
-
+        worldlinePaymentInfoByToken.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT);
+        worldlinePaymentInfoByToken.setPaymentMethod(paymentProduct.getPaymentMethod());
         modelService.save(worldlinePaymentInfoByToken);
     }
 

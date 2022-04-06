@@ -4,11 +4,8 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-            http://www.springframework.org/schema/beans/spring-beans.xsd
-            http://www.springframework.org/schema/util
-            http://www.springframework.org/schema/util/spring-util.xsd">
+            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="worldlinedirectcore-spring-dao.xml"/>
     <import resource="worldlinedirectcore-spring-service.xml"/>
@@ -66,6 +63,8 @@
         <property name="baseStoreService" ref="baseStoreService"/>
         <property name="customerAccountService" ref="customerAccountService"/>
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
     </bean>
 
     <bean id="worldlineExtendedCheckoutFacade"
