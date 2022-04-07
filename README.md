@@ -67,6 +67,10 @@ backoffice.cockpitng.uifactory.cache.enabled=false
 backoffice.cockpitng.widgetclassloader.resourcecache.enabled=false
 backoffice.cockpitng.resourceloader.resourcecache.enabled=false
 
+#worldlineJS
+worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js
+
+
 ```
 
 ## Configuration
