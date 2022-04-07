@@ -132,3 +132,20 @@ INSERT_UPDATE ZoneDeliveryModeValue;currency(isocode)[unique=true];deliveryMode(
 ;SGD;standard-gross;12;123;uk
 ;USD;standard-gross;12;123;uk
 ```
+
+## Edit Account Payment Detail Page
+
+- Execute this impex to edit Account Payment Detail Page for the accelerator storefronts
+- Don't forget to synchronize or execute it in Online version.
+- This impex includes Apparel-uk as an example.
+
+```
+$contentCatalog = apparel-ukContentCatalog
+$contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+$jspPath = /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/payment-details/worldlineAccountPaymentInfoPage.jsp
+UPDATE CMSLinkComponent; $contentCV[unique = true]; uid[unique = true] ; name                              ; url
+                       ;                          ; PaymentDetailsLink ; WorldlineAccountPaymentDetailsLink ; /my-account/worldline/payment-details
+INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]             ; name                                       ; page
+                                 ;                          ; AccountPaymentDetailsComponent ; Worldline Account Payment Details Component ; $jspPath
+
+```
