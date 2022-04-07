@@ -85,7 +85,7 @@ UPDATE BaseStore; uid[unique = true]; paymentProvider; checkoutFlowGroup      ; 
                 ; apparel-de        ; WORLDLINE  ; worldlineB2CResponsiveCheckoutGroup ; worldline-order-process ;worldline-return-process
                 ; electronics       ; WORLDLINE  ; worldlineB2CResponsiveCheckoutGroup ; worldline-order-process ;worldline-return-process              
 
-UPDATE BaseStore; uid[unique = true]; globalCollectConfiguration(merchantID)
+UPDATE BaseStore; uid[unique = true]; worldlineConfiguration(merchantID)
                 ; apparel-uk        ; greenlightcommerce1
                 ; apparel-de        ; greenlightcommerce1
                 ; electronics       ; greenlightcommerce1
