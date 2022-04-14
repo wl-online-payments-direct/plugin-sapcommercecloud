@@ -79,9 +79,11 @@ worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hos
 
 
 ```
+$htpTemplate=HTPTemplate.html
+$htpTemplate=HTPTemplate11_Full.html
 INSERT_UPDATE WorldlineConfiguration; merchantID[unique=true]           ; apiKey               ; apiSecret                                        ; webhookKeyId                   ; webhookSecret                        ; variant          ; defaultOperationCode(code); endpointURL;
-                                   ; greenlightcommerce1  ; 052BEFE7F9CD932D58D1 ; NGMyZmU0M2EtMjYzMi00YmFkLWI2YjMtYTcyZTJjZTI3ZTNi ; dfe212d95b794eb5971331c8f0ea82 ; ec73cb3b-e771-4fcb-a393-2bd6711351c9 ; HTPTemplate.html ; SALE                      ; https://payment.preprod.direct.ingenico.com
-                                   ; greenlightcommerceAP ; 052BEFE7F9CD932D58D1 ; NGMyZmU0M2EtMjYzMi00YmFkLWI2YjMtYTcyZTJjZTI3ZTNi ; dfe212d95b794eb5971331c8f0ea82 ; ec73cb3b-e771-4fcb-a393-2bd6711351c9 ; HTPTemplate.html ; SALE                      ; https://payment.preprod.direct.ingenico.com    
+                                   ; greenlightcommerce1  ; 052BEFE7F9CD932D58D1 ; NGMyZmU0M2EtMjYzMi00YmFkLWI2YjMtYTcyZTJjZTI3ZTNi ; dfe212d95b794eb5971331c8f0ea82 ; ec73cb3b-e771-4fcb-a393-2bd6711351c9 ; $htpTemplate ; SALE                      ; https://payment.preprod.direct.ingenico.com
+                                   ; greenlightcommerceAP ; 052BEFE7F9CD932D58D1 ; NGMyZmU0M2EtMjYzMi00YmFkLWI2YjMtYTcyZTJjZTI3ZTNi ; dfe212d95b794eb5971331c8f0ea82 ; ec73cb3b-e771-4fcb-a393-2bd6711351c9 ; $htpTemplate ; SALE                      ; https://payment.preprod.direct.ingenico.com    
                                    
 
 UPDATE BaseStore; uid[unique = true]; paymentProvider; checkoutFlowGroup      ; submitOrderProcessCode ; createReturnProcessCode
