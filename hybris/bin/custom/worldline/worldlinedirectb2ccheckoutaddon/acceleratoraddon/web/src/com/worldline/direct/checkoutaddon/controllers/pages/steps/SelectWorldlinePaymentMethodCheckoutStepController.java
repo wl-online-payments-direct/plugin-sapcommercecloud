@@ -1,5 +1,6 @@
 package com.worldline.direct.checkoutaddon.controllers.pages.steps;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_APPLEPAY;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -189,6 +190,11 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
     @ModelAttribute("hostedTokenizationJs")
     String getHostedTokenizationJs(){
         return Config.getParameter("worldline.hosted.tokenization.js");
+    }
+
+    @ModelAttribute("applePayId")
+    int getApplePayId(){
+        return PAYMENT_METHOD_APPLEPAY;
     }
 
 

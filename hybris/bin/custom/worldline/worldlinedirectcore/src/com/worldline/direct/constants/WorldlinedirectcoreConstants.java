@@ -12,6 +12,7 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final int PAYMENT_METHOD_HTP = -1;
     public static final int PAYMENT_METHOD_IDEAL = 809;
     public static final int PAYMENT_METHOD_PAYPAL = 840;
+    public static final int PAYMENT_METHOD_APPLEPAY = 302;
     public static final int PAYMENT_METHOD_ILLICADO = 3112;
     public static final int PAYMENT_METHOD_BCC = 3012;
 
