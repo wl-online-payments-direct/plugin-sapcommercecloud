@@ -1,8 +1,10 @@
 package com.worldline.direct.populator.hostedcheckout;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
-
+import com.google.common.base.Preconditions;
+import com.ingenico.direct.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.OperationCodesEnum;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
@@ -10,15 +12,8 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
 
-import com.google.common.base.Preconditions;
-
-import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
-import com.ingenico.direct.domain.RedirectPaymentMethodSpecificInput;
-import com.ingenico.direct.domain.RedirectPaymentProduct809SpecificInput;
-import com.ingenico.direct.domain.RedirectPaymentProduct840SpecificInput;
-import com.ingenico.direct.domain.RedirectionData;
-import com.worldline.direct.enums.OperationCodesEnum;
-import com.worldline.direct.model.WorldlineConfigurationModel;
+import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator.HOSTED_CHECKOUT_RETURN_URL;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 public class WorldlineHostedCheckoutRedirectPopulator implements Populator<AbstractOrderModel, CreateHostedCheckoutRequest> {
 
@@ -77,7 +72,7 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
     }
 
     private String getHostedCheckoutReturnUrl() {
-        return sessionService.getAttribute("hostedCheckoutReturnUrl");
+        return sessionService.getAttribute(HOSTED_CHECKOUT_RETURN_URL);
     }
 
     public void setSessionService(SessionService sessionService) {

@@ -2,12 +2,12 @@ package com.worldline.direct.occ.controllers.v2;
 
 
 import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
-import com.worldline.direct.occ.helpers.WorldlineHelper;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.occ.controllers.v2.validator.WorldlineBrowserDataWsDTOValidator;
+import com.worldline.direct.occ.helpers.WorldlineHelper;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.payment.dto.BrowserDataWsDTO;
@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 
 @Controller
 @RequestMapping(value = "/{baseSiteId}/users/{userId}/orders")
@@ -110,6 +112,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         final WorldlineHostedTokenizationData hostedTokenizationData = new WorldlineHostedTokenizationData();
         hostedTokenizationData.setHostedTokenizationId(orderData.getWorldlinePaymentInfo().getHostedTokenizationId());
         hostedTokenizationData.setBrowserData(browserData);
+        hostedTokenizationData.setReturnUrl(sessionService.getAttribute(HOSTED_TOKENIZATION_RETURN_URL));
 
         storeHTPReturnUrlInSession(orderData.getCode(), request);
 
