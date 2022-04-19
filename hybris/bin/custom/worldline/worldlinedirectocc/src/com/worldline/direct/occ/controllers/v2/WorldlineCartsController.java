@@ -102,7 +102,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
         worldlineCheckoutFacade.fillWorldlinePaymentInfoData(worldlinePaymentInfoData,
                 worldlinePaymentDetailsWsDTO.getPaymentProductId(),
                 worldlinePaymentDetailsWsDTO.getIssuerId(),
-                worldlinePaymentDetailsWsDTO.getHostedTokenizationId());
+                worldlinePaymentDetailsWsDTO.getHostedTokenizationId(), worldlinePaymentDetailsWsDTO.getHostedCheckoutToken());
 
         final AddressData addressData;
         if (Boolean.TRUE.equals(worldlinePaymentDetailsWsDTO.isUseDeliveryAddress())) {
