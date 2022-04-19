@@ -19,7 +19,6 @@
     <bean id="worldlineOrderRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineOrderRequestParamPopulator">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
     <bean id="worldlineShoppingCartWithoutDiscountRequestParamPopulator"

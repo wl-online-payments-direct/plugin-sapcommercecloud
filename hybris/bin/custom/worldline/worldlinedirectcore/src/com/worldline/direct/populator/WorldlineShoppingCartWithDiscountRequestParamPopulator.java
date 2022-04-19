@@ -27,7 +27,7 @@ public class WorldlineShoppingCartWithDiscountRequestParamPopulator implements P
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
-        if (BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().getSubmitOrderPromotion())) {
+        if (BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().getSubmitOrderPromotion()) && abstractOrderModel.getTotalDiscounts() > 0) {
             order.setShoppingCart(createShoppingCart(abstractOrderModel));
         }
     }
