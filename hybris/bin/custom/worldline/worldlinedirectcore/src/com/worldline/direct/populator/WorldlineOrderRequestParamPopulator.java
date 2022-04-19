@@ -1,28 +1,17 @@
 package com.worldline.direct.populator;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
-
-import com.worldline.direct.service.WorldlineConfigurationService;
+import com.ingenico.direct.domain.*;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 
-import com.ingenico.direct.domain.AddressPersonal;
-import com.ingenico.direct.domain.AmountOfMoney;
-import com.ingenico.direct.domain.Order;
-import com.ingenico.direct.domain.OrderReferences;
-import com.ingenico.direct.domain.PersonalName;
-import com.ingenico.direct.domain.Shipping;
-import org.apache.commons.lang3.BooleanUtils;
-
-import java.math.BigDecimal;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
     private WorldlineAmountUtils worldlineAmountUtils;
-    private WorldlineConfigurationService worldlineConfigurationService;
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
@@ -75,11 +64,7 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         final AmountOfMoney amountOfMoney = new AmountOfMoney();
         final String currencyCode = abstractOrderModel.getCurrency().getIsocode();
         final long amount;
-        if (BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().getSubmitOrderPromotion())) {
-            amount = worldlineAmountUtils.createAmount(BigDecimal.valueOf(abstractOrderModel.getSubtotal()).subtract(BigDecimal.valueOf(abstractOrderModel.getTotalDiscounts())), currencyCode);
-        } else {
-            amount = worldlineAmountUtils.createAmount(abstractOrderModel.getTotalPrice(), currencyCode);
-        }
+        amount = worldlineAmountUtils.getOrderPrice(abstractOrderModel);
         amountOfMoney.setAmount(amount);
         amountOfMoney.setCurrencyCode(currencyCode);
 
@@ -88,9 +73,5 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
 
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
-    }
-
-    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
-        this.worldlineConfigurationService = worldlineConfigurationService;
     }
 }
