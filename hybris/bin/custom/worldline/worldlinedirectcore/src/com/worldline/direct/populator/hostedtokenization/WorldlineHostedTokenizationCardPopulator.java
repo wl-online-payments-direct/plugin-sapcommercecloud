@@ -1,34 +1,46 @@
 package com.worldline.direct.populator.hostedtokenization;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
-
+import com.google.common.base.Preconditions;
+import com.ingenico.direct.domain.*;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
+import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
-import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.session.SessionService;
 
-import com.ingenico.direct.domain.CardPaymentMethodSpecificInput;
-import com.ingenico.direct.domain.CreatePaymentRequest;
-import com.ingenico.direct.domain.Order;
-import com.ingenico.direct.domain.RedirectionData;
-import com.ingenico.direct.domain.ThreeDSecure;
-import com.worldline.direct.model.WorldlineConfigurationModel;
+import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
-public class WorldlineHostedTokenizationPaymentPopulator implements Populator<AbstractOrderModel, CreatePaymentRequest> {
+public class WorldlineHostedTokenizationCardPopulator implements Populator<AbstractOrderModel, CreatePaymentRequest> {
 
     private static final String ECOMMERCE = "ECOMMERCE";
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
-
-    private Converter<AbstractOrderModel, Order> worldlineOrderParamConverter;
+    private WorldlinePaymentService worldlinePaymentService;
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreatePaymentRequest createPaymentRequest) throws ConversionException {
-        validateParameterNotNull(abstractOrderModel, "order cannot be null!");
-        createPaymentRequest.setOrder(worldlineOrderParamConverter.convert(abstractOrderModel));
-        createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput());
+        validateParameterNotNull(abstractOrderModel, "abstractOrderModel cannot be null!");
+        validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "PaymentInfo cannot be null!");
+        Preconditions.checkArgument(abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel, "Payment has to be WorldlinePaymentInfo");
+
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+
+        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentInfo.getPaymentMethod())) {
+            final GetHostedTokenizationResponse hostedTokenization = worldlinePaymentService.getHostedTokenization(paymentInfo.getHostedTokenizationId());
+            validateParameterNotNull(hostedTokenization, "tokenizationResponse cannot be null");
+
+            createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput());
+            createPaymentRequest.getCardPaymentMethodSpecificInput()
+                    .setToken(hostedTokenization.getToken().getId());
+            createPaymentRequest.getCardPaymentMethodSpecificInput()
+                    .setPaymentProductId(hostedTokenization.getToken().getPaymentProductId());
+
+        }
 
     }
 
@@ -51,18 +63,19 @@ public class WorldlineHostedTokenizationPaymentPopulator implements Populator<Ab
     }
 
     private String getHostedTokenizationReturnUrl() {
-        return sessionService.getAttribute("hostedTokenizationReturnUrl");
+        return sessionService.getAttribute(HOSTED_TOKENIZATION_RETURN_URL);
     }
 
     public void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
 
-    public void setWorldlineOrderParamConverter(Converter<AbstractOrderModel, Order> worldlineOrderParamConverter) {
-        this.worldlineOrderParamConverter = worldlineOrderParamConverter;
-    }
 
     public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
         this.worldlineConfigurationService = worldlineConfigurationService;
+    }
+
+    public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
+        this.worldlinePaymentService = worldlinePaymentService;
     }
 }

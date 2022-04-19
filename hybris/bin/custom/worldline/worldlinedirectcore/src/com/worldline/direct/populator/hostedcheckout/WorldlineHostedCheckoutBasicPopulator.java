@@ -1,9 +1,8 @@
 package com.worldline.direct.populator.hostedcheckout;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
-
-import java.util.List;
-
+import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
+import com.ingenico.direct.domain.HostedCheckoutSpecificInput;
+import com.ingenico.direct.domain.Order;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
@@ -12,15 +11,16 @@ import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.I18NService;
 import de.hybris.platform.servicelayer.session.SessionService;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
-import com.ingenico.direct.domain.HostedCheckoutSpecificInput;
-import com.ingenico.direct.domain.Order;
+import java.util.List;
+
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 public class WorldlineHostedCheckoutBasicPopulator implements Populator<AbstractOrderModel, CreateHostedCheckoutRequest> {
+
+    public static final String HOSTED_CHECKOUT_RETURN_URL = "hostedCheckoutReturnUrl";
 
     private SessionService sessionService;
     private I18NService i18NService;
@@ -58,7 +58,7 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
     }
 
     private String getReturnUrlFromSession() {
-        return sessionService.getAttribute("hostedCheckoutReturnUrl");
+        return sessionService.getAttribute(HOSTED_CHECKOUT_RETURN_URL);
     }
 
     public void setSessionService(SessionService sessionService) {
