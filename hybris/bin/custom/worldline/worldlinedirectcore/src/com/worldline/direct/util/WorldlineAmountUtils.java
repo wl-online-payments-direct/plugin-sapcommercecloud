@@ -1,10 +1,11 @@
 package com.worldline.direct.util;
 
+import de.hybris.platform.core.model.c2l.CurrencyModel;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.servicelayer.i18n.CommonI18NService;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
-import de.hybris.platform.core.model.c2l.CurrencyModel;
-import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 
 public class WorldlineAmountUtils {
 
@@ -39,5 +40,8 @@ public class WorldlineAmountUtils {
         this.commonI18NService = commonI18NService;
     }
 
-
+    public long getOrderPrice(AbstractOrderModel abstractOrderModel)
+    {
+       return createAmount(BigDecimal.valueOf(abstractOrderModel.getSubtotal()).add(BigDecimal.valueOf(abstractOrderModel.getDeliveryCost())).subtract(BigDecimal.valueOf(abstractOrderModel.getTotalDiscounts())),abstractOrderModel.getCurrency().getIsocode());
+    }
 }
