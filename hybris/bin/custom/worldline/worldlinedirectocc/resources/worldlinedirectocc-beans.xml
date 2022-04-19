@@ -153,6 +153,7 @@
         <property name="paymentMethod" type="String"/>
         <property name="issuerId" type="String"/>
         <property name="hostedTokenizationId" type="String"/>
+        <property name="hostedCheckoutToken" type="String"/>
         <property name="useDeliveryAddress" type="boolean"/>
         <property name="billingAddress" type="de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO"/>
     </bean>

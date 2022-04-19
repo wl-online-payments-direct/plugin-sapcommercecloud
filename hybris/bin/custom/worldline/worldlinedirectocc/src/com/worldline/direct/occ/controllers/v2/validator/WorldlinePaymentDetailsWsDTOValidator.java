@@ -2,12 +2,11 @@ package com.worldline.direct.occ.controllers.v2.validator;
 
 
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
-
-import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
 
 @Component("worldlinePaymentDetailsWsDTOValidator")
 public class WorldlinePaymentDetailsWsDTOValidator implements Validator {
@@ -35,6 +34,8 @@ public class WorldlinePaymentDetailsWsDTOValidator implements Validator {
                 ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "field.required", new Object[]{"issuerId"});
             } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP == wsDTO.getPaymentProductId()) {
                 ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedTokenizationId", "field.required", new Object[]{"hostedTokenizationId"});
+            } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP == wsDTO.getPaymentProductId()) {
+                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedCheckoutId", "field.required.missing", new Object[]{"hostedCheckoutId"});
             }
         }
 
