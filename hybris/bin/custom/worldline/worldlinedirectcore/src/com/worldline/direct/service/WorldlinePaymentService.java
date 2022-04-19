@@ -1,29 +1,14 @@
 package com.worldline.direct.service;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import de.hybris.platform.core.model.order.OrderModel;
-
-import com.ingenico.direct.domain.CancelPaymentResponse;
-import com.ingenico.direct.domain.CaptureResponse;
-import com.ingenico.direct.domain.CapturesResponse;
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
-import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
-import com.ingenico.direct.domain.CreatePaymentResponse;
-import com.ingenico.direct.domain.DirectoryEntry;
-import com.ingenico.direct.domain.GetHostedCheckoutResponse;
-import com.ingenico.direct.domain.GetHostedTokenizationResponse;
-import com.ingenico.direct.domain.GetPaymentProductsResponse;
-import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.direct.domain.PaymentResponse;
-import com.ingenico.direct.domain.ProductDirectory;
-import com.ingenico.direct.domain.RefundResponse;
+import com.ingenico.direct.domain.*;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.ingenico.direct.domain.TokenResponse;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
+import de.hybris.platform.core.model.order.OrderModel;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 public interface WorldlinePaymentService {
 
@@ -41,7 +26,7 @@ public interface WorldlinePaymentService {
 
     GetHostedTokenizationResponse getHostedTokenization(String hostedTokenizationId);
 
-    CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData, GetHostedTokenizationResponse tokenizationResponse) throws WorldlineNonAuthorizedPaymentException;
+    CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException;
 
     PaymentResponse getPayment(String paymentId);
 
