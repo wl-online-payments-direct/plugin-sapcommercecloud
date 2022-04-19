@@ -262,9 +262,6 @@
     <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectbackoffice"/>
     <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectocc"/>
     <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectwebhook"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectcustomersupportbackoffice"/>
-
-    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectfulfilmentprocess"/>
 
   </extensions>
 </hybrisconfig>

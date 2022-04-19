@@ -245,4 +245,29 @@
 	</context>
 	<!-- WorldlineWebhooksEvent BO appearance END -->
 
+	<!-- CS Backoffice START -->
+	<context component="cseditorareaactions" type="Order" merge-by="type">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common">
+				<y:label>actiongroup.common</y:label>
+				<y:action action-id="de.hybris.ordermanagementbackoffice.actions.order.manualpaymentcaptureaction" property="currentObject" merge-mode="remove"/>
+				<y:action action-id="de.hybris.ordermanagementbackoffice.actions.order.cancelorderaction" property="currentObject" merge-mode="remove" />
+				<y:action action-id="com.worldline.direct.actions.worldlinemanualpaymentcaptureaction" property="currentObject"/>
+				<y:action action-id="com.worldline.direct.actions.worldlinemanualpaymentreverseauthaction" property="currentObject"/>
+			</y:group>
+		</y:actions>
+	</context>
+
+	<context component="cseditorareaactions" type="ReturnRequest" merge-by="type">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common">
+				<y:label>actiongroup.common</y:label>
+				<y:action action-id="de.hybris.ordermanagementbackoffice.actions.returns.manualrefundaction"
+						  property="currentObject" merge-mode="remove"/>
+				<y:action action-id="com.worldline.direct.actions.worldlinemanualpaymentrefundaction" property="currentObject"/>
+			</y:group>
+		</y:actions>
+	</context>
+	<!-- CS Backoffice END -->
+
 </config>
