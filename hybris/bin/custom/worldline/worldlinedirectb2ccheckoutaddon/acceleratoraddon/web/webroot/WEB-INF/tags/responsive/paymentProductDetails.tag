@@ -8,16 +8,28 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="paymentproduct"
            tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/paymentproducts" %>
+<%@ attribute name="paymentInfo" required="false" type="com.worldline.direct.order.data.WorldlinePaymentInfoData" %>
 
 <c:choose>
     <c:when test="${paymentProduct.id==-1}">
         <spring:theme code="checkout.paymentProduct.groupedCards.display.label" var="groupedCardsLabel"/>
         <div class="worldline_payment_product" title="${groupedCardsLabel}">
-            <form:radiobutton path="paymentProductId" cssClass="payment_product htp"  value="${paymentProduct.id}" tabindex="${tabindex}"
+            <form:radiobutton path="paymentProductId" cssClass="payment_product htp" value="${paymentProduct.id}"
+                              tabindex="${tabindex}"
                               checked="${isSelected ? 'checked' : '' }"/>
             <span>${groupedCardsLabel}</span>
             <paymentproduct:hostedTokenizationDetail hostedTokenization="${hostedTokenization}"
                                                      savedPaymentInfos="${savedPaymentInfos}"/>
+        </div>
+    </c:when>
+    <c:when test="${paymentProduct.id==-2 && not empty savedPaymentInfos}">
+        <spring:theme code="checkout.multi.hostedCheckout.useSavedCard" var="groupedCardsLabel"/>
+        <div class="worldline_payment_product" title="${groupedCardsLabel}">
+            <form:radiobutton path="paymentProductId" cssClass="payment_product" value="${paymentProduct.id}"
+                              tabindex="${tabindex}"
+                              checked="${isSelected ? 'checked' : '' }"/>
+            <span>${groupedCardsLabel}</span>
+            <paymentproduct:hostedCheckoutDetail paymentInfo="${paymentInfo}" savedPaymentInfos="${savedPaymentInfos}"/>
         </div>
     </c:when>
     <c:otherwise>
