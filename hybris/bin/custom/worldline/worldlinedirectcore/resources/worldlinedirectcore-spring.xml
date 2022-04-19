@@ -69,7 +69,9 @@
 
     <bean id="worldlineExtendedCheckoutFacade"
           class="com.worldline.direct.facade.impl.WorldLineExtendedCheckoutFacadeImpl"
-          parent="defaultCheckoutFacade"/>
+          parent="defaultCheckoutFacade">
+        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+    </bean>
 
     <bean id="worldlineWebhookFacade" class="com.worldline.direct.facade.impl.WorldlineWebhookFacadeImpl">
         <property name="worldlineWebhookService" ref="worldlineWebhookService"/>
