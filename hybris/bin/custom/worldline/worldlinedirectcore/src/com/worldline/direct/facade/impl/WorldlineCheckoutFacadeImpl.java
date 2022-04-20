@@ -152,7 +152,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     public void fillWorldlinePaymentInfoData(final WorldlinePaymentInfoData worldlinePaymentInfoData,
                                              int paymentId,
                                              String paymentDirId,
-<<<<<<< HEAD
                                              String hostedTokenizationId, String hostedCheckoutToken) throws WorldlineNonValidPaymentProductException {
         if (StringUtils.isNotEmpty(hostedCheckoutToken) && paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP) {
             final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
