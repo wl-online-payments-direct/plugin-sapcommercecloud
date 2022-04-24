@@ -6,6 +6,7 @@ import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.occ.controllers.v2.validator.WorldlinePaymentDetailsWsDTOValidator;
 import com.worldline.direct.occ.helpers.WorldlineHelper;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
@@ -13,10 +14,13 @@ import com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
 import com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO;
 import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
+
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.user.data.AddressData;
+import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
+import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartAddressException;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartException;
@@ -58,6 +62,9 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @Resource(name = "worldlineCheckoutFacade")
     private WorldlineCheckoutFacade worldlineCheckoutFacade;
 
+    @Resource(name = "worldlineUserFacade")
+    private WorldlineUserFacade worldlineUserFacade;
+
     @Resource(name = "worldlinePaymentDetailsWsDTOValidator")
     private WorldlinePaymentDetailsWsDTOValidator worldlinePaymentDetailsWsDTOValidator;
 
@@ -80,6 +87,20 @@ public class WorldlineCartsController extends WorldlineBaseController {
         worldlineHelper.fillIdealIssuers(paymentProductListWsDTO, availablePaymentMethods, fields);
 
         return paymentProductListWsDTO;
+    }
+
+    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
+    @RequestMapping(value = "/{cartId}/worldlinepaymentdetails", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(nickname = "getSavedPaymentDetailsListForCheckout", value = "Get saved customer's credit card payment details list for checkout.", notes = "Return saved customer's credit card payment details list for checkout.")
+    @ApiBaseSiteIdUserIdAndCartIdParam
+    public PaymentDetailsListWsDTO getSavedPaymentDetailsListForCheckout(@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
+        final List<PaymentProduct> availablePaymentMethods = worldlineCheckoutFacade.getAvailablePaymentMethods();
+        final List<WorldlinePaymentInfoData> worldlinePaymentInfoDataList = worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE);
+        final PaymentDetailsListWsDTO paymentDetailsListWsDTO = new PaymentDetailsListWsDTO();
+        paymentDetailsListWsDTO.setPayments(dataMapper.mapAsList(worldlinePaymentInfoDataList, PaymentDetailsWsDTO.class, fields));
+
+        return paymentDetailsListWsDTO;
     }
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
