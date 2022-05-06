@@ -47,6 +47,7 @@
         <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
     </bean>
 
     <bean id="worldlineCheckoutFacade" class="com.worldline.direct.facade.impl.WorldlineCheckoutFacadeImpl">
