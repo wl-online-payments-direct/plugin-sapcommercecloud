@@ -18,8 +18,11 @@ public interface WorldlineUserFacade {
 
     WorldlinePaymentInfoData getWorldlinePaymentInfoByToken(String token);
 
+    WorldlinePaymentInfoData getWorldlinePaymentInfoByCode(String code);
+
     void saveWorldlinePaymentInfo(TokenResponse tokenResponse, PaymentProduct paymentProduct);
 
     void deleteSavedWorldlinePaymentInfo(String code);
 
+    void setDefaultPaymentInfo(WorldlinePaymentInfoData paymentInfoData);
 }
