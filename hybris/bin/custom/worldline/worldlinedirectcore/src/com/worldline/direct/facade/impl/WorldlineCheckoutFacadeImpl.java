@@ -32,7 +32,6 @@ import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
-import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.core.model.user.CustomerModel;
@@ -52,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
@@ -69,7 +67,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private CommerceCheckoutService commerceCheckoutService;
     private BaseStoreService baseStoreService;
     private CustomerAccountService customerAccountService;
-    private WorldlinePaymentModeService worldlinePaymentModeService;
     private WorldlineCustomerAccountService worldlineCustomerAccountService;
     private CheckoutCustomerStrategy checkoutCustomerStrategy;
 
@@ -87,17 +84,10 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 totalPrice.getCurrencyIso(),
                 getCountryCode(cartData),
                 getShopperLocale());
-        paymentProducts = filterByAvailablePaymentModes(paymentProducts);
-        paymentProducts = filterByCheckoutType(paymentProducts);
 
         return paymentProducts;
     }
 
-    private List<PaymentProduct> filterByAvailablePaymentModes(List<PaymentProduct> paymentProducts) {
-        List<String> activePaymentModeCodes = worldlinePaymentModeService.getActivePaymentModes().stream().map(PaymentModeModel::getCode).collect(Collectors.toList());
-        return paymentProducts.stream()
-                .filter(paymentProduct -> activePaymentModeCodes.contains(String.valueOf(paymentProduct.getId()))).collect(Collectors.toList());
-    }
 
     @Override
     public PaymentProduct getPaymentMethodById(int paymentId) {
@@ -164,7 +154,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 worldlinePaymentInfoData.setPaymentProductDirectoryId(paymentDirId);
                 worldlinePaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
                 if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP || paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL) {
-		    worldlinePaymentInfoData.setPaymentProductDirectoryId(paymentDirId);
+		            worldlinePaymentInfoData.setPaymentProductDirectoryId(paymentDirId);
                     worldlinePaymentInfoData.setHostedTokenizationId(hostedTokenizationId);
                     worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
                 } else {
@@ -307,35 +297,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return orderConverter.convert(orderModel);
     }
 
-    protected List<PaymentProduct> filterByCheckoutType(List<PaymentProduct> paymentProducts) {
-        final WorldlineCheckoutTypesEnum worldlineCheckoutType = getWorldlineCheckoutType();
-        if (worldlineCheckoutType == null) {
-            return paymentProducts;
-        }
-        switch (worldlineCheckoutType) {
-            case HOSTED_CHECKOUT:
-                paymentProducts = paymentProducts.stream()
-                        .filter(paymentProduct -> !WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.MOBILE.getValue().equals(paymentProduct.getPaymentMethod()))
-                        .collect(Collectors.toList());
-                paymentProducts.add(0, createHcpGroupedCardPaymentProduct());
-                break;
-            case HOSTED_TOKENIZATION:
-                final Predicate<PaymentProduct> isCard = paymentProduct -> WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentProduct.getPaymentMethod());
-                final boolean isCardsPresent = paymentProducts.stream()
-                        .anyMatch(isCard);
-
-                final Predicate<PaymentProduct> isBCMC = paymentProduct -> WorldlinedirectcoreConstants.PAYMENT_METHOD_BCC == paymentProduct.getId();
-                paymentProducts = paymentProducts.stream()
-                        .filter(isCard.negate().or(isBCMC))
-                        .collect(Collectors.toList());
-
-                if (isCardsPresent) {
-                    paymentProducts.add(0, createHtpGroupedCardPaymentProduct());
-                }
-                break;
-        }
-        return paymentProducts;
-    }
 
     @Override
     public WorldlineCheckoutTypesEnum getWorldlineCheckoutType() {
@@ -575,9 +536,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         this.worldlineBusinessProcessService = worldlineBusinessProcessService;
     }
 
-    public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
-        this.worldlinePaymentModeService = worldlinePaymentModeService;
-    }
 
     public void setWorldlineCustomerAccountService(WorldlineCustomerAccountService worldlineCustomerAccountService) {
         this.worldlineCustomerAccountService = worldlineCustomerAccountService;
