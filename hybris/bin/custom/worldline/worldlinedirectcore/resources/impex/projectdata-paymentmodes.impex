@@ -1,5 +1,5 @@
 # Create PaymentModes by group
-INSERT_UPDATE PaymentMode; code[unique = true]        ; name[lang = en]                                              ; description[lang = en]                                                       ; active; paymentinfotype(code);
+INSERT_UPDATE StandardPaymentMode; code[unique = true]        ; name[lang = en]                                              ; description[lang = en]                                                       ; active; paymentinfotype(code);
                          ; worldlineCardPaymentMode   ; card worldline payment mode                                  ; payment mode by cards                                                        ; true  ; WorldlinePaymentInfo ;
                          ; worldlinePayPalPaymentMode ; Paypal worldline payment mode                                ; payment mode by paypal                                                       ; true  ; WorldlinePaymentInfo ;
                          ; worldlineIDEALPaymentMode  ; IDEAL worldline payment mode                                 ; payment mode by ideal                                                        ; true  ; WorldlinePaymentInfo ;
@@ -145,3 +145,7 @@ INSERT_UPDATE PaymentMode; code[unique = true]        ; name[lang = en]         
                          ; 201                        ; Invoice                                                      ; Payment Mode By Invoice                                                      ; true  ; WorldlinePaymentInfo ;
                          ; 9000                       ; AfterPay Installments                                        ; Payment Mode By AfterPay Installments                                        ; true  ; WorldlinePaymentInfo ;
                          ; 9001                       ; AfterPay Invoice                                             ; Payment Mode By AfterPay Invoice                                             ; true  ; WorldlinePaymentInfo ;
+                         ; 3302                       ; Klarna Pay Later                                             ; Payment Mode By Klarna Pay Later                                             ; true  ; WorldlinePaymentInfo ;
+                         ; 3301                       ; Klarna Pay Now                                             ; Payment Mode By Klarna Pay Now                                             ; true  ; WorldlinePaymentInfo ;
+                         ; 5110                       ; Oney3x4x                                             ; Payment Mode By Oney 3x4x                                             ; true  ; WorldlinePaymentInfo ;
+                         ; 5600                       ; OneyBrandedGiftCard                                             ; Payment Mode By Oney Branded Gift Card                                             ; true  ; WorldlinePaymentInfo ;

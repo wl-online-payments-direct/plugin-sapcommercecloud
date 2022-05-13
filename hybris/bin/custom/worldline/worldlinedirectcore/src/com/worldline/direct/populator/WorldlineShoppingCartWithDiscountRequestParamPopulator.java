@@ -6,6 +6,7 @@ import com.worldline.direct.util.WorldlineAmountUtils;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -64,7 +65,7 @@ public class WorldlineShoppingCartWithDiscountRequestParamPopulator implements P
             itemAmountOfMoney.setAmount(entry.getKey().multiply(BigDecimal.valueOf(entry.getValue())).longValue());
             itemAmountOfMoney.setCurrencyCode(currencyISOCode);
             item.setAmountOfMoney(itemAmountOfMoney);
-            item.setOrderLineDetails(createOrderLineDetails(orderEntry.getProduct().getName(), entry.getKey().longValue(), entry.getValue().longValue()));
+            item.setOrderLineDetails(createOrderLineDetails(orderEntry.getProduct(), entry.getKey().longValue(), entry.getValue().longValue()));
             lineItems.add(item);
         });
         return lineItems;
@@ -96,16 +97,20 @@ public class WorldlineShoppingCartWithDiscountRequestParamPopulator implements P
 
         OrderLineDetails orderLineDetails = new OrderLineDetails();
         orderLineDetails.setProductName(abstractOrderModel.getDeliveryMode().getName());
+        orderLineDetails.setProductCode(abstractOrderModel.getDeliveryMode().getName());
         orderLineDetails.setQuantity(1L);
+        orderLineDetails.setTaxAmount(0L);
         orderLineDetails.setProductPrice(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(), currencyISOCode));
 
         shipping.setOrderLineDetails(orderLineDetails);
         return shipping;
     }
 
-    private OrderLineDetails createOrderLineDetails(String productName, long productPrice, long quantity) {
+    private OrderLineDetails createOrderLineDetails(ProductModel productModel, long productPrice, long quantity) {
         OrderLineDetails orderLineDetails = new OrderLineDetails();
-        orderLineDetails.setProductName(productName);
+        orderLineDetails.setProductName(productModel.getName());
+        orderLineDetails.setProductCode(productModel.getCode());
+        orderLineDetails.setTaxAmount(0L);
         orderLineDetails.setQuantity(quantity);
         orderLineDetails.setProductPrice(productPrice);
         return orderLineDetails;
