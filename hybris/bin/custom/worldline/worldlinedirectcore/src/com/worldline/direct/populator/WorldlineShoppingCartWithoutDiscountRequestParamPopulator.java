@@ -59,7 +59,9 @@ public class WorldlineShoppingCartWithoutDiscountRequestParamPopulator implement
 
         OrderLineDetails orderLineDetails = new OrderLineDetails();
         orderLineDetails.setProductName(abstractOrderModel.getDeliveryMode().getName());
+        orderLineDetails.setProductCode(abstractOrderModel.getDeliveryMode().getName());
         orderLineDetails.setQuantity(1L);
+        orderLineDetails.setTaxAmount(0L);
         orderLineDetails.setProductPrice(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(), currencyISOCode));
 
         shipping.setOrderLineDetails(orderLineDetails);
@@ -69,6 +71,9 @@ public class WorldlineShoppingCartWithoutDiscountRequestParamPopulator implement
     private OrderLineDetails createOrderLineDetails(AbstractOrderEntryModel orderEntry, String currencyISOcode) {
         OrderLineDetails orderLineDetails = new OrderLineDetails();
         orderLineDetails.setProductName(orderEntry.getProduct().getName());
+        orderLineDetails.setProductCode(orderEntry.getProduct().getCode());
+        orderLineDetails.setTaxAmount(0L);
+        orderLineDetails.setQuantity(orderEntry.getQuantity());
         orderLineDetails.setQuantity(orderEntry.getQuantity());
         orderLineDetails.setProductPrice(BigDecimal.valueOf(worldlineAmountUtils.createAmount(orderEntry.getTotalPrice(), currencyISOcode)).divide(BigDecimal.valueOf(orderEntry.getQuantity())).longValue());
         return orderLineDetails;

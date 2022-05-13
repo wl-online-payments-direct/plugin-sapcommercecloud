@@ -37,6 +37,7 @@
           class="com.worldline.direct.populator.WorldlineCustomerRequestParamPopulator">
         <property name="commonI18NService" ref="commonI18NService"/>
         <property name="customerEmailResolutionService" ref="customerEmailResolutionService"/>
+        <property name="customerNameStrategy" ref="customerNameStrategy"/>
     </bean>
 
     <bean id="worldlineBrowserCustomerDevicePopulator"
