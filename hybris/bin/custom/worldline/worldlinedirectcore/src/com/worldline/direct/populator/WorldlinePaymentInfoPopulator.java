@@ -8,6 +8,7 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 
 public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> {
 
@@ -22,7 +23,7 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         worldlinePaymentInfoData.setPaymentProductDirectoryId(worldlinePaymentInfoModel.getPaymentProductDirectoryId());
         worldlinePaymentInfoData.setHostedTokenizationId(worldlinePaymentInfoModel.getHostedTokenizationId());
         worldlinePaymentInfoData.setWorldlineCheckoutType(worldlinePaymentInfoModel.getWorldlineCheckoutType());
-        worldlinePaymentInfoData.setAlias(worldlinePaymentInfoModel.getAlias());
+        worldlinePaymentInfoData.setAlias(formattedAlias(worldlinePaymentInfoModel.getAlias()));
         worldlinePaymentInfoData.setCardholderName(worldlinePaymentInfoModel.getCardholderName());
         worldlinePaymentInfoData.setExpiryDate(worldlinePaymentInfoModel.getExpiryDate());
         String[] splittedDate = StringUtils.split(worldlinePaymentInfoModel.getExpiryDate(), "/");
@@ -43,6 +44,14 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
 
         worldlinePaymentInfoData.setReturnMAC(worldlinePaymentInfoModel.getReturnMAC());
         worldlinePaymentInfoData.setSaved(worldlinePaymentInfoModel.isSaved());
+    }
+
+    private String formattedAlias(String alias) {
+        if (StringUtils.isNotEmpty(alias) && alias.length()>4) {
+            return "*".repeat(12) + alias.substring(alias.length() - 4);
+        }else {
+            return StringUtils.EMPTY;
+        }
     }
 
     public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {

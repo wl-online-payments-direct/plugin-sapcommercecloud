@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
 import de.hybris.platform.util.Config;
@@ -39,6 +40,9 @@ public class WorldlineHelper {
     @Resource(name = "worldlineUserFacade")
     private WorldlineUserFacade worldlineUserFacade;
 
+    @Resource(name = "worldlinePaymentProductUtils")
+    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
+
     private int getIdealIndex(List<PaymentProduct> availablePaymentMethods) {
         return Iterables.indexOf(availablePaymentMethods, paymentProduct -> PAYMENT_METHOD_IDEAL == paymentProduct.getId());
     }
@@ -58,7 +62,8 @@ public class WorldlineHelper {
     }
 
     public void fillSavedPaymentDetails(HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO, String fields) {
-        final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfos(true);
+        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductUtils.filterByAvailablePaymentModes(worldlineCheckoutFacade.getAvailablePaymentMethods());
+        final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE);
         final PaymentDetailsListWsDTO paymentDetailsListWsDTO = new PaymentDetailsListWsDTO();
         paymentDetailsListWsDTO.setPayments(getDataMapper().mapAsList(worldlinePaymentInfos, PaymentDetailsWsDTO.class, fields));
         hostedTokenizationResponseWsDTO.setSavedPaymentDetails(paymentDetailsListWsDTO);
