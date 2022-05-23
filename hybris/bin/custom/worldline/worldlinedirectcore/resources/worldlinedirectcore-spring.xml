@@ -39,6 +39,11 @@
         <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
+    <bean id="worldlinePaymentProductUtils" class="com.worldline.direct.util.WorldlinePaymentProductUtils">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+    </bean>
+
     <!-- facades -->
     <alias name="worldlineUserFacade" alias="worldlineUserFacade"/>
     <bean id="worldlineUserFacade" class="com.worldline.direct.facade.impl.WorldlineUserFacadeImpl">
@@ -47,6 +52,7 @@
         <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
     </bean>
 
     <bean id="worldlineCheckoutFacade" class="com.worldline.direct.facade.impl.WorldlineCheckoutFacadeImpl">
@@ -63,7 +69,6 @@
         <property name="modelService" ref="modelService"/>
         <property name="baseStoreService" ref="baseStoreService"/>
         <property name="customerAccountService" ref="customerAccountService"/>
-        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
         <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
         <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
     </bean>
