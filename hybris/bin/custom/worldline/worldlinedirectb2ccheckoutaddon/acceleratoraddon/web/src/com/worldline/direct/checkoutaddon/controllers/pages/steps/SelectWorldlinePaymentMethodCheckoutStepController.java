@@ -11,6 +11,7 @@ import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -67,6 +68,9 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
     @Resource(name = "worldlinePaymentDetailsValidator")
     private WorldlinePaymentDetailsValidator worldlinePaymentDetailsValidator;
 
+    @Resource(name = "worldlinePaymentProductUtils")
+    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
+
     protected UserFacade getUserFacade() {
         return userFacade;
     }
@@ -84,8 +88,8 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         setupSelectPaymentPage(model);
 
         model.addAttribute("worldlinePaymentDetailsForm", new WorldlinePaymentDetailsForm());
-        final List<PaymentProduct> availablePaymentMethods = worldlineCheckoutFacade.getAvailablePaymentMethods();
-        model.addAttribute("paymentProducts", availablePaymentMethods);
+        final List<PaymentProduct> availablePaymentMethods =worldlinePaymentProductUtils.filterByAvailablePaymentModes( worldlineCheckoutFacade.getAvailablePaymentMethods());
+        model.addAttribute("paymentProducts", worldlinePaymentProductUtils.filterByCheckoutType(availablePaymentMethods));
 
         model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
         model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));

@@ -8,7 +8,7 @@
         <property name="paymentMethod" type="String"/>
         <property name="paymentMethodImageUrl" type="String"/>
         <property name="original" type="de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel"/>
-        <property name="saved" type="java.lang.Boolean"/>
+        <property name="saved" type="boolean"/>
         <property name="paymentProductDirectoryId" type="String"/>
         <property name="hostedTokenizationId" type="String"/>
         <property name="worldlineCheckoutType" type="com.worldline.direct.enums.WorldlineCheckoutTypesEnum"/>
@@ -22,6 +22,8 @@
         <property name="expiryYear" type="String"/>
         <property name="billingAddress" type="de.hybris.platform.commercefacades.user.data.AddressData"/>
         <property name="returnMAC" type="String"/>
+        <property name="defaultPayment" type="boolean"/>
+        <property name="cardType" type="de.hybris.platform.commercefacades.order.data.CardTypeData"/>
     </bean>
 
     <bean class="de.hybris.platform.commercefacades.order.data.CartData">
