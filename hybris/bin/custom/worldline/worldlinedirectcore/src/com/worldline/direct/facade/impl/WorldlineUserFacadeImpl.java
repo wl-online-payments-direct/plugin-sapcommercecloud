@@ -9,11 +9,14 @@ import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.WorldlineCustomerAccountService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.commerceservices.customer.CustomerAccountService;
+import org.apache.commons.lang.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +36,7 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     private WorldlineCustomerAccountService worldlineCustomerAccountService;
     private WorldlinePaymentService worldlinePaymentService;
     private Converter<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> worldlinePaymentInfoConverter;
-
+    private CustomerAccountService customerAccountService;
     @Override
     public List<WorldlinePaymentInfoData> getWorldlinePaymentInfos(boolean saved) {
         final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
@@ -42,6 +45,7 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
 
         for (final WorldlinePaymentInfoModel worldlinePaymentInfoModel : worldlinePaymentInfos) {
             final WorldlinePaymentInfoData paymentInfoData = worldlinePaymentInfoConverter.convert(worldlinePaymentInfoModel);
+            paymentInfoData.setDefaultPayment(BooleanUtils.isTrue(worldlinePaymentInfoModel.equals(currentCustomer.getDefaultPaymentInfo())));
             worldlinePaymentInfoDataList.add(paymentInfoData);
         }
         return worldlinePaymentInfoDataList;
@@ -90,6 +94,20 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     }
 
     @Override
+    public WorldlinePaymentInfoData getWorldlinePaymentInfoByCode(String code) {
+        final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+        final WorldlinePaymentInfoModel worldlinePaymentInfoById = worldlineCustomerAccountService.getWorldlinePaymentInfoByCode(currentCustomer, code);
+        final PaymentInfoModel defaultPaymentInfoModel = currentCustomer.getDefaultPaymentInfo();
+
+        if (worldlinePaymentInfoById != null) {
+            WorldlinePaymentInfoData worldlinePaymentInfoData = worldlinePaymentInfoConverter.convert(worldlinePaymentInfoById);
+            worldlinePaymentInfoData.setDefaultPayment(BooleanUtils.isTrue(worldlinePaymentInfoById.equals(defaultPaymentInfoModel)));
+            return worldlinePaymentInfoData;
+        }
+        return null;
+    }
+
+    @Override
     public void saveWorldlinePaymentInfo(TokenResponse tokenResponse, PaymentProduct paymentProduct) {
         final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
         WorldlinePaymentInfoModel worldlinePaymentInfoByToken = worldlineCustomerAccountService.getWorldlinePaymentInfoByToken(
@@ -130,6 +148,17 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
 
     }
 
+    @Override
+    public void setDefaultPaymentInfo(WorldlinePaymentInfoData paymentInfoData) {
+        validateParameterNotNullStandardMessage("paymentInfoData", paymentInfoData);
+        final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();;
+        final WorldlinePaymentInfoModel worldlinePaymentInfoModel =  worldlineCustomerAccountService.getWorldlinePaymentInfoByCode(currentCustomer, paymentInfoData.getCode());
+        if (worldlinePaymentInfoModel != null)
+        {
+             customerAccountService.setDefaultPaymentInfo(currentCustomer, worldlinePaymentInfoModel);
+        }
+    }
+
     public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
         this.checkoutCustomerStrategy = checkoutCustomerStrategy;
     }
@@ -144,6 +173,10 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
 
     public void setWorldlinePaymentInfoConverter(Converter<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> worldlinePaymentInfoConverter) {
         this.worldlinePaymentInfoConverter = worldlinePaymentInfoConverter;
+    }
+
+    public void setCustomerAccountService(CustomerAccountService customerAccountService) {
+        this.customerAccountService = customerAccountService;
     }
 
     public void setModelService(ModelService modelService) {
