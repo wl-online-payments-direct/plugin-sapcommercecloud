@@ -1,6 +1,7 @@
 package com.worldline.direct.populator;
 
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import de.hybris.platform.commercefacades.order.data.CardTypeData;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -44,6 +45,9 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
 
         worldlinePaymentInfoData.setReturnMAC(worldlinePaymentInfoModel.getReturnMAC());
         worldlinePaymentInfoData.setSaved(worldlinePaymentInfoModel.isSaved());
+        CardTypeData cardTypeData=new CardTypeData();
+        cardTypeData.setName(worldlinePaymentInfoModel.getCardBrand());
+        worldlinePaymentInfoData.setCardType(cardTypeData);
     }
 
     private String formattedAlias(String alias) {
