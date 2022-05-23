@@ -116,6 +116,15 @@ ACC.worldlinePaymentPost = {
                 $(".js-reset-token-form").parent().toggleClass("display-none");
             }
         });
+    },
+    checkApplePayAvailability: function () {
+        if (window.ApplePaySession) {
+            if (ApplePaySession.canMakePayments()) {
+                $('#worldline_payment_product_302').removeClass("display-none");
+                return;
+            }
+        }
+        $('#worldline_payment_product_302').remove();
     }
 }
 
@@ -124,4 +133,5 @@ $(document).ready(function () {
     ACC.worldlinePaymentPost.bindSelectWorldlinePaymentProduct();
     ACC.worldlinePaymentPost.bindSubmitWorldlinePlaceOrderForm();
     ACC.worldlinePaymentPost.bindWorldlineSavedPayments();
+    ACC.worldlinePaymentPost.checkApplePayAvailability();
 });

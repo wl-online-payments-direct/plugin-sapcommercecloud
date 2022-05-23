@@ -33,7 +33,7 @@
         </div>
     </c:when>
     <c:otherwise>
-        <div class="worldline_payment_product" title="${paymentProduct.displayHints.label}">
+        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product ${applePayId eq paymentProduct.id? 'display-none' : ''}" title="${paymentProduct.displayHints.label}">
             <form:radiobutton path="paymentProductId" cssClass="payment_product"
                               value="${paymentProduct.id}" tabindex="${tabindex}"
                               checked="${isSelected ? 'checked' : '' }"/>
