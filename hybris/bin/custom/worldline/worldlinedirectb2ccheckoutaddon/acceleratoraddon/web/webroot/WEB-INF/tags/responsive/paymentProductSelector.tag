@@ -7,11 +7,15 @@
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive" %>
 
 <c:set value="${not empty cartData.worldlinePaymentInfo ? cartData.worldlinePaymentInfo.id : '' }" var="selectedPaymentMethodId" />
+<c:set value="${not empty cartData.worldlinePaymentInfo  ? cartData.worldlinePaymentInfo.saved : false }"
+       var="isSavedCart"/>
 <div id="worldline_payment_products" class="worldline_payment_products" name="worldline_payment_products">
     <c:if test="${empty paymentProducts}">
         <p><spring:theme code="payment.methods.not.found"/></p>
     </c:if>
 	<c:forEach items="${paymentProducts}" var="paymentProduct" varStatus="index">
-		<worldline:paymentProductDetails paymentProduct="${paymentProduct}" tabindex="${tabindex+index.count}" isSelected="${selectedPaymentMethodId eq paymentProduct.id}" />
+        <worldline:paymentProductDetails paymentInfo="${cartData.worldlinePaymentInfo}"
+                                         paymentProduct="${paymentProduct}" tabindex="${tabindex+index.count}"
+                                         isSelected="${isSavedCart ? (paymentProduct.id eq -2) :selectedPaymentMethodId eq paymentProduct.id}"/>
 	</c:forEach>
 </div>

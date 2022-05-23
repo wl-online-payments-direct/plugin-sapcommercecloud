@@ -1,19 +1,17 @@
 package com.worldline.direct.populator.hostedcheckout;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
-
+import com.google.common.base.Preconditions;
+import com.ingenico.direct.domain.CardPaymentMethodSpecificInputBase;
+import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 
-import com.google.common.base.Preconditions;
-
-import com.ingenico.direct.domain.CardPaymentMethodSpecificInputBase;
-import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
-import com.worldline.direct.model.WorldlineConfigurationModel;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractOrderModel, CreateHostedCheckoutRequest> {
 
@@ -43,6 +41,7 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         }
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
         cardPaymentMethodSpecificInput.setTokenize(false);
+        cardPaymentMethodSpecificInput.setToken(paymentInfo.getToken());
         cardPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
 
         return cardPaymentMethodSpecificInput;
