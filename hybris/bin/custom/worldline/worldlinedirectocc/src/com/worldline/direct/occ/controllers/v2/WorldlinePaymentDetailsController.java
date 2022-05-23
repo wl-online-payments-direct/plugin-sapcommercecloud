@@ -1,16 +1,14 @@
 package com.worldline.direct.occ.controllers.v2;
 
 
-import javax.annotation.Resource;
-import java.util.List;
-
 import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdAndUserIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -19,14 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
-import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import javax.annotation.Resource;
+import java.util.List;
 
 @Controller
 @RequestMapping(value = "/{baseSiteId}/users/{userId}/worldlinepaymentdetails")
@@ -37,6 +31,8 @@ public class WorldlinePaymentDetailsController extends WorldlineBaseController {
     @Resource(name = "dataMapper")
     private DataMapper dataMapper;
 
+    @Resource(name = "userFacade")
+    private UserFacade userFacade;
     @Resource(name = "worldlineUserFacade")
     private WorldlineUserFacade worldlineUserFacade;
 
@@ -50,7 +46,6 @@ public class WorldlinePaymentDetailsController extends WorldlineBaseController {
         LOGGER.debug("[WORLDLINE] getSavedPaymentDetailsList");
 
         final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfos(true);
-        getDataMapper().map(worldlinePaymentInfos.get(0), PaymentDetailsWsDTO.class, fields);
         final PaymentDetailsListWsDTO paymentDetailsListWsDTO = new PaymentDetailsListWsDTO();
         paymentDetailsListWsDTO.setPayments(getDataMapper().mapAsList(worldlinePaymentInfos, PaymentDetailsWsDTO.class, fields));
 
@@ -66,6 +61,19 @@ public class WorldlinePaymentDetailsController extends WorldlineBaseController {
             @ApiParam(value = "Payment details identifier.", required = true) @PathVariable final String paymentDetailsId) {
         LOGGER.debug("[WORLDLINE] removePaymentDetails: id = {}", sanitize(paymentDetailsId));
         worldlineUserFacade.deleteSavedWorldlinePaymentInfo(paymentDetailsId);
+    }
+
+    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
+    @RequestMapping(value = "/{paymentDetailsId}", method = RequestMethod.PATCH)
+    @ApiBaseSiteIdAndUserIdParam
+    @ResponseStatus(HttpStatus.OK)
+    public void updatePaymentDetails(@ApiParam(value = "Payment details identifier.", required = true) @PathVariable final String paymentDetailsId) {
+        LOGGER.debug("[WORLDLINE] updatePaymentDetails: id = {}", sanitize(paymentDetailsId));
+        final WorldlinePaymentInfoData paymentInfoData = worldlineUserFacade.getWorldlinePaymentInfoByCode(paymentDetailsId);
+        final boolean isAlreadyDefaultPaymentInfo = paymentInfoData.isDefaultPayment();
+        if (paymentInfoData.isSaved() && !isAlreadyDefaultPaymentInfo ) {
+            worldlineUserFacade.setDefaultPaymentInfo(paymentInfoData);
+        }
     }
 
 

@@ -1,13 +1,12 @@
 
 package com.worldline.direct.checkoutaddon.forms.validation;
 
+import com.worldline.direct.checkoutaddon.forms.WorldlinePaymentDetailsForm;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
-
-import com.worldline.direct.checkoutaddon.forms.WorldlinePaymentDetailsForm;
 
 
 @Component("worldlinePaymentDetailsValidator")
@@ -36,6 +35,8 @@ public class WorldlinePaymentDetailsValidator implements Validator {
                 ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "checkout.error.issuer.id.missing");
             } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP == form.getPaymentProductId()) {
                 ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedTokenizationId", "checkout.error.hostedTokenization.hostedTokenizationId.missing");
+            } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP == form.getPaymentProductId()) {
+                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedCheckoutToken", "checkout.error.hostedcheckout.hostedCheckoutToken.missing");
             }
         }
 

@@ -4,15 +4,13 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-            http://www.springframework.org/schema/beans/spring-beans.xsd
-            http://www.springframework.org/schema/util
-            http://www.springframework.org/schema/util/spring-util.xsd">
+            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="worldlinedirectcore-spring-dao.xml"/>
     <import resource="worldlinedirectcore-spring-service.xml"/>
     <import resource="worldlinedirectcore-spring-converter.xml"/>
+    <import resource="worldlinedirectcore-spring-process.xml"/>
 
 
     <bean id="worldlineClientFactory" class="com.worldline.direct.factory.impl.WorldlineClientFactoryImpl">
@@ -41,6 +39,11 @@
         <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
+    <bean id="worldlinePaymentProductUtils" class="com.worldline.direct.util.WorldlinePaymentProductUtils">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+    </bean>
+
     <!-- facades -->
     <alias name="worldlineUserFacade" alias="worldlineUserFacade"/>
     <bean id="worldlineUserFacade" class="com.worldline.direct.facade.impl.WorldlineUserFacadeImpl">
@@ -49,6 +52,7 @@
         <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
     </bean>
 
     <bean id="worldlineCheckoutFacade" class="com.worldline.direct.facade.impl.WorldlineCheckoutFacadeImpl">
@@ -65,12 +69,15 @@
         <property name="modelService" ref="modelService"/>
         <property name="baseStoreService" ref="baseStoreService"/>
         <property name="customerAccountService" ref="customerAccountService"/>
-        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
     </bean>
 
     <bean id="worldlineExtendedCheckoutFacade"
           class="com.worldline.direct.facade.impl.WorldLineExtendedCheckoutFacadeImpl"
-          parent="defaultCheckoutFacade"/>
+          parent="defaultCheckoutFacade">
+        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+    </bean>
 
     <bean id="worldlineWebhookFacade" class="com.worldline.direct.facade.impl.WorldlineWebhookFacadeImpl">
         <property name="worldlineWebhookService" ref="worldlineWebhookService"/>

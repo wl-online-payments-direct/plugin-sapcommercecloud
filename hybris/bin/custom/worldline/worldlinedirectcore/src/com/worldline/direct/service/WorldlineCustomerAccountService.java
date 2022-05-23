@@ -9,5 +9,7 @@ public interface WorldlineCustomerAccountService {
 
     List<WorldlinePaymentInfoModel> getWorldlinePaymentInfos(CustomerModel customerModel, boolean saved);
 
+    WorldlinePaymentInfoModel getWorldlinePaymentInfoByCode(CustomerModel customerModel, String code);
+
     WorldlinePaymentInfoModel getWorldlinePaymentInfoByToken(CustomerModel customerModel, String token, boolean saved);
 }
