@@ -31,6 +31,17 @@ public class WorldlineCustomerAccountServiceImpl implements WorldlineCustomerAcc
         }
     }
 
+    @Override
+    public WorldlinePaymentInfoModel getWorldlinePaymentInfoByCode(CustomerModel customerModel, String code) {
+        validateParameterNotNull(customerModel, "Customer model cannot be null");
+        validateParameterNotNull(code, "code cannot be null");
+        try {
+            return worldlineCustomerAccountDao.findWorldlinePaymentInfosByCustomerAndCode(customerModel, code);
+        } catch (ModelNotFoundException ex) {
+            return null;
+        }
+    }
+
     public void setWorldlineCustomerAccountDao(WorldlineCustomerAccountDao worldlineCustomerAccountDao) {
         this.worldlineCustomerAccountDao = worldlineCustomerAccountDao;
     }

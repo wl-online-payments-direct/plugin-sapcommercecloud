@@ -23,6 +23,11 @@ public class WorldlineCustomerAccountDaoImpl extends AbstractItemDao implements 
             + WorldlinePaymentInfoModel._TYPECODE + "} WHERE {" + WorldlinePaymentInfoModel.USER + "} = ?customer AND {"
             + WorldlinePaymentInfoModel.TOKEN + "}=?token AND {" + WorldlinePaymentInfoModel.DUPLICATE + "} = ?duplicate";
 
+    private static final String FIND_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_AND_ID_QUERY = "SELECT {" + WorldlinePaymentInfoModel.PK + "} FROM {"
+            + WorldlinePaymentInfoModel._TYPECODE + "} WHERE {" + WorldlinePaymentInfoModel.USER + "} = ?customer AND {"
+            + WorldlinePaymentInfoModel.CODE + "}=?"+WorldlinePaymentInfoModel.CODE+" AND {" + WorldlinePaymentInfoModel.DUPLICATE + "} = ?duplicate"
+            + " AND {" + WorldlinePaymentInfoModel.SAVED + "} = ?saved";
+
     private static final String FIND_SAVED_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_QUERY = FIND_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_QUERY
             + " AND {" + WorldlinePaymentInfoModel.SAVED + "} = ?saved";
 
@@ -41,6 +46,20 @@ public class WorldlineCustomerAccountDaoImpl extends AbstractItemDao implements 
         final SearchResult<WorldlinePaymentInfoModel> result = getFlexibleSearchService().search(
                 saved ? FIND_SAVED_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_QUERY : FIND_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_QUERY, queryParams);
         return result.getResult();
+    }
+
+    @Override
+    public WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndCode(CustomerModel customerModel, String code) {
+        final Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("customer", customerModel);
+        queryParams.put(WorldlinePaymentInfoModel.CODE, code);
+        queryParams.put(WorldlinePaymentInfoModel.SAVED, true);
+        queryParams.put("duplicate", Boolean.FALSE);
+        FlexibleSearchQuery flexibleSearchQuery = new FlexibleSearchQuery(
+                FIND_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_AND_ID_QUERY ,
+                queryParams);
+
+        return getFlexibleSearchService().searchUnique(flexibleSearchQuery);
     }
 
     @Override

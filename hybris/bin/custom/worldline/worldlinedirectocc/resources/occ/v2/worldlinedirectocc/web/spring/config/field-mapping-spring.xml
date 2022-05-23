@@ -81,9 +81,9 @@
         <property name="dtoClass" value="com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="hostedTokenizationId,redirectURL,savedPaymentDetails(BASIC)"/>
-                <entry key="DEFAULT" value="BASIC,savedPaymentDetails(DEFAULT)"/>
-                <entry key="FULL" value="BASIC,savedPaymentDetails(FULL)"/>
+                <entry key="BASIC" value="hostedTokenizationId,redirectURL,savedPaymentDetails(BASIC),checkoutType(BASIC)"/>
+                <entry key="DEFAULT" value="BASIC,savedPaymentDetails(DEFAULT),checkoutType(DEFAULT)"/>
+                <entry key="FULL" value="BASIC,savedPaymentDetails(FULL),checkoutType(FULL)"/>
             </map>
         </property>
     </bean>
@@ -93,9 +93,9 @@
                   value="de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="cardBrand,token"/>
-                <entry key="DEFAULT" value="cardBrand,token"/>
-                <entry key="FULL" value="cardBrand,token"/>
+                <entry key="BASIC" value="cardBrand,token,paymentMethodImageUrl,alias"/>
+                <entry key="DEFAULT" value="cardBrand,token,paymentMethodImageUrl,alias"/>
+                <entry key="FULL" value="cardBrand,token,paymentMethodImageUrl,alias"/>
             </map>
         </property>
     </bean>
@@ -181,7 +181,6 @@
             <map>
                 <entry key="code" value="id"/>
                 <entry key="cardholderName" value="accountHolderName"/>
-                <entry key="alias" value="cardNumber"/>
             </map>
         </property>
     </bean>

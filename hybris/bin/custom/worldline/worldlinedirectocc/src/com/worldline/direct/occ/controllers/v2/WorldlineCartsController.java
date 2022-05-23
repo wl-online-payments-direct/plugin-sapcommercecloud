@@ -14,6 +14,7 @@ import com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
 import com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO;
 import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -68,6 +69,10 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @Resource(name = "worldlinePaymentDetailsWsDTOValidator")
     private WorldlinePaymentDetailsWsDTOValidator worldlinePaymentDetailsWsDTOValidator;
 
+    @Resource(name = "worldlinePaymentProductUtils")
+    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
+
+
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @RequestMapping(value = "/{cartId}/paymentproducts", method = RequestMethod.GET)
     @ResponseBody
@@ -77,7 +82,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @ApiBaseSiteIdUserIdAndCartIdParam
     public PaymentProductListWsDTO getCartPaymentProducts(
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
-        final List<PaymentProduct> availablePaymentMethods = worldlineCheckoutFacade.getAvailablePaymentMethods();
+        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductUtils.filterByCheckoutType(worldlinePaymentProductUtils.filterByAvailablePaymentModes(worldlineCheckoutFacade.getAvailablePaymentMethods()));
 
         GetPaymentProductsResponse productsResponse = new GetPaymentProductsResponse();
         productsResponse.setPaymentProducts(availablePaymentMethods);
@@ -176,6 +181,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
         final HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO = getDataMapper()
                 .map(hostedTokenization, HostedTokenizationResponseWsDTO.class, fields);
 
+        hostedTokenizationResponseWsDTO.setCheckoutType( getDataMapper().map(worldlineCheckoutFacade.getWorldlineCheckoutType(),WorldlineCheckoutTypeWsDTO.class,"worldlineCheckoutType"));
         worldlineHelper.fillSavedPaymentDetails(hostedTokenizationResponseWsDTO, fields);
 
         return hostedTokenizationResponseWsDTO;
