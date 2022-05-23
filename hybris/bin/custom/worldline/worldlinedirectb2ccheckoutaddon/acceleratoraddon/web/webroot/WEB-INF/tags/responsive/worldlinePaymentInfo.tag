@@ -19,12 +19,12 @@
                     <c:when test="${paymentProduct.id==-1}">
                         <spring:theme code="checkout.paymentProduct.groupedCards.display.label"
                                       var="groupedCardsLabel"/>
-                        <div class="worldline_payment_product" title="${groupedCardsLabel}">
+                        <div class="payment_product" title="${groupedCardsLabel}">
                             <span>${groupedCardsLabel}</span>
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="worldline_payment_product" title="${paymentProduct.displayHints.label}">
+                        <div class="payment_product" title="${paymentProduct.displayHints.label}">
                             <img src="${paymentProduct.displayHints.logo}" alt="${paymentProduct.displayHints.label}"/>
                             <span>${paymentProduct.displayHints.label}</span>
                         </div>

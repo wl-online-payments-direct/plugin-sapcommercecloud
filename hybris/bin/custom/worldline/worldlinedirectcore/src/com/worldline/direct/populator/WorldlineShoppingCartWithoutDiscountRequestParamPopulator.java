@@ -9,6 +9,7 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class WorldlineShoppingCartWithoutDiscountRequestParamPopulator implement
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
-        if (BooleanUtils.isFalse(worldlineConfigurationService.getCurrentWorldlineConfiguration().getSubmitOrderPromotion())) {
+        if (BooleanUtils.isFalse(worldlineConfigurationService.getCurrentWorldlineConfiguration().getSubmitOrderPromotion()) || abstractOrderModel.getTotalDiscounts() == 0) {
             order.setShoppingCart(createShoppingCart(abstractOrderModel));
         }
     }
@@ -58,7 +59,9 @@ public class WorldlineShoppingCartWithoutDiscountRequestParamPopulator implement
 
         OrderLineDetails orderLineDetails = new OrderLineDetails();
         orderLineDetails.setProductName(abstractOrderModel.getDeliveryMode().getName());
+        orderLineDetails.setProductCode(abstractOrderModel.getDeliveryMode().getName());
         orderLineDetails.setQuantity(1L);
+        orderLineDetails.setTaxAmount(0L);
         orderLineDetails.setProductPrice(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(), currencyISOCode));
 
         shipping.setOrderLineDetails(orderLineDetails);
@@ -68,8 +71,11 @@ public class WorldlineShoppingCartWithoutDiscountRequestParamPopulator implement
     private OrderLineDetails createOrderLineDetails(AbstractOrderEntryModel orderEntry, String currencyISOcode) {
         OrderLineDetails orderLineDetails = new OrderLineDetails();
         orderLineDetails.setProductName(orderEntry.getProduct().getName());
+        orderLineDetails.setProductCode(orderEntry.getProduct().getCode());
+        orderLineDetails.setTaxAmount(0L);
         orderLineDetails.setQuantity(orderEntry.getQuantity());
-        orderLineDetails.setProductPrice(worldlineAmountUtils.createAmount(orderEntry.getBasePrice(), currencyISOcode));
+        orderLineDetails.setQuantity(orderEntry.getQuantity());
+        orderLineDetails.setProductPrice(BigDecimal.valueOf(worldlineAmountUtils.createAmount(orderEntry.getTotalPrice(), currencyISOcode)).divide(BigDecimal.valueOf(orderEntry.getQuantity())).longValue());
         return orderLineDetails;
     }
 

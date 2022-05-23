@@ -9,5 +9,7 @@ public interface WorldlineCustomerAccountDao {
 
     List<WorldlinePaymentInfoModel> findWorldlinePaymentInfosByCustomer(CustomerModel customerModel, boolean saved);
 
+    WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndCode(CustomerModel customerModel, String code);
+
     WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndToken(CustomerModel customerModel, String token, boolean saved);
 }

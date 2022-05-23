@@ -12,6 +12,8 @@ public class WorldlinePaymentDetailsForm {
 
     private String hostedTokenizationId;
 
+    private String hostedCheckoutToken;
+
     private String issuerId;
 
     private boolean useDeliveryAddress;
@@ -66,5 +68,13 @@ public class WorldlinePaymentDetailsForm {
 
     public void setBillingAddress(AddressForm billingAddress) {
         this.billingAddress = billingAddress;
+    }
+
+    public String getHostedCheckoutToken() {
+        return hostedCheckoutToken;
+    }
+
+    public void setHostedCheckoutToken(String hostedCheckoutToken) {
+        this.hostedCheckoutToken = hostedCheckoutToken;
     }
 }
