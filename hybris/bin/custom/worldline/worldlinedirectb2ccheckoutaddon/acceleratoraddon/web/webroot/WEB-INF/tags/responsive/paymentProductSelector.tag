@@ -16,6 +16,6 @@
 	<c:forEach items="${paymentProducts}" var="paymentProduct" varStatus="index">
         <worldline:paymentProductDetails paymentInfo="${cartData.worldlinePaymentInfo}"
                                          paymentProduct="${paymentProduct}" tabindex="${tabindex+index.count}"
-                                         isSelected="${isSavedCart ? (paymentProduct.id eq -2) :selectedPaymentMethodId eq paymentProduct.id}"/>
+                                         isSelectedID="${selectedPaymentMethodId eq paymentProduct.id}"/>
 	</c:forEach>
 </div>

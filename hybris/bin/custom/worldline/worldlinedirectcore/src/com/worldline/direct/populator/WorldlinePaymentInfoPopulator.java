@@ -9,7 +9,6 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 
 public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> {
 
@@ -48,6 +47,9 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         CardTypeData cardTypeData=new CardTypeData();
         cardTypeData.setName(worldlinePaymentInfoModel.getCardBrand());
         worldlinePaymentInfoData.setCardType(cardTypeData);
+        if (worldlinePaymentInfoModel.getUsedSavedPayment() != null) {
+            worldlinePaymentInfoData.setSavedPayment(worldlinePaymentInfoModel.getUsedSavedPayment().getCode());
+        }
     }
 
     private String formattedAlias(String alias) {

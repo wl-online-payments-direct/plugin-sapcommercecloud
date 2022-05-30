@@ -1,5 +1,18 @@
+const PAYMENT_METHOD_SELECTORS = {
+    PLACE_ORDER_FORM: '#worldlinePlaceOrderForm',
+    PAYMENT_METHOD_FORM: '#worldlineSelectPaymentForm',
+    PAYMENT_METHOD_SUBMIT_BUTTON: '.submit_worldlineSelectPaymentForm',
+    CARD_ROW_TABLE_ROW: '.card-row',
+    PAYMENT_PRODUCT_ROW: '.js-worldline_payment_product',
+    PAYMENT_PRODUCT_IDEAL_ROW: '.worldline_payment_product_detail',
+    PAYMENT_METHOD_CONTAINER: '.worldline_payment_products',
+    SAVED_CARD_CODE_PARAM: 'savedCardCode',
+    TOKENIZATION_FORM_TABLE_ROW: '.js-hostedTokenization',
+    TOKENIZATION_FORM_CLASS: 'js-hostedTokenization',
+    HTP_CLASS: '.htp'
+}
 ACC.worldlinePaymentPost = {
-
+    tokenizer: {},
     spinner: $("<img>").attr("src", ACC.config.commonResourcePath + "/images/spinner.gif"),
     internalData: function () {
         return {
@@ -16,23 +29,29 @@ ACC.worldlinePaymentPost = {
         var json = ACC.worldlinePaymentPost.internalData();
         for (key in json) {
             if (json.hasOwnProperty(key))
-                $('#worldlinePlaceOrderForm  input[name=' + key + ']').val(json[key]);
+                $(PAYMENT_METHOD_SELECTORS.PLACE_ORDER_FORM + ' input[name=' + key + ']').val(json[key]);
         }
 
     },
 
     bindSubmitWorldlineSelectPaymentForm: function () {
-        $('.submit_worldlineSelectPaymentForm').click(function () {
-            var isHTP = $('.worldline_payment_product .htp').is(':checked');
-            if (isHTP) {
-                if (tokenizer !== undefined) {
+        $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_SUBMIT_BUTTON).click(function () {
+            var isSavedCard = $('input:radio[name="paymentProductId"]:checked').attr("is-saved");
+            var isHTP = $(PAYMENT_METHOD_SELECTORS.HTP_CLASS);
+            if (isSavedCard === "true") {
+                $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM + ' input[name=' + PAYMENT_METHOD_SELECTORS.SAVED_CARD_CODE_PARAM + ']').val($('input:radio[name="paymentProductId"]:checked').attr("code"));
+            } else {
+                $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM + ' input[name=' + PAYMENT_METHOD_SELECTORS.SAVED_CARD_CODE_PARAM + ']').val('');
+            }
+            if (isHTP.length && isSavedCard) {
+                if (ACC.worldlinePaymentPost.tokenizer !== undefined) {
                     var submitBtn = $(this);
                     var form = submitBtn.parents('form:first');
                     form.block({message: ACC.worldlinePaymentPost.spinner});
-                    tokenizer.submitTokenization().then((result) => {
+                    ACC.worldlinePaymentPost.tokenizer.submitTokenization().then((result) => {
                         if (result.success) {
                             console.log("Tokenization succeed :", result.hostedTokenizationId);
-                            $('#worldlineSelectPaymentForm  input[name=hostedTokenizationId]').val(result.hostedTokenizationId);
+                            $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM + ' input[name=hostedTokenizationId]').val(result.hostedTokenizationId);
 
                             $('.worldlineBillingAddressForm').filter(":hidden").remove();
                             ACC.worldlineOrderPost.enableAddressForm();
@@ -40,6 +59,9 @@ ACC.worldlinePaymentPost = {
                             $('#worldlineSelectPaymentForm').submit();
                             submitBtn.unbind("click");
                         } else {
+                            $([document.documentElement, document.body]).animate({
+                                scrollTop: $(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_TABLE_ROW).offset().top
+                            }, 500);
                             console.log("Tokenization failed :", result.error);
                         }
                     }).catch(function (error) {
@@ -47,7 +69,7 @@ ACC.worldlinePaymentPost = {
                     }).finally(function () {
                         form.unblock();
                     });
-                }else{
+                } else {
                     console.error("tokenizer is undefined !!");
                 }
             } else {
@@ -57,20 +79,26 @@ ACC.worldlinePaymentPost = {
                 $('#worldlineSelectPaymentForm').submit();
             }
         });
+        $(PAYMENT_METHOD_SELECTORS.CARD_ROW_TABLE_ROW).click(function () {
+            $(this).find('td input:radio').prop('checked', true).change();
+        });
+        $(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_ROW).click(function () {
+            $(this).find('input:radio').prop('checked', true).change();
+        })
     },
 
     bindSelectWorldlinePaymentProduct: function () {
-        var $paymentProduct = $('.worldline_payment_product .payment_product');
+        var $paymentProduct = $(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_ROW + ' .payment_product');
         $paymentProduct.on('change', function () {
             var paymentProduct = $(this);
             if (paymentProduct.is(':checked')) {
-                $('.worldline_payment_product_detail').addClass('display-none');
-                paymentProduct.siblings('.worldline_payment_product_detail').removeClass('display-none');
+                $(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_IDEAL_ROW).addClass('display-none');
+                paymentProduct.siblings(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_IDEAL_ROW).removeClass('display-none');
             }
         });
         $paymentProduct.each(function () {
             if ($(this).is(':checked')) {
-                $(this).siblings('.worldline_payment_product_detail').removeClass('display-none');
+                $(this).siblings(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_IDEAL_ROW).removeClass('display-none');
             }
         });
     },
@@ -83,37 +111,42 @@ ACC.worldlinePaymentPost = {
     },
 
     bindWorldlineSavedPayments: function () {
-        $(document).on("click", ".js-saved-worldline-payments", function (e) {
-            e.preventDefault();
 
-            var title = $("#savedpaymentstitle").html();
 
-            $.colorbox({
-                href: "#savedpaymentsbody",
-                inline: true,
-                maxWidth: "100%",
-                opacity: 0.7,
-                title: title,
-                close: '<span class="glyphicon glyphicon-remove"></span>',
-                onComplete: function () {
+        $('input:radio[name="paymentProductId"]').change(function () {
+            var isHTP = $(PAYMENT_METHOD_SELECTORS.HTP_CLASS);
+
+            if ($(this).attr("is-saved") && isHTP.length) {
+                $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_CONTAINER).block({message: ACC.worldlinePaymentPost.spinner});
+                let token = $(this).attr("token");
+                if ($(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_TABLE_ROW).length > 0) {
+                    ACC.worldlinePaymentPost.tokenizer.destroy();
+                    $(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_TABLE_ROW).addClass("display-none").removeClass(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_CLASS);
                 }
-            });
-        });
-        $(document).on("click", ".js-use-saved-worldline-payment", function (e) {
-            e.preventDefault();
-            if (tokenizer !== undefined) {
-                tokenizer.useToken($(this).data('token'));
-                $(".js-saved-worldline-payments").parent().toggleClass("display-none");
-                $(".js-reset-token-form").parent().toggleClass("display-none");
-                $.colorbox.close();
-            }
-        });
-        $(document).on("click", ".js-reset-token-form", function (e) {
-            e.preventDefault();
-            if (tokenizer !== undefined) {
-                tokenizer.useToken();
-                $(".js-saved-worldline-payments").parent().toggleClass("display-none");
-                $(".js-reset-token-form").parent().toggleClass("display-none");
+                let tokenizationForm = $(this).closest('tr').next('tr').removeClass('display-none').addClass(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_CLASS).find(".hostedTokenization");
+                var params = {
+                    validationCallback: validateHostedTokenizationSubmit,
+                    hideCardholderName: false,
+                    hideTokenFields: false
+                };
+                ACC.worldlinePaymentPost.waitForElm(tokenizationForm.attr("id"))
+                ACC.worldlinePaymentPost.tokenizer = new Tokenizer($(".js-hostedTokenization-partialRedirectUrl").attr("value"), tokenizationForm.attr("name"), params);
+                ACC.worldlinePaymentPost.tokenizer.initialize()
+                    .then(() => {
+                        if (token) {
+                            ACC.worldlinePaymentPost.tokenizer.useToken(token);
+                        }
+                        $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_CONTAINER).unblock();
+                    })
+                    .catch(reason => {
+                        console.log("tokenizer", "error on init");
+                        $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_CONTAINER).unblock();
+                    });
+            } else {
+                if ($(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_TABLE_ROW).length > 0) {
+                    ACC.worldlinePaymentPost.tokenizer.destroy();
+                    $(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_TABLE_ROW).addClass("display-none").removeClass(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_CLASS);
+                }
             }
         });
     },
@@ -125,6 +158,56 @@ ACC.worldlinePaymentPost = {
             }
         }
         $('#worldline_payment_product_302').remove();
+    }, load: function () {
+        let $selectedRadio = $('input:radio[name="paymentProductId"]:checked');
+        var isHTP = $(PAYMENT_METHOD_SELECTORS.HTP_CLASS);
+
+        if ($selectedRadio.attr("is-saved").length && isHTP.length) {
+            $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_CONTAINER).block({message: $("<img>").attr("src", ACC.config.commonResourcePath + "/images/spinner.gif")});
+            let token = $selectedRadio.attr("token");
+            let tokenizationForm = $selectedRadio.closest('tr').next('tr').removeClass('display-none').addClass('js-hostedTokenization').find(".hostedTokenization");
+            var params = {
+                validationCallback: validateHostedTokenizationSubmit,
+                hideCardholderName: false,
+                hideTokenFields: false
+            };
+
+            ACC.worldlinePaymentPost.waitForElm(tokenizationForm.attr("id"))
+            ACC.worldlinePaymentPost.tokenizer = new Tokenizer($(".js-hostedTokenization-partialRedirectUrl").attr("value"), tokenizationForm.attr("name"), params);
+            ACC.worldlinePaymentPost.tokenizer.initialize()
+                .then(() => {
+                    if (token) {
+                        ACC.worldlinePaymentPost.tokenizer.useToken(token);
+                    }
+                    $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_CONTAINER).unblock();
+                })
+                .catch(reason => {
+                    console.log("tokenizer", "error on init");
+                    $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_CONTAINER).unblock();
+                });
+        } else {
+            if ($(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_TABLE_ROW).length > 0) {
+                ACC.worldlinePaymentPost.tokenizer.destroy();
+                $(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_TABLE_ROW).addClass("display-none").removeClass(PAYMENT_METHOD_SELECTORS.TOKENIZATION_FORM_CLASS);
+
+            }
+        }
+    }, waitForElm: function (selector) {
+        return new Promise(resolve => {
+            if (document.querySelector(selector)) {
+                return resolve(document.querySelector(selector));
+            }
+            const observer = new MutationObserver(mutations => {
+                if (document.querySelector(selector)) {
+                    resolve(document.querySelector(selector));
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
     }
 }
 
@@ -134,4 +217,9 @@ $(document).ready(function () {
     ACC.worldlinePaymentPost.bindSubmitWorldlinePlaceOrderForm();
     ACC.worldlinePaymentPost.bindWorldlineSavedPayments();
     ACC.worldlinePaymentPost.checkApplePayAvailability();
+    ACC.worldlinePaymentPost.load();
 });
+
+function validateHostedTokenizationSubmit(result) {
+    console.log("tokenizer", result);
+}

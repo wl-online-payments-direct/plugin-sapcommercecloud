@@ -12,7 +12,7 @@ public class WorldlinePaymentDetailsForm {
 
     private String hostedTokenizationId;
 
-    private String hostedCheckoutToken;
+    private String savedCardCode;
 
     private String issuerId;
 
@@ -21,14 +21,6 @@ public class WorldlinePaymentDetailsForm {
     private boolean newBillingAddress;
 
     private AddressForm billingAddress;
-
-    public Integer getPaymentProductId() {
-        return paymentProductId;
-    }
-
-    public void setPaymentProductId(Integer paymentProductId) {
-        this.paymentProductId = paymentProductId;
-    }
 
     public String getHostedTokenizationId() {
         return hostedTokenizationId;
@@ -70,11 +62,21 @@ public class WorldlinePaymentDetailsForm {
         this.billingAddress = billingAddress;
     }
 
-    public String getHostedCheckoutToken() {
-        return hostedCheckoutToken;
+
+    public Integer getPaymentProductId() {
+        return paymentProductId;
     }
 
-    public void setHostedCheckoutToken(String hostedCheckoutToken) {
-        this.hostedCheckoutToken = hostedCheckoutToken;
+    public void setPaymentProductId(Integer paymentProductId) {
+        this.paymentProductId = paymentProductId;
     }
+
+    public String getSavedCardCode() {
+        return savedCardCode;
+    }
+
+    public void setSavedCardCode(String savedCardCode) {
+        this.savedCardCode = savedCardCode;
+    }
+
 }

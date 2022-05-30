@@ -30,7 +30,7 @@ public interface WorldlineCheckoutFacade {
 
     void handlePaymentInfo(WorldlinePaymentInfoData paymentInfoData);
 
-    void fillWorldlinePaymentInfoData(WorldlinePaymentInfoData paymentInfoData, int paymentId, String paymentDirId, String hostedTokenizationId, String hostedCheckoutToken) throws WorldlineNonValidPaymentProductException;
+    void fillWorldlinePaymentInfoData(WorldlinePaymentInfoData paymentInfoData, String savedPaymentCode,Integer paymentId, String paymentDirId, String hostedTokenizationId) throws WorldlineNonValidPaymentProductException;
 
     OrderData authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData hostedTokenizationId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 

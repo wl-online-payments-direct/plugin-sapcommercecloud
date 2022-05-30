@@ -31,12 +31,10 @@ public class WorldlinePaymentDetailsValidator implements Validator {
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "paymentProductId", "checkout.error.paymentProduct.id.missing");
         if (form.getPaymentProductId() != null) {
-            if (WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL == form.getPaymentProductId()) {
+            if ((WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL) == form.getPaymentProductId()) {
                 ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "checkout.error.issuer.id.missing");
             } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP == form.getPaymentProductId()) {
                 ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedTokenizationId", "checkout.error.hostedTokenization.hostedTokenizationId.missing");
-            } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP == form.getPaymentProductId()) {
-                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedCheckoutToken", "checkout.error.hostedcheckout.hostedCheckoutToken.missing");
             }
         }
 
