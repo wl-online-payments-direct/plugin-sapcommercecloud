@@ -31,11 +31,9 @@ public class WorldlineCheckoutFlowFacadeImpl extends DefaultCheckoutFlowFacade {
         return worldlinePaymentInfoData -> {
             switch (worldlinePaymentInfoData.getWorldlineCheckoutType()) {
                 case HOSTED_TOKENIZATION:
-                    return List.of(PAYMENT_METHOD_IDEAL, PAYMENT_METHOD_HTP).contains(worldlinePaymentInfoData.getId())
-                            && (
-                            (PAYMENT_METHOD_IDEAL == worldlinePaymentInfoData.getId() && StringUtils.isNotEmpty(worldlinePaymentInfoData.getPaymentProductDirectoryId()))
-                                    || (PAYMENT_METHOD_HTP == worldlinePaymentInfoData.getId()) && StringUtils.isNotEmpty(worldlinePaymentInfoData.getHostedTokenizationId())
-                    );
+                    return (PAYMENT_METHOD_IDEAL == worldlinePaymentInfoData.getId() && StringUtils.isNotEmpty(worldlinePaymentInfoData.getPaymentProductDirectoryId()))
+                                    || StringUtils.isNotBlank(worldlinePaymentInfoData.getHostedTokenizationId());
+
                 case HOSTED_CHECKOUT:
                 default:
                     return true;

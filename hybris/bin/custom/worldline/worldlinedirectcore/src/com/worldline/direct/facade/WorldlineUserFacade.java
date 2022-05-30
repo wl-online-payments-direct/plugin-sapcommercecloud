@@ -2,6 +2,7 @@ package com.worldline.direct.facade;
 
 import com.ingenico.direct.domain.PaymentProduct;
 import com.ingenico.direct.domain.TokenResponse;
+import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface WorldlineUserFacade {
 
     WorldlinePaymentInfoData getWorldlinePaymentInfoByCode(String code);
 
-    void saveWorldlinePaymentInfo(TokenResponse tokenResponse, PaymentProduct paymentProduct);
+    void saveWorldlinePaymentInfo(WorldlineCheckoutTypesEnum checkoutType, TokenResponse tokenResponse, PaymentProduct paymentProduct);
 
     void deleteSavedWorldlinePaymentInfo(String code);
 

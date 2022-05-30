@@ -9,10 +9,10 @@
 <c:if test="${not empty idealIssuers}">
     <div class="worldline_payment_product_detail display-none">
         <form:select id="select_issuer" path="issuerId" cssClass="form-control">
+            <option value="" selected disabled >
+                <spring:theme code="payment.methods.issuer.selector"/>
+            </option>
             <c:forEach var="idealIssuer" items="${idealIssuers}">
-                <option value="">
-                    <spring:theme code="payment.methods.issuer.selector"/>
-                </option>
                 <form:option class="issuerOption" value="${idealIssuer.issuerId}">
                     ${idealIssuer.issuerName}
                 </form:option>
