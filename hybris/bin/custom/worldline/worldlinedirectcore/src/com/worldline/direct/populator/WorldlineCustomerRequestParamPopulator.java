@@ -46,7 +46,9 @@ public class WorldlineCustomerRequestParamPopulator implements Populator<Abstrac
             String[] firstAndLastName = customerNameStrategy.splitName(customerModel.getName());
             personalName.setFirstName(firstAndLastName[0]);
             personalName.setSurname(firstAndLastName[1]);
-            personalName.setTitle(customerModel.getTitle().getName());
+            if (customerModel.getTitle() != null) {
+                personalName.setTitle(customerModel.getTitle().getName());
+            }
             personalInformation.setName(personalName);
             customer.setPersonalInformation(personalInformation);
             ContactDetails contactDetails = new ContactDetails();

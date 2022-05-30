@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd">
 
     <bean name="worldlinePaymentInfoPopulator" class="com.worldline.direct.populator.WorldlinePaymentInfoPopulator">
         <property name="addressConverter" ref="addressConverter"/>
@@ -19,19 +23,14 @@
     <bean id="worldlineOrderRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineOrderRequestParamPopulator">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
 
     <bean id="worldlineShoppingCartWithoutDiscountRequestParamPopulator"
-          class="com.worldline.direct.populator.WorldlineShoppingCartWithoutDiscountRequestParamPopulator">
-        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+          class="com.worldline.direct.populator.WorldlineShoppingCartRequestParamPopulator">
+            <property name="worldlineShoppingCartFactoriesConfiguration" ref="worldlineShoppingCartFactoriesConfiguration"/>
     </bean>
 
-    <bean id="worldlineShoppingCartWithDiscountRequestParamPopulator"
-          class="com.worldline.direct.populator.WorldlineShoppingCartWithDiscountRequestParamPopulator">
-        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
-    </bean>
 
     <bean id="worldlineCustomerRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineCustomerRequestParamPopulator">
@@ -57,7 +56,6 @@
             <list>
                 <ref bean="worldlineOrderRequestParamPopulator"/>
                 <ref bean="worldlineShoppingCartWithoutDiscountRequestParamPopulator"/>
-                <ref bean="worldlineShoppingCartWithDiscountRequestParamPopulator"/>
                 <ref bean="worldlineCustomerRequestParamPopulator"/>
             </list>
         </property>
@@ -155,5 +153,23 @@
     <bean parent="modifyPopulatorList">
         <property name="list" ref="orderConverter"/>
         <property name="add" ref="worldlineOrderPopulator"/>
+    </bean>
+
+    <bean name="worldlineShoppingCartFactoriesConfiguration" class="com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration" >
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="factoriesConfiguration" ref="shoppingCartfactoriesConfiguration"/>
+    </bean>
+    <util:map id="shoppingCartfactoriesConfiguration" key-type="java.lang.String" value-type="com.worldline.direct.factory.WorldlineShoppingCartFactory" map-class="java.util.HashMap">
+        <entry key="INCLUDE_DISCOUNT" value-ref="shoppingCartWithDiscountFactory" />
+        <entry key="EXCLUDE_DISCOUNT" value-ref="shoppingCartWithoutDiscountFactory" />
+    </util:map>
+    <bean id="shoppingCartWithDiscountFactory" class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithDiscountFactory">
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
+    </bean>
+
+    <bean id="shoppingCartWithoutDiscountFactory" class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithoutDiscountFactory">
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
 </beans>
