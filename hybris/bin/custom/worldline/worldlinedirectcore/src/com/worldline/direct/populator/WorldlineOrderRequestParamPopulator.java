@@ -2,8 +2,10 @@ package com.worldline.direct.populator;
 
 import com.ingenico.direct.domain.*;
 import com.worldline.direct.util.WorldlineAmountUtils;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 
@@ -12,7 +14,7 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
     private WorldlineAmountUtils worldlineAmountUtils;
-
+    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null!");
@@ -47,10 +49,12 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
             personalName.setTitle(deliveryAddress.getTitle().getName());
         }
         address.setName(personalName);
-
         shipping.setAddress(address);
         shipping.setEmailAddress(deliveryAddress.getEmail());
-
+        if (abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel && worldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getId()))
+        {
+            shipping.setShippingCost(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(),abstractOrderModel.getCurrency().getIsocode()));
+        }
         return shipping;
     }
 
@@ -64,7 +68,7 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         final AmountOfMoney amountOfMoney = new AmountOfMoney();
         final String currencyCode = abstractOrderModel.getCurrency().getIsocode();
         final long amount;
-        amount = worldlineAmountUtils.getOrderPrice(abstractOrderModel);
+        amount = worldlineAmountUtils.createAmount(abstractOrderModel.getTotalPrice(), abstractOrderModel.getCurrency().getIsocode());
         amountOfMoney.setAmount(amount);
         amountOfMoney.setCurrencyCode(currencyCode);
 
@@ -73,5 +77,9 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
 
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
+    }
+
+    public void setWorldlinePaymentProductUtils(WorldlinePaymentProductUtils worldlinePaymentProductUtils) {
+        this.worldlinePaymentProductUtils = worldlinePaymentProductUtils;
     }
 }
