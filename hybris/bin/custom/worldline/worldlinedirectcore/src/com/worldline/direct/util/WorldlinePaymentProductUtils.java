@@ -78,6 +78,10 @@ public class WorldlinePaymentProductUtils {
         return paymentProduct;
     }
 
+    public boolean isPaymentByKlarna(Integer paymentID)
+    {
+        return WorldlinedirectcoreConstants.PAYMENT_METHOD_KLARNA_PAY_NOW==paymentID || WorldlinedirectcoreConstants.PAYMENT_METHOD_KLARNA_PAY_AFTER==paymentID;
+    }
     public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
         this.worldlinePaymentModeService = worldlinePaymentModeService;
     }

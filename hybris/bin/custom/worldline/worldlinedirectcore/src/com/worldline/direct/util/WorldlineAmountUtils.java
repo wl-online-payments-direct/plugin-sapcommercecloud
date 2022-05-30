@@ -32,16 +32,11 @@ public class WorldlineAmountUtils {
     public BigDecimal fromAmount(double amount, String currencyIso) {
         final CurrencyModel currency = commonI18NService.getCurrency(currencyIso);
         final Integer digits = currency.getDigits();
-        return new BigDecimal(amount).setScale(digits,RoundingMode.HALF_UP);
+        return new BigDecimal(amount).setScale(digits, RoundingMode.HALF_UP);
     }
 
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;
-    }
-
-    public long getOrderPrice(AbstractOrderModel abstractOrderModel)
-    {
-       return createAmount(BigDecimal.valueOf(abstractOrderModel.getSubtotal()).add(BigDecimal.valueOf(abstractOrderModel.getDeliveryCost())).subtract(BigDecimal.valueOf(abstractOrderModel.getTotalDiscounts())),abstractOrderModel.getCurrency().getIsocode());
     }
 }
