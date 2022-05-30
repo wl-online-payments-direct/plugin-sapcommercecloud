@@ -20,7 +20,7 @@ public class WorldlinePaymentProductUtils {
     public List<PaymentProduct> filterByAvailablePaymentModes(List<PaymentProduct> paymentProducts){
         List<String> activePaymentModeCodes = worldlinePaymentModeService.getActivePaymentModes().stream().map(PaymentModeModel::getCode).collect(Collectors.toList());
         return paymentProducts.stream()
-                .filter(paymentProduct -> activePaymentModeCodes.contains(String.valueOf(paymentProduct.getId()))).collect(Collectors.toList());
+                .filter(paymentProduct -> activePaymentModeCodes.contains(String.valueOf(paymentProduct.getId())) || WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP== paymentProduct.getId() || WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP== paymentProduct.getId()).collect(Collectors.toList());
 
     }
       public List<PaymentProduct> filterByCheckoutType(List<PaymentProduct> paymentProducts){
