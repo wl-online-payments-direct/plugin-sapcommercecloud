@@ -108,7 +108,7 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     }
 
     @Override
-    public void saveWorldlinePaymentInfo(TokenResponse tokenResponse, PaymentProduct paymentProduct) {
+    public void saveWorldlinePaymentInfo(WorldlineCheckoutTypesEnum checkoutType, TokenResponse tokenResponse, PaymentProduct paymentProduct) {
         final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
         WorldlinePaymentInfoModel worldlinePaymentInfoByToken = worldlineCustomerAccountService.getWorldlinePaymentInfoByToken(
                 currentCustomer,
@@ -128,7 +128,7 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         worldlinePaymentInfoByToken.setCardBrand(paymentProduct.getDisplayHints().getLabel());
         worldlinePaymentInfoByToken.setId(tokenResponse.getPaymentProductId());
         worldlinePaymentInfoByToken.setSaved(true);
-        worldlinePaymentInfoByToken.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT);
+        worldlinePaymentInfoByToken.setWorldlineCheckoutType(checkoutType);
         worldlinePaymentInfoByToken.setPaymentMethod(paymentProduct.getPaymentMethod());
         modelService.save(worldlinePaymentInfoByToken);
     }

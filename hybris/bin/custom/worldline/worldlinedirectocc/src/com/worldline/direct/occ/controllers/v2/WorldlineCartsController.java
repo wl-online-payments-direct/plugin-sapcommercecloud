@@ -31,6 +31,7 @@ import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -126,9 +127,10 @@ public class WorldlineCartsController extends WorldlineBaseController {
         final WorldlinePaymentInfoData worldlinePaymentInfoData = new WorldlinePaymentInfoData();
 
         worldlineCheckoutFacade.fillWorldlinePaymentInfoData(worldlinePaymentInfoData,
+                StringUtils.EMPTY,
                 worldlinePaymentDetailsWsDTO.getPaymentProductId(),
                 worldlinePaymentDetailsWsDTO.getIssuerId(),
-                worldlinePaymentDetailsWsDTO.getHostedTokenizationId(), worldlinePaymentDetailsWsDTO.getHostedCheckoutToken());
+                worldlinePaymentDetailsWsDTO.getHostedTokenizationId());
 
         final AddressData addressData;
         if (Boolean.TRUE.equals(worldlinePaymentDetailsWsDTO.isUseDeliveryAddress())) {
