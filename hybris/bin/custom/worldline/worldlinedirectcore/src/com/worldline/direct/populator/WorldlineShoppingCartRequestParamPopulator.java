@@ -1,0 +1,25 @@
+package com.worldline.direct.populator;
+
+import com.ingenico.direct.domain.Order;
+import com.ingenico.direct.domain.ShoppingCart;
+import com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration;
+import de.hybris.platform.converters.Populator;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.servicelayer.dto.converter.ConversionException;
+import org.springframework.beans.factory.annotation.Required;
+
+public class WorldlineShoppingCartRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
+
+    private WorldlineShoppingCartFactoriesConfiguration worldlineShoppingCartFactoriesConfiguration;
+
+    @Override
+    public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
+        ShoppingCart shoppingCart = worldlineShoppingCartFactoriesConfiguration.getShoppingCartFactory(abstractOrderModel).create(abstractOrderModel);
+        order.setShoppingCart(shoppingCart);
+    }
+
+    @Required
+    public void setWorldlineShoppingCartFactoriesConfiguration(WorldlineShoppingCartFactoriesConfiguration worldlineShoppingCartFactoriesConfiguration) {
+        this.worldlineShoppingCartFactoriesConfiguration = worldlineShoppingCartFactoriesConfiguration;
+    }
+}
