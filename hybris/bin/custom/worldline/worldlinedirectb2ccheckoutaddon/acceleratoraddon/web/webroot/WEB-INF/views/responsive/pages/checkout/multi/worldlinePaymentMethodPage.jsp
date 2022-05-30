@@ -19,26 +19,6 @@
     <jsp:attribute name="pageScripts">
         <c:if test="${hostedTokenization!=null}">
         <script src="${hostedTokenizationJs}"></script>
-            <script>
-                var params = {
-                    validationCallback: validateHostedTokenizationSubmit,
-                    hideCardholderName: false,
-                    hideTokenFields: false
-                };
-                var tokenizer = new Tokenizer("${hostedTokenization.partialRedirectUrl}", 'hostedTokenization', params);
-
-                tokenizer.initialize()
-                    .then(() => {
-                        console.log("tokenizer", "initialized");
-                    })
-                    .catch(reason => {
-                        console.log("tokenizer", "error on init");
-                    });
-
-                function validateHostedTokenizationSubmit(result) {
-                    console.log("tokenizer", result);
-                }
-            </script>
         </c:if>
     </jsp:attribute>
 

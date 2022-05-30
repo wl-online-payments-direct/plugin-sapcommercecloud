@@ -186,6 +186,7 @@
 						<ea:attribute qualifier="alias"/>
 						<ea:attribute qualifier="cardholderName"/>
 						<ea:attribute qualifier="expiryDate"/>
+						<ea:attribute qualifier="usedSavedPayment"/>
 					</ea:section>
 				</ea:tab>
 			</ea:editorArea>
