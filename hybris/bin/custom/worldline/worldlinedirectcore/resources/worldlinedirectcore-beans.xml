@@ -7,7 +7,7 @@
         <property name="id" type="Integer"/>
         <property name="paymentMethod" type="String"/>
         <property name="paymentMethodImageUrl" type="String"/>
-        <property name="original" type="de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel"/>
+        <property name="savedPayment" type="String"/>
         <property name="saved" type="boolean"/>
         <property name="paymentProductDirectoryId" type="String"/>
         <property name="hostedTokenizationId" type="String"/>

@@ -7,52 +7,83 @@
 <%@ attribute name="hostedTokenization" required="true"
               type="com.ingenico.direct.domain.CreateHostedTokenizationResponse" %>
 <%@ attribute name="savedPaymentInfos" required="false" type="java.util.List" %>
+<%@ attribute name="paymentProductId" required="false" type="java.lang.Integer" %>
+<%@ attribute name="paymentInfo" required="false" type="com.worldline.direct.order.data.WorldlinePaymentInfoData" %>
+<c:set var="isChecked" value="${false}"/>
 
-<c:if test="${hostedTokenization!=null}">
-    <div class="worldline_payment_product_detail display-none">
-
+<div class="js-hostedTokenization-partialRedirectUrl" value="${hostedTokenization.partialRedirectUrl}"></div>
+<fieldset class="credit-card-selector-block form-check">
+    <table>
+        <body>
         <c:if test="${not empty savedPaymentInfos}">
-            <div class="form-group">
-                <button type="button"
-                        class="btn btn-default btn-block js-saved-worldline-payments">
-                    <spring:theme code="checkout.multi.tokenization.useSavedCard"/>
-                </button>
-            </div>
-            <div class="form-group display-none">
-                <button type="button" class="btn btn-default btn-block js-reset-token-form">
-                    <spring:theme code="checkout.multi.tokenization.resetForm"/>
-                </button>
-            </div>
-            <div id="savedpayments">
-                <div id="savedpaymentstitle">
-                    <div class="headline">
-                       <span class="headline-text">
-                           <spring:theme code="checkout.multi.tokenization.useSavedCard"/>
-                       </span>
-                    </div>
-                </div>
-                <div id="savedpaymentsbody">
-                    <c:forEach var="savedPaymentInfo" items="${savedPaymentInfos}">
-                        <div class="saved-payment-entry">
-                            <ul>
-                                <strong>${savedPaymentInfo.cardholderName}</strong><br>
-                                    ${savedPaymentInfo.cardBrand}<br>
-                                    ${savedPaymentInfo.alias}<br>
-                                <spring:theme code="checkout.multi.tokenization.expire"
-                                              arguments="${savedPaymentInfo.expiryDate}"/><br>
-                            </ul>
-                            <button type="button" data-token="${savedPaymentInfo.token}"
-                                    class="btn btn-primary btn-block js-use-saved-worldline-payment">
-                                <spring:theme
-                                        code="checkout.multi.tokenization.useThesePaymentDetails"/>
-                            </button>
-                        </div>
-                    </c:forEach>
-                </div>
-            </div>
+            <tr class="card-row selected">
+                <td colspan="5">
+                    <spring:theme code="checkout.paymentProduct.savedCard"/>
+                </td>
+            </tr>
         </c:if>
-        <div id="hostedTokenization"></div>
-        <form:input type="hidden" path="hostedTokenizationId"/>
-    </div>
-</c:if>
 
+        <c:forEach var="savedPaymentInfo" items="${savedPaymentInfos}" varStatus="index">
+            <c:set var="checked"
+                   value="${((not empty paymentInfo) and ( paymentInfo.savedPayment eq savedPaymentInfo.code))}"/>
+            <c:set var="isChecked" value="${isChecked?true:checked}"/>
+            <tr class="card-row ">
+                <td class="radioButton">
+                    <form:radiobutton path="paymentProductId"
+                                      value="${paymentProductId}"
+                                      is-saved="true"
+                                      cssClass="radio_image_row"
+                                      code="${savedPaymentInfo.code}"
+                                      token="${savedPaymentInfo.token}"
+                                      checked="${checked ? 'checked' : '' }"/>
+                    <img src="${savedPaymentInfo.paymentMethodImageUrl}" alt="" class="logo">
+                </td>
+                <td class="paymentProductName">
+                        ${savedPaymentInfo.cardBrand}
+                </td>
+                <td class="creditCardHolder">
+                        ${savedPaymentInfo.cardholderName}
+                </td>
+                <td class="maskedCreditCardNumber">
+                    <span class="creditCardHolder">${savedPaymentInfo.cardholderName}</span>
+                        ${savedPaymentInfo.alias}
+                </td>
+                <td class="creditCardExpiration">
+                        ${savedPaymentInfo.expiryDate}
+                </td>
+            </tr>
+            <tr class="display-none">
+                <td colspan="5">
+                    <div id="hostedTokenization-${index.index}" name="hostedTokenization-${index.index}"
+                         class="hostedTokenization"></div>
+                </td>
+            </tr>
+        </c:forEach>
+        <c:if test="${not empty savedPaymentInfos}">
+            <tr class="card-row selected">
+                <td colspan="5">
+                    <spring:theme code="checkout.paymentProduct.otherPayments"/>
+                </td>
+            </tr>
+        </c:if>
+
+        <tr class="card-row">
+            <td class="radioButton" colspan="5">
+                <form:radiobutton path="paymentProductId"
+                                  value="${paymentProductId}"
+                                  is-saved="false"
+                                  checked="${!isChecked ? 'checked' : '' }"/>
+                <span class="new-cart"><spring:theme code="checkout.paymentProduct.tokenization.newCard"/></span>
+            </td>
+        </tr>
+        <tr class="display-none">
+            <td colspan="5">
+                <div id="hostedTokenization-new" name="hostedTokenization-new" class="hostedTokenization"></div>
+            </td>
+        </tr>
+        </body>
+    </table>
+</fieldset>
+
+
+<form:input type="hidden" path="hostedTokenizationId"/>
