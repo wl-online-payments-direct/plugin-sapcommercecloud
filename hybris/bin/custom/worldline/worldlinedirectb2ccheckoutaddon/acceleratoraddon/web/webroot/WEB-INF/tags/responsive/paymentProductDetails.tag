@@ -29,7 +29,7 @@
         <form:input type="hidden" path="savedCardCode"/>
     </c:when>
     <c:otherwise>
-        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product js-worldline_payment_product${applePayId eq paymentProduct.id? 'display-none' : ''}" title="${paymentProduct.displayHints.label}">
+        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product js-worldline_payment_product ${applePayId eq paymentProduct.id? 'display-none' : ''}" title="${paymentProduct.displayHints.label}">
             <div class="payment_product_row">
                 <form:radiobutton path="paymentProductId" cssClass="payment_product"
                                   value="${paymentProduct.id}" tabindex="${tabindex}"
