@@ -1,32 +1,31 @@
 package com.worldline.direct.occ.helpers;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
+import com.google.common.collect.Iterables;
+import com.ingenico.direct.domain.DirectoryEntry;
+import com.ingenico.direct.domain.PaymentProduct;
+import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
+import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
+import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.payment.dto.DirectoryEntryWsDTO;
+import com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO;
+import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
+import com.worldline.direct.payment.dto.ProductDirectoryWsDTO;
+import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
+import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
+import de.hybris.platform.util.Config;
+import de.hybris.platform.webservicescommons.mapping.DataMapper;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-import com.worldline.direct.util.WorldlinePaymentProductUtils;
-import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
-import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
-import de.hybris.platform.util.Config;
-import de.hybris.platform.webservicescommons.mapping.DataMapper;
-
-import com.google.common.collect.Iterables;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerMapping;
-
-import com.ingenico.direct.domain.DirectoryEntry;
-import com.ingenico.direct.domain.PaymentProduct;
-import com.worldline.direct.facade.WorldlineCheckoutFacade;
-import com.worldline.direct.facade.WorldlineUserFacade;
-import com.worldline.direct.order.data.WorldlinePaymentInfoData;
-import com.worldline.direct.payment.dto.DirectoryEntryWsDTO;
-import com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO;
-import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
-import com.worldline.direct.payment.dto.ProductDirectoryWsDTO;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 
 
 @Component("worldlineHelper")
@@ -40,8 +39,8 @@ public class WorldlineHelper {
     @Resource(name = "worldlineUserFacade")
     private WorldlineUserFacade worldlineUserFacade;
 
-    @Resource(name = "worldlinePaymentProductUtils")
-    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
+    @Resource(name = "worldlinePaymentProductFilterStrategyFactory")
+    private WorldlinePaymentProductFilterStrategyFactory worldlinePaymentProductFilterStrategyFactory;
 
     private int getIdealIndex(List<PaymentProduct> availablePaymentMethods) {
         return Iterables.indexOf(availablePaymentMethods, paymentProduct -> PAYMENT_METHOD_IDEAL == paymentProduct.getId());
@@ -62,7 +61,7 @@ public class WorldlineHelper {
     }
 
     public void fillSavedPaymentDetails(HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO, String fields) {
-        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductUtils.filterByAvailablePaymentModes(worldlineCheckoutFacade.getAvailablePaymentMethods());
+        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS).get();
         final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE);
         final PaymentDetailsListWsDTO paymentDetailsListWsDTO = new PaymentDetailsListWsDTO();
         paymentDetailsListWsDTO.setPayments(getDataMapper().mapAsList(worldlinePaymentInfos, PaymentDetailsWsDTO.class, fields));
