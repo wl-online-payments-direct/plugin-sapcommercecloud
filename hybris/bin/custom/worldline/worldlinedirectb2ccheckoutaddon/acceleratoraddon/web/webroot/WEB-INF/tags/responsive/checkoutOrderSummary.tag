@@ -16,7 +16,7 @@
 
 <spring:htmlEscape defaultHtmlEscape="true" />
 
-<spring:url value="/checkout/multi/summary/placeOrder" var="placeOrderUrl" htmlEscape="false"/>
+<spring:url value="/checkout/multi/worldline/summary/placeOrder" var="placeOrderUrl" htmlEscape="false"/>
 <spring:url value="/checkout/multi/termsAndConditions" var="getTermsAndConditionsUrl" htmlEscape="false"/>
 
 <div class="checkout-summary-headline hidden-xs">
