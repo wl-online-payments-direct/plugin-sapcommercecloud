@@ -4,9 +4,11 @@ package com.worldline.direct.occ.controllers.v2;
 import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
 import com.ingenico.direct.domain.GetPaymentProductsResponse;
 import com.ingenico.direct.domain.PaymentProduct;
+import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
 import com.worldline.direct.occ.controllers.v2.validator.WorldlinePaymentDetailsWsDTOValidator;
 import com.worldline.direct.occ.helpers.WorldlineHelper;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
@@ -14,8 +16,6 @@ import com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
 import com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO;
 import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
-import com.worldline.direct.util.WorldlinePaymentProductUtils;
-
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
@@ -70,8 +70,8 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @Resource(name = "worldlinePaymentDetailsWsDTOValidator")
     private WorldlinePaymentDetailsWsDTOValidator worldlinePaymentDetailsWsDTOValidator;
 
-    @Resource(name = "worldlinePaymentProductUtils")
-    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
+    @Resource(name = "worldlinePaymentProductFilterStrategyFactory")
+    private WorldlinePaymentProductFilterStrategyFactory worldlinePaymentProductFilterStrategyFactory;
 
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
@@ -83,7 +83,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @ApiBaseSiteIdUserIdAndCartIdParam
     public PaymentProductListWsDTO getCartPaymentProducts(
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
-        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductUtils.filterByCheckoutType(worldlinePaymentProductUtils.filterByAvailablePaymentModes(worldlineCheckoutFacade.getAvailablePaymentMethods()));
+        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE).get();
 
         GetPaymentProductsResponse productsResponse = new GetPaymentProductsResponse();
         productsResponse.setPaymentProducts(availablePaymentMethods);
