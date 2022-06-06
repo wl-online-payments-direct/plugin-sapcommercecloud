@@ -7,11 +7,12 @@ import com.worldline.direct.checkoutaddon.forms.WorldlinePaymentDetailsForm;
 import com.worldline.direct.checkoutaddon.forms.validation.WorldlinePaymentDetailsValidator;
 import com.worldline.direct.constants.WorldlineCheckoutConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
-import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -69,17 +70,18 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
     @Resource(name = "worldlinePaymentDetailsValidator")
     private WorldlinePaymentDetailsValidator worldlinePaymentDetailsValidator;
 
-    @Resource(name = "worldlinePaymentProductUtils")
-    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
+    @Resource(name = "worldlinePaymentProductFilterStrategyFactory")
+    private WorldlinePaymentProductFilterStrategyFactory worldlinePaymentProductFilterStrategyFactory;
 
     protected UserFacade getUserFacade() {
         return userFacade;
     }
 
     @ModelAttribute("savedCardPrefix")
-    public String getSavedCardPrefix(){
+    public String getSavedCardPrefix() {
         return "savedPaymentCard-";
     }
+
     /**
      * {@inheritDoc}
      */
@@ -92,8 +94,8 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         setupSelectPaymentPage(model);
 
         model.addAttribute("worldlinePaymentDetailsForm", new WorldlinePaymentDetailsForm());
-        final List<PaymentProduct> availablePaymentMethods =worldlinePaymentProductUtils.filterByAvailablePaymentModes( worldlineCheckoutFacade.getAvailablePaymentMethods());
-        model.addAttribute("paymentProducts", worldlinePaymentProductUtils.filterByCheckoutType(availablePaymentMethods));
+        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS).get();
+        model.addAttribute("paymentProducts", worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE).get());
 
         model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
         model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));
