@@ -162,7 +162,7 @@ ACC.worldlinePaymentPost = {
         let $selectedRadio = $('input:radio[name="paymentProductId"]:checked');
         var isHTP = $(PAYMENT_METHOD_SELECTORS.HTP_CLASS);
 
-        if ($selectedRadio.attr("is-saved").length && isHTP.length) {
+        if ($selectedRadio.attr("is-saved") !== undefined && $selectedRadio.attr("is-saved").length && isHTP.length) {
             $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_CONTAINER).block({message: $("<img>").attr("src", ACC.config.commonResourcePath + "/images/spinner.gif")});
             let token = $selectedRadio.attr("token");
             let tokenizationForm = $selectedRadio.closest('tr').next('tr').removeClass('display-none').addClass('js-hostedTokenization').find(".hostedTokenization");
