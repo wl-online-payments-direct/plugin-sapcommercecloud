@@ -3,9 +3,11 @@
  Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:utils="http://www.springframework.org/schema/util"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-            http://www.springframework.org/schema/beans/spring-beans.xsd">
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <import resource="worldlinedirectcore-spring-dao.xml"/>
     <import resource="worldlinedirectcore-spring-service.xml"/>
@@ -39,10 +41,7 @@
         <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
-    <bean id="worldlinePaymentProductUtils" class="com.worldline.direct.util.WorldlinePaymentProductUtils">
-        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
-        <property name="baseStoreService" ref="baseStoreService"/>
-    </bean>
+    <bean id="worldlinePaymentProductUtils" class="com.worldline.direct.util.WorldlinePaymentProductUtils"/>
 
     <!-- facades -->
     <alias name="worldlineUserFacade" alias="worldlineUserFacade"/>
@@ -102,6 +101,59 @@
     </bean>
 
     <!-- strategies -->
+    <bean id="worldlinePaymentProductFilterByAvailabilityStrategy"
+          class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByAvailabilityStrategy">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+    </bean>
+    <bean id="worldlinePaymentProductFilterByCheckoutStrategy"
+          class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByCheckoutStrategy">
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="worldlineHostedCheckoutPaymentProductsEvaluatorList"
+                  ref="worldlineHostedCheckoutPaymentProductsEvaluatorList"/>
+        <property name="worldlineHostedTokenizationPaymentProductsEvaluatorList"
+                  ref="worldlineHostedTokenizationPaymentProductsEvaluatorList"/>
+    </bean>
 
+    <util:map id="worldlinePaymentProductFilterStrategyMap"
+              key-type="com.worldline.direct.enums.WorldlinePaymentProductFilterEnum"
+              value-type="com.worldline.direct.strategy.WorldlinePaymentProductFilterStrategy"
+              map-class="java.util.HashMap">
+        <entry key="CHECKOUT_TYPE" value-ref="worldlinePaymentProductFilterByCheckoutStrategy"/>
+        <entry key="ACTIVE_PAYMENTS" value-ref="worldlinePaymentProductFilterByAvailabilityStrategy"/>
+    </util:map>
+    <bean id="worldlinePaymentProductFilterStrategyFactory"
+          class="com.worldline.direct.factory.impl.DefaultWorldlinePaymentProductFilterStrategyFactory">
+        <property name="paymentProductFilterStrategyMap" ref="worldlinePaymentProductFilterStrategyMap"/>
+    </bean>
+
+    <!-- evaluator -->
+    <bean id="worldlineHostedCheckoutPaymentProductsEvaluator"
+          class="com.worldline.direct.evaluate.impl.WorldlineHostedCheckoutPaymentProductsEvaluator"/>
+    <bean id="worldlineHostedTokenizationPaymentProductsEvaluator"
+          class="com.worldline.direct.evaluate.impl.WorldlineHostedTokenizationPaymentProductsEvaluator"/>
+    <bean id="worldlineBcmcPaymentProductsEvaluator"
+          class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
+        <property name="paymentProductId">
+            <utils:constant
+                    static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_BCC"/>
+        </property>
+    </bean>
+    <bean id="worldlineApplePayPaymentProductsEvaluator"
+          class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
+        <property name="paymentProductId">
+            <utils:constant
+                    static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_APPLEPAY"/>
+        </property>
+    </bean>
+
+    <utils:list id="worldlineHostedCheckoutPaymentProductsEvaluatorList">
+        <ref bean="worldlineHostedCheckoutPaymentProductsEvaluator"/>
+        <ref bean="worldlineApplePayPaymentProductsEvaluator"/>
+    </utils:list>
+
+    <utils:list id="worldlineHostedTokenizationPaymentProductsEvaluatorList">
+        <ref bean="worldlineHostedTokenizationPaymentProductsEvaluator"/>
+        <ref bean="worldlineBcmcPaymentProductsEvaluator"/>
+    </utils:list>
 
 </beans>
