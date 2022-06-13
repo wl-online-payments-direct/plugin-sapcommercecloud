@@ -8,6 +8,7 @@ import com.worldline.direct.evaluate.WorldlinePaymentProductEvaluator;
 import com.worldline.direct.strategy.WorldlinePaymentProductFilterStrategy;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
+import de.hybris.platform.util.localization.Localization;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -60,7 +61,7 @@ public class WorldlinePaymentProductFilterByCheckoutStrategy implements Worldlin
         paymentProduct.setId(WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP);
         paymentProduct.setPaymentMethod(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
-        paymentProduct.getDisplayHints().setLabel("Grouped Cards");
+        paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.byCard"));
         return paymentProduct;
     }
 
@@ -69,7 +70,7 @@ public class WorldlinePaymentProductFilterByCheckoutStrategy implements Worldlin
         paymentProduct.setId(WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP);
         paymentProduct.setPaymentMethod(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
-        paymentProduct.getDisplayHints().setLabel("Grouped Cards");
+        paymentProduct.getDisplayHints().setLabel("");
         return paymentProduct;
     }
 
