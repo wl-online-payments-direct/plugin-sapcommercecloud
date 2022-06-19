@@ -5,7 +5,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
 <%@ attribute name="hostedTokenization" required="true"
-              type="com.ingenico.direct.domain.CreateHostedTokenizationResponse" %>
+              type="com.onlinepayments.domain.CreateHostedTokenizationResponse" %>
 <%@ attribute name="savedPaymentInfos" required="false" type="java.util.List" %>
 <%@ attribute name="paymentProductId" required="false" type="java.lang.Integer" %>
 <%@ attribute name="paymentInfo" required="false" type="com.worldline.direct.order.data.WorldlinePaymentInfoData" %>

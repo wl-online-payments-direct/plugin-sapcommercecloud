@@ -1,7 +1,7 @@
 package com.worldline.direct.strategy.impl;
 
-import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.direct.domain.PaymentProductDisplayHints;
+import com.onlinepayments.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProductDisplayHints;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.evaluate.WorldlinePaymentProductEvaluator;

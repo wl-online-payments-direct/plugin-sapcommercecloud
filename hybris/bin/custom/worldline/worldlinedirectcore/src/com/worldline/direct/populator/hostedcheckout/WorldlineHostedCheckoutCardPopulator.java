@@ -1,8 +1,8 @@
 package com.worldline.direct.populator.hostedcheckout;
 
 import com.google.common.base.Preconditions;
-import com.ingenico.direct.domain.CardPaymentMethodSpecificInputBase;
-import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
+import com.onlinepayments.domain.CardPaymentMethodSpecificInputBase;
+import com.onlinepayments.domain.CreateHostedCheckoutRequest;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;

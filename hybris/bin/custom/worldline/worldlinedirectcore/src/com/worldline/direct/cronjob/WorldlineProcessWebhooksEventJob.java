@@ -1,9 +1,10 @@
 package com.worldline.direct.cronjob;
 
-import java.util.Date;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onlinepayments.domain.WebhooksEvent;
 import com.worldline.direct.dao.WorldlineWebhookDao;
+import com.worldline.direct.enums.WorldlineWebhooksEventStatusEnum;
+import com.worldline.direct.model.WorldlineWebhooksEventModel;
 import com.worldline.direct.service.WorldlineWebhookService;
 import de.hybris.platform.cronjob.enums.CronJobResult;
 import de.hybris.platform.cronjob.enums.CronJobStatus;
@@ -12,14 +13,11 @@ import de.hybris.platform.servicelayer.cronjob.AbstractJobPerformable;
 import de.hybris.platform.servicelayer.cronjob.PerformResult;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.util.Config;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ingenico.direct.domain.WebhooksEvent;
-import com.worldline.direct.enums.WorldlineWebhooksEventStatusEnum;
-import com.worldline.direct.model.WorldlineWebhooksEventModel;
+import java.util.Date;
+import java.util.List;
 
 public class WorldlineProcessWebhooksEventJob extends AbstractJobPerformable<CronJobModel> {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineProcessWebhooksEventJob.class);

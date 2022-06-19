@@ -1,7 +1,7 @@
 package com.worldline.direct.occ.controllers.v2;
 
 
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
+import com.onlinepayments.domain.CreateHostedCheckoutResponse;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;

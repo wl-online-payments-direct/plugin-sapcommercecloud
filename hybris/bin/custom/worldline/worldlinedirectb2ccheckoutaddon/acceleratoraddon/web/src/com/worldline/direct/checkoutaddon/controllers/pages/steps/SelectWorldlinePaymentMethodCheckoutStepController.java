@@ -1,7 +1,7 @@
 package com.worldline.direct.checkoutaddon.controllers.pages.steps;
 
-import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.CreateHostedTokenizationResponse;
+import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePaymentDetailsForm;
 import com.worldline.direct.checkoutaddon.forms.validation.WorldlinePaymentDetailsValidator;

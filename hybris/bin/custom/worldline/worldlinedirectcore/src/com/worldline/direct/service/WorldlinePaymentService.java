@@ -1,6 +1,6 @@
 package com.worldline.direct.service;
 
-import com.ingenico.direct.domain.*;
+import com.onlinepayments.domain.*;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.order.data.BrowserData;

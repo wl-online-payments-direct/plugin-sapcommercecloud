@@ -1,9 +1,9 @@
 package com.worldline.direct.factory.impl;
 
-import com.ingenico.direct.domain.AmountOfMoney;
-import com.ingenico.direct.domain.LineItem;
-import com.ingenico.direct.domain.OrderLineDetails;
-import com.ingenico.direct.domain.ShoppingCart;
+import com.onlinepayments.domain.AmountOfMoney;
+import com.onlinepayments.domain.LineItem;
+import com.onlinepayments.domain.OrderLineDetails;
+import com.onlinepayments.domain.ShoppingCart;
 import com.worldline.direct.factory.WorldlineShoppingCartFactory;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
