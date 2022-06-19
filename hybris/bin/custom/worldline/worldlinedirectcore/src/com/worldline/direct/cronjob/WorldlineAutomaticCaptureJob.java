@@ -1,18 +1,13 @@
 package com.worldline.direct.cronjob;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-
+import com.onlinepayments.domain.CaptureResponse;
+import com.onlinepayments.domain.CapturesResponse;
 import com.worldline.direct.dao.WorldlineOrderDao;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineTransactionService;
+import com.worldline.direct.util.WorldlineAmountUtils;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.cronjob.enums.CronJobResult;
 import de.hybris.platform.cronjob.enums.CronJobStatus;
@@ -23,15 +18,18 @@ import de.hybris.platform.servicelayer.cronjob.AbstractJobPerformable;
 import de.hybris.platform.servicelayer.cronjob.PerformResult;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.store.BaseStoreModel;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ingenico.direct.domain.CaptureResponse;
-import com.ingenico.direct.domain.CapturesResponse;
-import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.worldline.direct.util.WorldlineAmountUtils;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT;
 
 public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJobModel> {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineAutomaticCaptureJob.class);

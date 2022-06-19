@@ -1,13 +1,14 @@
 package com.worldline.direct.facade.impl;
 
-import com.ingenico.direct.domain.CardWithoutCvv;
-import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.direct.domain.TokenResponse;
+import com.onlinepayments.domain.CardWithoutCvv;
+import com.onlinepayments.domain.PaymentProduct;
+import com.onlinepayments.domain.TokenResponse;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.WorldlineCustomerAccountService;
 import com.worldline.direct.service.WorldlinePaymentService;
+import de.hybris.platform.commerceservices.customer.CustomerAccountService;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -15,7 +16,6 @@ import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
-import de.hybris.platform.commerceservices.customer.CustomerAccountService;
 import org.apache.commons.lang.BooleanUtils;
 
 import java.util.ArrayList;
@@ -151,11 +151,10 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     @Override
     public void setDefaultPaymentInfo(WorldlinePaymentInfoData paymentInfoData) {
         validateParameterNotNullStandardMessage("paymentInfoData", paymentInfoData);
-        final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();;
-        final WorldlinePaymentInfoModel worldlinePaymentInfoModel =  worldlineCustomerAccountService.getWorldlinePaymentInfoByCode(currentCustomer, paymentInfoData.getCode());
-        if (worldlinePaymentInfoModel != null)
-        {
-             customerAccountService.setDefaultPaymentInfo(currentCustomer, worldlinePaymentInfoModel);
+        final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+        final WorldlinePaymentInfoModel worldlinePaymentInfoModel = worldlineCustomerAccountService.getWorldlinePaymentInfoByCode(currentCustomer, paymentInfoData.getCode());
+        if (worldlinePaymentInfoModel != null) {
+            customerAccountService.setDefaultPaymentInfo(currentCustomer, worldlinePaymentInfoModel);
         }
     }
 

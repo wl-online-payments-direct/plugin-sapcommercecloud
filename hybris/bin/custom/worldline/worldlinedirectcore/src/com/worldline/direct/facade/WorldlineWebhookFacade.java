@@ -1,8 +1,7 @@
 package com.worldline.direct.facade;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-import com.ingenico.direct.domain.WebhooksEvent;
+import com.onlinepayments.domain.WebhooksEvent;
 import com.worldline.direct.exception.WorldlineNonValidWebhooksEventException;
 
 public interface WorldlineWebhookFacade {

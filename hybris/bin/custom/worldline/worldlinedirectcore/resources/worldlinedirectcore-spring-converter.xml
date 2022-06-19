@@ -43,7 +43,7 @@
           class="com.worldline.direct.populator.WorldlineBrowserCustomerDevicePopulator"/>
 
     <bean id="worldlineBrowserCustomerDeviceConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CustomerDevice"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CustomerDevice"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineBrowserCustomerDevicePopulator"/>
@@ -51,7 +51,7 @@
         </property>
     </bean>
     <bean id="worldlineOrderParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.Order"/>
+        <property name="targetClass" value="com.onlinepayments.domain.Order"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineOrderRequestParamPopulator"/>
@@ -86,7 +86,7 @@
     </bean>
 
     <bean id="worldlineHostedCheckoutParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CreateHostedCheckoutRequest"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CreateHostedCheckoutRequest"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineHostedCheckoutBasicPopulator"/>
@@ -120,7 +120,7 @@
 
 
     <bean id="worldlineHostedTokenizationParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CreatePaymentRequest"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CreatePaymentRequest"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineHostedTokenizationBasicPopulator"/>

@@ -1,7 +1,7 @@
 package com.worldline.direct.facade.impl;
 
-import com.ingenico.direct.ApiException;
-import com.ingenico.direct.domain.*;
+import com.onlinepayments.ApiException;
+import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;

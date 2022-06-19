@@ -1,7 +1,7 @@
 package com.worldline.direct.facade;
 
-import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.direct.domain.TokenResponse;
+import com.onlinepayments.domain.PaymentProduct;
+import com.onlinepayments.domain.TokenResponse;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 
