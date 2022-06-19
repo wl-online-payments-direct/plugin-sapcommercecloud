@@ -1,12 +1,12 @@
 package com.worldline.direct.service.impl;
 
-import com.ingenico.direct.ApiException;
-import com.ingenico.direct.Client;
-import com.ingenico.direct.DeclinedPaymentException;
-import com.ingenico.direct.domain.*;
-import com.ingenico.direct.merchant.products.GetPaymentProductParams;
-import com.ingenico.direct.merchant.products.GetPaymentProductsParams;
-import com.ingenico.direct.merchant.products.GetProductDirectoryParams;
+import com.onlinepayments.ApiException;
+import com.onlinepayments.Client;
+import com.onlinepayments.DeclinedPaymentException;
+import com.onlinepayments.domain.*;
+import com.onlinepayments.merchant.products.GetPaymentProductParams;
+import com.onlinepayments.merchant.products.GetPaymentProductsParams;
+import com.onlinepayments.merchant.products.GetProductDirectoryParams;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.factory.WorldlineClientFactory;

@@ -1,17 +1,16 @@
 package com.worldline.direct.factory.impl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import com.onlinepayments.Client;
+import com.onlinepayments.CommunicatorConfiguration;
+import com.onlinepayments.Factory;
+import com.worldline.direct.factory.WorldlineClientFactory;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ingenico.direct.Client;
-import com.ingenico.direct.CommunicatorConfiguration;
-import com.ingenico.direct.Factory;
-import com.worldline.direct.factory.WorldlineClientFactory;
-import com.worldline.direct.model.WorldlineConfigurationModel;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class WorldlineClientFactoryImpl implements WorldlineClientFactory {
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlineClientFactoryImpl.class);

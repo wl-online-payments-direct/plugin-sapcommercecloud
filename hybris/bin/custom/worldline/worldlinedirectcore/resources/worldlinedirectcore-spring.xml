@@ -20,7 +20,7 @@
         <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
     </bean>
 
-    <bean id="communicatorConfiguration" class="com.ingenico.direct.CommunicatorConfiguration">
+    <bean id="communicatorConfiguration" class="com.onlinepayments.CommunicatorConfiguration">
         <property name="authorizationType" value="${worldline.direct.api.authorizationType}"/>
         <property name="connectTimeout" value="${worldline.direct.api.connectTimeout}"/>
         <property name="socketTimeout" value="${worldline.direct.api.socketTimeout}"/>
@@ -28,7 +28,7 @@
         <property name="integrator" value="${worldline.direct.api.integrator}"/>
         <property name="shoppingCartExtension" ref="worldlineShoppingCartExtension"/>
     </bean>
-    <bean id="worldlineShoppingCartExtension" class="com.ingenico.direct.domain.ShoppingCartExtension">
+    <bean id="worldlineShoppingCartExtension" class="com.onlinepayments.domain.ShoppingCartExtension">
         <constructor-arg name="creator" value="${worldline.direct.api.shoppingCartExtension.creator}"/>
         <constructor-arg name="name" value="${worldline.direct.api.shoppingCartExtension.name}"/>
         <constructor-arg name="version" value="${worldline.direct.api.shoppingCartExtension.version}"/>

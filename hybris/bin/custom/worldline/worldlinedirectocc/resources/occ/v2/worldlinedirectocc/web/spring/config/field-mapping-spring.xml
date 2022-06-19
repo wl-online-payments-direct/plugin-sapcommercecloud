@@ -4,7 +4,6 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!-- Fieldset mapping -->
@@ -137,7 +136,7 @@
 
     <bean id="hostedTokenizationFieldMapper" parent="fieldMapper">
         <property name="sourceClass"
-                  value="com.ingenico.direct.domain.CreateHostedTokenizationResponse"/>
+                  value="com.onlinepayments.domain.CreateHostedTokenizationResponse"/>
         <property name="destClass"
                   value="com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
         <property name="fieldMapping">
@@ -149,7 +148,7 @@
 
     <bean id="hostedCheckoutFieldMapper" parent="fieldMapper">
         <property name="sourceClass"
-                  value="com.ingenico.direct.domain.CreateHostedCheckoutResponse"/>
+                  value="com.onlinepayments.domain.CreateHostedCheckoutResponse"/>
         <property name="destClass"
                   value="com.worldline.direct.payment.dto.HostedCheckoutResponseWsDTO"/>
         <property name="fieldMapping">

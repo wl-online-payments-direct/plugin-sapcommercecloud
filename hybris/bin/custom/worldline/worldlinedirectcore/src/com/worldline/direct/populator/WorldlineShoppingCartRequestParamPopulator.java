@@ -1,7 +1,7 @@
 package com.worldline.direct.populator;
 
-import com.ingenico.direct.domain.Order;
-import com.ingenico.direct.domain.ShoppingCart;
+import com.onlinepayments.domain.Order;
+import com.onlinepayments.domain.ShoppingCart;
 import com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;

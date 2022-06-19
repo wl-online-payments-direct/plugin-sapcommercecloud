@@ -1,9 +1,9 @@
 package com.worldline.direct.facade;
 
-import com.ingenico.direct.domain.CreateHostedCheckoutResponse;
-import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
-import com.ingenico.direct.domain.DirectoryEntry;
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.CreateHostedCheckoutResponse;
+import com.onlinepayments.domain.CreateHostedTokenizationResponse;
+import com.onlinepayments.domain.DirectoryEntry;
+import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;

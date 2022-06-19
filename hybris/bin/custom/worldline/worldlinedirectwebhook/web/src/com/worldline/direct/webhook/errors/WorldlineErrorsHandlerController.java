@@ -1,6 +1,9 @@
 package com.worldline.direct.webhook.errors;
 
 
+import com.onlinepayments.webhooks.ApiVersionMismatchException;
+import com.onlinepayments.webhooks.SignatureValidationException;
+import com.worldline.direct.exception.WorldlineNonValidWebhooksEventException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -8,10 +11,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import com.ingenico.direct.webhooks.ApiVersionMismatchException;
-import com.ingenico.direct.webhooks.SignatureValidationException;
-import com.worldline.direct.exception.WorldlineNonValidWebhooksEventException;
 
 
 /**
