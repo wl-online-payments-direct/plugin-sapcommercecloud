@@ -111,8 +111,7 @@
     </bean>
     <bean id="worldlineHostedTokenizationRedirectPopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationRedirectPopulator">
-        <property name="baseSiteService" ref="baseSiteService"/>
-        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
+        <property name="sessionService" ref="sessionService"/>
     </bean>
 
     <bean id="worldlineHostedTokenizationMobilePopulator"

@@ -70,6 +70,7 @@
         <property name="customerAccountService" ref="customerAccountService"/>
         <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
         <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
+        <property name="paymentModeService" ref="worldlinePaymentModeService"/>
     </bean>
 
     <bean id="worldlineExtendedCheckoutFacade"
