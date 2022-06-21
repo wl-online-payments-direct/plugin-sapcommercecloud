@@ -53,7 +53,7 @@ public class WorldlineShoppingCartWithoutDiscountFactory implements WorldlineSho
         orderLineDetails.setProductCode(orderEntry.getProduct().getCode());
         orderLineDetails.setTaxAmount(0L);
         BigDecimal basePrice = BigDecimal.valueOf(worldlineAmountUtils.createAmount(orderEntry.getBasePrice(), currencyISOcode));
-        BigDecimal totalPrice = BigDecimal.valueOf(worldlineAmountUtils.createAmount(orderEntry.getTotalPrice(), currencyISOcode));
+        BigDecimal totalPrice = BigDecimal.valueOf(worldlineAmountUtils.createAmount(orderEntry.getTotalPrice() / orderEntry.getQuantity(), currencyISOcode));
         orderLineDetails.setQuantity(orderEntry.getQuantity());
         orderLineDetails.setDiscountAmount(basePrice.subtract(totalPrice).longValue());
         orderLineDetails.setProductPrice(basePrice.longValue());

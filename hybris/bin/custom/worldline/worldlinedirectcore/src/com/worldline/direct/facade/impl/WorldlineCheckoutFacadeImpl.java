@@ -12,7 +12,10 @@ import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
-import com.worldline.direct.service.*;
+import com.worldline.direct.service.WorldlineBusinessProcessService;
+import com.worldline.direct.service.WorldlineCustomerAccountService;
+import com.worldline.direct.service.WorldlinePaymentService;
+import com.worldline.direct.service.WorldlineTransactionService;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
@@ -32,11 +35,13 @@ import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
+import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
+import de.hybris.platform.order.PaymentModeService;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
@@ -44,6 +49,7 @@ import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
+import de.hybris.platform.util.localization.Localization;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +58,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP;
 
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineCheckoutFacadeImpl.class);
@@ -65,6 +74,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private CartService cartService;
     private CheckoutFacade checkoutFacade;
     private CommerceCheckoutService commerceCheckoutService;
+    private PaymentModeService paymentModeService;
     private BaseStoreService baseStoreService;
     private CustomerAccountService customerAccountService;
     private WorldlineCustomerAccountService worldlineCustomerAccountService;
@@ -91,7 +101,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     @Override
     public PaymentProduct getPaymentMethodById(int paymentId) {
-        if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP) {
+        if (paymentId == PAYMENT_METHOD_HTP) {
             return createHtpGroupedCardPaymentProduct();
         } else if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP) {
             return createHcpGroupedCardPaymentProduct();
@@ -150,13 +160,17 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             worldlinePaymentInfoData.setSavedPayment(StringUtils.defaultString(savedPaymentCode,StringUtils.EMPTY));
             worldlinePaymentInfoData.setId(paymentProduct.getId());
             worldlinePaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
-            if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP) {
+            if (paymentId == PAYMENT_METHOD_HTP) {
                 worldlinePaymentInfoData.setHostedTokenizationId(hostedTokenizationId);
                 worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
+                worldlinePaymentInfoData.setPaymentProductDirectoryId(StringUtils.EMPTY);
             } else if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL) {
                 worldlinePaymentInfoData.setPaymentProductDirectoryId(paymentDirId);
+                worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
                 worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
             } else {
+                worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
+                worldlinePaymentInfoData.setPaymentProductDirectoryId(StringUtils.EMPTY);
                 worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT);
             }
         } else {
@@ -322,6 +336,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             AddressModel billingAddress = convertToAddressModel(worldlinePaymentInfoData.getBillingAddress());
             paymentInfo.setBillingAddress(billingAddress);
             billingAddress.setOwner(paymentInfo);
+        String paymentModeCode;
         if (StringUtils.isNotBlank(worldlinePaymentInfoData.getSavedPayment()))
         {
             final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
@@ -329,13 +344,19 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             paymentInfo.setUsedSavedPayment(savedPaymentInfo);
             paymentInfo.setId(savedPaymentInfo.getId());
             paymentInfo.setToken(savedPaymentInfo.getToken());
-        }else {
+            paymentModeCode = String.valueOf(savedPaymentInfo.getId());
+        } else {
             paymentInfo.setUsedSavedPayment(null);
             paymentInfo.setToken(null);
             paymentInfo.setId(worldlinePaymentInfoData.getId());
+            paymentModeCode = String.valueOf(worldlinePaymentInfoData.getId());
         }
-
-            modelService.save(paymentInfo);
+        if (!StringUtils.equals(paymentModeCode, String.valueOf(PAYMENT_METHOD_HTP)) && !StringUtils.equals(paymentModeCode, String.valueOf(PAYMENT_METHOD_HCP))) {
+            PaymentModeModel paymentMode = paymentModeService.getPaymentModeForCode(paymentModeCode);
+            cartModel.setPaymentMode(paymentMode);
+            modelService.save(cartModel);
+        }
+        modelService.save(paymentInfo);
         return paymentInfo;
     }
 
@@ -343,7 +364,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         if (orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
             final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
             final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
-            if (paymentOutput.getCardPaymentMethodSpecificOutput() != null && paymentInfo.getId().equals(WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP)) {
+            if (paymentOutput.getCardPaymentMethodSpecificOutput() != null && paymentInfo.getId().equals(PAYMENT_METHOD_HTP)) {
                 paymentInfo.setId(paymentOutput.getCardPaymentMethodSpecificOutput().getPaymentProductId());
                 modelService.save(paymentInfo);
                 modelService.refresh(orderModel);
@@ -440,10 +461,10 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     private PaymentProduct createHtpGroupedCardPaymentProduct() {
         PaymentProduct paymentProduct = new PaymentProduct();
-        paymentProduct.setId(WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP);
+        paymentProduct.setId(PAYMENT_METHOD_HTP);
         paymentProduct.setPaymentMethod(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
-        paymentProduct.getDisplayHints().setLabel("Grouped Cards");
+        paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.byCard"));
         return paymentProduct;
     }
 
@@ -452,14 +473,14 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         paymentProduct.setId(WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP);
         paymentProduct.setPaymentMethod(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
-        paymentProduct.getDisplayHints().setLabel("Grouped Cards");
+        paymentProduct.getDisplayHints().setLabel("");
         return paymentProduct;
     }
 
     private Boolean isValidPaymentMethod(PaymentProduct paymentProduct) {
         final WorldlineCheckoutTypesEnum worldlineCheckoutType = getWorldlineCheckoutType();
         if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutType)) {
-            return paymentProduct.getId() >= 0 || paymentProduct.getId() == WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP;
+            return paymentProduct.getId() >= 0 || paymentProduct.getId() == PAYMENT_METHOD_HTP;
         }
         return true;
     }
@@ -541,5 +562,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
         this.checkoutCustomerStrategy = checkoutCustomerStrategy;
+    }
+
+    public void setPaymentModeService(PaymentModeService paymentModeService) {
+        this.paymentModeService = paymentModeService;
     }
 }
