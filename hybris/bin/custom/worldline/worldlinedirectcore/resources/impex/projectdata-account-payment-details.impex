@@ -1,0 +1,14 @@
+$contentCatalog = powertoolsContentCatalog
+$contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+$jspPath = /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/payment-details/worldlineAccountPaymentInfoPage.jsp
+UPDATE CMSLinkComponent; $contentCV[unique = true]; uid[unique = true] ; name                               ; url
+                       ;                          ; PaymentDetailsLink ; WorldlineAccountPaymentDetailsLink ; /my-account/worldline/payment-details
+INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                   ; name                                          ; page
+                                 ;                          ; AccountPaymentDetailsComponent       ; Worldline Account Payment Details Component   ; $jspPath
+                                 ;                          ; OrderConfirmationShippingComponent   ; Order Confirmation Shipping Info Component    ; /WEB-INF/views/addons/worldlinedirectb2bcheckoutaddon/responsive/pages/replenishment/accountOrderDetailShippingInfo.jsp ; ; OrderConfirmationShippingComponent
+                                 ;                          ; AccountOrderDetailsShippingComponent ; Account Order Details Shipping Info Component ; /WEB-INF/views/addons/worldlinedirectb2bcheckoutaddon/responsive/pages/replenishment/accountOrderDetailShippingInfo.jsp ; ; AccountOrderDetailsShippingComponent
+
+INSERT_UPDATE ServicelayerJob; code[unique = true]                ; active; retry; priority; springId
+                             ; worldlineAcceleratorCartToOrderJob ; true  ; true ; 4       ; worldlineAcceleratorCartToOrderJob
+
+

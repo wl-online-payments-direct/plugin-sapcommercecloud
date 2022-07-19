@@ -53,4 +53,31 @@
         <property name="ipAddress" type="String"/>
     </bean>
 
+    <bean class="de.hybris.platform.b2bacceleratorfacades.order.data.TriggerData">
+        <property name="active" type="boolean"/>
+    </bean>
+
+
+    <!--
+        <bean class="com.worldline.direct.order.data.WorldlineScheduledCartData" extends="de.hybris.platform.commercefacades.order.data.CartData">
+            <property name="active" type="boolean"/>
+            <property name="triggerData" type="com.worldline.direct.order.data.WorldlineTriggerData"/>
+            <property name="firstOrderDate" type="java.util.Date"/>
+            <property name="jobCode" type="String"/>
+        </bean>
+
+        <bean class="com.worldline.direct.order.data.WorldlineTriggerData">
+            <property name="weekInterval" type="Integer"/>
+            <property name="day" type="Integer"/>
+            <property name="daysOfWeek" type="java.util.List&lt;de.hybris.platform.cronjob.enums.DayOfWeek>"/>
+            <property name="relative" type="java.lang.Boolean"/>
+            <property name="activationTime" type="java.util.Date"/>
+            <property name="month" type="Integer"/>
+            <property name="displayTimeTable" type="String"/>
+            <property name="creationTime" type="java.util.Date"/>
+            <property name="hour" type="Integer"/>
+            <property name="minute" type="Integer"/>
+            <property name="active" type="boolean"/>
+        </bean>
+    -->
 </beans>

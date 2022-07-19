@@ -6,7 +6,11 @@
 <%@ taglib prefix="ycommerce" uri="http://hybris.com/tld/ycommercetags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive" %>
+<%@ taglib prefix="replenishment" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/replenishment" %>
 <%@ taglib prefix="multi-checkout" tagdir="/WEB-INF/tags/responsive/checkout/multi" %>
+<%@ taglib prefix="b2b-multi-checkout" tagdir="/WEB-INF/tags/addons/b2bacceleratoraddon/responsive/checkout/multi" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
 <spring:url value="/checkout/multi/worldline/summary/placeOrder" var="placeOrderUrl" htmlEscape="false"/>
@@ -29,7 +33,8 @@
                             </div>
                         </div>
                         <div class="place-order-form hidden-xs">
-                            <form:form action="${placeOrderUrl}" id="worldlinePlaceOrderForm"
+                            <form:form action="${placeOrderUrl}" id="placeOrderForm1"
+                                       cssClass="js-worldlinePlaceOrderForm"
                                        modelAttribute="worldlinePlaceOrderForm">
                                 <form:input type="hidden" path="screenHeight"/>
                                 <form:input type="hidden" path="screenWidth"/>
@@ -51,6 +56,15 @@
                                         class="btn btn-primary btn-place-order btn-block checkout-next">
                                     <spring:theme code="checkout.summary.placeOrder" text="Place Order"/>
                                 </button>
+                                <c:if test="${cartData.quoteData eq null && showReplenishment eq true}">
+                                    <button id="scheduleReplenishment" type="button"
+                                            class="btn btn-default btn-block scheduleReplenishmentButton checkoutSummaryButton"
+                                            disabled="disabled">
+                                        <spring:theme code="checkout.summary.scheduleReplenishment"/>
+                                    </button>
+
+                                    <replenishment:worldlineReplenishmentScheduleForm/>
+                                </c:if>
                             </form:form>
                         </div>
                     </ycommerce:testId>
@@ -59,7 +73,7 @@
 
             <div class="col-sm-6">
                 <worldline:checkoutOrderSummary cartData="${cartData}" showDeliveryAddress="true" showPaymentInfo="true"
-                                               showTaxEstimate="true" showTax="true"/>
+                                                showTaxEstimate="true" showTax="true"/>
             </div>
 
             <div class="col-sm-12 col-lg-12">

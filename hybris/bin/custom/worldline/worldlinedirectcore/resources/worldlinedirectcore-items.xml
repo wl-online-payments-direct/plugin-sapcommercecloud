@@ -111,12 +111,19 @@
             </attributes>
         </itemtype>
 
+
+
         <itemtype code="WorldlinePaymentInfo" extends="PaymentInfo"
                   jaloclass="de.hybris.platform.jalo.order.payment.PaymentInfo"
                   generate="false">
             <attributes>
                 <attribute qualifier="id" type="java.lang.Integer">
                     <description>worldline paymentProduct ID</description>
+                    <modifiers read="true" write="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="mandate" type="java.lang.String">
+                    <description>worldline mandate</description>
                     <modifiers read="true" write="true" search="true"/>
                     <persistence type="property"/>
                 </attribute>

@@ -1,9 +1,6 @@
 package com.worldline.direct.facade;
 
-import com.onlinepayments.domain.CreateHostedCheckoutResponse;
-import com.onlinepayments.domain.CreateHostedTokenizationResponse;
-import com.onlinepayments.domain.DirectoryEntry;
-import com.onlinepayments.domain.PaymentProduct;
+import com.onlinepayments.domain.*;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
@@ -11,7 +8,8 @@ import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
-import de.hybris.platform.commercefacades.order.data.OrderData;
+import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.order.InvalidCartException;
 
 import java.util.List;
@@ -30,16 +28,18 @@ public interface WorldlineCheckoutFacade {
 
     void handlePaymentInfo(WorldlinePaymentInfoData paymentInfoData);
 
-    void fillWorldlinePaymentInfoData(WorldlinePaymentInfoData paymentInfoData, String savedPaymentCode,Integer paymentId, String paymentDirId, String hostedTokenizationId) throws WorldlineNonValidPaymentProductException;
+    void fillWorldlinePaymentInfoData(WorldlinePaymentInfoData paymentInfoData, String savedPaymentCode, Integer paymentId, String paymentDirId, String hostedTokenizationId) throws WorldlineNonValidPaymentProductException;
 
-    OrderData authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData hostedTokenizationId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
+    void authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData hostedTokenizationId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
-    OrderData handle3dsResponse(String ref, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
+    void handle3dsResponse(String ref, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
     CreateHostedCheckoutResponse createHostedCheckout(String orderCode, BrowserData browserData) throws InvalidCartException;
 
-    OrderData authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
+    void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
-    void validateReturnMAC(OrderData orderDetails, String returnMAC) throws WorldlineNonValidReturnMACException;
+    void handlePaymentResponse(AbstractOrderModel abstractOrderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
+
+    void validateReturnMAC(AbstractOrderData orderDetails, String returnMAC) throws WorldlineNonValidReturnMACException;
 
 }

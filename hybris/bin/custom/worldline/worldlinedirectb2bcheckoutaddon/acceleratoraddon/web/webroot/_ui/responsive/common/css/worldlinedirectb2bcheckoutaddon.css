@@ -1,0 +1,27 @@
+.payment_product img {
+    margin: 10px;
+    box-shadow: 3px 3px 8px 0 rgb(0 0 0 / 30%);
+    max-width: 45px;
+}
+
+.select-toggle-container {
+    display: none;
+    width: 100%;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    border: 1px solid rgba(0, 0, 0, .15);
+    border-radius: 5px;
+
+}
+
+tr .logo {
+    max-width: 50px;
+    box-shadow: 3px 3px 8px 0 rgb(0 0 0 / 30%);
+}
+
+tr .new-cart {
+    vertical-align: 5px;
+}
+
+.radio_image_row {
+    margin-bottom: 5px !important;
+}

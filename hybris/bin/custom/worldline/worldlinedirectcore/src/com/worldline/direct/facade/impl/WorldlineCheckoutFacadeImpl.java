@@ -18,6 +18,7 @@ import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineTransactionService;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
+import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.order.data.PickupOrderEntryGroupData;
@@ -32,6 +33,7 @@ import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.c2l.C2LItemModel;
 import de.hybris.platform.core.model.c2l.LanguageModel;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
@@ -65,25 +67,25 @@ import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMEN
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineCheckoutFacadeImpl.class);
 
-    private CommonI18NService commonI18NService;
-    private ModelService modelService;
+    protected CommonI18NService commonI18NService;
+    protected ModelService modelService;
 
-    private Converter<AddressData, AddressModel> addressReverseConverter;
-    private Converter<OrderModel, OrderData> orderConverter;
+    protected Converter<AddressData, AddressModel> addressReverseConverter;
+    protected Converter<OrderModel, OrderData> orderConverter;
 
-    private CartService cartService;
-    private CheckoutFacade checkoutFacade;
-    private CommerceCheckoutService commerceCheckoutService;
+    protected CartService cartService;
+    protected CheckoutFacade checkoutFacade;
+    protected CommerceCheckoutService commerceCheckoutService;
+    protected BaseStoreService baseStoreService;
+    protected CustomerAccountService customerAccountService;
+    protected WorldlineCustomerAccountService worldlineCustomerAccountService;
+    protected CheckoutCustomerStrategy checkoutCustomerStrategy;
     private PaymentModeService paymentModeService;
-    private BaseStoreService baseStoreService;
-    private CustomerAccountService customerAccountService;
-    private WorldlineCustomerAccountService worldlineCustomerAccountService;
-    private CheckoutCustomerStrategy checkoutCustomerStrategy;
 
-    private WorldlineUserFacade worldlineUserFacade;
-    private WorldlinePaymentService worldlinePaymentService;
-    private WorldlineTransactionService worldlineTransactionService;
-    private WorldlineBusinessProcessService worldlineBusinessProcessService;
+    protected WorldlineUserFacade worldlineUserFacade;
+    protected WorldlinePaymentService worldlinePaymentService;
+    protected WorldlineTransactionService worldlineTransactionService;
+    protected WorldlineBusinessProcessService worldlineBusinessProcessService;
 
     @Override
     public List<PaymentProduct> getAvailablePaymentMethods() {
@@ -179,28 +181,28 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     }
 
     @Override
-    public OrderData authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+    public void authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         final CreatePaymentResponse paymentForHostedTokenization = worldlinePaymentService.createPaymentForHostedTokenization(orderForCode, worldlineHostedTokenizationData);
 
         cleanHostedCheckoutId();
         final PaymentResponse payment = paymentForHostedTokenization.getPayment();
-        savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION,payment);
+        savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION, payment);
         if (paymentForHostedTokenization.getMerchantAction() != null) {
             storeReturnMac(orderForCode, paymentForHostedTokenization.getMerchantAction().getRedirectData().getRETURNMAC());
             throw new WorldlineNonAuthorizedPaymentException(payment,
                     paymentForHostedTokenization.getMerchantAction(),
                     WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
         }
-        return handlePaymentResponse(orderForCode, payment);
+        handlePaymentResponse(orderForCode, payment);
 
     }
 
 
-    public OrderData handle3dsResponse(String orderCode, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+    public void handle3dsResponse(String orderCode, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         final PaymentResponse payment = worldlinePaymentService.getPayment(paymentId);
-        return handlePaymentResponse(orderForCode, payment);
+        handlePaymentResponse(orderForCode, payment);
     }
 
     @Override
@@ -214,7 +216,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
 
     @Override
-    public OrderData authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+    public void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         GetHostedCheckoutResponse hostedCheckoutData = worldlinePaymentService.getHostedCheckout(hostedCheckoutId);
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         switch (WorldlinedirectcoreConstants.HOSTED_CHECKOUT_STATUS_ENUM.valueOf(hostedCheckoutData.getStatus())) {
@@ -229,7 +231,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
                 savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
-                return handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                break;
             default:
                 LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
                 throw new IllegalStateException("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
@@ -237,7 +240,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     }
 
     @Override
-    public void validateReturnMAC(OrderData orderDetails, String returnMAC) throws WorldlineNonValidReturnMACException {
+    public void validateReturnMAC(AbstractOrderData orderDetails, String returnMAC) throws WorldlineNonValidReturnMACException {
         if (orderDetails == null || orderDetails.getWorldlinePaymentInfo() == null
                 || !StringUtils.equals(returnMAC, orderDetails.getWorldlinePaymentInfo().getReturnMAC())) {
             throw new WorldlineNonValidReturnMACException(returnMAC);
@@ -258,7 +261,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     }
 
 
-    protected OrderData handlePaymentResponse(OrderModel orderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+    public void handlePaymentResponse(AbstractOrderModel orderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         switch (WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.valueOf(paymentResponse.getStatus())) {
             case CREATED:
             case REJECTED:
@@ -282,16 +285,18 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             case PENDING_CAPTURE:
             case AUTHORIZATION_REQUESTED:
             case CAPTURE_REQUESTED:
-                return updateOrderFromPaymentResponse(orderModel, paymentResponse, PaymentTransactionType.AUTHORIZATION);
+                updateOrderFromPaymentResponse(orderModel, paymentResponse, PaymentTransactionType.AUTHORIZATION);
+                break;
             case CAPTURED:
-                return updateOrderFromPaymentResponse(orderModel, paymentResponse, PaymentTransactionType.CAPTURE);
+                updateOrderFromPaymentResponse(orderModel, paymentResponse, PaymentTransactionType.CAPTURE);
+                break;
             default:
                 LOGGER.warn("Unexpected value: " + paymentResponse.getStatus());
                 throw new IllegalStateException("Unexpected value: " + paymentResponse.getStatus());
         }
     }
 
-    protected OrderData updateOrderFromPaymentResponse(OrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) throws InvalidCartException {
+    protected void updateOrderFromPaymentResponse(AbstractOrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) throws InvalidCartException {
         updatePaymentInfoIfNeeded(orderModel, paymentResponse);
         final PaymentTransactionModel paymentTransaction = worldlineTransactionService.getOrCreatePaymentTransaction(orderModel,
                 paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
@@ -305,8 +310,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 paymentTransactionType
         );
         cartService.removeSessionCart();
+        cartService.getSessionCart();
         modelService.refresh(orderModel);
-        return orderConverter.convert(orderModel);
     }
 
 
@@ -336,7 +341,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             AddressModel billingAddress = convertToAddressModel(worldlinePaymentInfoData.getBillingAddress());
             paymentInfo.setBillingAddress(billingAddress);
             billingAddress.setOwner(paymentInfo);
-        String paymentModeCode;
+            String paymentModeCode;
         if (StringUtils.isNotBlank(worldlinePaymentInfoData.getSavedPayment()))
         {
             final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
@@ -360,7 +365,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return paymentInfo;
     }
 
-    protected void updatePaymentInfoIfNeeded(final OrderModel orderModel, PaymentResponse paymentResponse) {
+    protected void updatePaymentInfoIfNeeded(final AbstractOrderModel orderModel, PaymentResponse paymentResponse) {
         if (orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
             final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
             final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
@@ -432,7 +437,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return cartService.hasSessionCart() ? cartService.getSessionCart() : null;
     }
 
-    private void savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum checkoutType, PaymentResponse paymentResponse) {
+    protected void savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum checkoutType, PaymentResponse paymentResponse) {
 
         String token = null;
         final String paymentMethod = paymentResponse.getPaymentOutput().getPaymentMethod();
@@ -445,6 +450,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 final RedirectPaymentMethodSpecificOutput redirectPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput();
                 token = redirectPaymentMethodSpecificOutput.getToken();
                 break;
+            case DIRECT_DEBIT:
+
+                return;
         }
 
         if (token == null) {
@@ -485,14 +493,14 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return true;
     }
 
-    private void storeReturnMac(OrderModel orderForCode, String returnMAC) throws InvalidCartException {
-        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) orderForCode.getPaymentInfo();//
+    protected void storeReturnMac(AbstractOrderModel abstractOrderModel, String returnMAC) throws InvalidCartException {
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();//
         paymentInfo.setReturnMAC(returnMAC);
         modelService.save(paymentInfo);
     }
 
 
-    private void cleanHostedCheckoutId() throws InvalidCartException {
+    protected void cleanHostedCheckoutId() throws InvalidCartException {
         final CartModel cart = getCart();
         if (cart == null || !(cart.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
             throw new InvalidCartException("Invalid cart while storing ReturnMAC");
