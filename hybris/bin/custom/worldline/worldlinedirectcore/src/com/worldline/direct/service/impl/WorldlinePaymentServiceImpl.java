@@ -17,6 +17,7 @@ import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlineLogUtils;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import org.apache.commons.collections.CollectionUtils;
@@ -38,12 +39,12 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlinePaymentServiceImpl.class);
 
-    private WorldlineConfigurationService worldlineConfigurationService;
-    private WorldlineAmountUtils worldlineAmountUtils;
-    private WorldlineClientFactory worldlineClientFactory;
-    private Converter<AbstractOrderModel, CreatePaymentRequest> worldlineHostedTokenizationParamConverter;
-    private Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter;
-    private Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter;
+    protected WorldlineConfigurationService worldlineConfigurationService;
+    protected WorldlineAmountUtils worldlineAmountUtils;
+    protected WorldlineClientFactory worldlineClientFactory;
+    protected Converter<AbstractOrderModel, CreatePaymentRequest> worldlineHostedTokenizationParamConverter;
+    protected Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter;
+    protected Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter;
 
     @Override
     public GetPaymentProductsResponse getPaymentProductsResponse(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
@@ -224,6 +225,24 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
+    public CreateHostedCheckoutResponse createHostedCheckout(CartModel cartModel) {
+        validateParameterNotNull(cartModel, "cart cannot be null");
+        try (Client client = worldlineClientFactory.getClient()) {
+            final CreateHostedCheckoutRequest params = worldlineHostedCheckoutParamConverter.convert(cartModel);
+            final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
+
+            WorldlineLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
+
+            return hostedCheckout;
+
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getting createHostedCheckout ", e);
+            //TODO Throw Logical Exception
+            return null;
+        }
+    }
+
+    @Override
     public GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId) {
         try (Client client = worldlineClientFactory.getClient()) {
             final GetHostedCheckoutResponse hostedCheckoutResponse = client.merchant(getMerchantId()).hostedCheckout().getHostedCheckout(hostedCheckoutId);
@@ -271,6 +290,26 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
+    public GetMandateResponse getMandate(String uniqueMandateReference) {
+        validateParameterNotNullStandardMessage("uniqueMandateReference", uniqueMandateReference);
+
+        try (Client client = worldlineClientFactory.getClient()) {
+            GetMandateResponse mandateResponse = client.merchant(getMerchantId()).mandates().getMandate(uniqueMandateReference);
+
+            WorldlineLogUtils.logAction(LOGGER, "getMandate", uniqueMandateReference, mandateResponse);
+
+            return mandateResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getMandate", e);
+            return null;
+        } catch (ApiException e) {
+            LOGGER.info("[ WORLDLINE ] uniqueMandateReference not found!", e);
+            return null;
+        }
+    }
+
+
+    @Override
     public PaymentResponse getPayment(String paymentId) {
         validateParameterNotNull(paymentId, "paymentId cannot be null");
         try (Client client = worldlineClientFactory.getClient()) {
@@ -285,6 +324,27 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             //TODO Throw Logical Exception
             return null;
         }
+    }
+
+    @Override
+    public CreatePaymentResponse createPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException {
+        validateParameterNotNull(abstractOrderModel, "order cannot be null");
+        try (Client client = worldlineClientFactory.getClient()) {
+
+            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
+            final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
+
+            WorldlineLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, payment);
+
+            return payment;
+        } catch (DeclinedPaymentException e) {
+            LOGGER.debug("[ WORLDLINE ] Errors during getting createPayment ", e.getMessage());
+            throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
+            //TODO Throw Logical Exception
+        }
+        return null;
     }
 
     @Override
@@ -411,7 +471,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         }
     }
 
-    private String getMerchantId() {
+    protected String getMerchantId() {
         return worldlineConfigurationService.getCurrentMerchantId();
     }
 

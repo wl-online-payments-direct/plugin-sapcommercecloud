@@ -5,6 +5,8 @@ import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 
 import java.math.BigDecimal;
@@ -30,7 +32,11 @@ public interface WorldlinePaymentService {
 
     PaymentResponse getPayment(String paymentId);
 
+    CreatePaymentResponse createPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException;
+
     CreateHostedCheckoutResponse createHostedCheckout(OrderModel orderForCode, BrowserData browserData);
+
+    CreateHostedCheckoutResponse createHostedCheckout(CartModel cartModel);
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 
@@ -51,5 +57,7 @@ public interface WorldlinePaymentService {
     TokenResponse getToken(String tokenId);
 
     void deleteToken(String tokenId);
+
+    GetMandateResponse getMandate(String uniqueMandateReference);
 
 }
