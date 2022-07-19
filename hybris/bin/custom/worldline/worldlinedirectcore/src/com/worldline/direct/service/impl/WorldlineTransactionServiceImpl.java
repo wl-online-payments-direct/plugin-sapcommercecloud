@@ -108,7 +108,6 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 .filter(entry -> webhooksEvent.getPayment().getStatus().equals(entry.getTransactionStatusDetails()))
                 .anyMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
 
-        final OrderModel order = (OrderModel) paymentTransaction.getOrder();
         if (!alreadyProcessed) {
             updatePaymentTransaction(
                     paymentTransaction,
@@ -151,7 +150,6 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         validateParameterNotNullStandardMessage("webhooksEvent.refund", webhooksEvent.getRefund());
         LOGGER.debug("[WORLDLINE] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
         final PaymentTransactionModel paymentTransaction = worldlineTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getRefund().getId()));
-        final OrderModel order = (OrderModel) paymentTransaction.getOrder();
         updatePaymentTransaction(
                 paymentTransaction,
                 webhooksEvent.getRefund().getId(),
@@ -277,7 +275,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         switch (transactionType){
             case AUTHORIZATION:
             case CAPTURE:
-                worldlineBusinessProcessService.triggerOrderProcessEvent((OrderModel) order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
+                worldlineBusinessProcessService.triggerOrderProcessEvent(order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
                 break;
             case REFUND_FOLLOW_ON:
                 worldlineBusinessProcessService.triggerReturnProcessEvent((OrderModel) order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_REFUND);

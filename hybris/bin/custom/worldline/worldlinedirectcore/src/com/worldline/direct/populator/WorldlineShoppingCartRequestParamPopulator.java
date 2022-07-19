@@ -5,6 +5,8 @@ import com.onlinepayments.domain.ShoppingCart;
 import com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -14,8 +16,10 @@ public class WorldlineShoppingCartRequestParamPopulator implements Populator<Abs
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
-        ShoppingCart shoppingCart = worldlineShoppingCartFactoriesConfiguration.getShoppingCartFactory(abstractOrderModel).create(abstractOrderModel);
-        order.setShoppingCart(shoppingCart);
+        if (abstractOrderModel instanceof OrderModel || (abstractOrderModel instanceof CartModel && ((CartModel) abstractOrderModel).getReplenishmentOrderProcess() != null)) {
+            ShoppingCart shoppingCart = worldlineShoppingCartFactoriesConfiguration.getShoppingCartFactory(abstractOrderModel).create(abstractOrderModel);
+            order.setShoppingCart(shoppingCart);
+        }
     }
 
     @Required

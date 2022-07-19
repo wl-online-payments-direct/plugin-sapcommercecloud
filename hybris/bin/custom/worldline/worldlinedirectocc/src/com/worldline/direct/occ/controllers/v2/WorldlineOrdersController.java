@@ -116,7 +116,9 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
         storeHTPReturnUrlInSession(orderData.getCode(), request);
 
-        orderData = worldlineCheckoutFacade.authorisePaymentForHostedTokenization(orderData.getCode(), hostedTokenizationData);
+        worldlineCheckoutFacade.authorisePaymentForHostedTokenization(orderData.getCode(), hostedTokenizationData);
+        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
+
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
     }
 
@@ -149,7 +151,9 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         }
 
         worldlineCheckoutFacade.validateReturnMAC(orderData, returnMAC);
-        orderData = worldlineCheckoutFacade.handle3dsResponse(orderData.getCode(), paymentId);
+        worldlineCheckoutFacade.handle3dsResponse(orderData.getCode(), paymentId);
+        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
+
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
     }
 
@@ -215,7 +219,8 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         }
 
         worldlineCheckoutFacade.validateReturnMAC(orderData, returnMAC);
-        orderData = worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderData.getCode(), hostedCheckoutId);
+        worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderData.getCode(), hostedCheckoutId);
+        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
     }
 

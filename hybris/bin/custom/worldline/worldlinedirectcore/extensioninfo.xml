@@ -8,7 +8,6 @@
         <requires-extension name="commercefacades"/>
         <requires-extension name="acceleratorservices"/>
         <requires-extension name="payment"/>
-        <requires-extension name="acceleratorservices"/>
         <coremodule generated="true" manager="com.worldline.direct.jalo.WorldlinedirectcoreManager" packageroot="com.worldline.direct"/>
     </extension>
 

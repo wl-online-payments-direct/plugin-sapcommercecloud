@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <alias name="worldlineB2CCartToOrderService" alias="worldlineCartToOrderService"/>
+    <bean id="worldlineB2CCartToOrderService" class="com.worldline.direct.service.impl.WorldlineCartToOrderServiceImpl ">
+        <property name="modelService" ref="modelService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="eventService" ref="eventService"/>
+        <property name="cronJobService" ref="cronJobService"/>
+    </bean>
+
+
+</beans>

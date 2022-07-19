@@ -12,29 +12,15 @@
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context.xsd">
 
-	<context:annotation-config/>
+    <context:annotation-config/>
 
+    <import resource="config/multi-step-checkout-config.xml"/>
 
-	<!-- Expose /acceleratoraddon/web/webroot/WEB-INF/messages/base.js.properties  resource bundle as javascript variables -->
-	<bean id="defaultWorldlinedirectb2bcheckoutaddonJavaScriptMessageResourceAccessor"
-		  parent="abstractJavaScriptMessageResourceAccessor">
-		<property name="addOnName" value="worldlinedirectb2bcheckoutaddon"/>
-	</bean>
-
-	<bean id="defaultWorldlinedirectb2bcheckoutaddonBeforeViewJsPropsHandlerAdaptee"
-		  parent="abstractBeforeViewJsPropsHandlerAdaptee"
-		  class="de.hybris.platform.addonsupport.interceptors.ExportJsPropertiesBeforeViewHandler">
-		<property name="messageSource" ref="defaultWorldlinedirectb2bcheckoutaddonJavaScriptMessageResourceAccessor"/>
-	</bean>
-
-	<bean id="getWorldlinedirectb2bcheckoutaddonBeforeViewHandler" parent="beforeViewHandlerAdapter">
-		<property name="adaptee">
-			<ref bean="defaultWorldlinedirectb2bcheckoutaddonBeforeViewJsPropsHandlerAdaptee"/>
-		</property>
-	</bean>
-	<bean id="Worldlinedirectb2bcheckoutaddonBeforeViewHandlerListMergeDirective" depends-on="beforeViewHandlersList"
-		  parent="listMergeDirective">
-		<property name="add" ref="getWorldlinedirectb2bcheckoutaddonBeforeViewHandler"/>
-	</bean>
+    <alias name="worldlineCheckoutFlowFacade" alias="checkoutFlowFacade"/>
+    <bean id="worldlineCheckoutFlowFacade"
+          class="com.worldline.direct.b2bacceleratorfacades.flow.impl.WorldlineCheckoutFlowFacadeImpl"
+          parent="b2bMultiStepCheckoutFlowFacade">
+        <property name="commercePaymentProviderStrategy" ref="commercePaymentProviderStrategy"/>
+    </bean>
 
 </beans>
