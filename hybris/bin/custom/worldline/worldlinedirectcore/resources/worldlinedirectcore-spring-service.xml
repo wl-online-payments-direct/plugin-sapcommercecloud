@@ -69,4 +69,7 @@
         <property name="keyGenerator" ref="orderCodeGenerator"/>
     </bean>
 
+    <bean id="worldlineRecurringService" class="com.worldline.direct.service.impl.WorldlineRecurringServiceImpl">
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+    </bean>
 </beans>

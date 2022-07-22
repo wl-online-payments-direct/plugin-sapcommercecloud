@@ -5,6 +5,7 @@ import com.onlinepayments.domain.CreateMandateRequest;
 import com.onlinepayments.domain.SepaDirectDebitPaymentMethodSpecificInputBase;
 import com.onlinepayments.domain.SepaDirectDebitPaymentProduct771SpecificInputBase;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -22,7 +23,7 @@ public class WorldlineSepaDirectDebitPopulator implements Populator<AbstractOrde
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
         WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
-        if (PAYMENT_METHOD_SEPA == paymentInfo.getId()) {
+        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(paymentInfo)) {
             SepaDirectDebitPaymentMethodSpecificInputBase sepaDirectDebit = new SepaDirectDebitPaymentMethodSpecificInputBase();
             SepaDirectDebitPaymentProduct771SpecificInputBase specificInputBase = new SepaDirectDebitPaymentProduct771SpecificInputBase();
             CreateMandateRequest createMandateRequest = new CreateMandateRequest();

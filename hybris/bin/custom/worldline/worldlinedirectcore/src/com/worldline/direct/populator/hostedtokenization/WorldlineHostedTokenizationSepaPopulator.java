@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.CreatePaymentRequest;
 import com.onlinepayments.domain.SepaDirectDebitPaymentMethodSpecificInput;
 import com.onlinepayments.domain.SepaDirectDebitPaymentProduct771SpecificInput;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -22,7 +23,7 @@ public class WorldlineHostedTokenizationSepaPopulator implements Populator<Abstr
         Preconditions.checkArgument(abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel, "Payment has to be WorldlinePaymentInfo");
 
         WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
-        if (PAYMENT_METHOD_SEPA == paymentInfo.getId() && StringUtils.isNotEmpty(paymentInfo.getMandate())) {
+        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(paymentInfo) && StringUtils.isNotEmpty(paymentInfo.getMandate())) {
             SepaDirectDebitPaymentMethodSpecificInput sepaDirectDebit = new SepaDirectDebitPaymentMethodSpecificInput();
             SepaDirectDebitPaymentProduct771SpecificInput specificInputBase = new SepaDirectDebitPaymentProduct771SpecificInput();
             specificInputBase.withExistingUniqueMandateReference(paymentInfo.getMandate());

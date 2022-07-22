@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 public class WorldlineShoppingCartWithoutDiscountFactory implements WorldlineShoppingCartFactory {
     private WorldlineAmountUtils worldlineAmountUtils;
-    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
 
     @Override
     public ShoppingCart create(AbstractOrderModel abstractOrderModel) {
@@ -39,7 +38,7 @@ public class WorldlineShoppingCartWithoutDiscountFactory implements WorldlineSho
             item.setOrderLineDetails(createOrderLineDetails(orderEntry, currencyISOCode));
             lineItems.add(item);
         }
-        if (!worldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel)abstractOrderModel.getPaymentInfo()).getId())) {
+        if (!WorldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel)abstractOrderModel.getPaymentInfo()))) {
             lineItems.add(setShippingAsProduct(abstractOrderModel, currencyISOCode));
         }
         cart.setItems(lineItems);
@@ -81,11 +80,6 @@ public class WorldlineShoppingCartWithoutDiscountFactory implements WorldlineSho
     @Required
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
-    }
-
-    @Required
-    public void setWorldlinePaymentProductUtils(WorldlinePaymentProductUtils worldlinePaymentProductUtils) {
-        this.worldlinePaymentProductUtils = worldlinePaymentProductUtils;
     }
 
 }

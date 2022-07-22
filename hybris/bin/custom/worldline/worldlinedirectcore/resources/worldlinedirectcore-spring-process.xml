@@ -25,7 +25,7 @@
 
     <bean id="worldlineRequestPaymentAction"
           class="com.worldline.direct.actions.replenishment.WorldlineRequestPaymentAction" parent="abstractAction">
-        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlineRecurringService" ref="worldlineRecurringService"/>
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
         <property name="impersonationService" ref="impersonationService"/>
         <property name="worldlineCheckoutFacade" ref="worldlineCheckoutFacade"/>
