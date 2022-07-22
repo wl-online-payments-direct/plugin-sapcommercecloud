@@ -12,6 +12,7 @@ import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineDirectCheckoutFacade;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
@@ -57,7 +58,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA;
 import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator.HOSTED_CHECKOUT_RETURN_URL;
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 
@@ -144,7 +144,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("nthWeek", getNumberRange(1, 12));
         model.addAttribute("daysOfWeek", worldlineDirectCheckoutFacade.getDaysOfWeekForReplenishmentCheckoutSummary());
         if (worldlinePaymentInfo != null) {
-            model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && PAYMENT_METHOD_SEPA == worldlinePaymentInfo.getId());
+            model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfo));
         } else {
             model.addAttribute("showReplenishment", true);
         }

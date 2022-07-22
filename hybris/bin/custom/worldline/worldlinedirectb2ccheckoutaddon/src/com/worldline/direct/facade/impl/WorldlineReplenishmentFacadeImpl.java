@@ -2,6 +2,7 @@ package com.worldline.direct.facade.impl;
 
 import com.worldline.direct.facade.WorldlineReplenishmentFacade;
 import com.worldline.direct.service.WorldlineCustomerAccountService;
+import com.worldline.direct.service.WorldlineRecurringService;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.commercefacades.order.data.OrderHistoryData;
 import de.hybris.platform.commerceservices.search.pagedata.PageableData;
@@ -21,6 +22,7 @@ public class WorldlineReplenishmentFacadeImpl implements WorldlineReplenishmentF
     private WorldlineCustomerAccountService worldlineCustomerAccountService;
     private ModelService modelService;
     private Converter<OrderModel, OrderHistoryData> orderHistoryConverter;
+    private WorldlineRecurringService worldlineRecurringService;
 
     @Override
     public SearchPageData<ScheduledCartData> getPagedReplenishmentHistory(PageableData pageableData) {
@@ -44,6 +46,7 @@ public class WorldlineReplenishmentFacadeImpl implements WorldlineReplenishmentF
         final CartToOrderCronJobModel cronJob = worldlineCustomerAccountService
                 .getCartToOrderCronJob(jobCode);
         if (cronJob != null) {
+            worldlineRecurringService.cancelRecurringPayment(cronJob);
             cronJob.setActive(Boolean.FALSE);
             modelService.save(cronJob);
         }
@@ -91,5 +94,10 @@ public class WorldlineReplenishmentFacadeImpl implements WorldlineReplenishmentF
     @Required
     public void setOrderHistoryConverter(Converter<OrderModel, OrderHistoryData> orderHistoryConverter) {
         this.orderHistoryConverter = orderHistoryConverter;
+    }
+
+    @Required
+    public void setWorldlineRecurringService(WorldlineRecurringService worldlineRecurringService) {
+        this.worldlineRecurringService = worldlineRecurringService;
     }
 }

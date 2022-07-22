@@ -303,11 +303,29 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             LOGGER.error("[ WORLDLINE ] Errors during getMandate", e);
             return null;
         } catch (ApiException e) {
-            LOGGER.info("[ WORLDLINE ] uniqueMandateReference not found!", e);
+            LOGGER.info("[ WORLDLINE ] Errors during getMandate", e);
             return null;
         }
     }
 
+    @Override
+    public GetMandateResponse revokeMandate(String uniqueMandateReference) {
+        validateParameterNotNullStandardMessage("uniqueMandateReference", uniqueMandateReference);
+
+        try (Client client = worldlineClientFactory.getClient()) {
+            GetMandateResponse mandateResponse = client.merchant(getMerchantId()).mandates().revokeMandate(uniqueMandateReference);
+
+            WorldlineLogUtils.logAction(LOGGER, "revokeMandate", uniqueMandateReference, mandateResponse);
+
+            return mandateResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during revokeMandate", e);
+            return null;
+        } catch (ApiException e) {
+            LOGGER.info("[ WORLDLINE ] Errors during revokeMandate", e);
+            return null;
+        }
+    }
 
     @Override
     public PaymentResponse getPayment(String paymentId) {
