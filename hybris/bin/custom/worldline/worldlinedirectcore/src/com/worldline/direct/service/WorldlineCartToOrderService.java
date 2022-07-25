@@ -6,5 +6,5 @@ import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 public interface WorldlineCartToOrderService {
     void enableCartToOrderJob(CartToOrderCronJobModel cronJobModel, PaymentResponse paymentID);
 
-    void removeCartToOrderJob(CartToOrderCronJobModel cronJobModel);
+    void cancelCartToOrderJob(CartToOrderCronJobModel cronJobModel);
 }
