@@ -55,9 +55,9 @@ public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderServ
 
 
     @Override
-    public void removeCartToOrderJob(CartToOrderCronJobModel cronJobModel) {
-        LOG.info("removing cart to Order Cron Job");
-        modelService.remove(cronJobModel);
+    public void cancelCartToOrderJob(CartToOrderCronJobModel cronJobModel) {
+        LOG.info("cancel cart to Order Cron Job");
+        // TODO : mark cron Job for deletion
     }
 
     public void setEventService(EventService eventService) {
