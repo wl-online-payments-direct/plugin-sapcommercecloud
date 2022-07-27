@@ -1,6 +1,7 @@
 package com.worldline.direct.service.impl;
 
 import com.worldline.direct.service.WorldlineScheduleOrderService;
+import de.hybris.platform.b2bacceleratorservices.enums.CheckoutPaymentType;
 import de.hybris.platform.core.model.order.CartEntryModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
@@ -33,6 +34,8 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
         cartToOrderCronJob.setPaymentInfo(paymentInfo);
         cartToOrderCronJob.setJob(cronJobService.getJob(ACCELERATOR_CART_TO_ORDER_JOB));
         setCronJobToTrigger(cartToOrderCronJob, triggers);
+        final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cart.getPaymentType().getCode());
+        cartToOrderCronJob.setSubmitted(!cardPaymentType);
         modelService.save(cartToOrderCronJob);
         return cartToOrderCronJob;
     }

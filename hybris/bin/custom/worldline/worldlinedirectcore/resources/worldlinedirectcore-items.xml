@@ -111,6 +111,20 @@
             </attributes>
         </itemtype>
 
+        <itemtype code="CartToOrderCronJob" autocreate="false"
+                  generate="false" >
+            <attributes>
+                <attribute qualifier="submitted" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.TRUE</defaultvalue>
+                    <description>Define if the replenishment was successfully submitted.</description>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+
+
 
 
         <itemtype code="WorldlinePaymentInfo" extends="PaymentInfo"

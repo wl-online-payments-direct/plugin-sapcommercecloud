@@ -29,7 +29,7 @@ public class DefaultWorldlineCartToOrderCronJobModelDao extends DefaultGenericDa
 			+ CartToOrderCronJobModel.PK + "} FROM { " + CartToOrderCronJobModel._TYPECODE + " as "
 			+ CartToOrderCronJobModel._TYPECODE + " JOIN " + CartModel._TYPECODE + " as " + CartModel._TYPECODE + " ON {"
 			+ CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.CART + "} = {" + CartModel._TYPECODE + ":"
-			+ CartModel.PK + "}} WHERE {" + CartModel._TYPECODE + ":" + CartModel.USER + "} = ?user";
+			+ CartModel.PK + "}} WHERE {" + CartModel._TYPECODE + ":" + CartModel.USER + "} = ?user AND {" + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.SUBMITTED + "} = ?"+CartToOrderCronJobModel.SUBMITTED;
 
 
 	private static final String FIND_CARTTOORDERCRONJOB_TRIGGER_BY_USER_QUERY = "SELECT {" + CartToOrderCronJobModel._TYPECODE
@@ -38,7 +38,7 @@ public class DefaultWorldlineCartToOrderCronJobModelDao extends DefaultGenericDa
 			+ CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.CART + "} = {" + CartModel._TYPECODE + ":"
 			+ CartModel.PK + "} LEFT JOIN " + TriggerModel._TYPECODE + " as " + TriggerModel._TYPECODE + " ON {"
 			+ CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.PK + "} = {" + TriggerModel._TYPECODE + ":"
-			+ TriggerModel.CRONJOB + "}} WHERE {" + CartModel._TYPECODE + ":" + CartModel.USER + "} = ?user";
+			+ TriggerModel.CRONJOB + "}} WHERE {" + CartModel._TYPECODE + ":" + CartModel.USER + "} = ?user AND {" + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.SUBMITTED + "} = ?"+CartToOrderCronJobModel.SUBMITTED;
 
 	private static final String FIND_CARTTOORDERCRONJOB_BY_CODE_AND_USER_QUERY = FIND_CARTTOORDERCRONJOB_BY_USER_QUERY + " AND {"
 			+ CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.CODE + "} = ?code";
@@ -78,9 +78,10 @@ public class DefaultWorldlineCartToOrderCronJobModelDao extends DefaultGenericDa
 	@Override
 	public CartToOrderCronJobModel findCartToOrderCronJobByCode(final String code, final UserModel user)
 	{
-		final Map<String, Object> attr = new HashMap<String, Object>(2);
+		final Map<String, Object> attr = new HashMap<>(2);
 		attr.put(CartToOrderCronJobModel.CODE, code);
 		attr.put(CartModel.USER, user);
+		attr.put(CartToOrderCronJobModel.SUBMITTED, false);
 		final FlexibleSearchQuery query = new FlexibleSearchQuery(FIND_CARTTOORDERCRONJOB_BY_CODE_AND_USER_QUERY);
 		query.getQueryParameters().putAll(attr);
 		final SearchResult<CartToOrderCronJobModel> jobs = this.getFlexibleSearchService().search(query);
@@ -91,8 +92,9 @@ public class DefaultWorldlineCartToOrderCronJobModelDao extends DefaultGenericDa
 	@Override
 	public List<CartToOrderCronJobModel> findCartToOrderCronJobsByUser(final UserModel user)
 	{
-		final Map<String, Object> attr = new HashMap<String, Object>(1);
+		final Map<String, Object> attr = new HashMap<>(1);
 		attr.put(OrderModel.USER, user);
+		attr.put(CartToOrderCronJobModel.SUBMITTED, true);
 		final FlexibleSearchQuery query = new FlexibleSearchQuery(FIND_CARTTOORDERCRONJOB_BY_USER_QUERY + SORT_JOBS_BY_DATE);
 		query.getQueryParameters().putAll(attr);
 		final SearchResult<CartToOrderCronJobModel> result = this.getFlexibleSearchService().search(query);
@@ -104,8 +106,9 @@ public class DefaultWorldlineCartToOrderCronJobModelDao extends DefaultGenericDa
 	public SearchPageData<CartToOrderCronJobModel> findPagedCartToOrderCronJobsByUser(final UserModel user,
 			final PageableData pageableData)
 	{
-		final Map<String, Object> queryParams = new HashMap<String, Object>(1);
+		final Map<String, Object> queryParams = new HashMap<>(1);
 		queryParams.put(OrderModel.USER, user);
+		queryParams.put(CartToOrderCronJobModel.SUBMITTED, true);
 
 		final List<SortQueryData> sortQueries = Arrays
 				.asList(
@@ -121,6 +124,7 @@ public class DefaultWorldlineCartToOrderCronJobModelDao extends DefaultGenericDa
 	{
 		final Map<String, Object> queryParams = new HashMap<String, Object>(1);
 		queryParams.put(CartToOrderCronJobModel.CODE, jobCode);
+		queryParams.put(TriggerModel.ACTIVE, true);
 
 		final List<SortQueryData> sortQueries = Arrays.asList(
 				createSortQueryData("byDate", FIND_ORDERS_FOR_SCHEDULE_BY_CODE_QUERY + SORT_ORDERS_BY_DATE),
