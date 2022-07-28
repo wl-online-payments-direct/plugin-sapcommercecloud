@@ -1,6 +1,6 @@
 <%@ tag body-content="empty" trimDirectiveWhitespaces="true" %>
 <%@ attribute name="tabindex" required="false" type="java.lang.Integer" %>
-<%@ attribute name="paymentProduct" required="true" type="com.ingenico.direct.domain.PaymentProduct" %>
+<%@ attribute name="paymentProduct" required="true" type="com.onlinepayments.domain.PaymentProduct" %>
 <%@ attribute name="isSelectedID" required="false" type="java.lang.Boolean" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>

@@ -1,11 +1,8 @@
 package com.worldline.direct.service.impl;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.onlinepayments.domain.AmountOfMoney;
+import com.onlinepayments.domain.Capture;
+import com.onlinepayments.domain.WebhooksEvent;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.dao.WorldlineTransactionDao;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
@@ -19,15 +16,16 @@ import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ingenico.direct.domain.AmountOfMoney;
-import com.ingenico.direct.domain.Capture;
-import com.ingenico.direct.domain.WebhooksEvent;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 
 public class WorldlineTransactionServiceImpl implements WorldlineTransactionService {
@@ -110,7 +108,6 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 .filter(entry -> webhooksEvent.getPayment().getStatus().equals(entry.getTransactionStatusDetails()))
                 .anyMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
 
-        final OrderModel order = (OrderModel) paymentTransaction.getOrder();
         if (!alreadyProcessed) {
             updatePaymentTransaction(
                     paymentTransaction,
@@ -153,7 +150,6 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         validateParameterNotNullStandardMessage("webhooksEvent.refund", webhooksEvent.getRefund());
         LOGGER.debug("[WORLDLINE] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
         final PaymentTransactionModel paymentTransaction = worldlineTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getRefund().getId()));
-        final OrderModel order = (OrderModel) paymentTransaction.getOrder();
         updatePaymentTransaction(
                 paymentTransaction,
                 webhooksEvent.getRefund().getId(),
@@ -279,7 +275,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         switch (transactionType){
             case AUTHORIZATION:
             case CAPTURE:
-                worldlineBusinessProcessService.triggerOrderProcessEvent((OrderModel) order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
+                worldlineBusinessProcessService.triggerOrderProcessEvent(order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
                 break;
             case REFUND_FOLLOW_ON:
                 worldlineBusinessProcessService.triggerReturnProcessEvent((OrderModel) order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_REFUND);

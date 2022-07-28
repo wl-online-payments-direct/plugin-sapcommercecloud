@@ -1,6 +1,6 @@
 package com.worldline.direct.strategy;
 
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProduct;
 
 import java.util.List;
 

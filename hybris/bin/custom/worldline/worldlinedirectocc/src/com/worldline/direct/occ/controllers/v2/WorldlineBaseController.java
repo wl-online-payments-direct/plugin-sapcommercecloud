@@ -1,8 +1,10 @@
 package com.worldline.direct.occ.controllers.v2;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.Lists;
+import com.onlinepayments.ApiException;
+import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
+import com.worldline.direct.order.data.BrowserData;
+import com.worldline.direct.payment.dto.NonAuthorizedPaymentWsDTO;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import de.hybris.platform.servicelayer.session.SessionService;
@@ -11,8 +13,6 @@ import de.hybris.platform.webservicescommons.dto.error.ErrorWsDTO;
 import de.hybris.platform.webservicescommons.errors.exceptions.WebserviceValidationException;
 import de.hybris.platform.webservicescommons.mapping.FieldSetLevelHelper;
 import de.hybris.platform.webservicescommons.util.YSanitizer;
-
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +24,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.ingenico.direct.ApiException;
-import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
-import com.worldline.direct.order.data.BrowserData;
-import com.worldline.direct.payment.dto.NonAuthorizedPaymentWsDTO;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 public class WorldlineBaseController {
 

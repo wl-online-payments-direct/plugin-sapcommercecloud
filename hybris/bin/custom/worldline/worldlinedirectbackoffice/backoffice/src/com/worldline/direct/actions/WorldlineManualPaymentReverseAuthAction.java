@@ -1,16 +1,10 @@
 package com.worldline.direct.actions;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.CANCELLED;
-
-import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.Lists;
 import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
-import com.ingenico.direct.domain.CancelPaymentResponse;
+import com.onlinepayments.domain.CancelPaymentResponse;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineTransactionService;
@@ -32,6 +26,12 @@ import de.hybris.platform.store.BaseStoreModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zhtml.Messagebox;
+
+import javax.annotation.Resource;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.CANCELLED;
 
 public class WorldlineManualPaymentReverseAuthAction extends CancelOrderAction implements CockpitAction<OrderModel, OrderModel> {
    private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineManualPaymentReverseAuthAction.class);

@@ -1,8 +1,8 @@
 package com.worldline.direct.populator.hostedcheckout;
 
-import com.ingenico.direct.domain.CreateHostedCheckoutRequest;
-import com.ingenico.direct.domain.HostedCheckoutSpecificInput;
-import com.ingenico.direct.domain.Order;
+import com.onlinepayments.domain.CreateHostedCheckoutRequest;
+import com.onlinepayments.domain.HostedCheckoutSpecificInput;
+import com.onlinepayments.domain.Order;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;

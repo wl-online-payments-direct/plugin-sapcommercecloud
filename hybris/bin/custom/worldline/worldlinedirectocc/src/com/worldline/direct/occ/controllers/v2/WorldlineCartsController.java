@@ -1,9 +1,9 @@
 package com.worldline.direct.occ.controllers.v2;
 
 
-import com.ingenico.direct.domain.CreateHostedTokenizationResponse;
-import com.ingenico.direct.domain.GetPaymentProductsResponse;
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.CreateHostedTokenizationResponse;
+import com.onlinepayments.domain.GetPaymentProductsResponse;
+import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;

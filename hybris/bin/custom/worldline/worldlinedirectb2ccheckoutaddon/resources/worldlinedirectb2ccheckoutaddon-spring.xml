@@ -3,17 +3,19 @@
  Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd
-           http://www.springframework.org/schema/aop
-           http://www.springframework.org/schema/aop/spring-aop.xsd
+
+
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context.xsd">
            
-    <context:annotation-config/> 
+    <context:annotation-config/>
+	<import resource="worldlinedirectb2ccheckoutaddon-spring-process.xml"/>
+	<import resource="worldlinedirectb2ccheckoutaddon-spring-converter.xml"/>
+	<import resource="worldlinedirectb2ccheckoutaddon-spring-service.xml"/>
 
 	<bean id="worldlinedirectb2ccheckoutaddonCoreDataImportedEventListener" parent="abstractCoreDataImportedEventListener">
 		<property name="supportedChannels">
@@ -40,6 +42,34 @@
 	<alias name="worldlineCheckoutFlowFacade" alias="checkoutFlowFacade"/>
 	<bean id="worldlineCheckoutFlowFacade" class="com.worldline.direct.acceleratorfacades.flow.impl.WorldlineCheckoutFlowFacadeImpl" parent="defaultCheckoutFlowFacade" >
 		<property name="commercePaymentProviderStrategy" ref="commercePaymentProviderStrategy"/>
+	</bean>
+
+	<bean id="worldlineExtendedCheckoutFacade"
+		  class="com.worldline.direct.facade.impl.WorldLineExtendedCheckoutFacadeImpl"
+		  parent="defaultCheckoutFacade">
+		<property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+		<property name="i18NService" ref="i18NService"/>
+		<property name="scheduledCartConverter" ref="scheduledCartConverter"/>
+		<property name="triggerPopulator" ref="triggerReversePopulator"/>
+		<property name="triggerService" ref="triggerService"/>
+		<property name="baseSiteService" ref="baseSiteService"/>
+		<property name="b2bDaysOfWeekConverter" ref="b2bDaysOfWeekConverter"/>
+		<property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+	</bean>
+
+	<bean id="worldline-replenishmentOrderPlacedEventListener"
+		  class="com.worldline.direct.event.listener.WorldlineReplenishmentOrderPlacedEventListener"
+		  parent="abstractEventListener">
+		<property name="modelService" ref="modelService" />
+		<property name="businessProcessService" ref="businessProcessService" />
+	</bean>
+
+	<bean id="worldlineReplenishmentFacade" class="com.worldline.direct.facade.impl.WorldlineReplenishmentFacadeImpl">
+		<property name="modelService" ref="modelService"/>
+		<property name="scheduledCartConverter" ref="scheduledCartConverter"/>
+		<property name="userService" ref="userService"/>
+		<property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
+		<property name="orderHistoryConverter" ref="orderHistoryConverter"/>
 	</bean>
 
 </beans>

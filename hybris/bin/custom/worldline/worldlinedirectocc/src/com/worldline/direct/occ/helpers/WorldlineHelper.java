@@ -1,8 +1,8 @@
 package com.worldline.direct.occ.helpers;
 
 import com.google.common.collect.Iterables;
-import com.ingenico.direct.domain.DirectoryEntry;
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.DirectoryEntry;
+import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
