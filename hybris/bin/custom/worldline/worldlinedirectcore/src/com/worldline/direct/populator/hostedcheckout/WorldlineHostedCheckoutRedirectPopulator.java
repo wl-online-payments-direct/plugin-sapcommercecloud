@@ -1,7 +1,7 @@
 package com.worldline.direct.populator.hostedcheckout;
 
 import com.google.common.base.Preconditions;
-import com.ingenico.direct.domain.*;
+import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.model.WorldlineConfigurationModel;
@@ -65,10 +65,7 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
     private Boolean requiresApproval() {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         OperationCodesEnum defaultOperationCode = currentWorldlineConfiguration.getDefaultOperationCode();
-        if (OperationCodesEnum.SALE.equals(defaultOperationCode)) {
-            return false;
-        }
-        return true;
+        return !OperationCodesEnum.SALE.equals(defaultOperationCode);
     }
 
     private String getHostedCheckoutReturnUrl() {

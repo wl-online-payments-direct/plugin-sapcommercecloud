@@ -1,10 +1,10 @@
 package com.worldline.direct.service;
 
-import java.util.List;
+import com.onlinepayments.RequestHeader;
+import com.onlinepayments.domain.WebhooksEvent;
+import com.onlinepayments.webhooks.WebhooksHelper;
 
-import com.ingenico.direct.RequestHeader;
-import com.ingenico.direct.domain.WebhooksEvent;
-import com.ingenico.direct.webhooks.WebhooksHelper;
+import java.util.List;
 
 public interface WorldlineWebhookService {
 

@@ -1,0 +1,17 @@
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+# you can put key/value pairs here.
+# Use Config.getParameter(..) to retrieve the values during runtime.
+
+worldlinedirectb2bcheckoutaddon.key=value
+
+# Specifies the location of the spring context file added automatically to the global platform application context.
+worldlinedirectb2bcheckoutaddon.application-context=worldlinedirectb2bcheckoutaddon-spring.xml
+
+yacceleratorstorefront.additionalWebSpringConfigs.worldlinedirectb2bcheckoutaddon=classpath:/worldlinedirectb2bcheckoutaddon/web/spring/worldlinedirectb2bcheckoutaddon-web-spring.xml
+
+
+
+worldlinedirectb2bcheckoutaddon.javascript.paths.responsive=/responsive/common/js/worldlinedirectb2bcheckoutaddon.js
+worldlinedirectb2bcheckoutaddon.css.paths.responsive=/responsive/common/css/worldlinedirectb2bcheckoutaddon.css

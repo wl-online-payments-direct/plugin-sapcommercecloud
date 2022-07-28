@@ -1,6 +1,6 @@
 package com.worldline.direct.factory;
 
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 
 import java.util.List;

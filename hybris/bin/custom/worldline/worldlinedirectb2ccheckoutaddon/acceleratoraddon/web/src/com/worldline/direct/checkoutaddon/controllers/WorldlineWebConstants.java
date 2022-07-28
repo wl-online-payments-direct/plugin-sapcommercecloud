@@ -15,6 +15,10 @@ public interface WorldlineWebConstants {
             interface PaymentDetails {
                 String root = Account.root + "/payment-details";
             }
+
+            interface Replenishment {
+                String ReadOnlyExpandedOrderForm =  "/fragments/checkout/readOnlyExpandedOrderForm";
+            }
         }
 
         interface Checkout {
@@ -43,7 +47,14 @@ public interface WorldlineWebConstants {
                 interface HOP {
                     String root = Checkout.root + "/hosted-checkout";
                     String handleResponse = "/response/";
+                    interface Option {
+                        String order = "order";
+                        String replenishment = "replenishment";
+                    }
+
                 }
+
+
 
             }
 

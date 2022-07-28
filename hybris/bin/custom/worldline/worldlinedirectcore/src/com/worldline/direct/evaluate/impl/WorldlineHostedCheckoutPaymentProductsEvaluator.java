@@ -1,6 +1,6 @@
 package com.worldline.direct.evaluate.impl;
 
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.evaluate.WorldlinePaymentProductEvaluator;
 

@@ -1,20 +1,20 @@
 package com.worldline.direct.widgets.worldlinepartialcapture;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT;
-
-import java.math.BigDecimal;
-
 import com.hybris.cockpitng.annotations.SocketEvent;
 import com.hybris.cockpitng.annotations.ViewEvent;
 import com.hybris.cockpitng.util.DefaultWidgetController;
+import com.onlinepayments.domain.CaptureResponse;
+import com.onlinepayments.domain.CapturesResponse;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
+import com.worldline.direct.service.WorldlinePaymentService;
+import com.worldline.direct.service.WorldlineTransactionService;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.store.BaseStoreModel;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +27,9 @@ import org.zkoss.zul.Doublebox;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
-import com.ingenico.direct.domain.CaptureResponse;
-import com.ingenico.direct.domain.CapturesResponse;
-import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.worldline.direct.service.WorldlinePaymentService;
-import com.worldline.direct.service.WorldlineTransactionService;
+import java.math.BigDecimal;
+
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT;
 
 public class WorldlinePartialCaptureController extends DefaultWidgetController {
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlinePartialCaptureController.class);

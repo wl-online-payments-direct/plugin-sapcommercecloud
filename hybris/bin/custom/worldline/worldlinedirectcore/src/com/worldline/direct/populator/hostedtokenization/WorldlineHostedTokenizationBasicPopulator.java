@@ -1,7 +1,7 @@
 package com.worldline.direct.populator.hostedtokenization;
 
-import com.ingenico.direct.domain.CreatePaymentRequest;
-import com.ingenico.direct.domain.Order;
+import com.onlinepayments.domain.CreatePaymentRequest;
+import com.onlinepayments.domain.Order;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
