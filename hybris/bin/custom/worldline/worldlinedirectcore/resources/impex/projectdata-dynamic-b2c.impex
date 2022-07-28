@@ -7,6 +7,8 @@ $media = media(code, $contentCV);
 $page = page(uid, $contentCV);
 $contentPage = contentPage(uid, $contentCV);
 $jarResourceCms = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/sampledata/cockpits/cmscockpit
+$wideContent=CMSImageComponent,BannerComponent
+$jarEmailResource=jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
 
 ###### Replenishment Confirmation Page Start ######
 INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true]                    ; position[unique = true]; page(uid, $contentCV)[unique = true][default = 'replenishmentConfirmationPage']; contentSlot(uid, $contentCV)[unique = true]; ; ;
@@ -90,3 +92,26 @@ INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]        
 ###### Account My Replenishment Order Details End ######
 
 
+INSERT_UPDATE EmailPageTemplate; $contentCV[unique = true]; uid[unique = true]                    ; name                                      ; active; frontendTemplateName          ; subject(code)                                       ; htmlTemplate(code)                               ; restrictedPageTypes(code)
+                               ;                          ; ReplenishmentOrderPlacedEmailTemplate ; Replenishment Order Placed Email Template ; true  ; replenishmentOrderPlacedEmail ; powertools_Email_Replenishment_Order_Placed_Subject ; powertools_Email_Replenishment_Order_Placed_Body ; EmailPage
+UPDATE EmailPageTemplate; $contentCV[unique = true]; uid[unique = true]                    ; velocityTemplate[translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                        ;                          ; ReplenishmentOrderPlacedEmailTemplate ; $jarEmailResource/structure-view/structure_replenishmentOrderPlacedEmailTemplate.vm
+
+INSERT_UPDATE ContentSlotName; name[unique = true]; template(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderPlacedEmailTemplate']; validComponentTypes(code); compTypeGroup(code)
+                             ; SiteLogo           ;                                                                                            ;                          ; logo ; email
+                             ; TopContent         ;                                                                                            ; $wideContent             ; email
+                             ; BottomContent      ;                                                                                            ; $wideContent             ; email
+
+INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active
+                         ;;EmailTopSlot;Default Email Top Slot;true
+                         ;;EmailBottomSlot;Default Email Bottom Slot;true
+                         ;;EmailSiteLogoSlot;Default Email Site Slot;true
+
+
+
+INSERT_UPDATE ContentSlotForTemplate; $contentCV[unique = true]; uid[unique = true]                          ; position[unique = true]; pageTemplate(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderPlacedEmailTemplate']; contentSlot(uid, $contentCV)[unique = true]; allowOverwrite
+                                    ;                          ; SiteLogo-ReplenishmentOrderPlacedEmail      ; SiteLogo               ;                                                                                                ; SiteLogoSlot                               ; true
+                                    ;                          ; TopContent-ReplenishmentOrderPlacedEmail    ; TopContent             ;                                                                                                ; EmailTopSlot                               ; true
+                                    ;                          ; BottomContent-ReplenishmentOrderPlacedEmail ; BottomContent          ;                                                                                                ; EmailBottomSlot                            ; true
+INSERT_UPDATE EmailPage; $contentCV[unique = true]; uid[unique = true]            ; name                     ; masterTemplate(uid, $contentCV)       ; defaultPage; approvalStatus(code)[default = 'approved']
+                       ;                          ; ReplenishmentOrderPlacedEmail ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate ; true       ; ; customerservices@hybris.com ; Customer Services Team

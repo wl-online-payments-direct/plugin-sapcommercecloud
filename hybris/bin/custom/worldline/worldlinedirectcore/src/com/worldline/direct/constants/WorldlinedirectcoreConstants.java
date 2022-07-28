@@ -74,7 +74,9 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     }
 
     public enum SEPA_MANDATE_STATUS {
-        ACTIVE("ACTIVE");
+        ACTIVE("ACTIVE"),
+        REVOKED("REVOKED"),
+        BLOCKED("BLOCKED");
         private final String value;
 
         SEPA_MANDATE_STATUS(String value) {

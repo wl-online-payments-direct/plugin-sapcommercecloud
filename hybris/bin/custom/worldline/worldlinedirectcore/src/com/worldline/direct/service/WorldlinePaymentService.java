@@ -60,4 +60,6 @@ public interface WorldlinePaymentService {
 
     GetMandateResponse getMandate(String uniqueMandateReference);
 
+    GetMandateResponse revokeMandate(String uniqueMandateReference);
+
 }

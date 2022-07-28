@@ -14,7 +14,6 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
     private WorldlineAmountUtils worldlineAmountUtils;
-    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null!");
@@ -51,7 +50,7 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         address.setName(personalName);
         shipping.setAddress(address);
         shipping.setEmailAddress(deliveryAddress.getEmail());
-        if (abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel && worldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getId()))
+        if (abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel && WorldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo())))
         {
             shipping.setShippingCost(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(),abstractOrderModel.getCurrency().getIsocode()));
         }
@@ -79,7 +78,4 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         this.worldlineAmountUtils = worldlineAmountUtils;
     }
 
-    public void setWorldlinePaymentProductUtils(WorldlinePaymentProductUtils worldlinePaymentProductUtils) {
-        this.worldlinePaymentProductUtils = worldlinePaymentProductUtils;
-    }
 }

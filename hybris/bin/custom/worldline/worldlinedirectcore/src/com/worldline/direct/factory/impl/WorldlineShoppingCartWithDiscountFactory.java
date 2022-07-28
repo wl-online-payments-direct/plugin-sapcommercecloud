@@ -21,7 +21,6 @@ public class WorldlineShoppingCartWithDiscountFactory implements WorldlineShoppi
     private static final String ENTRY_PRICE = "entryPrice";
     private static final String PRICE_AFTER_DISCOUNT = "priceAfterDiscount";
     private WorldlineAmountUtils worldlineAmountUtils;
-    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
 
     @Override
     public ShoppingCart create(AbstractOrderModel abstractOrderModel) {
@@ -34,7 +33,7 @@ public class WorldlineShoppingCartWithDiscountFactory implements WorldlineShoppi
         for (AbstractOrderEntryModel orderEntry : abstractOrderModel.getEntries().stream().filter(abstractOrderEntryModel -> abstractOrderEntryModel.getTotalPrice() > 0).collect(Collectors.toList())) {
             lineItems.addAll(createSplittedLineItem(currencyISOCode, orderEntriesToPricesMap.get(orderEntry), orderEntry));
         }
-        if (!worldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getId())) {
+        if (!WorldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()))) {
             lineItems.add(setShippingAsProduct(abstractOrderModel, currencyISOCode));
         }
 
@@ -147,8 +146,4 @@ public class WorldlineShoppingCartWithDiscountFactory implements WorldlineShoppi
         this.worldlineAmountUtils = worldlineAmountUtils;
     }
 
-    @Required
-    public void setWorldlinePaymentProductUtils(WorldlinePaymentProductUtils worldlinePaymentProductUtils) {
-        this.worldlinePaymentProductUtils = worldlinePaymentProductUtils;
-    }
 }
