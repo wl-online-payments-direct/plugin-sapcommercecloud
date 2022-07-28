@@ -16,6 +16,7 @@
     <import resource="worldlinedirectb2bcheckoutaddon-spring-process.xml"/>
     <import resource="worldlinedirectb2bcheckoutaddon-spring-converter.xml"/>
     <import resource="worldlinedirectb2bcheckoutaddon-spring-service.xml"/>
+    <import resource="worldlinedirectb2bcheckoutaddon-spring-dao.xml"/>
 
     <bean id="worldlinedirectb2bcheckoutaddonCoreDataImportedEventListener" parent="abstractCoreDataImportedEventListener">
         <property name="supportedChannels">

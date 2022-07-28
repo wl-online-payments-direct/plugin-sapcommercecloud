@@ -7,6 +7,7 @@ import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.WorldlineCustomerAccountService;
+import com.worldline.direct.service.WorldlinePaymentModeService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.commerceservices.customer.CustomerAccountService;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
@@ -17,6 +18,7 @@ import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
 import org.apache.commons.lang.BooleanUtils;
+import org.springframework.beans.factory.annotation.Required;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,7 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     private WorldlinePaymentService worldlinePaymentService;
     private Converter<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> worldlinePaymentInfoConverter;
     private CustomerAccountService customerAccountService;
+    private WorldlinePaymentModeService worldlinePaymentModeService;
     @Override
     public List<WorldlinePaymentInfoData> getWorldlinePaymentInfos(boolean saved) {
         final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
@@ -54,9 +57,10 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     @Override
     public List<WorldlinePaymentInfoData> getWorldlinePaymentInfosForPaymentProducts(List<PaymentProduct> paymentProducts, boolean saved) {
         final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
-        final List<WorldlinePaymentInfoModel> worldlinePaymentInfos = worldlineCustomerAccountService.getWorldlinePaymentInfos(currentCustomer, saved);
+        List<WorldlinePaymentInfoModel> worldlinePaymentInfos = worldlineCustomerAccountService.getWorldlinePaymentInfos(currentCustomer, saved);
         final List<WorldlinePaymentInfoData> worldlinePaymentInfoDataList = new ArrayList<>();
-
+        List<String> activePaymentMode = worldlinePaymentModeService.getActivePaymentModes().stream().map(paymentMode -> paymentMode.getCode()).collect(Collectors.toList());
+        worldlinePaymentInfos=worldlinePaymentInfos.stream().filter(worldlinePaymentInfoModel -> activePaymentMode.contains(String.valueOf(worldlinePaymentInfoModel.getId()))).collect(Collectors.toList());
         for (final WorldlinePaymentInfoModel worldlinePaymentInfoModel : worldlinePaymentInfos) {
             Optional<PaymentProduct> optionalPaymentProduct = paymentProducts.stream().filter(paymentProduct -> paymentProduct.getId().equals(worldlinePaymentInfoModel.getId())).findFirst();
             if (optionalPaymentProduct.isPresent()) {
@@ -158,27 +162,38 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         }
     }
 
+    @Required
     public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
         this.checkoutCustomerStrategy = checkoutCustomerStrategy;
     }
 
+    @Required
     public void setWorldlineCustomerAccountService(WorldlineCustomerAccountService worldlineCustomerAccountService) {
         this.worldlineCustomerAccountService = worldlineCustomerAccountService;
     }
 
+    @Required
     public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
         this.worldlinePaymentService = worldlinePaymentService;
     }
 
+    @Required
     public void setWorldlinePaymentInfoConverter(Converter<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> worldlinePaymentInfoConverter) {
         this.worldlinePaymentInfoConverter = worldlinePaymentInfoConverter;
     }
 
+    @Required
     public void setCustomerAccountService(CustomerAccountService customerAccountService) {
         this.customerAccountService = customerAccountService;
     }
 
+    @Required
     public void setModelService(ModelService modelService) {
         this.modelService = modelService;
+    }
+
+    @Required
+    public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
+        this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 }
