@@ -23,7 +23,6 @@
     <bean id="worldlineOrderRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineOrderRequestParamPopulator">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
 
     <bean id="worldlineShoppingCartRequestParamPopulator"
@@ -178,13 +177,11 @@
     <bean id="shoppingCartWithDiscountFactory"
           class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithDiscountFactory">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
 
     <bean id="shoppingCartWithoutDiscountFactory"
           class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithoutDiscountFactory">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
 
     <bean id="worldlineTriggerPopulator" class="com.worldline.direct.populator.WorldlineTriggerPopulator"/>

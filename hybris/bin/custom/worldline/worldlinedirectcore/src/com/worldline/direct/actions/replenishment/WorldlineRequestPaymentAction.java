@@ -1,10 +1,9 @@
 package com.worldline.direct.actions.replenishment;
 
 import com.onlinepayments.domain.CreatePaymentResponse;
-import com.onlinepayments.domain.GetMandateResponse;
-import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
-import com.worldline.direct.service.WorldlinePaymentService;
+import com.worldline.direct.service.WorldlineRecurringService;
 import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.commerceservices.impersonation.ImpersonationContext;
 import de.hybris.platform.commerceservices.impersonation.ImpersonationService;
@@ -18,9 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
-
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA;
 
 
 /**
@@ -30,8 +28,8 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
     private static final Logger LOG = LoggerFactory.getLogger(WorldlineRequestPaymentAction.class);
     private CommerceCheckoutService commerceCheckoutService;
     private ImpersonationService impersonationService;
-    private WorldlinePaymentService worldlinePaymentService;
     private WorldlineCheckoutFacade worldlineCheckoutFacade;
+    private WorldlineRecurringService worldlineRecurringService;
 
     @Override
     public String execute(final ReplenishmentProcessModel process) throws Exception {
@@ -43,33 +41,25 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
         return getImpersonationService().executeInContext(context,
                 (ImpersonationService.Executor<String, ImpersonationService.Nothing>) () -> {
                     if (process.getCartToOrderCronJob().getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
-                        WorldlinePaymentInfoModel worldlinePaymentInfo = (WorldlinePaymentInfoModel) process.getCartToOrderCronJob().getPaymentInfo();
-
-                        switch (worldlinePaymentInfo.getId()) {
-                            case PAYMENT_METHOD_SEPA:
-                                try {
-                                    String mandate = worldlinePaymentInfo.getMandate();
-
-                                    GetMandateResponse mandateResponse = worldlinePaymentService.getMandate(mandate);
-                                    if (mandateResponse != null && WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.valueOf(mandateResponse.getMandate().getStatus()) == WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.ACTIVE) {
-                                        CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(placedOrder);
-                                        worldlineCheckoutFacade.handlePaymentResponse(placedOrder, createPaymentResponse.getPayment());
-                                        return Transition.OK.toString();
-                                    } else {
-                                        return Transition.NOK.toString();
-                                    }
-
-                                } catch (Exception e) {
-                                    LOG.error("something went wrong during payment creation", e);
-                                    return Transition.NOK.toString();
-                                }
-                            default:
-                                break;
+                        Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
+                        if (recurringPayment.isPresent()) {
+                            try {
+                                worldlineCheckoutFacade.handlePaymentResponse(placedOrder, recurringPayment.get().getPayment());
+                                return Transition.OK.toString();
+                            } catch (WorldlineNonAuthorizedPaymentException e) {
+                                LOG.error("error during payment : " + e.getReason());
+                                return Transition.NOK.toString();
+                            } catch (Exception e) {
+                                LOG.error("something went wrong during payment creation", e);
+                                return Transition.NOK.toString();
+                            }
+                        } else {
+                            LOG.error("something went wrong during payment creation");
+                            return Transition.NOK.toString();
                         }
                     } else {
                         return Transition.SKIP.toString();
                     }
-                    return Transition.OK.toString();
                 });
     }
 
@@ -100,8 +90,9 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
         return Transition.getStringValues();
     }
 
-    public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
-        this.worldlinePaymentService = worldlinePaymentService;
+    @Required
+    public void setWorldlineRecurringService(WorldlineRecurringService worldlineRecurringService) {
+        this.worldlineRecurringService = worldlineRecurringService;
     }
 
     enum Transition {

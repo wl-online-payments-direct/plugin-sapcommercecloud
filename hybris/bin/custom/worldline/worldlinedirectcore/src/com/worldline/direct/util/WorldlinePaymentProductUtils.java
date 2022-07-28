@@ -1,12 +1,21 @@
 package com.worldline.direct.util;
 
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 
 public class WorldlinePaymentProductUtils {
 
 
-    public boolean isPaymentByKlarna(Integer paymentID) {
-        return WorldlinedirectcoreConstants.PAYMENT_METHOD_KLARNA_PAY_NOW == paymentID || WorldlinedirectcoreConstants.PAYMENT_METHOD_KLARNA_PAY_AFTER == paymentID;
+    public static boolean isPaymentByKlarna(WorldlinePaymentInfoModel worldlinePaymentInfoModel) {
+        return WorldlinedirectcoreConstants.PAYMENT_METHOD_KLARNA_PAY_NOW== worldlinePaymentInfoModel.getId()|| WorldlinedirectcoreConstants.PAYMENT_METHOD_KLARNA_PAY_AFTER == worldlinePaymentInfoModel.getId();
+    }
+
+    public static boolean isPaymentBySepaDirectDebit(WorldlinePaymentInfoModel worldlinePaymentInfoModel) {
+        return WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoModel.getId();
+    }
+    public static boolean isPaymentBySepaDirectDebit(WorldlinePaymentInfoData worldlinePaymentInfoModel) {
+        return WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoModel.getId();
     }
 
 }
