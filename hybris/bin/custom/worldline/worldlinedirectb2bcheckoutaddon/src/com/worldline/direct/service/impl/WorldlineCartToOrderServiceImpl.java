@@ -30,6 +30,8 @@ public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderServ
     public void enableCartToOrderJob(CartToOrderCronJobModel cronJobModel, PaymentResponse paymentResponse) {
         Optional<TriggerModel> firstTrigger = cronJobModel.getTriggers().stream().findFirst();
         WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cronJobModel.getPaymentInfo();
+        cronJobModel.setSubmitted(true);
+        modelService.save(cronJobModel);
         modelService.save(paymentInfo);
 
         if (firstTrigger.isPresent()) {
@@ -55,9 +57,9 @@ public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderServ
 
 
     @Override
-    public void removeCartToOrderJob(CartToOrderCronJobModel cronJobModel) {
-        LOG.info("removing cart to Order Cron Job");
-        modelService.remove(cronJobModel);
+    public void cancelCartToOrderJob(CartToOrderCronJobModel cronJobModel) {
+        LOG.info("cancel cart to Order Cron Job");
+        // TODO : mark cron Job for deletion
     }
 
     public void setEventService(EventService eventService) {

@@ -45,7 +45,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
             case CANCELLED_BY_CONSUMER:
             case CLIENT_NOT_ELIGIBLE_FOR_SELECTED_PAYMENT_PRODUCT:
                 // TODO : check if we need to cancel the job / delete it
-                worldlineCartToOrderService.removeCartToOrderJob(cartToOrderCronJob);
+                worldlineCartToOrderService.cancelCartToOrderJob(cartToOrderCronJob);
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.CANCELLED);
             case IN_PROGRESS:
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
