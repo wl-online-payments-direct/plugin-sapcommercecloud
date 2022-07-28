@@ -23,5 +23,31 @@
           class="com.worldline.direct.actions.returns.WorldlineCaptureRefundPaymentAction" parent="abstractAction">
     </bean>
 
+    <bean id="worldlineRequestPaymentAction"
+          class="com.worldline.direct.actions.replenishment.WorldlineRequestPaymentAction" parent="abstractAction">
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="impersonationService" ref="impersonationService"/>
+        <property name="worldlineCheckoutFacade" ref="worldlineCheckoutFacade"/>
+    </bean>
+
+    <bean id="worldlineCheckRecurringPaymentAction"
+          class="com.worldline.direct.actions.replenishment.WorldlineCheckRecurringPaymentAction"
+          parent="abstractAction"/>
+
+    <bean id="worldlineCloneCartAction" class="com.worldline.direct.actions.replenishment.WorldlineCloneCartAction"
+          parent="abstractAction">
+        <property name="userService" ref="userService"/>
+        <property name="cartService" ref="cartService"/>
+        <property name="typeService" ref="typeService"/>
+        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+    </bean>
+
+    <alias name="worldlineCheckPaymentInfoOrderAction" alias="checkCreditCardOrderAction"/>
+    <bean id="worldlineCheckPaymentInfoOrderAction"
+          class="com.worldline.direct.actions.approval.WorldlineCheckPaymentInfoOrderAction"
+          parent="abstractAction"
+    />
+
 
 </beans>

@@ -1,6 +1,6 @@
 package com.worldline.direct.populator;
 
-import com.ingenico.direct.domain.*;
+import com.onlinepayments.domain.*;
 import de.hybris.platform.commerceservices.customer.CustomerEmailResolutionService;
 import de.hybris.platform.commerceservices.enums.CustomerType;
 import de.hybris.platform.commerceservices.strategies.CustomerNameStrategy;

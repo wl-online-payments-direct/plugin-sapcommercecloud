@@ -23,10 +23,18 @@
         <property name="worldlineBrowserCustomerDeviceConverter" ref="worldlineBrowserCustomerDeviceConverter"/>
     </bean>
 
+    <bean id="worldlineB2BPaymentServiceImpl" class="com.worldline.direct.service.impl.WorldlineB2BPaymentServiceImpl"
+          parent="worldlinePaymentService">
+        <property name="baseSiteService" ref="baseSiteService"/>
+        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
+    </bean>
+
 
     <bean id="worldlineCustomerAccountService"
           class="com.worldline.direct.service.impl.WorldlineCustomerAccountServiceImpl">
         <property name="worldlineCustomerAccountDao" ref="worldlineCustomerAccountDao"/>
+        <property name="worldlineCartToOrderCronJobModelDao" ref="worldlineCartToOrderCronJobModelDao"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
     </bean>
 
     <bean id="worldlineBusinessProcessService"
@@ -48,8 +56,17 @@
         <property name="modelService" ref="modelService"/>
     </bean>
 
-    <bean id="worldlinePaymentModeService" class="com.worldline.direct.service.impl.WorldlinePaymentModeServiceImpl" parent="defaultPaymentModeService">
+    <bean id="worldlinePaymentModeService" class="com.worldline.direct.service.impl.WorldlinePaymentModeServiceImpl"
+          parent="defaultPaymentModeService">
         <property name="worldlinePaymentModeDao" ref="worldlinePaymentModeDao"/>
+    </bean>
+
+    <bean id="worldlineScheduleOrderService" class="com.worldline.direct.service.impl.WorldlineScheduleOrderServiceImpl">
+        <property name="typeService" ref="typeService"/>
+        <property name="cartService" ref="cartService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="cronJobService" ref="cronJobService"/>
+        <property name="keyGenerator" ref="orderCodeGenerator"/>
     </bean>
 
 </beans>

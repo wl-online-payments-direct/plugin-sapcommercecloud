@@ -1,6 +1,6 @@
 package com.worldline.direct.strategy.impl;
 
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.service.WorldlinePaymentModeService;
 import com.worldline.direct.strategy.WorldlinePaymentProductFilterStrategy;

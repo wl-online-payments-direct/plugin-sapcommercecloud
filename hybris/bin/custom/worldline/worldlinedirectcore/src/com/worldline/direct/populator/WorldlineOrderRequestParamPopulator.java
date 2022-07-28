@@ -1,6 +1,6 @@
 package com.worldline.direct.populator;
 
-import com.ingenico.direct.domain.*;
+import com.onlinepayments.domain.*;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;

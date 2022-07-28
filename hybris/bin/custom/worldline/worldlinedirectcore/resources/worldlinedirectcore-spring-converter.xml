@@ -26,9 +26,9 @@
         <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
 
-    <bean id="worldlineShoppingCartWithoutDiscountRequestParamPopulator"
+    <bean id="worldlineShoppingCartRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineShoppingCartRequestParamPopulator">
-            <property name="worldlineShoppingCartFactoriesConfiguration" ref="worldlineShoppingCartFactoriesConfiguration"/>
+        <property name="worldlineShoppingCartFactoriesConfiguration" ref="worldlineShoppingCartFactoriesConfiguration"/>
     </bean>
 
 
@@ -43,7 +43,7 @@
           class="com.worldline.direct.populator.WorldlineBrowserCustomerDevicePopulator"/>
 
     <bean id="worldlineBrowserCustomerDeviceConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CustomerDevice"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CustomerDevice"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineBrowserCustomerDevicePopulator"/>
@@ -51,11 +51,11 @@
         </property>
     </bean>
     <bean id="worldlineOrderParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.Order"/>
+        <property name="targetClass" value="com.onlinepayments.domain.Order"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineOrderRequestParamPopulator"/>
-                <ref bean="worldlineShoppingCartWithoutDiscountRequestParamPopulator"/>
+                <ref bean="worldlineShoppingCartRequestParamPopulator"/>
                 <ref bean="worldlineCustomerRequestParamPopulator"/>
             </list>
         </property>
@@ -74,6 +74,11 @@
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
+    <bean id="worldlineSepaDirectDebitPopulator"
+          class="com.worldline.direct.populator.hostedcheckout.WorldlineSepaDirectDebitPopulator">
+           <property name="commonI18NService" ref="commonI18NService"/>
+    </bean>
+
     <bean id="worldlineHostedCheckoutRedirectPopulator"
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutRedirectPopulator">
         <property name="sessionService" ref="sessionService"/>
@@ -86,13 +91,14 @@
     </bean>
 
     <bean id="worldlineHostedCheckoutParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CreateHostedCheckoutRequest"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CreateHostedCheckoutRequest"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineHostedCheckoutBasicPopulator"/>
                 <ref bean="worldlineHostedCheckoutCardPopulator"/>
                 <ref bean="worldlineHostedCheckoutRedirectPopulator"/>
                 <ref bean="worldlineHostedCheckoutMobilePopulator"/>
+                <ref bean="worldlineSepaDirectDebitPopulator"/>
             </list>
         </property>
     </bean>
@@ -114,19 +120,23 @@
         <property name="sessionService" ref="sessionService"/>
     </bean>
 
+    <bean id="worldlineHostedTokenizationSepaPopulator"
+          class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationSepaPopulator"/>
+
     <bean id="worldlineHostedTokenizationMobilePopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationMobilePopulator">
     </bean>
 
 
     <bean id="worldlineHostedTokenizationParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CreatePaymentRequest"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CreatePaymentRequest"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineHostedTokenizationBasicPopulator"/>
                 <ref bean="worldlineHostedTokenizationCardPopulator"/>
                 <ref bean="worldlineHostedTokenizationMobilePopulator"/>
                 <ref bean="worldlineHostedTokenizationRedirectPopulator"/>
+                <ref bean="worldlineHostedTokenizationSepaPopulator"/>
             </list>
         </property>
     </bean>
@@ -149,26 +159,39 @@
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
     </bean>
 
+
     <bean parent="modifyPopulatorList">
         <property name="list" ref="orderConverter"/>
         <property name="add" ref="worldlineOrderPopulator"/>
     </bean>
 
-    <bean name="worldlineShoppingCartFactoriesConfiguration" class="com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration" >
+    <bean name="worldlineShoppingCartFactoriesConfiguration"
+          class="com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration">
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="factoriesConfiguration" ref="shoppingCartfactoriesConfiguration"/>
     </bean>
-    <util:map id="shoppingCartfactoriesConfiguration" key-type="java.lang.String" value-type="com.worldline.direct.factory.WorldlineShoppingCartFactory" map-class="java.util.HashMap">
-        <entry key="INCLUDE_DISCOUNT" value-ref="shoppingCartWithDiscountFactory" />
-        <entry key="EXCLUDE_DISCOUNT" value-ref="shoppingCartWithoutDiscountFactory" />
+    <util:map id="shoppingCartfactoriesConfiguration" key-type="java.lang.String"
+              value-type="com.worldline.direct.factory.WorldlineShoppingCartFactory" map-class="java.util.HashMap">
+        <entry key="INCLUDE_DISCOUNT" value-ref="shoppingCartWithDiscountFactory"/>
+        <entry key="EXCLUDE_DISCOUNT" value-ref="shoppingCartWithoutDiscountFactory"/>
     </util:map>
-    <bean id="shoppingCartWithDiscountFactory" class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithDiscountFactory">
+    <bean id="shoppingCartWithDiscountFactory"
+          class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithDiscountFactory">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
         <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
 
-    <bean id="shoppingCartWithoutDiscountFactory" class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithoutDiscountFactory">
+    <bean id="shoppingCartWithoutDiscountFactory"
+          class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithoutDiscountFactory">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
         <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
+
+    <bean id="worldlineTriggerPopulator" class="com.worldline.direct.populator.WorldlineTriggerPopulator"/>
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="triggerConverter"/>
+        <property name="add" ref="worldlineTriggerPopulator"/>
+    </bean>
+
+
 </beans>
