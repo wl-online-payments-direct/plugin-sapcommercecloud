@@ -31,17 +31,14 @@
         <property name="worldlineCheckoutFacade" ref="worldlineCheckoutFacade"/>
     </bean>
 
-    <bean id="worldlineCheckRecurringPaymentAction"
-          class="com.worldline.direct.actions.replenishment.WorldlineCheckRecurringPaymentAction"
-          parent="abstractAction"/>
-
-    <bean id="worldlineCloneCartAction" class="com.worldline.direct.actions.replenishment.WorldlineCloneCartAction"
-          parent="abstractAction">
-        <property name="userService" ref="userService"/>
-        <property name="cartService" ref="cartService"/>
-        <property name="typeService" ref="typeService"/>
-        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+    <bean name="worldlinePlaceOrderAction"
+          class="com.worldline.direct.actions.replenishment.WorldlinePlaceOrderAction"
+          parent="abstractAction" >
+        <property name="b2bCommerceCheckoutService" ref="b2bCommerceCheckoutService"/>
+        <property name="b2cCommerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="impersonationService" ref="impersonationService"/>
     </bean>
+
 
     <alias name="worldlineCheckPaymentInfoOrderAction" alias="checkCreditCardOrderAction"/>
     <bean id="worldlineCheckPaymentInfoOrderAction"

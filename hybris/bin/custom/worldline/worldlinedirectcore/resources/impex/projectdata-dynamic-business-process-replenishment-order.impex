@@ -5,49 +5,33 @@ INSERT_UPDATE DynamicProcessDefinition; code[unique = true]                ; act
 		 processClass='de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel'
 		 onError='error'>
 
-	<action id='cloneCartAction' bean='worldlineCloneCartAction'>
+	<action id='cloneCartAction' bean='cloneCartAction'>
 		<transition name='OK' to='calculateCartAction'/>
 		<transition name='NOK' to='cleanUpClonedCartOnFailedAction'/>
 	</action>
 
 	<action id='calculateCartAction' bean='calculateCartAction'>
-		<transition name='OK' to='worldlineRequestPaymentAction'/>
+		<transition name='OK' to='placeOrderAction'/>
 		<transition name='NOK' to='cleanUpClonedCartOnFailedAction'/>
+	</action>
+
+	<action id='placeOrderAction' bean='worldlinePlaceOrderAction'>
+		<transition name='OK' to='cleanUpClonedCart'/>
+		<transition name='NOK' to='cleanUpClonedCartOnErrorAction'/>
+	</action>
+
+ 	<action id='cleanUpClonedCart' bean='cleanUpClonedCartAction'>
+	    <transition name='OK' to='worldlineRequestPaymentAction'/>
 	</action>
 
 	<action id='worldlineRequestPaymentAction' bean='worldlineRequestPaymentAction'>
-		<transition name='OK' to='worldlineCheckRecurringPaymentAction'/>
-		<transition name='NOK' to='cleanUpClonedCartOnFailedAction'/>
-		<transition name='SKIP' to='placeOrderAction'/>
-	</action>
-
-
-	<action id='worldlineCheckRecurringPaymentAction' bean='worldlineCheckRecurringPaymentAction'>
-		<transition name='OK' to='placeOrderAction'/>
-		<transition name='NOK' to='cleanUpClonedCartOnPaymentRejectedAction'/>
-		<transition name='WAIT' to='waitForWorldlineAuthorization'/>
-	</action>
-
-    <wait id='waitForWorldlineAuthorization' then='worldlineCheckRecurringPaymentAction' prependProcessCode='true'>
-        <event>worldline_payment_received</event>
-        <timeout delay='P1D' then='cleanUpClonedCartOnPaymentNotReceivedAction'/>
-    </wait>
-
-
-
-
-	<action id='placeOrderAction' bean='placeOrderAction'>
 		<transition name='OK' to='confirmationAction'/>
-		<transition name='NOK' to='cleanUpClonedCartOnErrorAction'/>
+		<transition name='NOK' to='error'/>
 	</action>
 
 	<action id='confirmationAction' bean='confirmationAction'>
-		<transition name='OK' to='cleanUpClonedCartOnSuccessAction'/>
-		<transition name='NOK' to='cleanUpClonedCartOnErrorAction'/>
-	</action>
-
- 	<action id='cleanUpClonedCartOnSuccessAction' bean='cleanUpClonedCartAction'>
-	    <transition name='OK' to='success'/>
+		<transition name='OK' to='success'/>
+		<transition name='NOK' to='error'/>
 	</action>
 
 	<action id='cleanUpClonedCartOnErrorAction' bean='cleanUpClonedCartAction'>
@@ -58,17 +42,7 @@ INSERT_UPDATE DynamicProcessDefinition; code[unique = true]                ; act
 		<transition name='OK' to='failed'/>
 	</action>
 
-	<action id='cleanUpClonedCartOnPaymentNotReceivedAction' bean='cleanUpClonedCartAction'>
-		<transition name='OK' to='paymentNotReceived'/>
-	</action>
-
-	<action id='cleanUpClonedCartOnPaymentRejectedAction' bean='cleanUpClonedCartAction'>
-		<transition name='OK' to='paymentRejected'/>
-	</action>
-
 	<end id='error' state='ERROR'>Something went wrong.</end>
-	<end id='paymentNotReceived' state='FAILED'>Payment Not received.</end>
-	<end id='paymentRejected' state='FAILED'>Payment Rejected.</end>
 	<end id='failed' state='FAILED'>Could not create a replenishment order.</end>
 	<end id='success' state='SUCCEEDED'>Created a replenishment order.</end>
 </process>"
