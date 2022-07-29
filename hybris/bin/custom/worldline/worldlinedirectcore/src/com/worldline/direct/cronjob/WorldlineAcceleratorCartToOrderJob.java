@@ -5,6 +5,7 @@ import de.hybris.platform.cronjob.enums.CronJobResult;
 import de.hybris.platform.cronjob.enums.CronJobStatus;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.processengine.BusinessProcessService;
+import de.hybris.platform.processengine.enums.ProcessState;
 import de.hybris.platform.servicelayer.cronjob.AbstractJobPerformable;
 import de.hybris.platform.servicelayer.cronjob.PerformResult;
 import de.hybris.platform.servicelayer.cronjob.TriggerService;
@@ -29,7 +30,29 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
         modelService.save(businessProcessModel);
         getBusinessProcessService().startProcess(businessProcessModel);
         modelService.refresh(businessProcessModel);
-        return new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED);
+        while (businessProcessModel.getProcessState().equals(ProcessState.RUNNING)
+                || businessProcessModel.getProcessState().equals(ProcessState.CREATED)) {
+            modelService.refresh(businessProcessModel);
+
+            try {
+                Thread.sleep(1000);
+            } catch (final InterruptedException e) {
+                LOG.warn("Thread interrupted " + e.getMessage());
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        final PerformResult cronJobResult;
+        if (businessProcessModel.getProcessState().equals(ProcessState.SUCCEEDED)) {
+            cronJobResult = new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED);
+        } else if (businessProcessModel.getProcessState().equals(ProcessState.ERROR)
+                || businessProcessModel.getProcessState().equals(ProcessState.FAILED)) {
+            cronJobResult = new PerformResult(CronJobResult.ERROR, CronJobStatus.UNKNOWN);
+        } else {
+            cronJobResult = new PerformResult(CronJobResult.FAILURE, CronJobStatus.FINISHED);
+        }
+
+        return cronJobResult;
     }
 
     protected BusinessProcessService getBusinessProcessService() {
