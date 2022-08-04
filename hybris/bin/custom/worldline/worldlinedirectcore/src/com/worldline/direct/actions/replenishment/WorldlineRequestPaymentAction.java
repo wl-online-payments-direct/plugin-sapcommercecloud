@@ -8,7 +8,7 @@ import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProc
 import de.hybris.platform.commerceservices.impersonation.ImpersonationContext;
 import de.hybris.platform.commerceservices.impersonation.ImpersonationService;
 import de.hybris.platform.commerceservices.order.CommerceCheckoutService;
-import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.processengine.action.AbstractAction;
 import de.hybris.platform.processengine.model.BusinessProcessParameterModel;
@@ -33,8 +33,8 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
 
     @Override
     public String execute(final ReplenishmentProcessModel process) throws Exception {
-        final BusinessProcessParameterModel orderModelParameter = processParameterHelper.getProcessParameterByName(process, "cart");
-        final CartModel placedOrder = (CartModel) orderModelParameter.getValue();
+        final BusinessProcessParameterModel orderModelParameter = processParameterHelper.getProcessParameterByName(process, "order");
+        final OrderModel placedOrder = (OrderModel) orderModelParameter.getValue();
         getModelService().refresh(placedOrder);
         final ImpersonationContext context = new ImpersonationContext();
         context.setOrder(placedOrder);
@@ -58,7 +58,7 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
                             return Transition.NOK.toString();
                         }
                     } else {
-                        return Transition.SKIP.toString();
+                        return Transition.OK.toString();
                     }
                 });
     }
@@ -96,7 +96,7 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
     }
 
     enum Transition {
-        OK, NOK, SKIP;
+        OK, NOK;
 
         public static Set<String> getStringValues() {
             Set<String> res = new HashSet<>();

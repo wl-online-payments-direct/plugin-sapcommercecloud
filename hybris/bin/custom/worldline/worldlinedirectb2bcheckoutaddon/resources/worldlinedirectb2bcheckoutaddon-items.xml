@@ -11,16 +11,5 @@
 
     <itemtypes>
 
-        <itemtype code="Cart" autocreate="false" generate="false">
-            <attributes>
-                <attribute qualifier="replenishmentOrderProcess" type="ReplenishmentProcess">
-                    <description>replenishment Order Process</description>
-                    <modifiers read="true" write="true" search="true"/>
-                    <persistence type="property"/>
-                </attribute>
-            </attributes>
-        </itemtype>
-
-
     </itemtypes>
 </items>

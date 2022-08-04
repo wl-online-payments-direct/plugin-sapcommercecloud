@@ -7,8 +7,10 @@ $media = media(code, $contentCV);
 $page = page(uid, $contentCV);
 $contentPage = contentPage(uid, $contentCV);
 $jarResourceCms = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/sampledata/cockpits/cmscockpit
-$wideContent=CMSImageComponent,BannerComponent
-$jarEmailResource=jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
+$wideContent = CMSImageComponent, BannerComponent
+$jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
+$siteName = apparel-uk
+$emailPackageName = $config-emailContextPackageName
 
 ###### Replenishment Confirmation Page Start ######
 INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true]                    ; position[unique = true]; page(uid, $contentCV)[unique = true][default = 'replenishmentConfirmationPage']; contentSlot(uid, $contentCV)[unique = true]; ; ;
@@ -75,7 +77,7 @@ INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]        
                          ;                          ; SideContent-my-replenishment-orders ; Side Content Slot for My Account Replenishment Orders ; true  ;                                       ; ; ;
                          ;                          ; BodyContent-my-replenishment-orders ; Body Content Slot for My Account Replenishment Orders ; true  ; AccountMyReplenishmentOrdersComponent ; ; ;
 
-INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                    ; name                                      ; page                                                                                                ; actions(uid, $contentCV); &componentRef
+INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                    ; name                                      ; page                                                                                                                          ; actions(uid, $contentCV); &componentRef
                                  ;                          ; AccountMyReplenishmentOrdersComponent ; Account My Replenishment Orders Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentSchedule.jsp ;                         ; AccountMyReplenishmentOrdersComponent
 ###### Account My Replenishment Orders End ######
 
@@ -85,27 +87,48 @@ INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true] 
                                 ;                          ; SideContent-my-replenishment-details ; SideContent            ;                                                                           ; SideContent-my-replenishment-details       ; ; ;
                                 ;                          ; BodyContent-my-replenishment-details ; BodyContent            ;                                                                           ; BodyContent-my-replenishment-details       ; ; ;
 
-INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                   ; name                                                 ; active                                                                                                ; cmsComponents(&componentRef)                                                                                                                                                                                                                                                                                                               ; ; ;
-                         ;                          ; SideContent-my-replenishment-details ; Side Content Slot for My Replenishment Order Details ; true                                                                                                  ;                                                                                                                                                                                                                                                                                                                                            ; ; ;
-                         ;                          ; BodyContent-my-replenishment-details ; Body Content Slot for My Replenishment Order Details ; true                                                                                                  ; AccountMyReplenishmentOrderDetailsHeadlineComponent,AccountMyReplenishmentOrderDetailsOverviewComponent,AccountMyReplenishmentOrderDetailsActionsComponent,AccountMyReplenishmentOrderDetailsItemsComponent,AccountOrderDetailsShippingComponent,AccountReplenishmentOrderDetailsTotalsComponent,AccountReplenishmentOrderHistoryComponent ; ; ;
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                   ; name                                                 ; active; cmsComponents(&componentRef)                                                                                                                                                                                                                                                                                                               ; ; ;
+                         ;                          ; SideContent-my-replenishment-details ; Side Content Slot for My Replenishment Order Details ; true  ;                                                                                                                                                                                                                                                                                                                                            ; ; ;
+                         ;                          ; BodyContent-my-replenishment-details ; Body Content Slot for My Replenishment Order Details ; true  ; AccountMyReplenishmentOrderDetailsHeadlineComponent,AccountMyReplenishmentOrderDetailsOverviewComponent,AccountMyReplenishmentOrderDetailsActionsComponent,AccountMyReplenishmentOrderDetailsItemsComponent,AccountOrderDetailsShippingComponent,AccountReplenishmentOrderDetailsTotalsComponent,AccountReplenishmentOrderHistoryComponent ; ; ;
 
 ###### Account My Replenishment Order Details End ######
+INSERT_UPDATE RendererTemplate; code[unique = true]                                      ; contextClass; rendererType(code)[default = 'velocity']
+
+                              ; $siteName_Email_Replenishment_Order_Placed_Body          ; de.hybris.platform.b2bacceleratoraddon.proccess.email.context.OrderReplenishmentEmailContext
+                              ; $siteName_Email_Replenishment_Order_Placed_Subject       ; de.hybris.platform.b2bacceleratoraddon.proccess.email.context.OrderReplenishmentEmailContext
+                              ; $siteName_Email_Replenishment_Order_Confirmation_Subject ; de.hybris.platform.yacceleratorfacades.process.email.context.OrderNotificationEmailContext
+                              ; $siteName_Email_Replenishment_Order_Confirmation_Body    ; de.hybris.platform.yacceleratorfacades.process.email.context.OrderNotificationEmailContext
+$lang = en
+
+UPDATE RendererTemplate; code[unique = true]                                      ; description[lang = $lang]          ; templateScript[lang = $lang, translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                       ; $siteName_Email_Replenishment_Order_Placed_Body          ; "Order Confirmation Email Subject" ; $jarEmailResource/email-replenishmentOrderPlacedBody.vm
+                       ; $siteName_Email_Replenishment_Order_Placed_Subject       ; "Order Confirmation Email Subject" ; $jarEmailResource/email-replenishmentOrderPlacedSubject.vm
+                       ; $siteName_Email_Replenishment_Order_Confirmation_Body    ; ""                                 ; $jarEmailResource/email-replenishmentOrderConfirmationBody.vm
+                       ; $siteName_Email_Replenishment_Order_Confirmation_Subject ; "Order Confirmation Email Subject" ; $jarEmailResource/email-replenishmentOrderConfirmationSubject.vm
 
 
-INSERT_UPDATE EmailPageTemplate; $contentCV[unique = true]; uid[unique = true]                    ; name                                      ; active; frontendTemplateName          ; subject(code)                                       ; htmlTemplate(code)                               ; restrictedPageTypes(code)
-                               ;                          ; ReplenishmentOrderPlacedEmailTemplate ; Replenishment Order Placed Email Template ; true  ; replenishmentOrderPlacedEmail ; powertools_Email_Replenishment_Order_Placed_Subject ; powertools_Email_Replenishment_Order_Placed_Body ; EmailPage
-UPDATE EmailPageTemplate; $contentCV[unique = true]; uid[unique = true]                    ; velocityTemplate[translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
-                        ;                          ; ReplenishmentOrderPlacedEmailTemplate ; $jarEmailResource/structure-view/structure_replenishmentOrderPlacedEmailTemplate.vm
+INSERT_UPDATE EmailPageTemplate; $contentCV[unique = true]; uid[unique = true]                          ; name                                            ; active; frontendTemplateName                ; subject(code)                                            ; htmlTemplate(code)                                    ; restrictedPageTypes(code)
+                               ;                          ; ReplenishmentOrderPlacedEmailTemplate       ; Replenishment Order Placed Email Template       ; true  ; replenishmentOrderPlacedEmail       ; $siteName_Email_Replenishment_Order_Placed_Subject       ; $siteName_Email_Replenishment_Order_Placed_Body       ; EmailPage
+                               ;                          ; ReplenishmentOrderConfirmationEmailTemplate ; Replenishment Order Confirmation Email Template ; true  ; replenishmentOrderConfirmationEmail ; $siteName_Email_Replenishment_Order_Confirmation_Subject ; $siteName_Email_Replenishment_Order_Confirmation_Body ; EmailPage
+
+
+UPDATE EmailPageTemplate; $contentCV[unique = true]; uid[unique = true]                          ; velocityTemplate[translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                        ;                          ; ReplenishmentOrderPlacedEmailTemplate       ; $jarEmailResource/structure-view/structure_replenishmentOrderPlacedEmailTemplate.vm
+                        ;                          ; ReplenishmentOrderConfirmationEmailTemplate ; $jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
 
 INSERT_UPDATE ContentSlotName; name[unique = true]; template(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderPlacedEmailTemplate']; validComponentTypes(code); compTypeGroup(code)
                              ; SiteLogo           ;                                                                                            ;                          ; logo ; email
                              ; TopContent         ;                                                                                            ; $wideContent             ; email
                              ; BottomContent      ;                                                                                            ; $wideContent             ; email
+INSERT_UPDATE ContentSlotName; name[unique = true]; template(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderConfirmationEmailTemplate']; validComponentTypes(code); compTypeGroup(code)
+                             ; SiteLogo           ;                                                                                                  ;                          ; logo ; email
+                             ; TopContent         ;                                                                                                  ; $wideContent             ; email
+                             ; BottomContent      ;                                                                                                  ; $wideContent             ; email
 
-INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active
-                         ;;EmailTopSlot;Default Email Top Slot;true
-                         ;;EmailBottomSlot;Default Email Bottom Slot;true
-                         ;;EmailSiteLogoSlot;Default Email Site Slot;true
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]; name                      ; active
+                         ;                          ; EmailTopSlot      ; Default Email Top Slot    ; true
+                         ;                          ; EmailBottomSlot   ; Default Email Bottom Slot ; true
+                         ;                          ; EmailSiteLogoSlot ; Default Email Site Slot   ; true
 
 
 
@@ -113,5 +136,11 @@ INSERT_UPDATE ContentSlotForTemplate; $contentCV[unique = true]; uid[unique = tr
                                     ;                          ; SiteLogo-ReplenishmentOrderPlacedEmail      ; SiteLogo               ;                                                                                                ; SiteLogoSlot                               ; true
                                     ;                          ; TopContent-ReplenishmentOrderPlacedEmail    ; TopContent             ;                                                                                                ; EmailTopSlot                               ; true
                                     ;                          ; BottomContent-ReplenishmentOrderPlacedEmail ; BottomContent          ;                                                                                                ; EmailBottomSlot                            ; true
-INSERT_UPDATE EmailPage; $contentCV[unique = true]; uid[unique = true]            ; name                     ; masterTemplate(uid, $contentCV)       ; defaultPage; approvalStatus(code)[default = 'approved']
-                       ;                          ; ReplenishmentOrderPlacedEmail ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate ; true       ; ; customerservices@hybris.com ; Customer Services Team
+INSERT_UPDATE ContentSlotForTemplate; $contentCV[unique = true]; uid[unique = true]                                ; position[unique = true]; pageTemplate(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderConfirmationEmailTemplate']; contentSlot(uid, $contentCV)[unique = true]; allowOverwrite
+                                    ;                          ; SiteLogo-ReplenishmentOrderConfirmationEmail      ; SiteLogo               ;                                                                                                      ; SiteLogoSlot                               ; true
+                                    ;                          ; TopContent-ReplenishmentOrderConfirmationEmail    ; TopContent             ;                                                                                                      ; EmailTopSlot                               ; true
+                                    ;                          ; BottomContent-ReplenishmentOrderConfirmationEmail ; BottomContent          ;                                                                                                      ; EmailBottomSlot                            ; true
+
+INSERT_UPDATE EmailPage; $contentCV[unique = true]; uid[unique = true]                  ; name                     ; masterTemplate(uid, $contentCV)             ; defaultPage; approvalStatus(code)[default = 'approved']; fromEmail[lang = $lang]     ; fromName[lang = $lang]
+                       ;                          ; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; customerservices@hybris.com ; Customer Services Team
+                       ;                          ; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; customerservices@hybris.com ; Customer Services Team
