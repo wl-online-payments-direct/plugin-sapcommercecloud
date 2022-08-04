@@ -1,9 +1,7 @@
 package com.worldline.direct.service.impl;
 
 import com.worldline.direct.service.WorldlineBusinessProcessService;
-import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
-import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.orderprocessing.model.OrderProcessModel;
 import de.hybris.platform.processengine.BusinessProcessService;
@@ -32,13 +30,6 @@ public class WorldlineBusinessProcessServiceImpl implements WorldlineBusinessPro
                 LOGGER.debug("Sending event:" + eventName);
                 businessProcessService.triggerEvent(eventName);
             }
-        } else if (abstractOrderModel instanceof CartModel && (((CartModel) abstractOrderModel).getReplenishmentOrderProcess() != null)) {
-            ReplenishmentProcessModel replenishmentProcessModel = ((CartModel) abstractOrderModel).getReplenishmentOrderProcess();
-            LOGGER.debug("Replenishment process code: " + replenishmentProcessModel.getCode());
-
-            final String eventName = replenishmentProcessModel.getCode() + "_" + event;
-            LOGGER.debug("Sending event:" + eventName);
-            businessProcessService.triggerEvent(eventName);
         }
     }
 

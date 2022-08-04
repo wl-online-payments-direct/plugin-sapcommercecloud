@@ -261,7 +261,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     }
 
 
-    public void handlePaymentResponse(AbstractOrderModel orderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+    public void handlePaymentResponse(OrderModel orderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         switch (WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.valueOf(paymentResponse.getStatus())) {
             case CREATED:
             case REJECTED:

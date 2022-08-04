@@ -40,8 +40,13 @@ public class DefaultWorldlineCartToOrderCronJobModelDao extends DefaultGenericDa
 			+ CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.PK + "} = {" + TriggerModel._TYPECODE + ":"
 			+ TriggerModel.CRONJOB + "}} WHERE {" + CartModel._TYPECODE + ":" + CartModel.USER + "} = ?user AND {" + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.SUBMITTED + "} = ?"+CartToOrderCronJobModel.SUBMITTED;
 
-	private static final String FIND_CARTTOORDERCRONJOB_BY_CODE_AND_USER_QUERY = FIND_CARTTOORDERCRONJOB_BY_USER_QUERY + " AND {"
+	private static final String FIND_CARTTOORDERCRONJOB_BY_CODE_AND_USER_QUERY = "SELECT {" + CartToOrderCronJobModel._TYPECODE + ":"
+			+ CartToOrderCronJobModel.PK + "} FROM { " + CartToOrderCronJobModel._TYPECODE + " as "
+			+ CartToOrderCronJobModel._TYPECODE + " JOIN " + CartModel._TYPECODE + " as " + CartModel._TYPECODE + " ON {"
+			+ CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.CART + "} = {" + CartModel._TYPECODE + ":"
+			+ CartModel.PK + "}} WHERE {" + CartModel._TYPECODE + ":" + CartModel.USER + "} = ?user  AND {"
 			+ CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.CODE + "} = ?code";
+
 
 	private static final String FIND_ORDERS_FOR_SCHEDULE_BY_CODE_QUERY = "SELECT {" + OrderModel._TYPECODE + ":" + OrderModel.PK
 			+ "} FROM { " + OrderModel._TYPECODE + " as " + OrderModel._TYPECODE + " JOIN " + CartToOrderCronJobModel._TYPECODE
@@ -81,7 +86,6 @@ public class DefaultWorldlineCartToOrderCronJobModelDao extends DefaultGenericDa
 		final Map<String, Object> attr = new HashMap<>(2);
 		attr.put(CartToOrderCronJobModel.CODE, code);
 		attr.put(CartModel.USER, user);
-		attr.put(CartToOrderCronJobModel.SUBMITTED, false);
 		final FlexibleSearchQuery query = new FlexibleSearchQuery(FIND_CARTTOORDERCRONJOB_BY_CODE_AND_USER_QUERY);
 		query.getQueryParameters().putAll(attr);
 		final SearchResult<CartToOrderCronJobModel> jobs = this.getFlexibleSearchService().search(query);
