@@ -24,7 +24,8 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
     private CartService cartService;
     private TypeService typeService;
     private KeyGenerator keyGenerator;
-    private static final String ACCELERATOR_CART_TO_ORDER_JOB="worldlineAcceleratorCartToOrderJob";
+    private static final String ACCELERATOR_CART_TO_ORDER_JOB = "worldlineAcceleratorCartToOrderJob";
+
     @Override
     public CartToOrderCronJobModel createOrderFromCartCronJob(CartModel cart, AddressModel deliveryAddress, AddressModel paymentAddress, PaymentInfoModel paymentInfo, List<TriggerModel> triggers) {
         final CartToOrderCronJobModel cartToOrderCronJob = modelService.create(CartToOrderCronJobModel.class);

@@ -8,7 +8,7 @@
     <spring:theme code="text.account.paymentType"/>
 </div>
 <div class="value-order">
-    ${fn:escapeXml(order.worldlinePaymentInfo.paymentMethod)}
+    ${fn:escapeXml(order.worldlinePaymentInfo.paymentMethod)}<br/>
     ${fn:escapeXml(order.worldlinePaymentInfo.cardholderName)}
 </div>
 
