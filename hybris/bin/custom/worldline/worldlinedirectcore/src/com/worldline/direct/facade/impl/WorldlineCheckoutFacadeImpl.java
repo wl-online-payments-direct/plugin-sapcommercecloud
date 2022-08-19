@@ -16,6 +16,7 @@ import com.worldline.direct.service.WorldlineBusinessProcessService;
 import com.worldline.direct.service.WorldlineCustomerAccountService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineTransactionService;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
@@ -232,10 +233,24 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             case PAYMENT_CREATED:
                 savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                saveMandateIfNeeded((WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 break;
             default:
                 LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
                 throw new IllegalStateException("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
+        }
+    }
+
+    protected void saveMandateIfNeeded(WorldlinePaymentInfoModel worldlinePaymentInfoModel, PaymentResponse paymentResponse) {
+        SepaDirectDebitPaymentMethodSpecificOutput sepaDirectDebitPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getSepaDirectDebitPaymentMethodSpecificOutput();
+        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel)  && sepaDirectDebitPaymentMethodSpecificOutput != null && StringUtils.isNotEmpty(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference())){
+            GetMandateResponse mandate = worldlinePaymentService.getMandate(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference());
+            if (mandate != null) {
+                worldlinePaymentInfoModel.setMandate(mandate.getMandate().getUniqueMandateReference());
+                MandatePersonalName personalName = mandate.getMandate().getCustomer().getPersonalInformation().getName();
+                worldlinePaymentInfoModel.setCardholderName(personalName.getFirstName() + " " + personalName.getSurname());
+                modelService.save(worldlinePaymentInfoModel);
+            }
         }
     }
 

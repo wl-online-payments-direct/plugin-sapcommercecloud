@@ -33,6 +33,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
         try (Client client = worldlineClientFactory.getClient()) {
             final CreateHostedCheckoutRequest params = worldlineHostedCheckoutParamConverter.convert(cartToOrderCronJobModel.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(browserData));
+            params.getOrder().getReferences().setMerchantReference(cartToOrderCronJobModel.getCode());
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
                 CreateMandateRequest mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
