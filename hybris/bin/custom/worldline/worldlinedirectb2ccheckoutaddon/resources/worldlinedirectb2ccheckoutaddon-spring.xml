@@ -44,33 +44,7 @@
 		<property name="commercePaymentProviderStrategy" ref="commercePaymentProviderStrategy"/>
 	</bean>
 
-	<bean id="worldlineExtendedCheckoutFacade"
-		  class="com.worldline.direct.facade.impl.WorldLineExtendedCheckoutFacadeImpl"
-		  parent="defaultCheckoutFacade">
-		<property name="guidKeyGenerator" ref="guidKeyGenerator"/>
-		<property name="i18NService" ref="i18NService"/>
-		<property name="scheduledCartConverter" ref="scheduledCartConverter"/>
-		<property name="triggerPopulator" ref="triggerReversePopulator"/>
-		<property name="triggerService" ref="triggerService"/>
-		<property name="baseSiteService" ref="baseSiteService"/>
-		<property name="b2bDaysOfWeekConverter" ref="b2bDaysOfWeekConverter"/>
-		<property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
-	</bean>
 
-	<bean id="worldline-replenishmentOrderPlacedEventListener"
-		  class="com.worldline.direct.event.listener.WorldlineReplenishmentOrderPlacedEventListener"
-		  parent="abstractEventListener">
-		<property name="modelService" ref="modelService" />
-		<property name="businessProcessService" ref="businessProcessService" />
-	</bean>
 
-	<bean id="worldlineReplenishmentFacade" class="com.worldline.direct.facade.impl.WorldlineReplenishmentFacadeImpl">
-		<property name="modelService" ref="modelService"/>
-		<property name="scheduledCartConverter" ref="scheduledCartConverter"/>
-		<property name="userService" ref="userService"/>
-		<property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
-		<property name="orderHistoryConverter" ref="orderHistoryConverter"/>
-		<property name="worldlineRecurringService" ref="worldlineRecurringService"/>
-	</bean>
 
 </beans>

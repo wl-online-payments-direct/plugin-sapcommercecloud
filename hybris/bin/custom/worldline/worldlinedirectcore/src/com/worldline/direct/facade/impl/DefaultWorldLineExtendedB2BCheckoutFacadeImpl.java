@@ -1,4 +1,4 @@
-package com.worldline.direct.b2bacceleratorfacades;
+package com.worldline.direct.facade.impl;
 
 import com.worldline.direct.service.WorldlineScheduleOrderService;
 import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
