@@ -1,4 +1,5 @@
 $contentCatalog = powertoolsContentCatalog
+$store = powertools
 $version = Staged
 $contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=$version])[default=$contentCatalog:$version]
 
@@ -11,4 +12,8 @@ INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]        
 
 
 INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                    ; name                                             ; active; cmsComponents(uid, $contentCV)                                                                                                                                                                                                                                         ; ; ;
-                         ;                          ; BodyContent-replenishmentConfirmation ; Body Content Slot for Replenishment Confirmation ; true  ; ReplenishmentConfirmationMessageComponent,AccountMyReplenishmentOrderDetailsOverviewComponent,WorldlineAccountMyReplenishmentOrderDetailsItemsComponent,AccountOrderDetailsShippingComponent,OrderConfirmationTotalsComponent,OrderConfirmationContinueButtonComponent ; ; ;
+                         ;                          ; BodyContent-replenishmentConfirmation ; Body Content Slot for Replenishment Confirmation ; true  ; ReplenishmentConfirmationMessageComponent,AccountMyReplenishmentOrderDetailsOverviewComponent,WorldlineAccountMyReplenishmentOrderDetailsItemsComponent,WorldlineAccountOrderDetailsShippingComponent,OrderConfirmationTotalsComponent,OrderConfirmationContinueButtonComponent ; ; ;
+
+UPDATE BaseStore; uid[unique = true]; submitorderprocesscode ;createReturnProcessCode ;paymentProvider;checkoutFlowGroup
+                ; $store            ; worldline-order-process ;worldline-return-process;WORLDLINE  ;worldlineB2BCheckoutGroup
+

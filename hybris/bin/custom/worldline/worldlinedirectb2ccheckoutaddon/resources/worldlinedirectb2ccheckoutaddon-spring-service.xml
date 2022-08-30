@@ -7,14 +7,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <alias name="worldlineB2CCartToOrderService" alias="worldlineCartToOrderService"/>
-    <bean id="worldlineB2CCartToOrderService" class="com.worldline.direct.service.impl.WorldlineCartToOrderServiceImpl ">
-        <property name="modelService" ref="modelService"/>
-        <property name="baseStoreService" ref="baseStoreService"/>
-        <property name="commonI18NService" ref="commonI18NService"/>
-        <property name="eventService" ref="eventService"/>
-        <property name="cronJobService" ref="cronJobService"/>
-    </bean>
 
 
 </beans>

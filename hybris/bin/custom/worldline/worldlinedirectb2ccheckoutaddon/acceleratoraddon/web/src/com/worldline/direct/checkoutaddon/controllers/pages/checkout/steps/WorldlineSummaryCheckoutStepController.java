@@ -7,7 +7,7 @@ import com.worldline.direct.checkoutaddon.controllers.utils.WorldlinePlaceOrderU
 import com.worldline.direct.checkoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.constants.WorldlineCheckoutConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
-import com.worldline.direct.exception.WorldlineEntityValidationException;
+import de.hybris.platform.b2bacceleratorfacades.exception.EntityValidationException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineDirectCheckoutFacade;
 import com.worldline.direct.order.data.BrowserData;
@@ -228,7 +228,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
                 return redirect;
             }
 
-        } catch (final WorldlineEntityValidationException e) {
+        } catch (final EntityValidationException e) {
             LOGGER.error("Failed to place Order", e);
             GlobalMessages.addErrorMessage(model, e.getLocalizedMessage());
 
