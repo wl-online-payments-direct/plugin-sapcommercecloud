@@ -39,12 +39,6 @@
 
 
 
-    <bean id="worldLineExtendedB2BCheckoutFacade"
-          class="com.worldline.direct.b2bacceleratorfacades.DefaultWorldLineExtendedB2BCheckoutFacadeImpl"
-          parent="b2bCheckoutFacade">
-        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
-        <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
-    </bean>
 
 
 

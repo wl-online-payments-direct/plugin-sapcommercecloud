@@ -31,16 +31,16 @@ public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderServ
         Optional<TriggerModel> firstTrigger = cronJobModel.getTriggers().stream().findFirst();
         WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cronJobModel.getPaymentInfo();
         cronJobModel.setSubmitted(true);
-        modelService.save(cronJobModel);
-        modelService.save(paymentInfo);
+
+        modelService.saveAll(cronJobModel,paymentInfo);
 
         if (firstTrigger.isPresent()) {
             TriggerModel triggerModel = firstTrigger.get();
             triggerModel.setActive(true);
+            modelService.save(triggerModel);
             if (BooleanUtils.isTrue(triggerModel.getRelative())) {
                 cronJobService.performCronJob(cronJobModel);
             }
-            modelService.save(triggerModel);
         }
         eventService.publishEvent(initializeReplenishmentPlacedEvent(cronJobModel));
     }

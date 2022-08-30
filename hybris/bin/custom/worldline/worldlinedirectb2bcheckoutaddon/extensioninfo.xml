@@ -16,7 +16,6 @@
 
         <requires-extension name="addonsupport"/>
         <requires-extension name="worldlinedirectcore"/>
-        <requires-extension name="b2bacceleratorfacades"/>
         <requires-extension name="b2bapprovalprocess"/>
         <requires-extension name="acceleratorstorefrontcommons"/>
 
