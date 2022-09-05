@@ -2,6 +2,7 @@ package com.worldline.direct.checkoutaddon.controllers.pages.checkout;
 
 import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants.URL.Checkout.Payment.HOP;
+import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
@@ -13,11 +14,11 @@ import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMe
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
+import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -59,7 +60,7 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
     @RequireHardLogIn
     @RequestMapping(value = ORDER_CONFIRMATION_PATH_VARIABLE + WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = {RequestMethod.POST, RequestMethod.GET})
     public String handleHostedCheckoutPaymentResponse(@PathVariable(value = "orderCode") final String orderCode,
-                                                      @PathVariable(value = "orderType") final String orderType,
+                                                      @PathVariable(value = "orderType") final OrderType orderType,
                                                       @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
                                                       @RequestParam(value = "hostedCheckoutId", required = true) final String hostedCheckoutId,
                                                       final Model model,
@@ -67,10 +68,14 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
 
         final AbstractOrderData orderDetails;
         try {
-            if (StringUtils.equals(WorldlineWebConstants.URL.Checkout.Payment.HOP.Option.order, orderType)) {
-                orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
-            } else {
-                orderDetails = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+            switch (orderType) {
+                case PLACE_ORDER:
+                    orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+                    break;
+                case SCHEDULE_REPLENISHMENT_ORDER:
+                default:
+                    orderDetails = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+                    break;
             }
 
         } catch (final UnknownIdentifierException e) {
@@ -79,10 +84,17 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
         }
         try {
             worldlineCheckoutFacade.validateReturnMAC(orderDetails, returnMAC);
-            if (StringUtils.equals(WorldlineWebConstants.URL.Checkout.Payment.HOP.Option.replenishment, orderType) && orderDetails instanceof ScheduledCartData && BooleanUtils.isFalse(((ScheduledCartData) orderDetails).getTriggerData().isActive())) {
-                worldlineRecurringCheckoutFacade.authorisePaymentForReplenishmentHostedCheckout(((ScheduledCartData) orderDetails).getJobCode(), hostedCheckoutId);
-            } else {
-                worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderDetails.getCode(), hostedCheckoutId);
+            switch (orderType) {
+                case PLACE_ORDER:
+                    if (orderDetails instanceof OrderData) {
+                        worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderDetails.getCode(), hostedCheckoutId);
+                    }
+                    break;
+                case SCHEDULE_REPLENISHMENT_ORDER:
+                    if (orderDetails instanceof ScheduledCartData && BooleanUtils.isFalse(((ScheduledCartData) orderDetails).getTriggerData().isActive())) {
+                        worldlineRecurringCheckoutFacade.authorisePaymentForReplenishmentHostedCheckout(((ScheduledCartData) orderDetails).getJobCode(), hostedCheckoutId);
+                    }
+                    break;
             }
             return redirectToOrderConfirmationPage(orderDetails);
         } catch (WorldlineNonAuthorizedPaymentException e) {

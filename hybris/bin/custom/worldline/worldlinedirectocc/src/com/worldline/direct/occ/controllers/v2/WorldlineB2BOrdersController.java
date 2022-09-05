@@ -60,8 +60,8 @@ import static de.hybris.platform.util.localization.Localization.getLocalizedStri
 @RequestMapping(value = "/{baseSiteId}/orgUsers/{userId}/orders")
 @Api(tags = "Worldline B2B Orders")
 public class WorldlineB2BOrdersController extends WorldlineBaseController {
-    private static final String CART_CHECKOUT_TERM_UNCHECKED = "cart.term.unchecked";
-    private static final String OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM = "ScheduleReplenishmentForm";
+    protected static final String CART_CHECKOUT_TERM_UNCHECKED = "cart.term.unchecked";
+    protected static final String OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM = "ScheduleReplenishmentForm";
 
 
     @Resource(name = "dataMapper")

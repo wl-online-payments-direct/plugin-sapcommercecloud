@@ -2,6 +2,7 @@ package com.worldline.direct.b2bcheckoutaddon.utils;
 
 import com.onlinepayments.domain.CreateHostedCheckoutResponse;
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
+import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
@@ -112,7 +113,7 @@ public class WorldlinePlaceOrderUtils {
 
     private void storeHOPReturnUrlInSession(String code, Boolean isRecurring) {
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root + "/" + (isRecurring ? WorldlineWebConstants.URL.Checkout.Payment.HOP.Option.replenishment : WorldlineWebConstants.URL.Checkout.Payment.HOP.Option.order) +
+                true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root + "/" + (isRecurring ? OrderType.SCHEDULE_REPLENISHMENT_ORDER : OrderType.PLACE_ORDER) +
                         WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + code);
         sessionService.setAttribute(HOSTED_CHECKOUT_RETURN_URL, returnUrl);
     }

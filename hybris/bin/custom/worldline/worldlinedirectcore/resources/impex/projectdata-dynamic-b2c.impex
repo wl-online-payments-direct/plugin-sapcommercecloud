@@ -20,7 +20,7 @@ UPDATE BaseStore; uid[unique = true]; submitorderprocesscode ;createReturnProces
 
 ###### Replenishment Confirmation Page Start ######
 INSERT_UPDATE ContentPage; $contentCV[unique = true]; uid[unique = true]            ; name                            ; masterTemplate(uid, $contentCV); label; defaultPage[default = 'true']; approvalStatus(code)[default = 'approved']; homepage[default = 'false']
-                         ;                          ; replenishmentConfirmationPage ; Replenishment Confirmation Page ; OrderConfirmationPageTemplate  ; replenishmentConfirmation
+                         ;                          ; replenishmentConfirmationPage ; Replenishment Confirmation Page ; OrderConfirmationPageTemplate  ; /replenishment/confirmation
 
 
 INSERT_UPDATE Media; $contentCV[unique = true]; code[unique = true]                  ; mime     ; realfilename                      ; @media[translator = de.hybris.platform.impex.jalo.media.MediaDataTranslator][forceWrite = true]; folder(qualifier)[default = 'images']
@@ -85,6 +85,9 @@ INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true] 
 INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                  ; name                                                  ; active; cmsComponents(&componentRef)          ; ; ;
                          ;                          ; SideContent-my-replenishment-orders ; Side Content Slot for My Account Replenishment Orders ; true  ;                                       ; ; ;
                          ;                          ; BodyContent-my-replenishment-orders ; Body Content Slot for My Account Replenishment Orders ; true  ; AccountMyReplenishmentOrdersComponent ; ; ;
+
+INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents(uid,$contentCV);
+                         ;;BodyContentSlot-orderdetail;Body Content Slot for My Account Order Details;true;AccountOrderDetailsHeadlineComponent,AccountOrderDetailsOverviewComponent,AccountOrderDetailsItemsComponent,WorldlineAccountOrderDetailsShippingComponent,AccountOrderDetailsTotalsComponent,AccountOrderDetailsActionsComponent;
 
 INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                    ; name                                      ; page                                                                                                                          ; actions(uid, $contentCV); &componentRef
                                  ;                          ; AccountMyReplenishmentOrdersComponent ; Account My Replenishment Orders Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentSchedule.jsp ;                         ; AccountMyReplenishmentOrdersComponent
