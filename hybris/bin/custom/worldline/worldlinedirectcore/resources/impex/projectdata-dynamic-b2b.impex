@@ -14,6 +14,10 @@ INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]        
 INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                    ; name                                             ; active; cmsComponents(uid, $contentCV)                                                                                                                                                                                                                                         ; ; ;
                          ;                          ; BodyContent-replenishmentConfirmation ; Body Content Slot for Replenishment Confirmation ; true  ; ReplenishmentConfirmationMessageComponent,AccountMyReplenishmentOrderDetailsOverviewComponent,WorldlineAccountMyReplenishmentOrderDetailsItemsComponent,WorldlineAccountOrderDetailsShippingComponent,OrderConfirmationTotalsComponent,OrderConfirmationContinueButtonComponent ; ; ;
 
+INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents(uid,$contentCV);
+;;BodyContent-orderdetail;Body Content Slot for My Account Order Details;true;AccountOrderDetailsHeadlineComponent,AccountOrderDetailsOverviewComponent,AccountOrderDetailsItemsComponent,WorldlineAccountOrderDetailsShippingComponent,AccountOrderDetailsApprovalDetailsComponent,AccountOrderDetailsTotalsComponent,AccountOrderDetailsReorderComponent;;;
+
+
 UPDATE BaseStore; uid[unique = true]; submitorderprocesscode ;createReturnProcessCode ;paymentProvider;checkoutFlowGroup
                 ; $store            ; worldline-order-process ;worldline-return-process;WORLDLINE  ;worldlineB2BCheckoutGroup
 
