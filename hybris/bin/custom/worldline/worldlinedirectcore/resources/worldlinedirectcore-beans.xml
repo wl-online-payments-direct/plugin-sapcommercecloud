@@ -24,6 +24,8 @@
         <property name="returnMAC" type="String"/>
         <property name="defaultPayment" type="boolean"/>
         <property name="cardType" type="de.hybris.platform.commercefacades.order.data.CardTypeData"/>
+        <property name="mandateDetail" type="com.worldline.direct.order.data.WorldlineMandateDetail"/>
+
     </bean>
 
     <bean class="de.hybris.platform.commercefacades.order.data.CartData">
@@ -58,5 +60,34 @@
     </bean>
 
 
+    <bean class="com.worldline.direct.order.data.WorldlineMandateDetail">
+        <property name="alias" type="String"/>
+        <property name="customerReference" type="String"/>
+        <property name="recurrenceType" type="String"/>
+        <property name="status" type="String"/>
+        <property name="uniqueMandateReference" type="String"/>
+        <property name="customer" type="com.worldline.direct.customer.data.WorldlineMandateCustomer"/>
+    </bean>
+
+    <bean class="com.worldline.direct.customer.data.WorldlineMandateCustomer">
+        <property name="iban" type="String"/>
+        <property name="companyName" type="String"/>
+        <property name="emailAddress" type="String"/>
+        <property name="address" type="com.worldline.direct.address.data.WorldlineMandateAddress"/>
+        <property name="personalInformation" type="com.worldline.direct.contact.data.WorldlinePersonalInformation"/>
+    </bean>
+    <bean class="com.worldline.direct.address.data.WorldlineMandateAddress">
+        <property name="city" type="String"/>
+        <property name="country" type="String"/>
+        <property name="HouseNumber" type="String"/>
+        <property name="street" type="String"/>
+        <property name="zip" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.direct.contact.data.WorldlinePersonalInformation">
+        <property name="firstName" type="String"/>
+        <property name="lastName" type="String"/>
+        <property name="title" type="String"/>
+    </bean>
 
 </beans>

@@ -1,6 +1,9 @@
 package com.worldline.direct.populator;
 
+import com.worldline.direct.model.WorldlineMandateModel;
+import com.worldline.direct.order.data.WorldlineMandateDetail;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.commercefacades.order.data.CardTypeData;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.converters.Populator;
@@ -9,10 +12,12 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Required;
 
 public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> {
 
     private Converter<AddressModel, AddressData> addressConverter;
+    private Converter<WorldlineMandateModel, WorldlineMandateDetail> worldlineMandateConverter;
 
     @Override
     public void populate(WorldlinePaymentInfoModel worldlinePaymentInfoModel, WorldlinePaymentInfoData worldlinePaymentInfoData) throws ConversionException {
@@ -50,6 +55,10 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         if (worldlinePaymentInfoModel.getUsedSavedPayment() != null) {
             worldlinePaymentInfoData.setSavedPayment(worldlinePaymentInfoModel.getUsedSavedPayment().getCode());
         }
+        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel) && worldlinePaymentInfoModel.getMandateDetail() != null) {
+            worldlinePaymentInfoData.setMandateDetail(worldlineMandateConverter.convert(worldlinePaymentInfoModel.getMandateDetail()));
+        }
+
     }
 
     private String formattedAlias(String alias) {
@@ -58,6 +67,11 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         }else {
             return StringUtils.EMPTY;
         }
+    }
+
+    @Required
+    public void setWorldlineMandateConverter(Converter<WorldlineMandateModel, WorldlineMandateDetail> worldlineMandateConverter) {
+        this.worldlineMandateConverter = worldlineMandateConverter;
     }
 
     public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {
