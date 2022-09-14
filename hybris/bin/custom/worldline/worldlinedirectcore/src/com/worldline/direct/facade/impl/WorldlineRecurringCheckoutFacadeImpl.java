@@ -49,7 +49,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
             case IN_PROGRESS:
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
-                saveMandateIfNeeded((WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getWorldlineConfiguration(),(WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 return handlePaymentResponse(cartToOrderCronJob, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
             default:
                 LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());

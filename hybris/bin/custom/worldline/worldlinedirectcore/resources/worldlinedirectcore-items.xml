@@ -23,6 +23,19 @@
             <value code="MAX_ATTEMPT_REACHED"/>
             <value code="PROCESSED"/>
         </enumtype>
+
+        <enumtype code="WorldlineRecurringPaymentStatus">
+            <value code="ACTIVE"/>
+            <value code="BLOCKED"/>
+            <value code="REVOKED"/>
+            <value code="UNKNOWN"/>
+        </enumtype>
+
+        <enumtype code="WorldlineRecurringType">
+            <value code="UNIQUE"/>
+            <value code="RECURRING"/>
+            <value code="UNKNOWN"/>
+        </enumtype>
         <enumtype code="PaymentStatus" autocreate="false" generate="true" dynamic="true">
             <value code="WORLDLINE_WAITING_AUTH" />
             <value code="WORLDLINE_AUTHORIZED" />
@@ -136,11 +149,6 @@
                     <modifiers read="true" write="true" search="true"/>
                     <persistence type="property"/>
                 </attribute>
-                <attribute qualifier="mandate" type="java.lang.String">
-                    <description>worldline mandate</description>
-                    <modifiers read="true" write="true" search="true"/>
-                    <persistence type="property"/>
-                </attribute>
                 <attribute qualifier="usedSavedPayment" type="WorldlinePaymentInfo">
                     <description>worldline Used Saved Payment</description>
                     <modifiers read="true" write="true" search="true"/>
@@ -190,6 +198,10 @@
                     <modifiers read="true" write="true" search="true" optional="true"/>
                     <persistence type="property"/>
                 </attribute>
+                <attribute qualifier="mandateDetail" type="WorldlineMandate">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -229,6 +241,91 @@
                     <modifiers read="true" initial="true" write="true" search="false" optional="false" unique="false"/>
                 </attribute>
             </attributes>
+        </itemtype>
+
+        <itemtype code="WorldlineMandate">
+            <deployment table="worldlineMandate" typecode="15007"/>
+            <attributes>
+                <attribute qualifier="uniqueMandateReference" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers unique="true" search="true"/>
+                </attribute>
+                <attribute qualifier="customer" type="Customer">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="worldlineConfiguration" type="WorldlineConfiguration">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="status" type="WorldlineRecurringPaymentStatus">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineRecurringPaymentStatus","ACTIVE")</defaultvalue>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="recurrenceType" type="WorldlineRecurringType">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineRecurringPaymentStatus","UNIQUE")</defaultvalue>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="alias" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="customerReference" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="iban" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="companyName" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="emailAddress" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="firstName" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="lastName" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="title" type="Title">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="city" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="country" type="Country">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="houseNumber" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="street" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="zip" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+            </attributes>
+            <indexes>
+                <index name="worldlineMandateIdx" unique="true">
+                    <key attribute="uniqueMandateReference" />
+                </index>
+            </indexes>
         </itemtype>
     </itemtypes>
 </items>

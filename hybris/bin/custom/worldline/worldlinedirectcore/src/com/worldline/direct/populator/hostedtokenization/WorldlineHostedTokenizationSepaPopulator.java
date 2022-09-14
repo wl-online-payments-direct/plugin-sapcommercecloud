@@ -23,10 +23,10 @@ public class WorldlineHostedTokenizationSepaPopulator implements Populator<Abstr
         Preconditions.checkArgument(abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel, "Payment has to be WorldlinePaymentInfo");
 
         WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
-        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(paymentInfo) && StringUtils.isNotEmpty(paymentInfo.getMandate())) {
+        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(paymentInfo) && paymentInfo.getMandateDetail() != null) {
             SepaDirectDebitPaymentMethodSpecificInput sepaDirectDebit = new SepaDirectDebitPaymentMethodSpecificInput();
             SepaDirectDebitPaymentProduct771SpecificInput specificInputBase = new SepaDirectDebitPaymentProduct771SpecificInput();
-            specificInputBase.withExistingUniqueMandateReference(paymentInfo.getMandate());
+            specificInputBase.withExistingUniqueMandateReference(paymentInfo.getMandateDetail().getUniqueMandateReference());
             sepaDirectDebit.setPaymentProductId(PAYMENT_METHOD_SEPA);
             sepaDirectDebit.setPaymentProduct771SpecificInput(specificInputBase);
             createPaymentRequest.setSepaDirectDebitPaymentMethodSpecificInput(sepaDirectDebit);

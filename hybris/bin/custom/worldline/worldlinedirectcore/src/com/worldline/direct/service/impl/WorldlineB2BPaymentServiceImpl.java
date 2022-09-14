@@ -21,9 +21,9 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl implements WorldlineB2BPaymentService {
-    private final static Logger LOGGER = LoggerFactory.getLogger(WorldlineB2BPaymentServiceImpl.class);
     private SiteBaseUrlResolutionService siteBaseUrlResolutionService;
     private BaseSiteService baseSiteService;
+    private final static Logger LOGGER = LoggerFactory.getLogger(WorldlineB2BPaymentServiceImpl.class);
 
     @Override
     public CreateHostedCheckoutResponse createRecurringHostedCheckout(CartToOrderCronJobModel cartToOrderCronJobModel, BrowserData browserData) {
@@ -38,6 +38,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 CreateMandateRequest mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
                 params.getOrder().getAmountOfMoney().setAmount(0L);
+                mandate.setCustomerReference(cartToOrderCronJobModel.getCode() + System.currentTimeMillis());
             }
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
 
@@ -71,7 +72,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug("[ WORLDLINE ] Errors during getting createPayment ", e.getMessage());
+            LOGGER.debug(String.format("[ WORLDLINE ] Errors during getting createPayment %s", e.getMessage()));
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (IOException e) {
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);

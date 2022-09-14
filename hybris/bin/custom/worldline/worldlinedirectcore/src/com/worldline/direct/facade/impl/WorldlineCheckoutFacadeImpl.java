@@ -4,11 +4,15 @@ import com.onlinepayments.ApiException;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
+import com.worldline.direct.enums.WorldlineRecurringType;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.model.WorldlineMandateModel;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
@@ -33,6 +37,7 @@ import de.hybris.platform.commerceservices.service.data.CommerceCheckoutParamete
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.c2l.C2LItemModel;
+import de.hybris.platform.core.model.c2l.CountryModel;
 import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
@@ -42,22 +47,27 @@ import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.core.model.user.CustomerModel;
+import de.hybris.platform.core.model.user.TitleModel;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.order.PaymentModeService;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
+import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.servicelayer.user.UserService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 import de.hybris.platform.util.localization.Localization;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,6 +85,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     protected Converter<OrderModel, OrderData> orderConverter;
 
     protected CartService cartService;
+    protected UserService userService;
     protected CheckoutFacade checkoutFacade;
     protected CommerceCheckoutService commerceCheckoutService;
     protected BaseStoreService baseStoreService;
@@ -159,7 +170,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                                              String hostedTokenizationId) throws WorldlineNonValidPaymentProductException {
 
         final PaymentProduct paymentProduct = getPaymentMethodById(paymentId);
-        if (isValidPaymentMethod(paymentProduct)) {
+        if (BooleanUtils.isTrue(isValidPaymentMethod(paymentProduct))) {
             worldlinePaymentInfoData.setSavedPayment(StringUtils.defaultString(savedPaymentCode,StringUtils.EMPTY));
             worldlinePaymentInfoData.setId(paymentProduct.getId());
             worldlinePaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
@@ -233,25 +244,88 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             case PAYMENT_CREATED:
                 savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
-                saveMandateIfNeeded((WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                saveMandateIfNeeded(orderForCode.getStore().getWorldlineConfiguration(),(WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 break;
             default:
-                LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
-                throw new IllegalStateException("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
+                LOGGER.error(String.format("Unexpected HostedCheckout Status value: %s", hostedCheckoutData.getStatus()));
+                throw new IllegalStateException(String.format("Unexpected HostedCheckout Status value: %s", hostedCheckoutData.getStatus()));
         }
     }
 
-    protected void saveMandateIfNeeded(WorldlinePaymentInfoModel worldlinePaymentInfoModel, PaymentResponse paymentResponse) {
+    protected void saveMandateIfNeeded(WorldlineConfigurationModel worldlineConfigurationModel, WorldlinePaymentInfoModel worldlinePaymentInfoModel, PaymentResponse paymentResponse) {
         SepaDirectDebitPaymentMethodSpecificOutput sepaDirectDebitPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getSepaDirectDebitPaymentMethodSpecificOutput();
         if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel)  && sepaDirectDebitPaymentMethodSpecificOutput != null && StringUtils.isNotEmpty(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference())){
             GetMandateResponse mandate = worldlinePaymentService.getMandate(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference());
             if (mandate != null) {
-                worldlinePaymentInfoModel.setMandate(mandate.getMandate().getUniqueMandateReference());
+                worldlinePaymentInfoModel.setMandateDetail(createMandate(mandate.getMandate(),worldlineConfigurationModel));
                 MandatePersonalName personalName = mandate.getMandate().getCustomer().getPersonalInformation().getName();
                 worldlinePaymentInfoModel.setCardholderName(personalName.getFirstName() + " " + personalName.getSurname());
                 modelService.save(worldlinePaymentInfoModel);
             }
         }
+    }
+
+    private WorldlineMandateModel createMandate(MandateResponse mandateResponse, WorldlineConfigurationModel worldlineConfigurationModel) {
+        WorldlineMandateModel worldlineMandateModel = modelService.create(WorldlineMandateModel.class);
+        try {
+            WorldlineRecurringPaymentStatus worldlineRecurringPaymentStatus = WorldlineRecurringPaymentStatus.valueOf(mandateResponse.getStatus());
+            worldlineMandateModel.setStatus(worldlineRecurringPaymentStatus);
+        } catch (IllegalArgumentException e) {
+            worldlineMandateModel.setStatus(WorldlineRecurringPaymentStatus.UNKNOWN);
+        }
+        worldlineMandateModel.setAlias(mandateResponse.getAlias());
+        worldlineMandateModel.setWorldlineConfiguration(worldlineConfigurationModel);
+        worldlineMandateModel.setUniqueMandateReference(mandateResponse.getUniqueMandateReference());
+        worldlineMandateModel.setCustomerReference(mandateResponse.getCustomerReference());
+        try {
+            WorldlineRecurringType worldlineRecurringType = WorldlineRecurringType.valueOf(mandateResponse.getRecurrenceType());
+            worldlineMandateModel.setRecurrenceType(worldlineRecurringType);
+        } catch (IllegalArgumentException e) {
+            worldlineMandateModel.setRecurrenceType(WorldlineRecurringType.UNKNOWN);
+        }
+        MandateCustomer customer = mandateResponse.getCustomer();
+        if (customer != null) {
+            worldlineMandateModel.setCompanyName(customer.getCompanyName());
+            if (customer.getPersonalInformation() != null) {
+
+                if (StringUtils.isNotEmpty(customer.getPersonalInformation().getTitle())) {
+                    try {
+                        TitleModel title = userService.getTitleForCode(Strings.toLowerCase(customer.getPersonalInformation().getTitle()));
+                        worldlineMandateModel.setTitle(title);
+                    } catch (Exception e) {
+                        LOGGER.error(String.format("no title found for %s", customer.getPersonalInformation().getTitle()));
+                    }
+                }
+                if (customer.getPersonalInformation().getName() != null) {
+                    worldlineMandateModel.setFirstName(customer.getPersonalInformation().getName().getFirstName());
+                    worldlineMandateModel.setLastName(customer.getPersonalInformation().getName().getSurname());
+                }
+
+            }
+            if (customer.getBankAccountIban() != null) {
+                worldlineMandateModel.setIban(customer.getBankAccountIban().getIban());
+            }
+            if (customer.getContactDetails() != null) {
+                worldlineMandateModel.setEmailAddress(customer.getContactDetails().getEmailAddress());
+            }
+            if (customer.getMandateAddress() != null) {
+                MandateAddress mandateAddress = customer.getMandateAddress();
+                worldlineMandateModel.setCity(mandateAddress.getCity());
+                worldlineMandateModel.setStreet(mandateAddress.getStreet());
+                worldlineMandateModel.setZip(mandateAddress.getZip());
+                worldlineMandateModel.setHouseNumber(mandateAddress.getHouseNumber());
+                if (StringUtils.isNotEmpty(mandateAddress.getCountryCode())) {
+                    try {
+                        CountryModel country = commonI18NService.getCountry(mandateAddress.getCountryCode());
+                        worldlineMandateModel.setCountry(country);
+                    } catch (UnknownIdentifierException e) {
+                        LOGGER.error("no country found for code :" + mandateAddress.getCountryCode());
+                    }
+                }
+            }
+        }
+        modelService.save(worldlineMandateModel);
+        return worldlineMandateModel;
     }
 
     @Override
@@ -306,12 +380,12 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 updateOrderFromPaymentResponse(orderModel, paymentResponse, PaymentTransactionType.CAPTURE);
                 break;
             default:
-                LOGGER.warn("Unexpected value: " + paymentResponse.getStatus());
+                LOGGER.warn(String.format("Unexpected value: %s", paymentResponse.getStatus()));
                 throw new IllegalStateException("Unexpected value: " + paymentResponse.getStatus());
         }
     }
 
-    protected void updateOrderFromPaymentResponse(AbstractOrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) throws InvalidCartException {
+    protected void updateOrderFromPaymentResponse(AbstractOrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) {
         updatePaymentInfoIfNeeded(orderModel, paymentResponse);
         final PaymentTransactionModel paymentTransaction = worldlineTransactionService.getOrCreatePaymentTransaction(orderModel,
                 paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
@@ -466,7 +540,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 token = redirectPaymentMethodSpecificOutput.getToken();
                 break;
             case DIRECT_DEBIT:
-
+            default:
                 return;
         }
 
@@ -508,7 +582,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return true;
     }
 
-    protected void storeReturnMac(AbstractOrderModel abstractOrderModel, String returnMAC) throws InvalidCartException {
+    protected void storeReturnMac(AbstractOrderModel abstractOrderModel, String returnMAC) {
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();//
         paymentInfo.setReturnMAC(returnMAC);
         modelService.save(paymentInfo);
@@ -589,5 +663,10 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     public void setPaymentModeService(PaymentModeService paymentModeService) {
         this.paymentModeService = paymentModeService;
+    }
+
+    @Required
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 }
