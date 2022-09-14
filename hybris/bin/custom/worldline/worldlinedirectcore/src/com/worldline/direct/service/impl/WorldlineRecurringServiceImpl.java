@@ -3,12 +3,16 @@ package com.worldline.direct.service.impl;
 import com.onlinepayments.domain.CreatePaymentResponse;
 import com.onlinepayments.domain.GetMandateResponse;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
+import com.worldline.direct.model.WorldlineMandateModel;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineRecurringService;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
+import de.hybris.platform.servicelayer.model.ModelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -20,6 +24,7 @@ import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMEN
 public class WorldlineRecurringServiceImpl implements WorldlineRecurringService {
     private static final Logger LOG = LoggerFactory.getLogger(WorldlineRecurringServiceImpl.class);
     private WorldlinePaymentService worldlinePaymentService;
+    private ModelService modelService;
 
     @Override
     public Optional<CreatePaymentResponse> createRecurringPayment(AbstractOrderModel abstractOrderModel) {
@@ -28,14 +33,22 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
         switch (worldlinePaymentInfo.getId()) {
             case PAYMENT_METHOD_SEPA:
                 try {
-                    String mandate = worldlinePaymentInfo.getMandate();
+                    if (worldlinePaymentInfo.getMandateDetail()!= null)
+                    {
+                        String mandate = worldlinePaymentInfo.getMandateDetail().getUniqueMandateReference();
 
-                    GetMandateResponse mandateResponse = worldlinePaymentService.getMandate(mandate);
-                    if (mandateResponse != null && WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.valueOf(mandateResponse.getMandate().getStatus()) == WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.ACTIVE) {
-                        CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
-                        return Optional.of(createPaymentResponse);
-                    } else {
+                        GetMandateResponse mandateResponse = worldlinePaymentService.getMandate(mandate);
+                        if (mandateResponse != null && WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.valueOf(mandateResponse.getMandate().getStatus()) == WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.ACTIVE) {
+                            CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
+                            return Optional.of(createPaymentResponse);
+                        } else {
+                            return Optional.empty();
+                        }
+
+                    }else {
+                        LOG.error("mandate is null for sepa direct debit");
                         return Optional.empty();
+
                     }
 
                 } catch (Exception e) {
@@ -55,10 +68,13 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             WorldlinePaymentInfoModel worldlinePaymentInfoModel = (WorldlinePaymentInfoModel) paymentInfo;
             switch (worldlinePaymentInfoModel.getId()) {
                 case PAYMENT_METHOD_SEPA: {
-                    String mandate = worldlinePaymentInfoModel.getMandate();
-                    GetMandateResponse revokeMandate = worldlinePaymentService.revokeMandate(mandate);
+                    WorldlineMandateModel mandateDetail = worldlinePaymentInfoModel.getMandateDetail();
+                    GetMandateResponse revokeMandate = worldlinePaymentService.revokeMandate(mandateDetail);
                     if (!(revokeMandate != null && WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.valueOf(revokeMandate.getMandate().getStatus()) == WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.REVOKED)) {
                         LOG.error("something went wrong while cancelling Recurring payment");
+                    }else {
+                        mandateDetail.setStatus(WorldlineRecurringPaymentStatus.REVOKED);
+                        modelService.save(mandateDetail);
                     }
                 }
                 break;
@@ -66,8 +82,54 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
         }
     }
 
+    @Override
+    public void updateMandate(WorldlineMandateModel mandateModel) {
+        GetMandateResponse mandate = worldlinePaymentService.getMandate(mandateModel);
+        if (mandate != null && mandate.getMandate() != null) {
+            switch (mandate.getMandate().getStatus()) {
+                case "ACTIVE": {
+                    mandateModel.setStatus(WorldlineRecurringPaymentStatus.ACTIVE);
+                    break;
+                }
+                case "REVOKED": {
+                    mandateModel.setStatus(WorldlineRecurringPaymentStatus.REVOKED);
+                    break;
+                }
+                case "BLOCKED": {
+                    mandateModel.setStatus(WorldlineRecurringPaymentStatus.BLOCKED);
+                    break;
+                }
+                default: {
+                    mandateModel.setStatus(WorldlineRecurringPaymentStatus.UNKNOWN);
+                    break;
+                }
+            }
+            modelService.save(mandateModel);
+        }else {
+        }
+    }
+
+    @Override
+    public WorldlineRecurringPaymentStatus isRecurringPaymentEnable(CartToOrderCronJobModel cartToOrderCronJobModel) {
+        if (!(cartToOrderCronJobModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
+            return WorldlineRecurringPaymentStatus.ACTIVE;
+        } else {
+            WorldlinePaymentInfoModel worldlinePaymentInfoModel = (WorldlinePaymentInfoModel)cartToOrderCronJobModel.getPaymentInfo();
+            if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel) && worldlinePaymentInfoModel.getMandateDetail() != null) {
+                return (worldlinePaymentInfoModel.getMandateDetail().getStatus());
+            } else {
+                return WorldlineRecurringPaymentStatus.BLOCKED;
+            }
+        }
+    }
+
     @Required
     public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
         this.worldlinePaymentService = worldlinePaymentService;
+    }
+
+    @Required
+    public void setModelService(ModelService modelService) {
+        this.modelService = modelService;
     }
 }

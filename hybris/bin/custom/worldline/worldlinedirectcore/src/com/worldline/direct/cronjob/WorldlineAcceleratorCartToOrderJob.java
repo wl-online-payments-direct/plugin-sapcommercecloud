@@ -1,5 +1,7 @@
 package com.worldline.direct.cronjob;
 
+import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
+import com.worldline.direct.service.WorldlineRecurringService;
 import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.cronjob.enums.CronJobResult;
 import de.hybris.platform.cronjob.enums.CronJobStatus;
@@ -18,13 +20,14 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
 
     private static final Logger LOG = Logger.getLogger(WorldlineAcceleratorCartToOrderJob.class);
     private BusinessProcessService businessProcessService;
+    private WorldlineRecurringService worldlineRecurringService;
     private TriggerService triggerService;
     private I18NService i18NService;
 
     @Override
     public PerformResult perform(final CartToOrderCronJobModel cronJob) {
         LOG.info("starting Worldline Accelerator Cart To Order Job");
-        if (BooleanUtils.isTrue(cronJob.isSubmitted()))
+        if (BooleanUtils.isTrue(cronJob.isSubmitted()) && WorldlineRecurringPaymentStatus.ACTIVE.equals(worldlineRecurringService.isRecurringPaymentEnable(cronJob)))
         {
         final String replenishmentOrderProcessCode = "worldlineReplenishmentOrderProcess" + cronJob.getCode() + System.currentTimeMillis();
         final ReplenishmentProcessModel businessProcessModel = getBusinessProcessService()
@@ -88,5 +91,10 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
     @Required
     public void setI18NService(final I18NService i18NService) {
         this.i18NService = i18NService;
+    }
+
+    @Required
+    public void setWorldlineRecurringService(WorldlineRecurringService worldlineRecurringService) {
+        this.worldlineRecurringService = worldlineRecurringService;
     }
 }
