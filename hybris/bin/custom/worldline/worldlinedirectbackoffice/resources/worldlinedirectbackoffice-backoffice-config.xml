@@ -78,6 +78,7 @@
 				<ea:section name="hmc.worldline.worldlineTokenizationConfig">
 					<ea:attribute qualifier="askConsumerConsent"/>
 					<ea:attribute qualifier="submitOrderPromotion"/>
+					<ea:attribute qualifier="replenishmentAttempts"/>
 					<ea:attribute qualifier="variant"/>
 				</ea:section>
 			</ea:tab>
@@ -225,6 +226,7 @@
 				<ea:section name="hmc.worldline.worldlineConfiguration">
 					<ea:attribute qualifier="worldlineConfiguration"/>
 					<ea:attribute qualifier="worldlineCheckoutType"/>
+					<ea:attribute qualifier="merchant"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
