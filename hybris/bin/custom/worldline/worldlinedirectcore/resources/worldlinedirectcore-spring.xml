@@ -13,6 +13,8 @@
     <import resource="worldlinedirectcore-spring-service.xml"/>
     <import resource="worldlinedirectcore-spring-converter.xml"/>
     <import resource="worldlinedirectcore-spring-process.xml"/>
+    <import resource="worldlinedirectcore-spring-event.xml"/>
+    <import resource="worldlinedirectcore-spring-email.xml"/>
 
 
     <bean id="worldlineClientFactory" class="com.worldline.direct.factory.impl.WorldlineClientFactoryImpl">
