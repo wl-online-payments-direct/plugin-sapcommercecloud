@@ -1,8 +1,8 @@
 package com.worldline.direct.actions.replenishment;
 
 import com.onlinepayments.domain.CreatePaymentResponse;
-import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineRecurringService;
 import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.commerceservices.impersonation.ImpersonationContext;
@@ -25,6 +25,7 @@ import java.util.Set;
  * Action for authorizing payments.
  */
 public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentProcessModel> {
+    private final static String ATTEMPTS = "attempts";
     private static final Logger LOG = LoggerFactory.getLogger(WorldlineRequestPaymentAction.class);
     private CommerceCheckoutService commerceCheckoutService;
     private ImpersonationService impersonationService;
@@ -41,22 +42,29 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
         return getImpersonationService().executeInContext(context,
                 (ImpersonationService.Executor<String, ImpersonationService.Nothing>) () -> {
                     if (process.getCartToOrderCronJob().getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
-                        Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
-                        if (recurringPayment.isPresent()) {
+                        Integer attemptSequence = getAttemptSequence(process, placedOrder.getStore().getWorldlineConfiguration());
+                        if (processParameterHelper.getProcessParameterByName(process, ATTEMPTS) == null || attemptSequence > 0) {
                             try {
-                                worldlineCheckoutFacade.handlePaymentResponse(placedOrder, recurringPayment.get().getPayment());
-                                return Transition.OK.toString();
-                            } catch (WorldlineNonAuthorizedPaymentException e) {
-                                LOG.error("error during payment : " + e.getReason());
-                                return Transition.NOK.toString();
+
+                                Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
+                                if (recurringPayment.isPresent()) {
+                                    worldlineCheckoutFacade.handlePaymentResponse(placedOrder, recurringPayment.get().getPayment());
+                                    return Transition.OK.toString();
+
+                                } else {
+                                    LOG.error("something went wrong during payment creation");
+                                    return Transition.NOK.toString();
+                                }
                             } catch (Exception e) {
+                                updateAttemptSequence(process, placedOrder.getStore().getWorldlineConfiguration());
                                 LOG.error("something went wrong during payment creation", e);
-                                return Transition.NOK.toString();
+                                return Transition.RETRY.toString();
                             }
                         } else {
-                            LOG.error("something went wrong during payment creation");
+                            worldlineRecurringService.blockRecurringPayment(placedOrder);
                             return Transition.NOK.toString();
                         }
+
                     } else {
                         return Transition.OK.toString();
                     }
@@ -70,6 +78,26 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
     @Required
     public void setCommerceCheckoutService(final CommerceCheckoutService commerceCheckoutService) {
         this.commerceCheckoutService = commerceCheckoutService;
+    }
+
+    private Integer getAttemptSequence(ReplenishmentProcessModel process, WorldlineConfigurationModel configurationModel) {
+        BusinessProcessParameterModel attempts = processParameterHelper.getProcessParameterByName(process, ATTEMPTS);
+        if (attempts != null) {
+            return (Integer) attempts.getValue();
+        } else {
+            return configurationModel.getReplenishmentAttempts()!= null ?configurationModel.getReplenishmentAttempts():5;
+        }
+    }
+
+    private void updateAttemptSequence(ReplenishmentProcessModel process, WorldlineConfigurationModel configurationModel) {
+        BusinessProcessParameterModel attempts = processParameterHelper.getProcessParameterByName(process, ATTEMPTS);
+
+        if (attempts != null) {
+            attempts.setValue((Integer) attempts.getValue() - 1);
+            modelService.save(attempts);
+        } else {
+            processParameterHelper.setProcessParameter(process, ATTEMPTS,configurationModel.getReplenishmentAttempts()!= null ?configurationModel.getReplenishmentAttempts():5);
+        }
     }
 
     protected ImpersonationService getImpersonationService() {
@@ -96,7 +124,7 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
     }
 
     enum Transition {
-        OK, NOK;
+        OK, NOK, RETRY;
 
         public static Set<String> getStringValues() {
             Set<String> res = new HashSet<>();

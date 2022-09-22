@@ -16,4 +16,6 @@ public interface WorldlineRecurringService {
     void updateMandate(WorldlineMandateModel mandateModel);
 
     WorldlineRecurringPaymentStatus isRecurringPaymentEnable(CartToOrderCronJobModel cartToOrderCronJobModel);
+
+    void blockRecurringPayment(AbstractOrderModel abstractOrderModel);
 }

@@ -31,21 +31,19 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
         WorldlinePaymentInfoModel worldlinePaymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
 
         switch (worldlinePaymentInfo.getId()) {
-            case PAYMENT_METHOD_SEPA:
+            case PAYMENT_METHOD_SEPA: {
                 try {
-                    if (worldlinePaymentInfo.getMandateDetail()!= null)
-                    {
-                        String mandate = worldlinePaymentInfo.getMandateDetail().getUniqueMandateReference();
-
-                        GetMandateResponse mandateResponse = worldlinePaymentService.getMandate(mandate);
-                        if (mandateResponse != null && WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.valueOf(mandateResponse.getMandate().getStatus()) == WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.ACTIVE) {
+                    if (worldlinePaymentInfo.getMandateDetail() != null) {
+                        WorldlineMandateModel mandateDetail = worldlinePaymentInfo.getMandateDetail();
+                        updateMandate(mandateDetail);
+                        if (WorldlineRecurringPaymentStatus.ACTIVE.equals(mandateDetail.getStatus())) {
                             CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
                             return Optional.of(createPaymentResponse);
                         } else {
                             return Optional.empty();
                         }
 
-                    }else {
+                    } else {
                         LOG.error("mandate is null for sepa direct debit");
                         return Optional.empty();
 
@@ -55,6 +53,7 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                     LOG.error("something went wrong during payment creation", e);
                     return Optional.empty();
                 }
+            }
             default:
                 return Optional.empty();
         }
@@ -67,7 +66,9 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
         if (paymentInfo instanceof WorldlinePaymentInfoModel) {
             WorldlinePaymentInfoModel worldlinePaymentInfoModel = (WorldlinePaymentInfoModel) paymentInfo;
             switch (worldlinePaymentInfoModel.getId()) {
-                case PAYMENT_METHOD_SEPA: {
+                case PAYMENT_METHOD_SEPA:
+                default:
+                {
                     WorldlineMandateModel mandateDetail = worldlinePaymentInfoModel.getMandateDetail();
                     GetMandateResponse revokeMandate = worldlinePaymentService.revokeMandate(mandateDetail);
                     if (!(revokeMandate != null && WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.valueOf(revokeMandate.getMandate().getStatus()) == WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.REVOKED)) {
@@ -105,9 +106,37 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                 }
             }
             modelService.save(mandateModel);
-        }else {
         }
     }
+
+    @Override
+    public void blockRecurringPayment(AbstractOrderModel abstractOrderModel) {
+        WorldlinePaymentInfoModel worldlinePaymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+
+        switch (worldlinePaymentInfo.getId()) {
+            case PAYMENT_METHOD_SEPA: {
+                if (worldlinePaymentInfo.getMandateDetail() != null) {
+                    WorldlineMandateModel mandateDetail = worldlinePaymentInfo.getMandateDetail();
+                    updateMandate(mandateDetail);
+                    if (WorldlineRecurringPaymentStatus.ACTIVE.equals(mandateDetail.getStatus())) {
+                        GetMandateResponse blockMandate = worldlinePaymentService.blockMandate(mandateDetail);
+                        if (blockMandate != null && "BLOCKED".equals(blockMandate.getMandate().getStatus())) {
+                            mandateDetail.setStatus(WorldlineRecurringPaymentStatus.BLOCKED);
+                            modelService.save(mandateDetail);
+                        }
+                    } else {
+                        LOG.warn(String.format("cannot block mandate with status = %s", mandateDetail.getStatus()));
+                    }
+                }
+                break;
+            }
+            default: {
+                LOG.warn("recurring Order have no recurring payment");
+                break;
+            }
+        }
+    }
+
 
     @Override
     public WorldlineRecurringPaymentStatus isRecurringPaymentEnable(CartToOrderCronJobModel cartToOrderCronJobModel) {
