@@ -8,7 +8,6 @@ import com.worldline.direct.b2bcheckoutaddon.constants.WorldlineCheckoutConstant
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.b2bcheckoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.b2bcheckoutaddon.utils.WorldlinePlaceOrderUtils;
-import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.order.data.BrowserData;
@@ -60,9 +59,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator.HOSTED_CHECKOUT_RETURN_URL;
-import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 
 
 @Controller
@@ -221,7 +217,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
             if (
                     (abstractOrderData instanceof OrderData && CheckoutPaymentType.CARD.getCode().equals(((OrderData) abstractOrderData).getPaymentType().getCode()))
                             || (abstractOrderData instanceof ScheduledCartData && CheckoutPaymentType.CARD.getCode().equals(((ScheduledCartData) abstractOrderData).getPaymentType().getCode()))) {
-                if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder()) && abstractOrderData instanceof ScheduledCartData) {
+                if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder())) {
                     redirect = worldlinePlaceOrderUtils.submitReplenishmentOrder(abstractOrderData, browserData, redirectModel);
                 } else {
                     redirect = worldlinePlaceOrderUtils.submiOrder(abstractOrderData, browserData, redirectModel);
@@ -309,20 +305,6 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
 
     protected CheckoutFacade getB2BCheckoutFacade() {
         return this.extendedCheckoutFacade;
-    }
-
-    private void storeHOPReturnUrlInSession(String code, Boolean isRecurring) {
-        final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root + "/" + (isRecurring ? OrderType.SCHEDULE_REPLENISHMENT_ORDER : OrderType.PLACE_ORDER) +
-                        WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + code);
-        getSessionService().setAttribute(HOSTED_CHECKOUT_RETURN_URL, returnUrl);
-    }
-
-    private void storeHTPReturnUrlInSession(String code, Boolean isRecurring) {
-        final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HTP.root + "/" + (isRecurring ? OrderType.SCHEDULE_REPLENISHMENT_ORDER : OrderType.PLACE_ORDER) +
-                        WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + code);
-        getSessionService().setAttribute(HOSTED_TOKENIZATION_RETURN_URL, returnUrl);
     }
 
 

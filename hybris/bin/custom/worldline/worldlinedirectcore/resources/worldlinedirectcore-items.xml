@@ -111,6 +111,12 @@
                     <modifiers read="true" write="true"/>
                     <persistence type="property"/>
                 </attribute>
+                <attribute qualifier="firstRecurringPayment" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Define if the first REcurring Payment is immediate or scheduled.</description>
+                </attribute>
             </attributes>
         </itemtype>
 
