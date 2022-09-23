@@ -8,6 +8,8 @@ import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineCustomerAccountFacade;
 import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
+import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractCheckoutController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
@@ -56,6 +58,9 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
     @Resource(name = "worldlineRecurringCheckoutFacade")
     private WorldlineRecurringCheckoutFacade worldlineRecurringCheckoutFacade;
 
+    @Resource(name = "worldlineConfigurationService")
+    private WorldlineConfigurationService worldlineConfigurationService;
+
 
     @RequireHardLogIn
     @RequestMapping(value = ORDER_CONFIRMATION_PATH_VARIABLE + WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = {RequestMethod.POST, RequestMethod.GET})
@@ -66,7 +71,9 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
                                                       final Model model,
                                                       final RedirectAttributes redirectAttributes) throws InvalidCartException {
 
-        final AbstractOrderData orderDetails;
+        AbstractOrderData orderDetails;
+        WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+
         try {
             switch (orderType) {
                 case PLACE_ORDER:
@@ -74,7 +81,12 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
                     break;
                 case SCHEDULE_REPLENISHMENT_ORDER:
                 default:
-                    orderDetails = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+                    if (currentWorldlineConfiguration.isFirstRecurringPayment())
+                    {
+                        orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+                    }else {
+                        orderDetails = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+                    }
                     break;
             }
 
@@ -91,8 +103,11 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
                     }
                     break;
                 case SCHEDULE_REPLENISHMENT_ORDER:
-                    if (orderDetails instanceof ScheduledCartData && BooleanUtils.isFalse(((ScheduledCartData) orderDetails).getTriggerData().isActive())) {
-                        worldlineRecurringCheckoutFacade.authorisePaymentForReplenishmentHostedCheckout(((ScheduledCartData) orderDetails).getJobCode(), hostedCheckoutId);
+                    if (BooleanUtils.isFalse(currentWorldlineConfiguration.isFirstRecurringPayment()) && orderDetails instanceof ScheduledCartData && BooleanUtils.isFalse(((ScheduledCartData) orderDetails).getTriggerData().isActive())) {
+                        worldlineRecurringCheckoutFacade.authorisePaymentForSchudledReplenishmentHostedCheckout(((ScheduledCartData) orderDetails).getJobCode(), hostedCheckoutId);
+                    } else if (BooleanUtils.isTrue(currentWorldlineConfiguration.isFirstRecurringPayment()) &&orderDetails instanceof OrderData)
+                    {
+                        orderDetails = worldlineRecurringCheckoutFacade.authorisePaymentForImmediateReplenishmentHostedCheckout(orderDetails.getCode(), hostedCheckoutId);
                     }
                     break;
             }

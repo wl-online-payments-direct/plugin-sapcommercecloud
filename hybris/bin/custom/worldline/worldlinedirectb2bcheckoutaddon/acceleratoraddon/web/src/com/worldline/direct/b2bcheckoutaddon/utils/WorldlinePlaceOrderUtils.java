@@ -3,6 +3,7 @@ package com.worldline.direct.b2bcheckoutaddon.utils;
 import com.onlinepayments.domain.CreateHostedCheckoutResponse;
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.enums.OrderType;
+import com.worldline.direct.enums.RecurringPaymentEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
@@ -31,9 +32,6 @@ import static de.hybris.platform.acceleratorstorefrontcommons.controllers.Abstra
 @Component("worldlinePlaceOrderUtils")
 public class WorldlinePlaceOrderUtils {
 
-    private static final String REDIRECT_URL_REPLENISHMENT_CONFIRMATION = REDIRECT_PREFIX
-            + "/checkout/replenishment/confirmation/";
-
     @Resource(name = "checkoutFacade")
     private CheckoutFacade checkoutFacade;
     @Resource(name = "worldlineCheckoutFacade")
@@ -54,7 +52,7 @@ public class WorldlinePlaceOrderUtils {
         switch (cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType()) {
             case HOSTED_CHECKOUT:
 
-                storeHOPReturnUrlInSession(getOrderCode(abstractOrderData), false);
+                storeHOPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
                 CreateHostedCheckoutResponse hostedCheckoutResponse = worldlineCheckoutFacade.createHostedCheckout(abstractOrderData.getCode(), browserData);
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
@@ -101,9 +99,15 @@ public class WorldlinePlaceOrderUtils {
         final CartData cartData = checkoutFacade.getCheckoutCart();
         switch (cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType()) {
             case HOSTED_CHECKOUT:
-
-                storeHOPReturnUrlInSession(((ScheduledCartData) abstractOrderData).getJobCode(), true);
-                CreateHostedCheckoutResponse hostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(((ScheduledCartData) abstractOrderData).getJobCode(), browserData);
+                CreateHostedCheckoutResponse hostedCheckoutResponse;
+                if (abstractOrderData instanceof ScheduledCartData)
+                {
+                    storeHOPReturnUrlInSession(((ScheduledCartData) abstractOrderData).getJobCode(), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+                    hostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.SCHEDULED);
+                }else {
+                    storeHOPReturnUrlInSession(abstractOrderData.getCode(), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+                    hostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.IMMEDIATE);
+                }
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
                 throw new UnsupportedOperationException();
@@ -111,9 +115,9 @@ public class WorldlinePlaceOrderUtils {
         return StringUtils.EMPTY;
     }
 
-    private void storeHOPReturnUrlInSession(String code, Boolean isRecurring) {
+    private void storeHOPReturnUrlInSession(String code, OrderType orderType) {
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root + "/" + (isRecurring ? OrderType.SCHEDULE_REPLENISHMENT_ORDER : OrderType.PLACE_ORDER) +
+                true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root + "/" + orderType +
                         WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + code);
         sessionService.setAttribute(HOSTED_CHECKOUT_RETURN_URL, returnUrl);
     }
@@ -131,10 +135,6 @@ public class WorldlinePlaceOrderUtils {
 
     protected String redirectToOrderConfirmationPage(AbstractOrderData orderData) {
         return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
-    }
-
-    protected String redirectToReplenishmentConfirmationPage(AbstractOrderData orderData) {
-        return REDIRECT_URL_REPLENISHMENT_CONFIRMATION + ((ScheduledCartData) orderData).getJobCode();
     }
 
 

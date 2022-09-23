@@ -79,6 +79,7 @@
 					<ea:attribute qualifier="askConsumerConsent"/>
 					<ea:attribute qualifier="submitOrderPromotion"/>
 					<ea:attribute qualifier="replenishmentAttempts"/>
+					<ea:attribute qualifier="firstRecurringPayment"/>
 					<ea:attribute qualifier="variant"/>
 				</ea:section>
 			</ea:tab>
