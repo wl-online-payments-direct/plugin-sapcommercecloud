@@ -10,6 +10,7 @@ import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.service.WorldlineB2BPaymentService;
 import com.worldline.direct.util.WorldlineLogUtils;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
+import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.site.BaseSiteService;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlineB2BPaymentServiceImpl.class);
 
     @Override
-    public CreateHostedCheckoutResponse createRecurringHostedCheckout(CartToOrderCronJobModel cartToOrderCronJobModel, BrowserData browserData) {
+    public CreateHostedCheckoutResponse createScheduledRecurringOrderHostedCheckout(CartToOrderCronJobModel cartToOrderCronJobModel, BrowserData browserData) {
         validateParameterNotNullStandardMessage("browserData", browserData);
         validateParameterNotNull(cartToOrderCronJobModel, "cartToOrderCronJob cannot be null");
         validateParameterNotNull(cartToOrderCronJobModel.getCart(), "cartToOrderCronJob.cart cannot be null");
@@ -54,6 +55,32 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             return null;
         }
     }
+
+    @Override
+    public CreateHostedCheckoutResponse createImmediateRecurringOrderHostedCheckout(OrderModel orderModel, BrowserData browserData) {
+        validateParameterNotNullStandardMessage("browserData", browserData);
+        validateParameterNotNull(orderModel, "orderModel cannot be null");
+        validateParameterNotNull(orderModel.getSchedulingCronJob(), "cartToOrderCronJob cannot be null");
+        try (Client client = worldlineClientFactory.getClient()) {
+            final CreateHostedCheckoutRequest params = worldlineHostedCheckoutParamConverter.convert(orderModel);
+            params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(browserData));
+            if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
+                CreateMandateRequest mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
+                mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
+            }
+            params.getHostedCheckoutSpecificInput().withIsRecurring(true);
+
+            final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
+
+            WorldlineLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
+
+            return hostedCheckout;
+
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getting createHostedCheckout ", e);
+            //TODO Throw Logical Exception
+            return null;
+        }    }
 
     @Override
     public CreatePaymentResponse createRecurringPaymentForHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {

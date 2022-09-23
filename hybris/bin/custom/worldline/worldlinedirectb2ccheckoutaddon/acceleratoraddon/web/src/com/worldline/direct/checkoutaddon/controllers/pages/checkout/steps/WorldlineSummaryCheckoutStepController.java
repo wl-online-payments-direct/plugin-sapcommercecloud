@@ -217,7 +217,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
                 if (
                         (abstractOrderData instanceof OrderData && CheckoutPaymentType.CARD.getCode().equals(((OrderData) abstractOrderData).getPaymentType().getCode()))
                                 || (abstractOrderData instanceof ScheduledCartData && CheckoutPaymentType.CARD.getCode().equals(((ScheduledCartData) abstractOrderData).getPaymentType().getCode()))) {
-                    if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder()) && abstractOrderData instanceof ScheduledCartData) {
+                    if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder())) {
                         redirect = worldlinePlaceOrderUtils.submitReplenishmentOrder(abstractOrderData, browserData, redirectModel);
                     } else {
                         redirect = worldlinePlaceOrderUtils.submiOrder(abstractOrderData, browserData, redirectModel);

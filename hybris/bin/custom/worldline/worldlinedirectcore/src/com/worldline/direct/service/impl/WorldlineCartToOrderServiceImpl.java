@@ -1,6 +1,5 @@
 package com.worldline.direct.service.impl;
 
-import com.onlinepayments.domain.PaymentResponse;
 import com.worldline.direct.service.WorldlineCartToOrderService;
 import de.hybris.platform.b2bacceleratorservices.event.ReplenishmentOrderPlacedEvent;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -12,7 +11,6 @@ import de.hybris.platform.servicelayer.event.EventService;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.store.services.BaseStoreService;
-import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +25,7 @@ public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderServ
     private CronJobService cronJobService;
 
     @Override
-    public void enableCartToOrderJob(CartToOrderCronJobModel cronJobModel, PaymentResponse paymentResponse) {
+    public void enableCartToOrderJob(CartToOrderCronJobModel cronJobModel, boolean performCronjob) {
         Optional<TriggerModel> firstTrigger = cronJobModel.getTriggers().stream().findFirst();
         WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cronJobModel.getPaymentInfo();
         cronJobModel.setSubmitted(true);
@@ -38,7 +36,7 @@ public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderServ
             TriggerModel triggerModel = firstTrigger.get();
             triggerModel.setActive(true);
             modelService.save(triggerModel);
-            if (BooleanUtils.isTrue(triggerModel.getRelative())) {
+            if (performCronjob) {
                 cronJobService.performCronJob(cronJobModel);
             }
         }
