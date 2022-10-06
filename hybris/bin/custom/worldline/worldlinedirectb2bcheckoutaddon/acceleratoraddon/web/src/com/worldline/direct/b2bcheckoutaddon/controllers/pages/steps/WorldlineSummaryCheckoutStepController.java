@@ -132,6 +132,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("nDays", getNumberRange(1, 30));
         model.addAttribute("nthDayOfMonth", getNumberRange(1, 31));
         model.addAttribute("nthWeek", getNumberRange(1, 12));
+        model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
         model.addAttribute("daysOfWeek", getB2BCheckoutFacade().getDaysOfWeekForReplenishmentCheckoutSummary());
         if (worldlinePaymentInfo != null) {
             model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfo));
@@ -204,9 +205,11 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         placeOrderData.setNDaysOfWeek(worldlinePlaceOrderForm.getnDaysOfWeek());
         placeOrderData.setNthDayOfMonth(worldlinePlaceOrderForm.getNthDayOfMonth());
         placeOrderData.setNWeeks(worldlinePlaceOrderForm.getnWeeks());
+        placeOrderData.setNMonths(worldlinePlaceOrderForm.getnMonths());
         placeOrderData.setReplenishmentOrder(worldlinePlaceOrderForm.isReplenishmentOrder());
         placeOrderData.setReplenishmentRecurrence(worldlinePlaceOrderForm.getReplenishmentRecurrence());
         placeOrderData.setReplenishmentStartDate(worldlinePlaceOrderForm.getReplenishmentStartDate());
+        placeOrderData.setReplenishmentEndDate(worldlinePlaceOrderForm.getReplenishmentEndDate());
         placeOrderData.setSecurityCode(worldlinePlaceOrderForm.getSecurityCode());
         placeOrderData.setTermsCheck(worldlinePlaceOrderForm.isTermsCheck());
         AbstractOrderData abstractOrderData;

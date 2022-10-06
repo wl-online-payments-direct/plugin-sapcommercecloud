@@ -213,5 +213,7 @@
         <property name="add" ref="worldlineTriggerPopulator"/>
     </bean>
 
+    <alias name="worldlineTriggerReversePopulator" alias="triggerReversePopulator"/>
+    <bean id="worldlineTriggerReversePopulator" class="com.worldline.direct.populator.WorldlineTriggerReversePopulator"/>
 
 </beans>

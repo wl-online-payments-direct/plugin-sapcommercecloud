@@ -13,6 +13,7 @@
 <spring:theme code="responsive.replenishmentScheduleForm.activateDaily" var="Daily" htmlEscape="false"/>
 <spring:theme code="responsive.replenishmentScheduleForm.activateWeekly" var="Weekly" htmlEscape="false"/>
 <spring:theme code="responsive.replenishmentScheduleForm.activateMonthly" var="Monthly" htmlEscape="false"/>
+<spring:theme code="responsive.replenishmentScheduleForm.activateYearly" var="Yearly" htmlEscape="false"/>
 <spring:theme code="text.store.dateformat.datepicker.selection" text="mm/dd/yy" var="dateForForDatePicker"/>
 
 <div style="display:none;">
@@ -26,7 +27,7 @@
 
         <div class="column scheduleform  scheduleform_left">
             <div class="replenishmentFrequency_left">
-                <div class="form-element-icon datepicker">
+                <div class="form-element-icon datepicker start">
                     <formElement:formInputBox idKey="replenishmentStartDate"
                                               labelKey="replenishmentScheduleForm.startDate"
                                               path="replenishmentStartDate" inputCSS="date js-replenishment-datepicker"
@@ -38,6 +39,20 @@
                     </div>
                 </div>
             </div>
+            <div class="replenishmentFrequency_left">
+                <div class="form-element-icon datepicker end">
+                    <formElement:formInputBox idKey="replenishmentEndDate"
+                                              labelKey="replenishmentScheduleForm.endDate"
+                                              path="replenishmentEndDate" inputCSS="date js-replenishment-datepicker"
+                                              mandatory="true"/>
+                    <i class="glyphicon glyphicon-calendar js-open-datepicker"></i>
+                    <div id="errorReplenishmentEndDate" style="display: none" class="help-block">
+                        <spring:theme code="checkout.summary.placeOrder.wrongDateFormatMessage"
+                                      arguments="${dateForForDatePicker}"/>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="replenishmentFrequency">
@@ -52,6 +67,11 @@
             <form:radiobutton path="replenishmentRecurrence" id="replenishmentFrequencyM" label="${Monthly}"
                               value="MONTHLY" class="replenishmentfrequencyM"/>
         </div>
+        <div class="replenishmentFrequency">
+            <form:radiobutton path="replenishmentRecurrence" id="replenishmentFrequencyY" label="${Yearly}"
+                              value="YEARLY" class="replenishmentfrequencyY"/>
+        </div>
+
 
         <div class="column scheduleform scheduleformD" style="display: none;">
             <div class="form-group">
@@ -99,6 +119,16 @@
                 <div class="controls">
                     <form:select id="nthDayOfMonth" path="nthDayOfMonth" style="width: 100px;" class="form-control">
                         <form:options items="${nthDayOfMonth}"/>
+                    </form:select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="nMonths">
+                    <spring:theme code="responsive.replenishmentScheduleForm.monthly.months"/>
+                </label>
+                <div class="controls">
+                    <form:select id="nMonths" path="nMonths" style="width: 100px;" class="form-control">
+                        <form:options items="${nthMonth}"/>
                     </form:select>
                 </div>
             </div>

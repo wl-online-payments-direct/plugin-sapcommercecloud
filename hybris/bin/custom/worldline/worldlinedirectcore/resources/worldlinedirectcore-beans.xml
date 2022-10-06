@@ -57,8 +57,14 @@
 
     <bean class="de.hybris.platform.b2bacceleratorfacades.order.data.TriggerData">
         <property name="active" type="boolean"/>
+        <property name="year" type="java.lang.Integer"/>
+        <property name="dateRange" type="de.hybris.platform.util.StandardDateRange"/>
     </bean>
-
+    <bean class="de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData">
+        <property name="nMonths" type="String"/>
+        <property name="nYear" type="String"/>
+        <property name="replenishmentEndDate" type="java.util.Date"/>
+    </bean>
 
     <bean class="com.worldline.direct.order.data.WorldlineMandateDetail">
         <property name="alias" type="String"/>
