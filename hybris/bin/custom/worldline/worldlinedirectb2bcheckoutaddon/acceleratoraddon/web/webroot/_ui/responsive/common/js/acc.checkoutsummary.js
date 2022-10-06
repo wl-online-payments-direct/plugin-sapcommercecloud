@@ -130,12 +130,12 @@ ACC.checkoutsummary = {
                         $('.scheduleformD').hide();
                         $('.scheduleformW').show();
                         $('.scheduleformM').hide();
-						break;
+                        break;
                     case "MONTHLY":
                         $('.scheduleformD').hide();
                         $('.scheduleformW').hide();
-						$('.scheduleformM').show();
-						break
+                        $('.scheduleformM').show();
+                        break
                     default :
                         $('.scheduleformD').hide();
                         $('.scheduleformW').hide();
@@ -161,25 +161,25 @@ ACC.checkoutsummary = {
             var localeDateFormat = $('#replenishmentSchedule').data('dateForDatePicker');
             var startDateEntered = $("#replenishmentStartDate").val();
             var endDateEntered = $("#replenishmentEndDate").val();
-                let validateStartDate = ACC.checkoutsummary.validateDate(startDateEntered, localeDateFormat);
-                let validateEndDate = ACC.checkoutsummary.validateDate(endDateEntered, localeDateFormat);
-                if (validateStartDate  &&validateEndDate) {
-                    $(".replenishmentOrderClass").val(true);
-                    placeReplenishment = true;
-                    $.colorbox.close();
-                } else
+            let validateStartDate = ACC.checkoutsummary.validateDate(startDateEntered, localeDateFormat);
+            let validateEndDate = ACC.checkoutsummary.validateDate(endDateEntered, localeDateFormat);
+            if (validateStartDate  &&validateEndDate) {
+                $(".replenishmentOrderClass").val(true);
+                placeReplenishment = true;
+                $.colorbox.close();
+            } else
+            {
+                if (!validateStartDate)
                 {
-                    if (!validateStartDate)
-                    {
-                        ACC.checkoutsummary.toggleReplenishmentScheduleStartDateError(true);
-                    }
-                    if (!validateEndDate)
-                    {
-                        ACC.checkoutsummary.toggleReplenishmentScheduleEndDateError(true);
-                    }
-                    $.colorbox.resize();
-
+                    ACC.checkoutsummary.toggleReplenishmentScheduleStartDateError(true);
                 }
+                if (!validateEndDate)
+                {
+                    ACC.checkoutsummary.toggleReplenishmentScheduleEndDateError(true);
+                }
+                $.colorbox.resize();
+
+            }
 
 
         });

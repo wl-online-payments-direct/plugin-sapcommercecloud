@@ -100,6 +100,24 @@
         <property name="scheduleReplenishment" type="de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO"/>
     </bean>
 
+    <bean class="de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO">
+        <property name="numberOfMonths" type="String">
+            <description>How frequent replenishment should be activated expressed in Months. Mandatory with
+                'recurrencePeriod=Monthly'.
+            </description>
+            <hints>
+                <hint name="example">14</hint>
+            </hints>
+        </property>
+        <property name="replenishmentEndDate" type="java.util.Date">
+            <description>Lasd day for replenishment order</description>
+            <hints>
+                <hint name="example">2020-12-31T09:00:00+0000</hint>
+            </hints>
+        </property>
+    </bean>
+
+
 
     <bean class="com.worldline.direct.payment.dto.DirectoryEntryWsDTO">
         <description>Directory Entry</description>
