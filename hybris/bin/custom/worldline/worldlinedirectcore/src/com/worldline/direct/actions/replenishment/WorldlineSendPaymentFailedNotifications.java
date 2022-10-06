@@ -1,6 +1,6 @@
 package com.worldline.direct.actions.replenishment;
 
-import com.worldline.direct.event.WorldlineReplenishmentPaymentFailedNotificationEvent;
+import com.worldline.direct.event.replenishment.payment.WorldlineReplenishmentPaymentFailedNotificationEvent;
 import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.processengine.action.AbstractProceduralAction;
 import de.hybris.platform.servicelayer.event.EventService;

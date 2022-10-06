@@ -142,6 +142,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("nDays", getNumberRange(1, 30));
         model.addAttribute("nthDayOfMonth", getNumberRange(1, 31));
         model.addAttribute("nthWeek", getNumberRange(1, 12));
+        model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
         model.addAttribute("daysOfWeek", worldlineDirectCheckoutFacade.getDaysOfWeekForReplenishmentCheckoutSummary());
         if (worldlinePaymentInfo != null) {
             model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfo));
@@ -197,15 +198,16 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
             return REDIRECT_PREFIX + "/cart";
         }
 
-        final CartData cartData = getCheckoutFacade().getCheckoutCart();
         final PlaceOrderData placeOrderData = new PlaceOrderData();
         placeOrderData.setNDays(worldlinePlaceOrderForm.getnDays());
         placeOrderData.setNDaysOfWeek(worldlinePlaceOrderForm.getnDaysOfWeek());
         placeOrderData.setNthDayOfMonth(worldlinePlaceOrderForm.getNthDayOfMonth());
         placeOrderData.setNWeeks(worldlinePlaceOrderForm.getnWeeks());
+        placeOrderData.setNMonths(worldlinePlaceOrderForm.getnMonths());
         placeOrderData.setReplenishmentOrder(worldlinePlaceOrderForm.isReplenishmentOrder());
         placeOrderData.setReplenishmentRecurrence(worldlinePlaceOrderForm.getReplenishmentRecurrence());
         placeOrderData.setReplenishmentStartDate(worldlinePlaceOrderForm.getReplenishmentStartDate());
+        placeOrderData.setReplenishmentEndDate(worldlinePlaceOrderForm.getReplenishmentEndDate());
         placeOrderData.setSecurityCode(worldlinePlaceOrderForm.getSecurityCode());
         placeOrderData.setTermsCheck(worldlinePlaceOrderForm.isTermsCheck());
         AbstractOrderData abstractOrderData;
@@ -243,20 +245,6 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         }
 
         return redirectToOrderConfirmationPage(placeOrderData, abstractOrderData);
-    }
-
-    private void storeHOPReturnUrlInSession(String code) {
-        final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root +
-                        WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + code);
-        getSessionService().setAttribute(HOSTED_CHECKOUT_RETURN_URL, returnUrl);
-    }
-
-    private void storeHTPReturnUrlInSession(String code) {
-        final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HTP.root +
-                        WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + code);
-        getSessionService().setAttribute(HOSTED_TOKENIZATION_RETURN_URL, returnUrl);
     }
 
     protected boolean validateOrderForm(final WorldlinePlaceOrderForm worldlinePlaceOrderForm, final Model model) {

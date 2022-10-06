@@ -14,6 +14,7 @@ import de.hybris.platform.store.services.BaseStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderService {
@@ -26,19 +27,18 @@ public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderServ
 
     @Override
     public void enableCartToOrderJob(CartToOrderCronJobModel cronJobModel, boolean performCronjob) {
-        Optional<TriggerModel> firstTrigger = cronJobModel.getTriggers().stream().findFirst();
+        List<TriggerModel> triggers = cronJobModel.getTriggers();
         WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cronJobModel.getPaymentInfo();
         cronJobModel.setSubmitted(true);
 
         modelService.saveAll(cronJobModel,paymentInfo);
 
-        if (firstTrigger.isPresent()) {
-            TriggerModel triggerModel = firstTrigger.get();
+        for (TriggerModel triggerModel : triggers) {
             triggerModel.setActive(true);
             modelService.save(triggerModel);
-            if (performCronjob) {
-                cronJobService.performCronJob(cronJobModel);
-            }
+        }
+        if (performCronjob) {
+            cronJobService.performCronJob(cronJobModel);
         }
         eventService.publishEvent(initializeReplenishmentPlacedEvent(cronJobModel));
     }
