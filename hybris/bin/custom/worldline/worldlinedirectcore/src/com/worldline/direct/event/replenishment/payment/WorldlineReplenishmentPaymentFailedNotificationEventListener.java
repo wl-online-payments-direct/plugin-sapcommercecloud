@@ -1,4 +1,4 @@
-package com.worldline.direct.event;
+package com.worldline.direct.event.replenishment.payment;
 
 import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.core.model.user.CustomerModel;
@@ -19,6 +19,7 @@ public class WorldlineReplenishmentPaymentFailedNotificationEventListener extend
         paymentFailedCustomerNotificationProcess.setCustomer((CustomerModel) cartToOrderCronJob.getCart().getUser());
         paymentFailedCustomerNotificationProcess.setCurrency(cartToOrderCronJob.getCart().getCurrency());
         paymentFailedCustomerNotificationProcess.setLanguage(cartToOrderCronJob.getCart().getStore().getDefaultLanguage());
+        paymentFailedCustomerNotificationProcess.setSite(cartToOrderCronJob.getCart().getSite());
         paymentFailedCustomerNotificationProcess.setStore(cartToOrderCronJob.getCart().getStore());
         modelService.save(paymentFailedCustomerNotificationProcess);
         businessProcessService.startProcess(paymentFailedCustomerNotificationProcess);
