@@ -1,4 +1,4 @@
-package com.worldline.direct.event;
+package com.worldline.direct.event.replenishment.payment;
 
 import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.servicelayer.event.events.AbstractEvent;

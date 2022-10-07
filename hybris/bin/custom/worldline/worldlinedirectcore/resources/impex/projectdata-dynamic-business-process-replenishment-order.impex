@@ -6,14 +6,18 @@ INSERT_UPDATE DynamicProcessDefinition; code[unique = true]                ; act
 		 onError='error'>
 
 	<action id='cloneCartAction' bean='cloneCartAction'>
-		<transition name='OK' to='calculateCartAction'/>
+		<transition name='OK' to='validateCartAction'/>
 		<transition name='NOK' to='cleanUpClonedCartOnFailedAction'/>
 	</action>
 
-	<action id='calculateCartAction' bean='calculateCartAction'>
+
+	<action id='validateCartAction' bean='worldlineValidateCartAction'>
 		<transition name='OK' to='placeOrderAction'/>
-		<transition name='NOK' to='cleanUpClonedCartOnFailedAction'/>
+		<transition name='NOK' to='sendCartNonValidEmailFailure'/>
+		<transition name='ERROR' to='cleanUpClonedCartOnFailedAction'/>
 	</action>
+
+
 
 	<action id='placeOrderAction' bean='worldlinePlaceOrderAction'>
 		<transition name='OK' to='cleanUpClonedCart'/>
@@ -32,11 +36,15 @@ INSERT_UPDATE DynamicProcessDefinition; code[unique = true]                ; act
 
 	<wait id='waitBeforeNewAttempt' then='worldlineRequestPaymentAction'>
 	<event>noEvent</event>
-        <timeout delay='PT1M' then='worldlineRequestPaymentAction'/>
+        <timeout delay='PT6H' then='worldlineRequestPaymentAction'/>
     </wait>
 
     <action id='sendPaymentFailedNotifications' bean='worldlineSendPaymentFailedNotificationAction'>
-         <transition name='OK' to='error'/>
+         <transition name='OK' to='cleanUpClonedCartOnErrorAction'/>
+    </action>
+
+    <action id='sendCartNonValidEmailFailure' bean='worldlineSendCartNonValidEmailFailure'>
+         <transition name='OK' to='cleanUpClonedCartOnErrorAction'/>
     </action>
 
 
