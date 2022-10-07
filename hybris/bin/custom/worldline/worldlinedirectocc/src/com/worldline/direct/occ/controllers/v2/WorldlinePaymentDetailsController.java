@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = "/{baseSiteId}/users/{userId}/worldlinepaymentdetails")
+@RequestMapping(value = "/{baseSiteId}/users/{userId}/worldlinePaymentDetails")
 @Api(tags = "Worldline PaymentDetails")
 public class WorldlinePaymentDetailsController extends WorldlineBaseController {
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlinePaymentDetailsController.class);

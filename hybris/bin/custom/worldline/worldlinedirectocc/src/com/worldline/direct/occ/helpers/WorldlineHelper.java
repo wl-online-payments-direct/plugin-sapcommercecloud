@@ -3,6 +3,8 @@ package com.worldline.direct.occ.helpers;
 import com.google.common.collect.Iterables;
 import com.onlinepayments.domain.DirectoryEntry;
 import com.onlinepayments.domain.PaymentProduct;
+import com.worldline.direct.constants.WorldlinedirectoccWebConstants;
+import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
@@ -72,6 +74,11 @@ public class WorldlineHelper {
         final String returnURL = Config.getParameter(key);
         final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
         return String.format(returnURL, uriVars.get("baseSiteId"), uriVars.get("userId"), "_orderCode_", request.getParameter("cartId"));
+    }
+    public String buildRecurringReturnURL(HttpServletRequest request, String key,Boolean isRecurring) {
+        final String returnURL = Config.getParameter(key);
+        final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        return String.format(returnURL, uriVars.get("baseSiteId"),(isRecurring ? OrderType.SCHEDULE_REPLENISHMENT_ORDER : OrderType.PLACE_ORDER), uriVars.get("userId"), "_cartId_", request.getParameter("cartId"));
     }
 
 

@@ -1,9 +1,9 @@
 package com.worldline.direct.facade.impl;
 
-import com.worldline.direct.exception.WorldlineEntityValidationException;
 import com.worldline.direct.facade.WorldlineDirectCheckoutFacade;
 import com.worldline.direct.service.WorldlineScheduleOrderService;
 import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
+import de.hybris.platform.b2bacceleratorfacades.exception.EntityValidationException;
 import de.hybris.platform.b2bacceleratorfacades.order.data.B2BDaysOfWeekData;
 import de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
@@ -37,7 +37,7 @@ import java.util.List;
 
 import static de.hybris.platform.util.localization.Localization.getLocalizedString;
 
-public class WorldLineExtendedCheckoutFacadeImpl extends DefaultCheckoutFacade implements WorldlineDirectCheckoutFacade {
+public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacade implements WorldlineDirectCheckoutFacade {
     private static final String CART_CHECKOUT_REPLENISHMENT_NO_STARTDATE = "cart.replenishment.no.startdate";
     private static final String CART_CHECKOUT_REPLENISHMENT_NO_FREQUENCY = "cart.replenishment.no.frequency";
 
@@ -70,12 +70,12 @@ public class WorldLineExtendedCheckoutFacadeImpl extends DefaultCheckoutFacade i
         // validate replenishment
         if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder())) {
             if (placeOrderData.getReplenishmentStartDate() == null) {
-                throw new WorldlineEntityValidationException(getLocalizedString(CART_CHECKOUT_REPLENISHMENT_NO_STARTDATE));
+                throw new EntityValidationException(getLocalizedString(CART_CHECKOUT_REPLENISHMENT_NO_STARTDATE));
             }
 
             if (placeOrderData.getReplenishmentRecurrence().equals(B2BReplenishmentRecurrenceEnum.WEEKLY)
                     && CollectionUtils.isEmpty(placeOrderData.getNDaysOfWeek())) {
-                throw new WorldlineEntityValidationException(getLocalizedString(CART_CHECKOUT_REPLENISHMENT_NO_FREQUENCY));
+                throw new EntityValidationException(getLocalizedString(CART_CHECKOUT_REPLENISHMENT_NO_FREQUENCY));
             }
 
             final TriggerData triggerData = new TriggerData();

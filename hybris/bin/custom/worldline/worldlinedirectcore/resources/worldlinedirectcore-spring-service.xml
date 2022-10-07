@@ -33,7 +33,7 @@
     <bean id="worldlineCustomerAccountService"
           class="com.worldline.direct.service.impl.WorldlineCustomerAccountServiceImpl">
         <property name="worldlineCustomerAccountDao" ref="worldlineCustomerAccountDao"/>
-        <property name="worldlineCartToOrderCronJobModelDao" ref="worldlineCartToOrderCronJobModelDao"/>
+        <property name="b2BCustomerAccountService" ref="b2bCustomerAccountService"/>
         <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
     </bean>
 
@@ -72,4 +72,36 @@
     <bean id="worldlineRecurringService" class="com.worldline.direct.service.impl.WorldlineRecurringServiceImpl">
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
     </bean>
+
+
+    <alias name="worldlineB2CCartToOrderService" alias="worldlineCartToOrderService"/>
+    <bean id="worldlineB2CCartToOrderService" class="com.worldline.direct.service.impl.WorldlineCartToOrderServiceImpl ">
+        <property name="modelService" ref="modelService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="eventService" ref="eventService"/>
+        <property name="cronJobService" ref="cronJobService"/>
+    </bean>
+
+    <bean id="worldLineExtendedB2BCheckoutFacade"
+          class="com.worldline.direct.facade.impl.DefaultWorldLineExtendedB2BCheckoutFacadeImpl"
+          parent="b2bCheckoutFacade">
+        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+        <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+    </bean>
+
+    <bean id="worldlineExtendedCheckoutFacade"
+          class="com.worldline.direct.facade.impl.WorldLineExtendedB2CCheckoutFacadeImpl"
+          parent="defaultCheckoutFacade">
+        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+        <property name="i18NService" ref="i18NService"/>
+        <property name="scheduledCartConverter" ref="scheduledCartConverter"/>
+        <property name="triggerPopulator" ref="triggerReversePopulator"/>
+        <property name="triggerService" ref="triggerService"/>
+        <property name="baseSiteService" ref="baseSiteService"/>
+        <property name="b2bDaysOfWeekConverter" ref="b2bDaysOfWeekConverter"/>
+        <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+    </bean>
+
+
 </beans>
