@@ -176,6 +176,8 @@
         <property name="cardholderName" type="String"/>
         <property name="worldlineCheckoutType" type="com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO"/>
         <property name="billingAddress" type="de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO"/>
+        <property name="mandateDetail" type="com.worldline.direct.payment.dto.MandateDetailWsDTO"/>
+
     </bean>
 
     <bean class="com.worldline.direct.payment.dto.WorldlinePaymentInfoWsDTO"
@@ -216,6 +218,56 @@
         <property name="redirectTo" type="String"/>
     </bean>
 
+
+    <bean class="com.worldline.direct.payment.dto.MandateDetailWsDTO">
+        <description>Worldline Mandate Detail</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">MandateDetailWsDTO</hint>
+        </hints>
+        <property name="alias" type="String"/>
+        <property name="customerReference" type="String"/>
+        <property name="recurrenceType" type="String"/>
+        <property name="status" type="String"/>
+        <property name="uniqueMandateReference" type="String"/>
+        <property name="customer" type="com.worldline.direct.payment.dto.WorldlineMandateCustomerWsDTO"/>
+    </bean>
+
+    <bean class="com.worldline.direct.payment.dto.WorldlineMandateCustomerWsDTO">
+        <description>Worldline Mandate Customer Detail</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlineMandateCustomer</hint>
+        </hints>
+        <property name="iban" type="String"/>
+        <property name="companyName" type="String"/>
+        <property name="emailAddress" type="String"/>
+        <property name="address" type="com.worldline.direct.payment.dto.WorldlineMandateAddressWsDTO"/>
+        <property name="personalInformation" type="com.worldline.direct.payment.dto.WorldlinePersonalInformationWsDTO"/>
+    </bean>
+
+    <bean class="com.worldline.direct.payment.dto.WorldlineMandateAddressWsDTO">
+        <description>Worldline Mandate Address Detail</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlineMandateAddress</hint>
+        </hints>
+        <property name="city" type="String"/>
+        <property name="country" type="String"/>
+        <property name="HouseNumber" type="String"/>
+        <property name="street" type="String"/>
+        <property name="zip" type="String"/>
+    </bean>
+    <bean class="com.worldline.direct.payment.dto.WorldlinePersonalInformationWsDTO">
+        <description>Worldline Mandate Address Detail</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlineMandateAddress</hint>
+        </hints>
+        <property name="firstName" type="String"/>
+        <property name="lastName" type="String"/>
+        <property name="title" type="String"/>
+    </bean>
 
 
 </beans>

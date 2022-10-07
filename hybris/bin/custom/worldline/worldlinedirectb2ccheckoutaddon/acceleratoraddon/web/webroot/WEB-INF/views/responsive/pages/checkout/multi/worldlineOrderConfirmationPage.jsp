@@ -16,6 +16,8 @@
 
         <jsp:include page="/WEB-INF/views/responsive/pages/account/accountOrderDetailItems.jsp" />
 
+        <jsp:include page="/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/cms/mandate/worldlineMandateDetails.jsp"/>
+
         <%-- Add keep payment details button in this section --%>
         <div class="account-orderdetail well well-tertiary">
             <div class="well-headline">

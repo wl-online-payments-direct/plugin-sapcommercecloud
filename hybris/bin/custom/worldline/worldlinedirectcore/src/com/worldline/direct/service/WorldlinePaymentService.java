@@ -3,6 +3,7 @@ package com.worldline.direct.service;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.model.WorldlineMandateModel;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
@@ -60,6 +61,12 @@ public interface WorldlinePaymentService {
 
     GetMandateResponse getMandate(String uniqueMandateReference);
 
-    GetMandateResponse revokeMandate(String uniqueMandateReference);
+    GetMandateResponse getMandate(WorldlineMandateModel worldlineMandateModel);
+
+    GetMandateResponse revokeMandate(WorldlineMandateModel worldlineMandateModel);
+
+    GetMandateResponse blockMandate(WorldlineMandateModel worldlineMandateModel);
+
+    GetMandateResponse unBlockMandate(WorldlineMandateModel worldlineMandateModel);
 
 }

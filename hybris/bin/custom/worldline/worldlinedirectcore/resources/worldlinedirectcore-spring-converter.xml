@@ -9,6 +9,7 @@
 
     <bean name="worldlinePaymentInfoPopulator" class="com.worldline.direct.populator.WorldlinePaymentInfoPopulator">
         <property name="addressConverter" ref="addressConverter"/>
+        <property name="worldlineMandateConverter" ref="worldlineMandateConverter"/>
     </bean>
 
     <bean id="worldlinePaymentInfoConverter" parent="abstractPopulatingConverter">
@@ -154,10 +155,32 @@
         <property name="add" ref="worldlineCartPopulator"/>
     </bean>
 
+    <bean name="worldlineSchuduleOrderPopulator" class="com.worldline.direct.populator.WorldlineSchuduleOrderPopulator">
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="scheduledCartConverter"/>
+        <property name="add" ref="worldlineSchuduleOrderPopulator"/>
+    </bean>
+
+
     <bean name="worldlineOrderPopulator" class="com.worldline.direct.populator.WorldlineOrderPopulator">
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
     </bean>
 
+    <bean name="worldlineMandatePopulator" class="com.worldline.direct.populator.WorldlineMandatePopulator">
+        <property name="enumerationService" ref="enumerationService"/>
+    </bean>
+
+    <bean id="worldlineMandateConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.worldline.direct.order.data.WorldlineMandateDetail"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineMandatePopulator"/>
+            </list>
+        </property>
+    </bean>
 
     <bean parent="modifyPopulatorList">
         <property name="list" ref="orderConverter"/>
