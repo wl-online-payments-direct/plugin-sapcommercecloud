@@ -26,8 +26,19 @@ INSERT_UPDATE DynamicProcessDefinition; code[unique = true]                ; act
 
 	<action id='worldlineRequestPaymentAction' bean='worldlineRequestPaymentAction'>
 		<transition name='OK' to='confirmationAction'/>
-		<transition name='NOK' to='error'/>
+		<transition name='NOK' to='sendPaymentFailedNotifications'/>
+		<transition name='RETRY' to='waitBeforeNewAttempt'/>
 	</action>
+
+	<wait id='waitBeforeNewAttempt' then='worldlineRequestPaymentAction'>
+	<event>noEvent</event>
+        <timeout delay='PT1M' then='worldlineRequestPaymentAction'/>
+    </wait>
+
+    <action id='sendPaymentFailedNotifications' bean='worldlineSendPaymentFailedNotificationAction'>
+         <transition name='OK' to='error'/>
+    </action>
+
 
 	<action id='confirmationAction' bean='confirmationAction'>
 		<transition name='OK' to='success'/>

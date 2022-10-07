@@ -47,4 +47,11 @@
     />
 
 
+    <bean id="worldlineSendPaymentFailedNotificationAction"
+          class="com.worldline.direct.actions.replenishment.WorldlineSendPaymentFailedNotifications"
+          parent="abstractAction">
+        <property name="modelService" ref="modelService"/>
+        <property name="eventService" ref="eventService"/>
+    </bean>
+
 </beans>

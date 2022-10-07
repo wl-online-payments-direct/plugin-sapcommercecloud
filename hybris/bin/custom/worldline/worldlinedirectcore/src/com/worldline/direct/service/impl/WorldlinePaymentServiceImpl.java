@@ -11,6 +11,7 @@ import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.factory.WorldlineClientFactory;
 import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.model.WorldlineMandateModel;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentService;
@@ -309,13 +310,34 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
-    public GetMandateResponse revokeMandate(String uniqueMandateReference) {
-        validateParameterNotNullStandardMessage("uniqueMandateReference", uniqueMandateReference);
+    public GetMandateResponse getMandate(WorldlineMandateModel worldlineMandateModel) {
+        validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
+        WorldlineConfigurationModel worldlineConfiguration = worldlineMandateModel.getWorldlineConfiguration();
 
-        try (Client client = worldlineClientFactory.getClient()) {
-            GetMandateResponse mandateResponse = client.merchant(getMerchantId()).mandates().revokeMandate(uniqueMandateReference);
+        try (Client client = worldlineClientFactory.getClient(worldlineConfiguration)) {
+            GetMandateResponse mandateResponse = client.merchant(worldlineConfiguration.getMerchantID()).mandates().getMandate( worldlineMandateModel.getUniqueMandateReference());
 
-            WorldlineLogUtils.logAction(LOGGER, "revokeMandate", uniqueMandateReference, mandateResponse);
+            WorldlineLogUtils.logAction(LOGGER, "getMandate",  worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
+
+            return mandateResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getMandate", e);
+            return null;
+        } catch (ApiException e) {
+            LOGGER.info("[ WORLDLINE ] Errors during getMandate", e);
+            return null;
+        }
+    }
+
+    @Override
+    public GetMandateResponse revokeMandate(WorldlineMandateModel worldlineMandateModel) {
+        validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
+        WorldlineConfigurationModel worldlineConfiguration = worldlineMandateModel.getWorldlineConfiguration();
+
+        try (Client client = worldlineClientFactory.getClient(worldlineConfiguration)) {
+            GetMandateResponse mandateResponse = client.merchant(worldlineConfiguration.getMerchantID()).mandates().revokeMandate(worldlineMandateModel.getUniqueMandateReference());
+
+            WorldlineLogUtils.logAction(LOGGER, "revokeMandate", worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
 
             return mandateResponse;
         } catch (IOException e) {
@@ -323,6 +345,44 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             return null;
         } catch (ApiException e) {
             LOGGER.info("[ WORLDLINE ] Errors during revokeMandate", e);
+            return null;
+        }
+    }
+
+    @Override
+    public GetMandateResponse blockMandate(WorldlineMandateModel worldlineMandateModel) {
+        validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
+        WorldlineConfigurationModel worldlineConfiguration = worldlineMandateModel.getWorldlineConfiguration();
+
+        try (Client client = worldlineClientFactory.getClient(worldlineConfiguration)) {
+            GetMandateResponse mandateResponse = client.merchant(worldlineConfiguration.getMerchantID()).mandates().blockMandate(worldlineMandateModel.getUniqueMandateReference());
+
+            WorldlineLogUtils.logAction(LOGGER, "blockMandate", worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
+
+            return mandateResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during blockMandate", e);
+            return null;
+        } catch (ApiException e) {
+            LOGGER.info("[ WORLDLINE ] Errors during blockMandate", e);
+            return null;
+        }
+    }
+    @Override
+    public GetMandateResponse unBlockMandate(WorldlineMandateModel worldlineMandateModel) {
+        validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
+        WorldlineConfigurationModel worldlineConfiguration = worldlineMandateModel.getWorldlineConfiguration();
+        try (Client client = worldlineClientFactory.getClient(worldlineConfiguration)) {
+            GetMandateResponse mandateResponse = client.merchant(worldlineConfiguration.getMerchantID()).mandates().unblockMandate(worldlineMandateModel.getUniqueMandateReference());
+
+            WorldlineLogUtils.logAction(LOGGER, "unBlockMandate", worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
+
+            return mandateResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during unBlockMandate", e);
+            return null;
+        } catch (ApiException e) {
+            LOGGER.info("[ WORLDLINE ] Errors during unBlockMandate", e);
             return null;
         }
     }
