@@ -1,6 +1,7 @@
 package com.worldline.direct.facade.impl;
 
 import com.worldline.direct.facade.WorldlineDirectCheckoutFacade;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlineScheduleOrderService;
 import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
 import de.hybris.platform.b2bacceleratorfacades.exception.EntityValidationException;
@@ -8,7 +9,9 @@ import de.hybris.platform.b2bacceleratorfacades.order.data.B2BDaysOfWeekData;
 import de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.b2bacceleratorfacades.order.data.TriggerData;
+import de.hybris.platform.b2bacceleratorservices.enums.CheckoutPaymentType;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
+import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.order.impl.DefaultCheckoutFacade;
 import de.hybris.platform.converters.Converters;
 import de.hybris.platform.converters.Populator;
@@ -28,6 +31,8 @@ import de.hybris.platform.site.BaseSiteService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Calendar;
@@ -40,6 +45,7 @@ import static de.hybris.platform.util.localization.Localization.getLocalizedStri
 public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacade implements WorldlineDirectCheckoutFacade {
     private static final String CART_CHECKOUT_REPLENISHMENT_NO_STARTDATE = "cart.replenishment.no.startdate";
     private static final String CART_CHECKOUT_REPLENISHMENT_NO_FREQUENCY = "cart.replenishment.no.frequency";
+    public static final Logger LOG = LoggerFactory.getLogger(WorldLineExtendedB2CCheckoutFacadeImpl.class);
 
     private KeyGenerator guidKeyGenerator;
     private I18NService i18NService;
@@ -49,6 +55,7 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
     private Converter<CartToOrderCronJobModel, ScheduledCartData> scheduledCartConverter;
     private Populator<TriggerData, TriggerModel> triggerPopulator;
     private Converter<DayOfWeek, B2BDaysOfWeekData> b2bDaysOfWeekConverter;
+    private WorldlineConfigurationService worldlineConfigurationService;
 
 
     @Override
@@ -81,12 +88,53 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
             final TriggerData triggerData = new TriggerData();
             populateTriggerDataFromPlaceOrderData(placeOrderData, triggerData);
 
-            return (T) scheduleOrder(triggerData);
+            final CartModel cartModel = getCart();
+            final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cartModel.getPaymentType().getCode());
+
+            if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment() && BooleanUtils.isTrue(cardPaymentType)) {
+                return (T) scheduleOrderAndPlaceOrder(triggerData);
+            } else {
+                return (T) scheduleOrder(triggerData);
+            }
         }
 
         return (T) super.placeOrder();
 
     }
+
+    private OrderData scheduleOrderAndPlaceOrder(TriggerData trigger) throws InvalidCartException {
+        final CartModel cartModel = getCart();
+        cartModel.setSite(baseSiteService.getCurrentBaseSite());
+        cartModel.setStore(getBaseStoreService().getCurrentBaseStore());
+        getModelService().save(cartModel);
+
+        final AddressModel deliveryAddress = cartModel.getDeliveryAddress();
+        final AddressModel paymentAddress = cartModel.getPaymentAddress();
+        final PaymentInfoModel paymentInfo = cartModel.getPaymentInfo();
+        final TriggerModel triggerModel = getModelService().create(TriggerModel.class);
+        triggerPopulator.populate(trigger, triggerModel);
+
+        // If Trigger is not relative, reset activeDate to next expected runtime
+        if (BooleanUtils.isFalse(triggerModel.getRelative())) {
+            // getNextTime(relavtiveDate) will skip the date, to avoid skipping the activation date, go back 1 day to test.
+            final Calendar priorDayCalendar = Calendar.getInstance();
+            priorDayCalendar.setTime(DateUtils.addDays(triggerModel.getActivationTime(), -1));
+
+            final Date nextPotentialFire = triggerService.getNextTime(triggerModel, priorDayCalendar).getTime();
+
+            if (!DateUtils.isSameDay(nextPotentialFire, triggerModel.getActivationTime())) {
+                // Adjust activation time to next scheduled vis a vis the cron expression
+                triggerModel.setActivationTime(nextPotentialFire);
+            }
+        }
+        triggerModel.setActive(false);
+        final CartToOrderCronJobModel scheduledCart = worldlineScheduleOrderService.createOrderFromCartCronJob(cartModel,
+                deliveryAddress, paymentAddress, paymentInfo, Collections.singletonList(triggerModel));
+
+        OrderData orderData = placeFirstRecurringOrder(scheduledCart);
+        return orderData;
+    }
+
 
     protected void populateTriggerDataFromPlaceOrderData(final PlaceOrderData placeOrderData, final TriggerData triggerData) {
         final Date replenishmentStartDate = placeOrderData.getReplenishmentStartDate();
@@ -156,6 +204,15 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
         return Converters.convertAll(daysOfWeek, b2bDaysOfWeekConverter);
     }
 
+    private OrderData placeFirstRecurringOrder(CartToOrderCronJobModel scheduledCart) throws InvalidCartException {
+        OrderData orderData = super.placeOrder();
+        final OrderModel orderModel = getCustomerAccountService().getOrderForCode(orderData.getCode(), getBaseStoreService().getCurrentBaseStore());
+        orderModel.setSchedulingCronJob(scheduledCart);
+        getModelService().save(orderModel);
+        return getOrderConverter().convert(orderModel);
+    }
+
+
     @Required
     public void setI18NService(I18NService i18NService) {
         this.i18NService = i18NService;
@@ -189,5 +246,9 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
     @Required
     public void setWorldlineScheduleOrderService(WorldlineScheduleOrderService worldlineScheduleOrderService) {
         this.worldlineScheduleOrderService = worldlineScheduleOrderService;
+    }
+
+    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
+        this.worldlineConfigurationService = worldlineConfigurationService;
     }
 }

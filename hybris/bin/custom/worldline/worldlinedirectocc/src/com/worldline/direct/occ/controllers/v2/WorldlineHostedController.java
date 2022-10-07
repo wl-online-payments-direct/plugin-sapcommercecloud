@@ -15,6 +15,7 @@ import de.hybris.platform.commercewebservices.core.strategies.OrderCodeIdentific
 import de.hybris.platform.commercewebservicescommons.dto.order.AbstractOrderWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.order.OrderWsDTO;
 import de.hybris.platform.commercewebservicescommons.strategies.CartLoaderStrategy;
+import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdAndUserIdParam;
@@ -22,6 +23,7 @@ import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +56,9 @@ public class WorldlineHostedController extends WorldlineBaseController {
 
     @Resource(name = "worldlineCustomerAccountFacade")
     private WorldlineCustomerAccountFacade worldlineCustomerAccountFacade;
+
+    @Resource(name = "cartService")
+    private CartService cartService;
 
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
@@ -113,7 +118,6 @@ public class WorldlineHostedController extends WorldlineBaseController {
                 } else {
                     orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
                 }
-
                 worldlineCheckoutFacade.validateReturnMAC(orderData, returnMAC);
                 worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderData.getCode(), hostedCheckoutId);
                 orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
@@ -121,16 +125,25 @@ public class WorldlineHostedController extends WorldlineBaseController {
             }
             case SCHEDULE_REPLENISHMENT_ORDER:
             default: {
-                ScheduledCartData scheduledCartData = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
-
-                worldlineCheckoutFacade.validateReturnMAC(scheduledCartData, returnMAC);
-                worldlineRecurringCheckoutFacade.authorisePaymentForReplenishmentHostedCheckout(scheduledCartData.getJobCode(), hostedCheckoutId);
-                scheduledCartData = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+                ScheduledCartData scheduledCartData;
+                if (BooleanUtils.isTrue(cartService.getSessionCart().getStore().getWorldlineConfiguration().isFirstRecurringPayment())) {
+                    OrderData orderData;
+                    if (orderCodeIdentificationStrategy.isID(orderCode)) {
+                        orderData = orderFacade.getOrderDetailsForGUID(orderCode);
+                    } else {
+                        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
+                    }
+                    worldlineCheckoutFacade.validateReturnMAC(orderData, returnMAC);
+                    scheduledCartData = worldlineRecurringCheckoutFacade.authorisePaymentForImmediateReplenishmentHostedCheckout(orderData.getCode(), hostedCheckoutId);
+                } else {
+                    scheduledCartData = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+                    worldlineCheckoutFacade.validateReturnMAC(scheduledCartData, returnMAC);
+                    worldlineRecurringCheckoutFacade.authorisePaymentForSchudledReplenishmentHostedCheckout(scheduledCartData.getJobCode(), hostedCheckoutId);
+                    scheduledCartData = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+                }
                 return getDataMapper().map(scheduledCartData, ReplenishmentOrderWsDTO.class, fields);
-
             }
         }
-
     }
 
     public DataMapper getDataMapper() {

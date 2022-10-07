@@ -13,6 +13,8 @@
     <import resource="worldlinedirectcore-spring-service.xml"/>
     <import resource="worldlinedirectcore-spring-converter.xml"/>
     <import resource="worldlinedirectcore-spring-process.xml"/>
+    <import resource="worldlinedirectcore-spring-event.xml"/>
+    <import resource="worldlinedirectcore-spring-email.xml"/>
 
 
     <bean id="worldlineClientFactory" class="com.worldline.direct.factory.impl.WorldlineClientFactoryImpl">
@@ -70,6 +72,7 @@
         <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
         <property name="customerAccountService" ref="customerAccountService"/>
         <property name="paymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="userService" ref="userService"/>
     </bean>
 
     <bean id="worldlineRecurringCheckoutFacade" parent="worldlineCheckoutFacade"
@@ -112,6 +115,7 @@
         <property name="businessProcessService" ref="businessProcessService"/>
         <property name="triggerService" ref="triggerService"/>
         <property name="i18NService" ref="i18NService"/>
+        <property name="worldlineRecurringService" ref="worldlineRecurringService"/>
     </bean>
 
 

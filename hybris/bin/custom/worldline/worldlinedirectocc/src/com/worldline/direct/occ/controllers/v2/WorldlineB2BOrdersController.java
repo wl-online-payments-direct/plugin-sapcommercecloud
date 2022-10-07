@@ -2,6 +2,8 @@ package com.worldline.direct.occ.controllers.v2;
 
 
 import com.onlinepayments.domain.CreateHostedCheckoutResponse;
+import com.worldline.direct.enums.OrderType;
+import com.worldline.direct.enums.RecurringPaymentEnum;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
@@ -18,10 +20,7 @@ import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO;
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.OrderFacade;
-import de.hybris.platform.commercefacades.order.data.CartData;
-import de.hybris.platform.commercefacades.order.data.CartModificationData;
-import de.hybris.platform.commercefacades.order.data.CartModificationDataList;
-import de.hybris.platform.commercefacades.order.data.OrderData;
+import de.hybris.platform.commercefacades.order.data.*;
 import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commerceservices.order.CommerceCartModificationException;
 import de.hybris.platform.commercewebservicescommons.dto.order.OrderWsDTO;
@@ -39,7 +38,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.annotation.Secured;
@@ -183,15 +181,15 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
 
         OrderData orderData = extendedCheckoutFacade.placeOrder(new PlaceOrderData());
 
-        storeHOPReturnUrlInSession(orderData.getCode(), request, false);
+        storeHOPReturnUrlInSession(orderData.getCode(), request, OrderType.PLACE_ORDER);
 
         final CreateHostedCheckoutResponse createHostedCheckoutResponse = worldlineRecurringCheckoutFacade.createHostedCheckout(orderData.getCode(), browserData);
         return getDataMapper().map(createHostedCheckoutResponse, HostedCheckoutResponseWsDTO.class, fields);
 
     }
 
-    private void storeHOPReturnUrlInSession(String code, HttpServletRequest request, Boolean isRecurring) {
-        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, "worldline.occ.hostedCheckout.returnUrl", isRecurring);
+    private void storeHOPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType) {
+        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, "worldline.occ.hostedCheckout.returnUrl", orderType);
         sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL.replace("_cartId_", code));
     }
 
@@ -217,13 +215,21 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
 
         validateScheduleReplenishmentForm(recurringDataWSDTO.getScheduleReplenishment());
         final PlaceOrderData placeOrderData = createPlaceOrderData(recurringDataWSDTO.getScheduleReplenishment());
-        ScheduledCartData scheduledCartData = extendedCheckoutFacade.placeOrder(placeOrderData);
-        storeHOPReturnUrlInSession(scheduledCartData.getJobCode(), request, true);
-        validate(recurringDataWSDTO.getBrowserData(), "browserDataWsDTO", browserDataWsDTOValidator);
+        AbstractOrderData abstractOrderData = extendedCheckoutFacade.placeOrder(placeOrderData);
+        final CreateHostedCheckoutResponse createHostedCheckoutResponse;
 
-        final BrowserData browserData = getDataMapper().map(recurringDataWSDTO.getBrowserData(), BrowserData.class, BROWSER_MAPPING);
 
-        final CreateHostedCheckoutResponse createHostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(scheduledCartData.getJobCode(), browserData);
+        if (abstractOrderData instanceof ScheduledCartData) {
+            storeHOPReturnUrlInSession(((ScheduledCartData) abstractOrderData).getJobCode(), request, OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+            validate(recurringDataWSDTO.getBrowserData(), "browserDataWsDTO", browserDataWsDTOValidator);
+            final BrowserData browserData = getDataMapper().map(recurringDataWSDTO.getBrowserData(), BrowserData.class, BROWSER_MAPPING);
+            createHostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.SCHEDULED);
+        }else {
+            storeHOPReturnUrlInSession(abstractOrderData.getCode(), request, OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+            validate(recurringDataWSDTO.getBrowserData(), "browserDataWsDTO", browserDataWsDTOValidator);
+            final BrowserData browserData = getDataMapper().map(recurringDataWSDTO.getBrowserData(), BrowserData.class, BROWSER_MAPPING);
+            createHostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.IMMEDIATE);
+        }
         return dataMapper.map(createHostedCheckoutResponse, HostedCheckoutResponseWsDTO.class, fields);
     }
 

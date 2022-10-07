@@ -71,6 +71,7 @@
 
     <bean id="worldlineRecurringService" class="com.worldline.direct.service.impl.WorldlineRecurringServiceImpl">
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="modelService" ref="modelService"/>
     </bean>
 
 
@@ -88,6 +89,7 @@
           parent="b2bCheckoutFacade">
         <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
         <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
     <bean id="worldlineExtendedCheckoutFacade"
@@ -101,6 +103,7 @@
         <property name="baseSiteService" ref="baseSiteService"/>
         <property name="b2bDaysOfWeekConverter" ref="b2bDaysOfWeekConverter"/>
         <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
 
