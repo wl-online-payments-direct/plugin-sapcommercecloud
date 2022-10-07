@@ -28,6 +28,7 @@ import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.I18NService;
 import de.hybris.platform.servicelayer.keygenerator.KeyGenerator;
 import de.hybris.platform.site.BaseSiteService;
+import de.hybris.platform.util.StandardDateRange;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -35,18 +36,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static de.hybris.platform.util.localization.Localization.getLocalizedString;
 
 public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacade implements WorldlineDirectCheckoutFacade {
+    public static final Logger LOG = LoggerFactory.getLogger(WorldLineExtendedB2CCheckoutFacadeImpl.class);
     private static final String CART_CHECKOUT_REPLENISHMENT_NO_STARTDATE = "cart.replenishment.no.startdate";
     private static final String CART_CHECKOUT_REPLENISHMENT_NO_FREQUENCY = "cart.replenishment.no.frequency";
-    public static final Logger LOG = LoggerFactory.getLogger(WorldLineExtendedB2CCheckoutFacadeImpl.class);
-
     private KeyGenerator guidKeyGenerator;
     private I18NService i18NService;
     private BaseSiteService baseSiteService;
@@ -85,16 +82,16 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
                 throw new EntityValidationException(getLocalizedString(CART_CHECKOUT_REPLENISHMENT_NO_FREQUENCY));
             }
 
-            final TriggerData triggerData = new TriggerData();
-            populateTriggerDataFromPlaceOrderData(placeOrderData, triggerData);
+            final List<TriggerData> triggerDataListData = new ArrayList<>();
+            populateTriggerDataFromPlaceOrderData(placeOrderData, triggerDataListData);
 
             final CartModel cartModel = getCart();
             final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cartModel.getPaymentType().getCode());
 
             if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment() && BooleanUtils.isTrue(cardPaymentType)) {
-                return (T) scheduleOrderAndPlaceOrder(triggerData);
+                return (T) scheduleOrderAndPlaceOrder(triggerDataListData);
             } else {
-                return (T) scheduleOrder(triggerData);
+                return (T) scheduleOrder(triggerDataListData);
             }
         }
 
@@ -102,7 +99,7 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
 
     }
 
-    private OrderData scheduleOrderAndPlaceOrder(TriggerData trigger) throws InvalidCartException {
+    private OrderData scheduleOrderAndPlaceOrder(List<TriggerData> triggerDataList) throws InvalidCartException {
         final CartModel cartModel = getCart();
         cartModel.setSite(baseSiteService.getCurrentBaseSite());
         cartModel.setStore(getBaseStoreService().getCurrentBaseStore());
@@ -111,54 +108,119 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
         final AddressModel deliveryAddress = cartModel.getDeliveryAddress();
         final AddressModel paymentAddress = cartModel.getPaymentAddress();
         final PaymentInfoModel paymentInfo = cartModel.getPaymentInfo();
-        final TriggerModel triggerModel = getModelService().create(TriggerModel.class);
-        triggerPopulator.populate(trigger, triggerModel);
-
-        // If Trigger is not relative, reset activeDate to next expected runtime
-        if (BooleanUtils.isFalse(triggerModel.getRelative())) {
-            // getNextTime(relavtiveDate) will skip the date, to avoid skipping the activation date, go back 1 day to test.
-            final Calendar priorDayCalendar = Calendar.getInstance();
-            priorDayCalendar.setTime(DateUtils.addDays(triggerModel.getActivationTime(), -1));
-
-            final Date nextPotentialFire = triggerService.getNextTime(triggerModel, priorDayCalendar).getTime();
-
-            if (!DateUtils.isSameDay(nextPotentialFire, triggerModel.getActivationTime())) {
-                // Adjust activation time to next scheduled vis a vis the cron expression
-                triggerModel.setActivationTime(nextPotentialFire);
-            }
-        }
-        triggerModel.setActive(false);
+        List<TriggerModel> triggerModelList = createTriggers(triggerDataList);
         final CartToOrderCronJobModel scheduledCart = worldlineScheduleOrderService.createOrderFromCartCronJob(cartModel,
-                deliveryAddress, paymentAddress, paymentInfo, Collections.singletonList(triggerModel));
+                deliveryAddress, paymentAddress, paymentInfo, triggerModelList);
 
         OrderData orderData = placeFirstRecurringOrder(scheduledCart);
         return orderData;
     }
 
+    private List<TriggerModel> createTriggers(List<TriggerData> triggerDataList) {
+        List<TriggerModel> triggerModelList = new ArrayList<>();
+        for (TriggerData triggerData : triggerDataList) {
+            final TriggerModel triggerModel = getModelService().create(TriggerModel.class);
+            triggerPopulator.populate(triggerData, triggerModel);
 
-    protected void populateTriggerDataFromPlaceOrderData(final PlaceOrderData placeOrderData, final TriggerData triggerData) {
-        final Date replenishmentStartDate = placeOrderData.getReplenishmentStartDate();
-        final Calendar calendar = Calendar.getInstance(i18NService.getCurrentTimeZone(), i18NService.getCurrentLocale());
-        triggerData
-                .setActivationTime((replenishmentStartDate.before(calendar.getTime()) ? calendar.getTime() : replenishmentStartDate));
 
+            // If Trigger is not relative, reset activeDate to next expected runtime
+            if (BooleanUtils.isFalse(triggerModel.getRelative())) {
+                // getNextTime(relavtiveDate) will skip the date, to avoid skipping the activation date, go back 1 day to test.
+                final Calendar priorDayCalendar = Calendar.getInstance();
+                priorDayCalendar.setTime(DateUtils.addDays(triggerModel.getActivationTime(), -1));
+
+                final Date nextPotentialFire = triggerService.getNextTime(triggerModel, priorDayCalendar).getTime();
+
+                if (!DateUtils.isSameDay(nextPotentialFire, triggerModel.getActivationTime())) {
+                    // Adjust activation time to next scheduled vis a vis the cron expression
+                    triggerModel.setActivationTime(nextPotentialFire);
+                }
+            }
+            triggerModel.setActive(false);
+            triggerModelList.add(triggerModel);
+        }
+        return triggerModelList;
+    }
+
+
+    protected void populateTriggerDataFromPlaceOrderData(final PlaceOrderData placeOrderData, final List<TriggerData> triggerDataList) {
         final B2BReplenishmentRecurrenceEnum recurrenceValue = placeOrderData.getReplenishmentRecurrence();
-
-        if (B2BReplenishmentRecurrenceEnum.DAILY.equals(recurrenceValue)) {
-            triggerData.setDay(Integer.valueOf(placeOrderData.getNDays()));
-            triggerData.setRelative(Boolean.TRUE);
-        } else if (B2BReplenishmentRecurrenceEnum.WEEKLY.equals(recurrenceValue)) {
-            triggerData.setDaysOfWeek(placeOrderData.getNDaysOfWeek());
-            triggerData.setWeekInterval(Integer.valueOf(placeOrderData.getNWeeks()));
-            triggerData.setHour(Integer.valueOf(0));
-            triggerData.setMinute(Integer.valueOf(0));
-        } else if (B2BReplenishmentRecurrenceEnum.MONTHLY.equals(recurrenceValue)) {
-            triggerData.setDay(Integer.valueOf(placeOrderData.getNthDayOfMonth()));
-            triggerData.setRelative(Boolean.FALSE);
+        switch (recurrenceValue) {
+            case DAILY: {
+                TriggerData triggerData = createTrigger(placeOrderData);
+                triggerData.setDay(Integer.valueOf(placeOrderData.getNDays()));
+                triggerData.setRelative(Boolean.TRUE);
+                triggerDataList.add(triggerData);
+                break;
+            }
+            case WEEKLY: {
+                TriggerData triggerData = createTrigger(placeOrderData);
+                triggerData.setDaysOfWeek(placeOrderData.getNDaysOfWeek());
+                triggerData.setWeekInterval(Integer.valueOf(placeOrderData.getNWeeks()));
+                triggerData.setHour(Integer.valueOf(0));
+                triggerData.setMinute(Integer.valueOf(0));
+                triggerDataList.add(triggerData);
+                break;
+            }
+            case MONTHLY: {
+                final Date replenishmentStartDate = placeOrderData.getReplenishmentStartDate();
+                final Calendar calendarStartTime = Calendar.getInstance(i18NService.getCurrentTimeZone(), i18NService.getCurrentLocale());
+                Date nextActivationDate = replenishmentStartDate.before(calendarStartTime.getTime()) ? calendarStartTime.getTime() : replenishmentStartDate;
+                calendarStartTime.setTime(nextActivationDate);
+                List<Integer> monthsOptions = getMonthsOptions(Integer.parseInt(placeOrderData.getNMonths()), calendarStartTime.get(Calendar.MONTH));
+                monthsOptions.stream().forEach(month->{
+                    TriggerData triggerData = createTrigger(placeOrderData);
+                    triggerData.setDay(Integer.valueOf(placeOrderData.getNthDayOfMonth()));
+                    triggerData.setMonth(month);
+                    triggerData.setRelative(Boolean.FALSE);
+                    triggerDataList.add(triggerData);
+                });
+                break;
+            }
+            case YEARLY: {
+                TriggerData triggerData = createTrigger(placeOrderData);
+                triggerData.setYear(1);
+                triggerData.setRelative(Boolean.TRUE);
+                triggerDataList.add(triggerData);
+                break;
+            }
         }
     }
 
-    public ScheduledCartData scheduleOrder(final TriggerData trigger) {
+    private TriggerData createTrigger(PlaceOrderData placeOrderData) {
+        TriggerData triggerData = new TriggerData();
+
+
+        final Date replenishmentStartDate = placeOrderData.getReplenishmentStartDate();
+        final Calendar calendarStartTime = Calendar.getInstance(i18NService.getCurrentTimeZone(), i18NService.getCurrentLocale());
+        triggerData
+                .setActivationTime((replenishmentStartDate.before(calendarStartTime.getTime()) ? calendarStartTime.getTime() : replenishmentStartDate));
+
+        final Date replenishmentEndDate = placeOrderData.getReplenishmentEndDate();
+        if (Objects.nonNull(replenishmentEndDate) && replenishmentStartDate.before(replenishmentEndDate)) {
+            triggerData.setDateRange(new StandardDateRange(replenishmentStartDate, replenishmentEndDate));
+        }
+        return triggerData;
+    }
+
+    private List<Integer> getMonthsOptions(Integer nMonths, Integer currentMonth) {
+//nMonths == 1,2,3,4,6
+        List<Integer> months = new ArrayList<>();
+        if (nMonths != 1) {
+
+
+            int remainderMonth = currentMonth % nMonths;
+            for (int nbMonth = 0; nbMonth < 12; nbMonth++) {
+                if (nbMonth % nMonths == remainderMonth) {
+                    months.add(nbMonth);
+                }
+            }
+        } else {
+            months.add(-1);
+        }
+        return months;
+    }
+    public ScheduledCartData scheduleOrder(final List<TriggerData> triggerDataList) {
         final CartModel cartModel = getCart();
         cartModel.setSite(baseSiteService.getCurrentBaseSite());
         cartModel.setStore(getBaseStoreService().getCurrentBaseStore());
@@ -167,26 +229,10 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
         final AddressModel deliveryAddress = cartModel.getDeliveryAddress();
         final AddressModel paymentAddress = cartModel.getPaymentAddress();
         final PaymentInfoModel paymentInfo = cartModel.getPaymentInfo();
-        final TriggerModel triggerModel = getModelService().create(TriggerModel.class);
-        triggerPopulator.populate(trigger, triggerModel);
-
-        // If Trigger is not relative, reset activeDate to next expected runtime
-        if (BooleanUtils.isFalse(triggerModel.getRelative())) {
-            // getNextTime(relavtiveDate) will skip the date, to avoid skipping the activation date, go back 1 day to test.
-            final Calendar priorDayCalendar = Calendar.getInstance();
-            priorDayCalendar.setTime(DateUtils.addDays(triggerModel.getActivationTime(), -1));
-
-            final Date nextPotentialFire = triggerService.getNextTime(triggerModel, priorDayCalendar).getTime();
-
-            if (!DateUtils.isSameDay(nextPotentialFire, triggerModel.getActivationTime())) {
-                // Adjust activation time to next scheduled vis a vis the cron expression
-                triggerModel.setActivationTime(nextPotentialFire);
-            }
-        }
-        triggerModel.setActive(false);
+        List<TriggerModel> triggers = createTriggers(triggerDataList);
         // schedule cart
         final CartToOrderCronJobModel scheduledCart = worldlineScheduleOrderService.createOrderFromCartCronJob(cartModel,
-                deliveryAddress, paymentAddress, paymentInfo, Collections.singletonList(triggerModel));
+                deliveryAddress, paymentAddress, paymentInfo, triggers);
 
         ScheduledCartData scheduledCartData = null;
         if (scheduledCart != null) {

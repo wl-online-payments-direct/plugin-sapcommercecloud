@@ -19,8 +19,10 @@ public class WorldlinePlaceOrderForm {
     private String securityCode;
     private boolean replenishmentOrder;
     private Date replenishmentStartDate;
+    private Date replenishmentEndDate;
     private String nDays;
     private String nWeeks;
+    private String nMonths;
     private String nthDayOfMonth;
     private B2BReplenishmentRecurrenceEnum replenishmentRecurrence;
     private List<DayOfWeek> nDaysOfWeek;
@@ -152,5 +154,21 @@ public class WorldlinePlaceOrderForm {
 
     public void setnDaysOfWeek(List<DayOfWeek> nDaysOfWeek) {
         this.nDaysOfWeek = nDaysOfWeek;
+    }
+
+    public String getnMonths() {
+        return nMonths;
+    }
+
+    public void setnMonths(String nMonths) {
+        this.nMonths = nMonths;
+    }
+
+    public Date getReplenishmentEndDate() {
+        return replenishmentEndDate;
+    }
+
+    public void setReplenishmentEndDate(Date replenishmentEndDate) {
+        this.replenishmentEndDate = replenishmentEndDate;
     }
 }

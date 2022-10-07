@@ -2,5 +2,12 @@
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
 
+    <enum class="de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum">
+        <value>DAILY</value>
+        <value>WEEKLY</value>
+        <value>MONTHLY</value>
+        <value>YEARLY</value>
+    </enum>
+
 
 </beans>
