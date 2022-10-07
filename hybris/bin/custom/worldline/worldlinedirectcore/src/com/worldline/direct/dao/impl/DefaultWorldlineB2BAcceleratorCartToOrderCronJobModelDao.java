@@ -1,4 +1,4 @@
-package com.worldline.direct.dao;
+package com.worldline.direct.dao.impl;
 
 import de.hybris.platform.b2bacceleratorservices.dao.impl.DefaultB2BAcceleratorCartToOrderCronJobModelDao;
 import de.hybris.platform.commerceservices.search.flexiblesearch.data.SortQueryData;
@@ -33,13 +33,6 @@ public class DefaultWorldlineB2BAcceleratorCartToOrderCronJobModelDao extends De
             + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.PK + "} = {" + TriggerModel._TYPECODE + ":"
             + TriggerModel.CRONJOB + "}} WHERE {" + CartModel._TYPECODE + ":" + CartModel.USER + "} = ?user AND {" + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.SUBMITTED + "} = ?" + CartToOrderCronJobModel.SUBMITTED;
 
-    private static final String FIND_CARTTOORDERCRONJOB_BY_CODE_AND_USER_QUERY = "SELECT {" + CartToOrderCronJobModel._TYPECODE + ":"
-            + CartToOrderCronJobModel.PK + "} FROM { " + CartToOrderCronJobModel._TYPECODE + " as "
-            + CartToOrderCronJobModel._TYPECODE + " JOIN " + CartModel._TYPECODE + " as " + CartModel._TYPECODE + " ON {"
-            + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.CART + "} = {" + CartModel._TYPECODE + ":"
-            + CartModel.PK + "}} WHERE {" + CartModel._TYPECODE + ":" + CartModel.USER + "} = ?user  AND {"
-            + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.CODE + "} = ?code";
-
     private static final String SORT_JOBS_BY_DATE = " ORDER BY {" + CartToOrderCronJobModel._TYPECODE + ":"
             + CartToOrderCronJobModel.CREATIONTIME + "} DESC, {" + CartToOrderCronJobModel._TYPECODE + ":"
             + CartToOrderCronJobModel.PK + "}";
@@ -52,17 +45,6 @@ public class DefaultWorldlineB2BAcceleratorCartToOrderCronJobModelDao extends De
             + TriggerModel.ACTIVATIONTIME + "} ASC, {" + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.CREATIONTIME
             + "} DESC, {" + CartToOrderCronJobModel._TYPECODE + ":" + CartToOrderCronJobModel.PK + "}";
 
-    @Override
-    public CartToOrderCronJobModel findCartToOrderCronJobByCode(final String code, final UserModel user) {
-        final Map<String, Object> attr = new HashMap<String, Object>(2);
-        attr.put(CartToOrderCronJobModel.CODE, code);
-        attr.put(CartModel.USER, user);
-        final FlexibleSearchQuery query = new FlexibleSearchQuery(FIND_CARTTOORDERCRONJOB_BY_CODE_AND_USER_QUERY);
-        query.getQueryParameters().putAll(attr);
-        final SearchResult<CartToOrderCronJobModel> jobs = this.getFlexibleSearchService().search(query);
-        final List<CartToOrderCronJobModel> result = jobs.getResult();
-        return (result.iterator().hasNext() ? result.iterator().next() : null);
-    }
 
     @Override
     public List<CartToOrderCronJobModel> findCartToOrderCronJobsByUser(final UserModel user) {

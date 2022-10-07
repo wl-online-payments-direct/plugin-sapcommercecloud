@@ -8,6 +8,7 @@ import com.worldline.direct.b2bcheckoutaddon.constants.WorldlineCheckoutConstant
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.b2bcheckoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.b2bcheckoutaddon.utils.WorldlinePlaceOrderUtils;
+import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.order.data.BrowserData;
@@ -312,14 +313,14 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
 
     private void storeHOPReturnUrlInSession(String code, Boolean isRecurring) {
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root + "/" + (isRecurring ? WorldlineWebConstants.URL.Checkout.Payment.HOP.Option.replenishment : WorldlineWebConstants.URL.Checkout.Payment.HOP.Option.order) +
+                true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root + "/" + (isRecurring ? OrderType.SCHEDULE_REPLENISHMENT_ORDER : OrderType.PLACE_ORDER) +
                         WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + code);
         getSessionService().setAttribute(HOSTED_CHECKOUT_RETURN_URL, returnUrl);
     }
 
     private void storeHTPReturnUrlInSession(String code, Boolean isRecurring) {
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(getBaseSiteService().getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HTP.root + "/" + (isRecurring ? WorldlineWebConstants.URL.Checkout.Payment.HOP.Option.replenishment : WorldlineWebConstants.URL.Checkout.Payment.HOP.Option.order) +
+                true, WorldlineWebConstants.URL.Checkout.Payment.HTP.root + "/" + (isRecurring ? OrderType.SCHEDULE_REPLENISHMENT_ORDER : OrderType.PLACE_ORDER) +
                         WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + code);
         getSessionService().setAttribute(HOSTED_TOKENIZATION_RETURN_URL, returnUrl);
     }

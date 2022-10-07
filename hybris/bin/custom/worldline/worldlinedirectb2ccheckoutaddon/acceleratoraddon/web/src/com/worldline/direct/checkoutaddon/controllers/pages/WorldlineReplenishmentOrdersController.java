@@ -5,7 +5,6 @@ package com.worldline.direct.checkoutaddon.controllers.pages;
 
 import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.checkoutaddon.forms.ReorderForm;
-import com.worldline.direct.facade.WorldlineReplenishmentFacade;
 import de.hybris.platform.acceleratorfacades.ordergridform.OrderGridFormFacade;
 import de.hybris.platform.acceleratorfacades.product.data.ReadOnlyOrderGridData;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
@@ -14,6 +13,7 @@ import de.hybris.platform.acceleratorstorefrontcommons.breadcrumb.ResourceBreadc
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.ThirdPartyConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractSearchPageController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
+import de.hybris.platform.b2bacceleratorfacades.order.B2BOrderFacade;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
@@ -59,8 +59,8 @@ public class WorldlineReplenishmentOrdersController extends AbstractSearchPageCo
     @Resource(name = "customerFacade")
     protected CustomerFacade customerFacade;
 
-    @Resource(name = "worldlineReplenishmentFacade")
-    private WorldlineReplenishmentFacade worldlineReplenishmentFacade;
+    @Resource(name = "b2bOrderFacade")
+    private B2BOrderFacade b2BOrderFacade;
     @Resource(name = "orderFacade")
     private OrderFacade orderFacade;
 
@@ -77,7 +77,7 @@ public class WorldlineReplenishmentOrdersController extends AbstractSearchPageCo
                                   @RequestParam(value = "sort", required = false) final String sortCode, final Model model)
             throws CMSItemNotFoundException {
         final PageableData pageableData = createPageableData(page, 5, sortCode, showMode);
-        final SearchPageData<? extends ScheduledCartData> searchPageData = worldlineReplenishmentFacade.getPagedReplenishmentHistory(pageableData);
+        final SearchPageData<? extends ScheduledCartData> searchPageData = b2BOrderFacade.getPagedReplenishmentHistory(pageableData);
         populateModel(model, searchPageData, showMode);
 
         model.addAttribute("breadcrumbs", accountBreadcrumbBuilder.getBreadcrumbs("text.account.manageReplenishment"));
@@ -94,7 +94,7 @@ public class WorldlineReplenishmentOrdersController extends AbstractSearchPageCo
     @RequireHardLogIn
     public String cancelReplenishment(@PathVariable("jobCode") final String jobCode, final Model model,
                                       final RedirectAttributes redirectModel) throws CMSItemNotFoundException {
-        worldlineReplenishmentFacade.cancelReplenishment(jobCode, customerFacade.getCurrentCustomer().getUid());
+        b2BOrderFacade.cancelReplenishment(jobCode, customerFacade.getCurrentCustomer().getUid());
         GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.CONF_MESSAGES_HOLDER,
                 "text.account.replenishment.confirmation.canceled");
         return REDIRECT_TO_MYREPLENISHMENTS_PAGE;
@@ -130,12 +130,12 @@ public class WorldlineReplenishmentOrdersController extends AbstractSearchPageCo
                                        @RequestParam(value = "show", defaultValue = "Page") final ShowMode showMode,
                                        @RequestParam(value = "sort", required = false) final String sortCode, @PathVariable("jobCode") final String jobCode,
                                        final Model model) throws CMSItemNotFoundException {
-        final ScheduledCartData scheduledCartData = worldlineReplenishmentFacade.getReplenishmentOrderDetailsForCode(jobCode, customerFacade
+        final ScheduledCartData scheduledCartData = b2BOrderFacade.getReplenishmentOrderDetailsForCode(jobCode, customerFacade
                 .getCurrentCustomer().getUid());
         model.addAttribute("orderData", scheduledCartData);
 
         final PageableData pageableData = createPageableData(page, 5, sortCode, showMode);
-        final SearchPageData<? extends OrderHistoryData> searchPageData = worldlineReplenishmentFacade.getPagedReplenishmentOrderHistory(jobCode,
+        final SearchPageData<? extends OrderHistoryData> searchPageData = b2BOrderFacade.getPagedReplenishmentOrderHistory(jobCode,
                 pageableData);
         populateModel(model, searchPageData, showMode);
 
@@ -158,7 +158,7 @@ public class WorldlineReplenishmentOrdersController extends AbstractSearchPageCo
     @RequireHardLogIn
     public String cancelReplenishmentFromDetailPage(@PathVariable("jobCode") final String jobCode, final Model model,
                                                     final RedirectAttributes redirectModel) throws CMSItemNotFoundException {
-        this.worldlineReplenishmentFacade.cancelReplenishment(jobCode, customerFacade.getCurrentCustomer().getUid());
+        this.b2BOrderFacade.cancelReplenishment(jobCode, customerFacade.getCurrentCustomer().getUid());
         GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.CONF_MESSAGES_HOLDER,
                 "text.account.replenishment.confirmation.canceled");
         return String.format(REDIRECT_TO_MYREPLENISHMENTS_DETAILS_PAGE, jobCode);
@@ -199,7 +199,7 @@ public class WorldlineReplenishmentOrdersController extends AbstractSearchPageCo
         try {
             model.addAttribute("orderData", orderFacade.getOrderDetailsForCode(orderCode));
             model.addAttribute("scheduleData",
-                    worldlineReplenishmentFacade.getReplenishmentOrderDetailsForCode(jobCode, customerFacade.getCurrentCustomer().getUid()));
+                    b2BOrderFacade.getReplenishmentOrderDetailsForCode(jobCode, customerFacade.getCurrentCustomer().getUid()));
             model.addAttribute(new ReorderForm());
 
             final List<Breadcrumb> breadcrumbs = accountBreadcrumbBuilder.getBreadcrumbs(null);
@@ -228,7 +228,7 @@ public class WorldlineReplenishmentOrdersController extends AbstractSearchPageCo
     @RequireHardLogIn
     public String getProductVariantMatrixForResponsive(@PathVariable("jobCode") final String jobCode,
                                                        @RequestParam("productCode") final String productCode, final Model model) {
-        final ScheduledCartData scheduledCartData = worldlineReplenishmentFacade.getReplenishmentOrderDetailsForCode(jobCode,
+        final ScheduledCartData scheduledCartData = b2BOrderFacade.getReplenishmentOrderDetailsForCode(jobCode,
                 customerFacade.getCurrentCustomer().getUid());
 
         final Map<String, ReadOnlyOrderGridData> readOnlyMultiDMap = orderGridFormFacade.getReadOnlyOrderGridForProductInOrder(

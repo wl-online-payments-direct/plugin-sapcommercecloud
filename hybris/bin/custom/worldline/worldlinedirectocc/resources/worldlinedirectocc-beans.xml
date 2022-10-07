@@ -90,6 +90,17 @@
         <property name="colorDepth" type="Integer"/>
     </bean>
 
+    <bean class="com.worldline.direct.payment.dto.RecurringDataWSDTO">
+        <description>Recurring Data</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="recurring Data">Recurring Data</hint>
+        </hints>
+        <property name="browserData" type="com.worldline.direct.payment.dto.BrowserDataWsDTO"/>
+        <property name="scheduleReplenishment" type="de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO"/>
+    </bean>
+
+
     <bean class="com.worldline.direct.payment.dto.DirectoryEntryWsDTO">
         <description>Directory Entry</description>
         <hints>
@@ -162,6 +173,8 @@
         <property name="hostedTokenizationId" type="String"/>
         <property name="savedCardCode" type="String"/>
         <property name="useDeliveryAddress" type="boolean"/>
+        <property name="cardholderName" type="String"/>
+        <property name="worldlineCheckoutType" type="com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO"/>
         <property name="billingAddress" type="de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO"/>
     </bean>
 
@@ -172,7 +185,6 @@
             <hint name="wsRelated"/>
             <hint name="alias">WorldlinePaymentInfo</hint>
         </hints>
-        <property name="worldlineCheckoutType" type="com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO"/>
     </bean>
 
     <bean class="com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO">

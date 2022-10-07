@@ -10,6 +10,7 @@ import de.hybris.platform.servicelayer.cronjob.AbstractJobPerformable;
 import de.hybris.platform.servicelayer.cronjob.PerformResult;
 import de.hybris.platform.servicelayer.cronjob.TriggerService;
 import de.hybris.platform.servicelayer.i18n.I18NService;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -23,6 +24,8 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
     @Override
     public PerformResult perform(final CartToOrderCronJobModel cronJob) {
         LOG.info("starting Worldline Accelerator Cart To Order Job");
+        if (BooleanUtils.isTrue(cronJob.isSubmitted()))
+        {
         final String replenishmentOrderProcessCode = "worldlineReplenishmentOrderProcess" + cronJob.getCode() + System.currentTimeMillis();
         final ReplenishmentProcessModel businessProcessModel = getBusinessProcessService()
                 .createProcess(replenishmentOrderProcessCode, "worldlineReplenishmentOrderProcess");
@@ -51,8 +54,13 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
         } else {
             cronJobResult = new PerformResult(CronJobResult.FAILURE, CronJobStatus.FINISHED);
         }
-
         return cronJobResult;
+        }else {
+            LOG.error("payment was not received for this replenishment");
+            final PerformResult cronJobResult;
+            cronJobResult = new PerformResult(CronJobResult.FAILURE, CronJobStatus.FINISHED);
+            return cronJobResult;
+        }
     }
 
     protected BusinessProcessService getBusinessProcessService() {

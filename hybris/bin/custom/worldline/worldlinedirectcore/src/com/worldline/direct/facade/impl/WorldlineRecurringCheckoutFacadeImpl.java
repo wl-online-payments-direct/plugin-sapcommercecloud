@@ -9,7 +9,6 @@ import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.service.WorldlineB2BPaymentService;
 import com.worldline.direct.service.WorldlineCartToOrderService;
-import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.core.model.order.CartModel;
@@ -50,6 +49,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
             case IN_PROGRESS:
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
+                saveMandateIfNeeded((WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 return handlePaymentResponse(cartToOrderCronJob, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
             default:
                 LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
@@ -60,20 +60,11 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
 
     protected ScheduledCartData handlePaymentResponse(CartToOrderCronJobModel cartToOrderCronJobModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         worldlineCartToOrderService.enableCartToOrderJob(cartToOrderCronJobModel, paymentResponse);
-        saveMandate(cartToOrderCronJobModel, paymentResponse);
         cartService.removeSessionCart();
         cartService.getSessionCart();
         return scheduledCartConverter.convert(cartToOrderCronJobModel);
     }
 
-    private void saveMandate(CartToOrderCronJobModel cartToOrderCronJobModel, PaymentResponse paymentResponse) {
-        WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cartToOrderCronJobModel.getPaymentInfo();
-        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(paymentInfo) && paymentResponse.getPaymentOutput().getSepaDirectDebitPaymentMethodSpecificOutput() != null && paymentResponse.getPaymentOutput().getSepaDirectDebitPaymentMethodSpecificOutput().getPaymentProduct771SpecificOutput() != null) {
-            paymentInfo.setMandate(paymentResponse.getPaymentOutput().getSepaDirectDebitPaymentMethodSpecificOutput().getPaymentProduct771SpecificOutput().getMandateReference());
-            modelService.save(paymentInfo);
-            modelService.refresh(cartToOrderCronJobModel);
-        }
-    }
 
     public void setWorldlineB2BPaymentService(WorldlineB2BPaymentService worldlineB2BPaymentService) {
         this.worldlineB2BPaymentService = worldlineB2BPaymentService;

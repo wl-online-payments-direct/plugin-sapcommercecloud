@@ -43,11 +43,6 @@ public interface WorldlineWebConstants {
                 interface HOP {
                     String root = Checkout.root + "/hosted-checkout";
                     String handleResponse = "/response/";
-
-                    interface Option {
-                        String order = "order";
-                        String replenishment = "replenishment";
-                    }
                 }
 
             }
