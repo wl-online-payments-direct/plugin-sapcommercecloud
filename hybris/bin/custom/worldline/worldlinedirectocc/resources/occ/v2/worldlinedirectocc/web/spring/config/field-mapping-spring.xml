@@ -31,13 +31,37 @@
         </property>
     </bean>
 
+    <bean parent="fieldSetLevelMapping" id="worldlineReplenishmentOrderWsDTOFieldSetLevelMapping">
+        <property name="dtoClass"
+                  value="de.hybris.platform.b2bwebservicescommons.dto.order.ReplenishmentOrderWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="purchaseOrderNumber,worldlinePaymentInfo(BASIC)"/>
+                <entry key="DEFAULT" value="costCenter(DEFAULT),paymentType,purchaseOrderNumber,worldlinePaymentInfo(DEFAULT)"/>
+                <entry key="FULL" value="costCenter(DEFAULT),paymentType,purchaseOrderNumber,worldlinePaymentInfo(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="worldlineOrderWsDTOFieldSetLevelMapping">
+        <property name="dtoClass"
+                  value="de.hybris.platform.commercewebservicescommons.dto.order.OrderWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="worldlinePaymentInfo(BASIC)"/>
+                <entry key="DEFAULT" value="worldlinePaymentInfo(DEFAULT)"/>
+                <entry key="FULL" value="worldlinePaymentInfo(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
     <bean parent="fieldSetLevelMapping" id="worldlinePaymentInfoWsDTOFieldSetLevelMapping">
         <property name="dtoClass" value="com.worldline.direct.payment.dto.WorldlinePaymentInfoWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="paymentProductId,paymentMethod,issuerId,worldlineCheckoutType"/>
-                <entry key="DEFAULT" value="BASIC,billingAddress(DEFAULT),worldlineCheckoutType"/>
-                <entry key="FULL" value="BASIC,billingAddress(FULL),worldlineCheckoutType"/>
+                <entry key="BASIC" value="paymentProductId,paymentMethod,issuerId,cardholderName,worldlineCheckoutType"/>
+                <entry key="DEFAULT" value="BASIC,billingAddress(DEFAULT)"/>
+                <entry key="FULL" value="BASIC,billingAddress(FULL)"/>
             </map>
         </property>
     </bean>

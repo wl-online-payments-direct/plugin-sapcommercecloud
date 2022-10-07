@@ -16,6 +16,8 @@ import com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
 import com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO;
 import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
+import de.hybris.platform.b2bacceleratorservices.enums.CheckoutPaymentType;
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
@@ -74,7 +76,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
 
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/{cartId}/paymentproducts", method = RequestMethod.GET)
+    @RequestMapping(value = "/{cartId}/paymentProducts", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(nickname = "getCartPaymentProducts", value = "Get all available payment products for the current store and delivery address.", notes =
             "Returns all payment products supported for the "
@@ -95,7 +97,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
     }
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/{cartId}/worldlinepaymentdetails", method = RequestMethod.GET)
+    @RequestMapping(value = "/{cartId}/worldlinePaymentdetails", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(nickname = "getSavedPaymentDetailsListForCheckout", value = "Get saved customer's credit card payment details list for checkout.", notes = "Return saved customer's credit card payment details list for checkout.")
     @ApiBaseSiteIdUserIdAndCartIdParam
@@ -109,7 +111,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
     }
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/{cartId}/paymentproducts", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
+    @RequestMapping(value = "/{cartId}/paymentProducts", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
@@ -166,7 +168,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
 
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/{cartId}/hostedtokenization", method = RequestMethod.GET)
+    @RequestMapping(value = "/{cartId}/hostedTokenization", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(nickname = "getHostedTokenization", value = "Get worldline hosted tokenization.", notes =
             "Returns a hosted tokenization for the current base store and cart. " +
@@ -182,11 +184,27 @@ public class WorldlineCartsController extends WorldlineBaseController {
         final HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO = getDataMapper()
                 .map(hostedTokenization, HostedTokenizationResponseWsDTO.class, fields);
 
-        hostedTokenizationResponseWsDTO.setCheckoutType( getDataMapper().map(worldlineCheckoutFacade.getWorldlineCheckoutType(),WorldlineCheckoutTypeWsDTO.class,"worldlineCheckoutType"));
+        hostedTokenizationResponseWsDTO.setCheckoutType(getDataMapper().map(worldlineCheckoutFacade.getWorldlineCheckoutType(), WorldlineCheckoutTypeWsDTO.class, "worldlineCheckoutType"));
         worldlineHelper.fillSavedPaymentDetails(hostedTokenizationResponseWsDTO, fields);
 
         return hostedTokenizationResponseWsDTO;
     }
+
+    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
+    @RequestMapping(value = "/{cartId}/supportRecurring", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(nickname = "supportRecurring", value = "Check if Cart is allowed to create replenishment.", notes =
+            "return True if the payment Type is Account or if the payment mode allow recurring payment.")
+    @ApiBaseSiteIdUserIdAndCartIdParam
+    public Boolean supportRecurringPayment(
+            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
+        if (!checkoutFacade.hasCheckoutCart()) {
+            throw new CartException("No cart found.", CartException.NOT_FOUND);
+        }
+        final CartData cartData = cartFacade.getSessionCart();
+        return !CheckoutPaymentType.CARD.getCode().equals(cartData.getPaymentType().getCode()) || WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(cartData.getWorldlinePaymentInfo());
+    }
+
 
     public DataMapper getDataMapper() {
         return dataMapper;
@@ -196,7 +214,4 @@ public class WorldlineCartsController extends WorldlineBaseController {
         return checkoutFacade;
     }
 
-    public void setCheckoutFacade(CheckoutFacade checkoutFacade) {
-        this.checkoutFacade = checkoutFacade;
-    }
 }
