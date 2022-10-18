@@ -38,8 +38,7 @@ INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true] 
 
 
 INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                        ; name                                         ; page                                                                                                           ; actions(uid, $contentCV); &componentRef
-                                 ;                          ; ReplenishmentConfirmationMessageComponent ; Replenishment Confirmation Message Component ; /WEB-INF/views/addons/b2bacceleratoraddon/responsive/cms/checkout/replenishmentCheckoutConfirmationMessage.jsp ;                         ; ReplenishmentConfirmationMessageComponent
-#remove jsp                                ;                          ; ReplenishmentConfirmationMessageComponent ; Replenishment Confirmation Message Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/checkout/replenishmentCheckoutConfirmationMessage.jsp ;                         ; ReplenishmentConfirmationMessageComponent
+                                ;                          ; ReplenishmentConfirmationMessageComponent ; Replenishment Confirmation Message Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/checkout/replenishmentCheckoutConfirmationMessage.jsp ;                         ; ReplenishmentConfirmationMessageComponent
 
 
 INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                    ; name                                             ; active; cmsComponents(uid, $contentCV)                                                                                                                                                                                                                                                                                   ; ; ;
