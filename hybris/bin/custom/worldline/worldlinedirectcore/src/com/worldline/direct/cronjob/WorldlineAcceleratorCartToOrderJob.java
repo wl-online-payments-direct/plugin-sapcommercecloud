@@ -5,7 +5,6 @@ import com.worldline.direct.service.WorldlineRecurringService;
 import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.cronjob.enums.CronJobResult;
 import de.hybris.platform.cronjob.enums.CronJobStatus;
-import de.hybris.platform.cronjob.model.TriggerModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.processengine.BusinessProcessService;
 import de.hybris.platform.processengine.enums.ProcessState;
@@ -18,7 +17,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Date;
-import java.util.stream.Stream;
 
 public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<CartToOrderCronJobModel> {
 
@@ -31,8 +29,9 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
     @Override
     public PerformResult perform(final CartToOrderCronJobModel cronJob) {
         LOG.info("starting Worldline Accelerator Cart To Order Job");
-        Stream<TriggerModel> triggersWithDateRange = cronJob.getTriggers().stream().filter(triggerModel -> triggerModel.getDateRange() != null && triggerModel.getDateRange().getEnd() != null);
-        if (triggersWithDateRange.findFirst().isPresent() && triggersWithDateRange.allMatch(triggerModel -> triggerModel.getDateRange().getEnd().before(new Date())))
+        Boolean triggersWithDateRangePresent = cronJob.getTriggers().stream().filter(triggerModel -> triggerModel.getDateRange() != null && triggerModel.getDateRange().getEnd() != null).findFirst().isPresent();
+        Boolean triggersWithDateRangeAndValidDate = cronJob.getTriggers().stream().filter(triggerModel -> triggerModel.getDateRange() != null && triggerModel.getDateRange().getEnd() != null).allMatch(triggerModel -> triggerModel.getDateRange().getEnd().before(new Date()));
+        if (BooleanUtils.isTrue(triggersWithDateRangePresent) && BooleanUtils.isTrue(triggersWithDateRangeAndValidDate))
         {
             LOG.info("Worldline Accelerator Cart To Order Job has reached the ending date");
             cronJob.setActive(false);
