@@ -33,9 +33,9 @@ import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.mapping.FieldSetLevelHelper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdAndUserIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.MediaType;
@@ -56,7 +56,7 @@ import static de.hybris.platform.util.localization.Localization.getLocalizedStri
 
 @Controller
 @RequestMapping(value = "/{baseSiteId}/orgUsers/{userId}/orders")
-@Api(tags = "Worldline B2B Orders")
+@Tag(name = "Worldline B2B Orders")
 public class WorldlineB2BOrdersController extends WorldlineBaseController {
     protected static final String CART_CHECKOUT_TERM_UNCHECKED = "cart.term.unchecked";
     protected static final String OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM = "ScheduleReplenishmentForm";
@@ -99,16 +99,16 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
     public WorldlineB2BOrdersController() {
     }
 
-    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/hostedTokenization", method = RequestMethod.POST)
+    @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+    @PostMapping(value = "/hostedTokenization")
     @ResponseBody
-    @ApiOperation(nickname = "place the order with hostedTokenization", value = "Place the order with hostedTokenization.",
-            notes = "Authorizes the cart and places the order. The response contains the new order data.")
+    @Operation(operationId = "place the order with hostedTokenization", summary = "Place the order with hostedTokenization.",
+            description = "Authorizes the cart and places the order. The response contains the new order data.")
     @ApiBaseSiteIdAndUserIdParam
     public OrderWsDTO placeOrderHostedTokenization(
-            @ApiParam(value = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
             @RequestParam final String cartId,
-            @ApiParam(value = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true)
+            @Parameter(description = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true)
             @RequestBody final BrowserDataWsDTO browserDataWsDTO,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
             final HttpServletRequest request)
@@ -151,17 +151,17 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
     }
 
 
-    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/hostedCheckout", method = RequestMethod.POST)
+    @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+    @PostMapping(value = "/hostedCheckout")
     @ResponseBody
-    @ApiOperation(nickname = "placeOrderHostedCheckout", value = "Place the order with HostedCheckout.", notes =
+    @Operation(operationId = "placeOrderHostedCheckout", summary = "Place the order with HostedCheckout.", description =
             "Returns a hosted checkout data for the current base store. " +
                     "cart must be valid, otherwise an error will be returned.")
     @ApiBaseSiteIdAndUserIdParam
     public HostedCheckoutResponseWsDTO placeOrderHostedCheckout(
-            @ApiParam(value = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
+            @Parameter(description = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
             @RequestBody final BrowserDataWsDTO browserDataWsDTO,
-            @ApiParam(value = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
             @RequestParam final String cartId,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
             final HttpServletRequest request) throws InvalidCartException {
@@ -193,15 +193,16 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
         sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL.replace("_cartId_", code));
     }
 
-    @RequestMapping(value = "/recurringHostedCheckout", method = RequestMethod.POST, consumes =
+    @PostMapping(value = "/recurringHostedCheckout", consumes =
             {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
+    @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
     @ApiBaseSiteIdAndUserIdParam
-    @ApiOperation(nickname = "placeReplenishmentOrderHostedCheckout", value = "Place the Replenishment order with HostedCheckout", notes = "Place the Replenishment order with HostedCheckout", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation( operationId= "placeReplenishmentOrderHostedCheckout", summary = "Place the Replenishment order with HostedCheckout", description = "Place the Replenishment order with HostedCheckout" )
     public HostedCheckoutResponseWsDTO placeReplenishmentOrderHostedCheckout(
-            @ApiParam(value = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true) @RequestParam(required = true) final String cartId,
-            @ApiParam(value = "Whether terms were accepted or not.", required = true) @RequestParam(required = true) final boolean termsChecked,
-            @ApiParam(value = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true) @RequestBody final RecurringDataWSDTO recurringDataWSDTO,
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true) @RequestParam(required = true) final String cartId,
+            @Parameter(description = "Whether terms were accepted or not.", required = true) @RequestParam(required = true) final boolean termsChecked,
+            @Parameter(description = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true) @RequestBody final RecurringDataWSDTO recurringDataWSDTO,
             @ApiFieldsParam @RequestParam(required = false, defaultValue = FieldSetLevelHelper.DEFAULT_LEVEL) final String fields, final HttpServletRequest request)
             throws InvalidCartException {
 
