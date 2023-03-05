@@ -9,7 +9,7 @@ import de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecur
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.b2bacceleratorfacades.order.data.TriggerData;
 import de.hybris.platform.b2bacceleratorfacades.order.impl.DefaultB2BCheckoutFacade;
-import de.hybris.platform.b2bacceleratorservices.enums.CheckoutPaymentType;
+import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.order.data.OrderData;

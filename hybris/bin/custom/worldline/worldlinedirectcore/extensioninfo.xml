@@ -7,6 +7,7 @@
     <extension abstractclassprefix="Generated" classprefix="Worldlinedirectcore" jaloLogicFree="true" managername="WorldlinedirectcoreManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="worldlinedirectcore" usemaven="true">
         <requires-extension name="commercefacades"/>
         <requires-extension name="acceleratorservices"/>
+        <requires-extension name="b2bcommerce"/>
         <requires-extension name="b2bacceleratorfacades"/>
         <requires-extension name="payment"/>
         <coremodule generated="true" manager="com.worldline.direct.jalo.WorldlinedirectcoreManager" packageroot="com.worldline.direct"/>
