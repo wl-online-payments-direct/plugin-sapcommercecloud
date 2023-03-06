@@ -1,8 +1,10 @@
 package com.worldline.direct.populator.hostedcheckout;
 
+import com.onlinepayments.domain.CardPaymentMethodSpecificInputForHostedCheckout;
 import com.onlinepayments.domain.CreateHostedCheckoutRequest;
 import com.onlinepayments.domain.HostedCheckoutSpecificInput;
 import com.onlinepayments.domain.Order;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
@@ -40,13 +42,21 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         hostedCheckoutSpecificInput.setIsRecurring(Boolean.FALSE);
         hostedCheckoutSpecificInput.setShowResultPage(Boolean.FALSE);
         hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
-
+        hostedCheckoutSpecificInput.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInputForHostedCheckout(abstractOrderModel));
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
         hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
 
         hostedCheckoutSpecificInput.setReturnUrl(getReturnUrlFromSession());
 
         return hostedCheckoutSpecificInput;
+    }
+
+    private CardPaymentMethodSpecificInputForHostedCheckout getCardPaymentMethodSpecificInputForHostedCheckout(AbstractOrderModel abstractOrderModel)
+    {
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+        CardPaymentMethodSpecificInputForHostedCheckout cardPaymentMethodSpecificInputForHostedCheckout=new CardPaymentMethodSpecificInputForHostedCheckout();
+        cardPaymentMethodSpecificInputForHostedCheckout.setGroupCards(WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS==paymentInfo.getId());
+        return cardPaymentMethodSpecificInputForHostedCheckout;
     }
 
     private String getSavedTokens(Integer paymentMethodId) {
