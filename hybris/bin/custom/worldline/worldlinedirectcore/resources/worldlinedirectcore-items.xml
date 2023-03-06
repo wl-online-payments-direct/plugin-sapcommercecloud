@@ -5,6 +5,9 @@
 
 <items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="items.xsd">
+    <collectiontypes>
+        <collectiontype code="groupedCardsPaymentModeSet" elementtype="StandardPaymentMode" type="set"/>
+    </collectiontypes>
 
     <enumtypes>
         <enumtype generate="true" code="WorldlineCheckoutTypesEnum" autocreate="true">
@@ -45,7 +48,6 @@
             <value code="WORLDLINE_CAPTURED" />
         </enumtype>
     </enumtypes>
-
     <itemtypes>
         <itemtype code="WorldlineConfiguration"
                   extends="GenericItem"
@@ -99,6 +101,22 @@
                     <description>Submit Order Promotion as Line item promotion in Worldline.</description>
                     <modifiers read="true" write="true" optional="false"/>
                     <defaultvalue>Boolean.FALSE</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="groupCards" type="java.lang.Boolean">
+                    <description>Group cards for Hosted Checkout Page.</description>
+                    <modifiers read="true" write="true" optional="false"/>
+                    <defaultvalue>Boolean.FALSE</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="groupedCardsPaymentModes" type="groupedCardsPaymentModeSet">
+                    <description>Group cards Payment Modes.</description>
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="groupCardsLogo" type="Media">
+                    <description>Group cards Logo for payment page</description>
+                    <modifiers read="true" write="true"/>
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="replenishmentAttempts" type="java.lang.Integer">
