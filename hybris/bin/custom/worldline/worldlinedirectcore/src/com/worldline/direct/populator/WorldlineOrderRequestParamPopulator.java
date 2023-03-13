@@ -8,7 +8,10 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
+import org.apache.commons.lang.BooleanUtils;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ADDRESS_INDICATEUR.NEW;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ADDRESS_INDICATEUR.SAME_AS_BILLING;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
@@ -54,6 +57,7 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         {
             shipping.setShippingCost(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(),abstractOrderModel.getCurrency().getIsocode()));
         }
+        shipping.setAddressIndicator(BooleanUtils.isTrue(deliveryAddress.getShippingAddress()) ? SAME_AS_BILLING : NEW);
         return shipping;
     }
 
