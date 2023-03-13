@@ -12,9 +12,13 @@ import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.core.model.user.UserModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Locale;
+
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ACCOUNT_TYPE.CUSTOMER;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ACCOUNT_TYPE.GUEST;
 
 public class WorldlineCustomerRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
@@ -65,7 +69,9 @@ public class WorldlineCustomerRequestParamPopulator implements Populator<Abstrac
             ContactDetails contactDetails = new ContactDetails();
             contactDetails.setEmailAddress(customerEmailResolutionService.getEmailForCustomer(customerModel));
             contactDetails.setPhoneNumber(billingAddress.getPhone1());
+            contactDetails.setMobilePhoneNumber(StringUtils.trim(StringUtils.defaultIfBlank(billingAddress.getCellphone(), StringUtils.EMPTY)));
             customer.setContactDetails(contactDetails);
+            customer.setAccountType(isGuestUser(customerModel) ? GUEST : CUSTOMER);
         }
         return customer;
     }
