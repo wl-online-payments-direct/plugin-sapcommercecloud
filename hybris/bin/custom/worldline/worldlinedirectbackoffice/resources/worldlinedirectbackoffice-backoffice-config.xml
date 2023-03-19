@@ -79,10 +79,13 @@
 				<ea:section name="hmc.worldline.worldlineTokenizationConfig">
 					<ea:attribute qualifier="askConsumerConsent"/>
 					<ea:attribute qualifier="submitOrderPromotion"/>
-					<ea:attribute qualifier="exemptionRequest"/>
 					<ea:attribute qualifier="replenishmentAttempts"/>
 					<ea:attribute qualifier="firstRecurringPayment"/>
 					<ea:attribute qualifier="variant"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.settings.3ds">
+					<ea:attribute qualifier="challengeRequired"/>
+					<ea:attribute qualifier="exemptionRequest"/>
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineGroupedCardsConfig">
 					<ea:attribute qualifier="groupCards"/>
@@ -91,6 +94,13 @@
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
+	</context>
+
+
+	<context type="WorldlineConfiguration" component="editorAreaDynamicForms">
+		<df:dynamicForms xmlns:df="http://www.hybris.com/cockpitng/component/dynamicForms">
+			<df:attribute id="exemptionRequestVisiblity" triggeredOn="challengeRequired" qualifier="exemptionRequest" visibleIf="challengeRequired==false" />
+		</df:dynamicForms>
 	</context>
 
 	<!-- WorldlineConfiguration display name when viewing all attributes -->
