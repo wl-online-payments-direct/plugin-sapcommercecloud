@@ -11,6 +11,7 @@ import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
+import org.apache.commons.lang.BooleanUtils;
 
 import java.util.List;
 
@@ -20,6 +21,9 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
 
     private static final String ECOMMERCE = "ECOMMERCE";
     private List<String> salePaymentProduct;
+
+    public static final String CHALLENGE_REQUIRED = "challenge-required";
+    public static final String LOW_VALUE = "low-value";
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
@@ -44,8 +48,16 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS != paymentInfo.getId()) {
             cardPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
         }
-        if (currentWorldlineConfiguration.isExemptionRequest() && abstractOrderModel.getCurrency().getIsocode().equals("EUR") && abstractOrderModel.getTotalPrice() < 30) {
-            cardPaymentMethodSpecificInput.withThreeDSecure(new ThreeDSecureBase()).getThreeDSecure().setExemptionRequest("low-value");
+        boolean isExemptionRequestLowValue = BooleanUtils.isTrue(currentWorldlineConfiguration.isExemptionRequest()) && abstractOrderModel.getCurrency().getIsocode().equals("EUR") && abstractOrderModel.getTotalPrice() < 30;
+        boolean isChallengeRequired = BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired());
+        if (isExemptionRequestLowValue || isChallengeRequired) {
+            ThreeDSecureBase threeDSecureBase = new ThreeDSecureBase();
+            if (isChallengeRequired) {
+                threeDSecureBase.setChallengeIndicator(CHALLENGE_REQUIRED);
+            } else if (isExemptionRequestLowValue) {
+                threeDSecureBase.setExemptionRequest(LOW_VALUE);
+            }
+            cardPaymentMethodSpecificInput.setThreeDSecure(threeDSecureBase);
         }
         if (salePaymentProduct.contains(paymentInfo.getId())) {
             cardPaymentMethodSpecificInput.setAuthorizationMode(OperationCodesEnum.SALE.getCode());
