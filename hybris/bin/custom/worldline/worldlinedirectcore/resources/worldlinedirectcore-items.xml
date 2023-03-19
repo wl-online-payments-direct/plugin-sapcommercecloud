@@ -135,6 +135,12 @@
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                     <description>Define if the first REcurring Payment is immediate or scheduled.</description>
                 </attribute>
+                <attribute qualifier="exemptionRequest" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>request a SCA exemption for all transactions below 30 EUR.</description>
+                </attribute>
             </attributes>
         </itemtype>
 

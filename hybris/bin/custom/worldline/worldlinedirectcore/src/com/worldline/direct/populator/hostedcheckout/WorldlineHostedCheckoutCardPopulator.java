@@ -3,6 +3,7 @@ package com.worldline.direct.populator.hostedcheckout;
 import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.CardPaymentMethodSpecificInputBase;
 import com.onlinepayments.domain.CreateHostedCheckoutRequest;
+import com.onlinepayments.domain.ThreeDSecureBase;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
@@ -27,12 +28,12 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
 
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentInfo.getPaymentMethod())) {
-            createHostedCheckoutRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(paymentInfo));
+            createHostedCheckoutRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(abstractOrderModel, paymentInfo));
         }
 
     }
 
-    private CardPaymentMethodSpecificInputBase getCardPaymentMethodSpecificInput(WorldlinePaymentInfoModel paymentInfo) {
+    private CardPaymentMethodSpecificInputBase getCardPaymentMethodSpecificInput(AbstractOrderModel abstractOrderModel, WorldlinePaymentInfoModel paymentInfo) {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
 
         final CardPaymentMethodSpecificInputBase cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInputBase();
@@ -42,10 +43,12 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
         cardPaymentMethodSpecificInput.setTokenize(false);
         cardPaymentMethodSpecificInput.setToken(paymentInfo.getToken());
-        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS!=paymentInfo.getId()) {
+        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS != paymentInfo.getId()) {
             cardPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
         }
-
+        if (currentWorldlineConfiguration.isExemptionRequest() && abstractOrderModel.getCurrency().getIsocode().equals("EUR") && abstractOrderModel.getTotalPrice() < 30) {
+            cardPaymentMethodSpecificInput.withThreeDSecure(new ThreeDSecureBase()).getThreeDSecure().setExemptionRequest("low-value");
+        }
         return cardPaymentMethodSpecificInput;
     }
 
