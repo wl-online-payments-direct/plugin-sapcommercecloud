@@ -71,8 +71,10 @@
 
     <bean id="worldlineHostedCheckoutCardPopulator"
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator">
-        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="salePaymentProduct" ref="worldlineSalePaymentProductList"/>
     </bean>
+
+
 
     <bean id="worldlineSepaDirectDebitPopulator"
           class="com.worldline.direct.populator.hostedcheckout.WorldlineSepaDirectDebitPopulator">
