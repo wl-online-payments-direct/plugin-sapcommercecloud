@@ -74,6 +74,7 @@
 				<ea:section name="hmc.worldline.worldlineOperationCodeConfig">
 					<ea:attribute qualifier="defaultOperationCode"/>
 					<ea:attribute qualifier="captureTimeFrame"/>
+					<ea:attribute qualifier="sessionTimout"/>
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineTokenizationConfig">
 					<ea:attribute qualifier="askConsumerConsent"/>
