@@ -133,7 +133,7 @@
                     <persistence type="property" />
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
-                    <description>Define if the first REcurring Payment is immediate or scheduled.</description>
+                    <description>Define if the first Recurring Payment is immediate or scheduled.</description>
                 </attribute>
                 <attribute qualifier="sessionTimout" type="java.lang.Integer">
                     <modifiers read="true" write="true"/>
@@ -143,7 +143,13 @@
                     <persistence type="property" />
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
-                    <description>request a SCA exemption for all transactions below 30 EUR.</description>
+                    <description>Request a SCA exemption for all transactions below 30 EUR.</description>
+                </attribute>
+                <attribute qualifier="challengeRequired" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Enforce SCA for all transactions.</description>
                 </attribute>
             </attributes>
         </itemtype>
