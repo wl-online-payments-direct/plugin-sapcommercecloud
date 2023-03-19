@@ -6,6 +6,7 @@ import com.onlinepayments.domain.HostedCheckoutSpecificInput;
 import com.onlinepayments.domain.Order;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -38,6 +39,7 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
     }
 
     private HostedCheckoutSpecificInput getHostedCheckoutSpecificInput(AbstractOrderModel abstractOrderModel) {
+        WorldlineConfigurationModel worldlineConfiguration = abstractOrderModel.getStore().getWorldlineConfiguration();
         HostedCheckoutSpecificInput hostedCheckoutSpecificInput = new HostedCheckoutSpecificInput();
         hostedCheckoutSpecificInput.setIsRecurring(Boolean.FALSE);
         hostedCheckoutSpecificInput.setShowResultPage(Boolean.FALSE);
@@ -47,6 +49,9 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
 
         hostedCheckoutSpecificInput.setReturnUrl(getReturnUrlFromSession());
+        if (worldlineConfiguration.getSessionTimout() != null) {
+            hostedCheckoutSpecificInput.setSessionTimeout(worldlineConfiguration.getSessionTimout());
+        }
 
         return hostedCheckoutSpecificInput;
     }

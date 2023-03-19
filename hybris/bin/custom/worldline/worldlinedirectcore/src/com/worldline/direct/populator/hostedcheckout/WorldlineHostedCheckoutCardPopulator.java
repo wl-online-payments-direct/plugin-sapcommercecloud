@@ -5,19 +5,21 @@ import com.onlinepayments.domain.CardPaymentMethodSpecificInputBase;
 import com.onlinepayments.domain.CreateHostedCheckoutRequest;
 import com.onlinepayments.domain.ThreeDSecureBase;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
+
+import java.util.List;
 
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractOrderModel, CreateHostedCheckoutRequest> {
 
     private static final String ECOMMERCE = "ECOMMERCE";
-    private WorldlineConfigurationService worldlineConfigurationService;
+    private List<String> salePaymentProduct;
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
@@ -34,12 +36,8 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
     }
 
     private CardPaymentMethodSpecificInputBase getCardPaymentMethodSpecificInput(AbstractOrderModel abstractOrderModel, WorldlinePaymentInfoModel paymentInfo) {
-        final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
-
+        final WorldlineConfigurationModel currentWorldlineConfiguration = abstractOrderModel.getStore().getWorldlineConfiguration();
         final CardPaymentMethodSpecificInputBase cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInputBase();
-        if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
-            cardPaymentMethodSpecificInput.setAuthorizationMode(currentWorldlineConfiguration.getDefaultOperationCode().getCode());
-        }
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
         cardPaymentMethodSpecificInput.setTokenize(false);
         cardPaymentMethodSpecificInput.setToken(paymentInfo.getToken());
@@ -49,10 +47,16 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         if (currentWorldlineConfiguration.isExemptionRequest() && abstractOrderModel.getCurrency().getIsocode().equals("EUR") && abstractOrderModel.getTotalPrice() < 30) {
             cardPaymentMethodSpecificInput.withThreeDSecure(new ThreeDSecureBase()).getThreeDSecure().setExemptionRequest("low-value");
         }
+        if (salePaymentProduct.contains(paymentInfo.getId())) {
+            cardPaymentMethodSpecificInput.setAuthorizationMode(OperationCodesEnum.SALE.getCode());
+        } else if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
+            cardPaymentMethodSpecificInput.setAuthorizationMode(currentWorldlineConfiguration.getDefaultOperationCode().getCode());
+        }
+
         return cardPaymentMethodSpecificInput;
     }
 
-    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
-        this.worldlineConfigurationService = worldlineConfigurationService;
+    public void setSalePaymentProduct(List<String> salePaymentProduct) {
+        this.salePaymentProduct = salePaymentProduct;
     }
 }
