@@ -36,16 +36,15 @@ import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.mapping.FieldSetLevelHelper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdAndUserIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -63,7 +62,7 @@ import static de.hybris.platform.util.localization.Localization.getLocalizedStri
 
 @Controller
 @RequestMapping(value = "/{baseSiteId}/users/{userId}/orders")
-@Api(tags = "Worldline Orders")
+@Tag(name = "Worldline Orders")
 public class WorldlineOrdersController extends WorldlineBaseController {
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlineOrdersController.class);
 
@@ -112,16 +111,15 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
 
 
-    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/hostedTokenization", method = RequestMethod.POST)
+    @PostMapping(value = "/hostedTokenization")
     @ResponseBody
-    @ApiOperation(nickname = "place the order with hostedTokenization", value = "Place the order with hostedTokenization.",
-            notes = "Authorizes the cart and places the order. The response contains the new order data.")
+    @Operation(operationId = "place the order with hostedTokenization", summary = "Place the order with hostedTokenization.",
+            description = "Authorizes the cart and places the order. The response contains the new order data.")
     @ApiBaseSiteIdAndUserIdParam
     public OrderWsDTO placeOrderHostedTokenization(
-            @ApiParam(value = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
             @RequestParam final String cartId,
-            @ApiParam(value = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true)
+            @Parameter(description = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true)
             @RequestBody final BrowserDataWsDTO browserDataWsDTO,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
             final HttpServletRequest request)
@@ -163,18 +161,17 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL.replace("_orderCode_", code));
     }
 
-    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/{orderCode}/hostedTokenization/return", method = RequestMethod.POST)
+    @PostMapping(value = "/{orderCode}/hostedTokenization/return")
     @ResponseBody
-    @ApiOperation(nickname = "Handle return for hostedTokenization", value = "handle return for hostedTokenization.")
+    @Operation(description = "Handle return for hostedTokenization", summary = "handle return for hostedTokenization.")
     @ApiBaseSiteIdAndUserIdParam
     public OrderWsDTO handleHostedTokenizationReturn(
-            @ApiParam(value = "Order GUID (Globally Unique Identifier) or order CODE", required = true)
+            @Parameter(description= "Order GUID (Globally Unique Identifier) or order CODE", required = true)
             @PathVariable(value = "orderCode") final String orderCode,
             @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
             @RequestParam(value = "REF", required = true) final String ref,
             @RequestParam(value = "paymentId", required = true) final String paymentId,
-            @ApiParam(value = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
             @RequestParam final String cartId,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
             throws WorldlineNonAuthorizedPaymentException, InvalidCartException, WorldlineNonValidReturnMACException {
@@ -193,17 +190,16 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
     }
 
-    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/hostedCheckout", method = RequestMethod.POST)
+    @PostMapping(value = "/hostedCheckout")
     @ResponseBody
-    @ApiOperation(nickname = "placeOrderHostedCheckout", value = "Place the order with HostedCheckout.", notes =
+    @Operation(operationId = "placeOrderHostedCheckout", summary = "Place the order with HostedCheckout.", description =
             "Returns a hosted checkout data for the current base store. " +
                     "cart must be valid, otherwise an error will be returned.")
     @ApiBaseSiteIdAndUserIdParam
     public HostedCheckoutResponseWsDTO placeOrderHostedCheckout(
-            @ApiParam(value = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
+            @Parameter(description = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
             @RequestBody final BrowserDataWsDTO browserDataWsDTO,
-            @ApiParam(value = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
             @RequestParam final String cartId,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
             final HttpServletRequest request) throws InvalidCartException {
@@ -229,47 +225,15 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         return getDataMapper().map(createHostedCheckoutResponse, HostedCheckoutResponseWsDTO.class, fields);
 
     }
-
-
-    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/{orderCode}/hostedCheckout/return", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(nickname = "Handle return for HostedCheckout", value = "Handle return for HostedCheckout.",
-            notes = "Authorizes the cart and places the order. The response contains the new order data.")
-    @ApiBaseSiteIdAndUserIdParam
-    public OrderWsDTO handleHostedCheckoutReturn(
-            @ApiParam(value = "Order GUID (Globally Unique Identifier) or order CODE", required = true)
-            @PathVariable final String orderCode,
-            @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
-            @RequestParam(value = "hostedCheckoutId", required = true) final String hostedCheckoutId,
-            @ApiParam(value = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
-            @RequestParam final String cartId,
-            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-            throws WorldlineNonAuthorizedPaymentException, InvalidCartException, WorldlineNonValidReturnMACException {
-        cartLoaderStrategy.loadCart(cartId);
-        OrderData orderData;
-        if (orderCodeIdentificationStrategy.isID(orderCode)) {
-            orderData = orderFacade.getOrderDetailsForGUID(orderCode);
-        } else {
-            orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
-        }
-
-        worldlineCheckoutFacade.validateReturnMAC(orderData, returnMAC);
-        worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderData.getCode(), hostedCheckoutId);
-        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
-        return getDataMapper().map(orderData, OrderWsDTO.class, fields);
-    }
-
-
-    @RequestMapping(value = "/recurringHostedCheckout", method = RequestMethod.POST, consumes =
+    @PostMapping(value = "/recurringHostedCheckout", consumes =
             {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
     @ApiBaseSiteIdAndUserIdParam
-    @ApiOperation(nickname = "placeReplenishmentOrderHostedCheckout", value = "Place the Replenishment order with HostedCheckout", notes = "Place the Replenishment order with HostedCheckout", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(operationId = "placeReplenishmentOrderHostedCheckout", summary = "Place the Replenishment order with HostedCheckout", description = "Place the Replenishment order with HostedCheckout")
     public HostedCheckoutResponseWsDTO placeReplenishmentOrderHostedCheckout(
-            @ApiParam(value = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true) @RequestParam(required = true) final String cartId,
-            @ApiParam(value = "Whether terms were accepted or not.", required = true) @RequestParam(required = true) final boolean termsChecked,
-            @ApiParam(value = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true) @RequestBody final RecurringDataWSDTO recurringDataWSDTO,
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true) @RequestParam(required = true) final String cartId,
+            @Parameter(description = "Whether terms were accepted or not.", required = true) @RequestParam(required = true) final boolean termsChecked,
+            @Parameter(description = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true) @RequestBody final RecurringDataWSDTO recurringDataWSDTO,
             @ApiFieldsParam @RequestParam(required = false, defaultValue = FieldSetLevelHelper.DEFAULT_LEVEL) final String fields, final HttpServletRequest request)
             throws InvalidCartException {
 
@@ -299,6 +263,36 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         }
         return dataMapper.map(createHostedCheckoutResponse, HostedCheckoutResponseWsDTO.class, fields);
     }
+
+
+    @PostMapping(value = "/{orderCode}/hostedCheckout/return")
+    @ResponseBody
+    @Operation(operationId = "Handle return for HostedCheckout", summary = "Handle return for HostedCheckout.",
+            description = "Authorizes the cart and places the order. The response contains the new order data.")
+    @ApiBaseSiteIdAndUserIdParam
+    public OrderWsDTO handleHostedCheckoutReturn(
+            @Parameter(description = "Order GUID (Globally Unique Identifier) or order CODE", required = true)
+            @PathVariable final String orderCode,
+            @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
+            @RequestParam(value = "hostedCheckoutId", required = true) final String hostedCheckoutId,
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @RequestParam final String cartId,
+            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+            throws WorldlineNonAuthorizedPaymentException, InvalidCartException, WorldlineNonValidReturnMACException {
+        cartLoaderStrategy.loadCart(cartId);
+        OrderData orderData;
+        if (orderCodeIdentificationStrategy.isID(orderCode)) {
+            orderData = orderFacade.getOrderDetailsForGUID(orderCode);
+        } else {
+            orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
+        }
+
+        worldlineCheckoutFacade.validateReturnMAC(orderData, returnMAC);
+        worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderData.getCode(), hostedCheckoutId);
+        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
+        return getDataMapper().map(orderData, OrderWsDTO.class, fields);
+    }
+
 
 
     protected void validateTerms(final boolean termsChecked) {
