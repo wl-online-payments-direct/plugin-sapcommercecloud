@@ -1,7 +1,7 @@
 package com.worldline.direct.actions.approval;
 
 import de.hybris.platform.b2b.process.approval.model.B2BApprovalProcessModel;
-import de.hybris.platform.b2bacceleratorservices.enums.CheckoutPaymentType;
+import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.core.enums.OrderStatus;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.CreditCardPaymentInfoModel;
