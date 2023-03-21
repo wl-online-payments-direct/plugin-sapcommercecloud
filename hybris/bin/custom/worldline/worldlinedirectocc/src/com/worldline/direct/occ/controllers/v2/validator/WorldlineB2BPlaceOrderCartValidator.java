@@ -3,7 +3,7 @@
  */
 package com.worldline.direct.occ.controllers.v2.validator;
 
-import de.hybris.platform.b2bacceleratorservices.enums.CheckoutPaymentType;
+import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

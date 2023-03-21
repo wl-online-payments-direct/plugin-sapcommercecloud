@@ -27,7 +27,7 @@ import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
 import de.hybris.platform.b2bacceleratorfacades.exception.EntityValidationException;
 import de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
-import de.hybris.platform.b2bacceleratorservices.enums.CheckoutPaymentType;
+import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
