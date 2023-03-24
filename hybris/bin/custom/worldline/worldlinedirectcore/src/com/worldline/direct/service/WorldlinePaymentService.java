@@ -69,4 +69,6 @@ public interface WorldlinePaymentService {
 
     GetMandateResponse unBlockMandate(WorldlineMandateModel worldlineMandateModel);
 
+    CalculateSurchargeResponse calculateSurcharge(String token,AbstractOrderModel abstractOrderModel);
+
 }

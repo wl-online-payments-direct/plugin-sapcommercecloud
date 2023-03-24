@@ -12,6 +12,10 @@
 <c:set var="isChecked" value="${false}"/>
 
 <div class="js-hostedTokenization-partialRedirectUrl" value="${hostedTokenization.partialRedirectUrl}"></div>
+<c:if test="${applySurcharge eq true}">
+    <spring:theme code="checkout.paymentProduct.displaySurcharge.label"/>
+</c:if>
+
 <fieldset class="credit-card-selector-block form-check">
     <table>
         <body>
