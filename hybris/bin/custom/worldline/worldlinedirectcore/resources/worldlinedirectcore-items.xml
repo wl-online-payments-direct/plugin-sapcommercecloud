@@ -151,6 +151,12 @@
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                     <description>Enforce SCA for all transactions.</description>
                 </attribute>
+                <attribute qualifier="applySurcharge" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Apply Surcharge for all transactions.</description>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -294,6 +300,22 @@
                 </attribute>
             </attributes>
         </itemtype>
+
+        <itemtype code="AbstractOrder" autocreate="false" generate="false">
+            <attributes>
+                <attribute qualifier="surcharge" type="java.lang.Double">
+                    <persistence type="property">
+                        <columntype>
+                            <value>java.math.BigDecimal</value>
+                        </columntype>
+                    </persistence>
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <defaultvalue>Double.valueOf(0.0d)</defaultvalue>
+                </attribute>
+
+            </attributes>
+        </itemtype>
+
 
         <itemtype code="WorldlineMandate">
             <deployment table="worldlineMandate" typecode="15007"/>

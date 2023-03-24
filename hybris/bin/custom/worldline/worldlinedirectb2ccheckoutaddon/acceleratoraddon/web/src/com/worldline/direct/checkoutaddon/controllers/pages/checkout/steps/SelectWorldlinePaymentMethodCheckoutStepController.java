@@ -13,6 +13,7 @@ import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -28,6 +29,7 @@ import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commerceservices.enums.CountryType;
 import de.hybris.platform.util.Config;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -73,6 +75,9 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
     @Resource(name = "worldlinePaymentProductFilterStrategyFactory")
     private WorldlinePaymentProductFilterStrategyFactory worldlinePaymentProductFilterStrategyFactory;
 
+    @Resource(name = "worldlineConfigurationService")
+    private WorldlineConfigurationService worldlineConfigurationService;
+
     protected UserFacade getUserFacade() {
         return userFacade;
     }
@@ -90,7 +95,9 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
 
         model.addAttribute("worldlinePaymentDetailsForm", new WorldlinePaymentDetailsForm());
         final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS).get();
-        model.addAttribute("paymentProducts", worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE,WorldlinePaymentProductFilterEnum.GROUP_CARDS).get());
+        List<PaymentProduct> filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS).get();
+        model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
+        model.addAttribute("paymentProducts", filteredPaymentProducts);
 
         model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
         model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));

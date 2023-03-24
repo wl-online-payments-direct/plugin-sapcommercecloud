@@ -388,6 +388,34 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
+    public CalculateSurchargeResponse calculateSurcharge(String hostedTokenizationId,AbstractOrderModel abstractOrderModel) {
+        validateParameterNotNullStandardMessage("hostedTokenizationId", hostedTokenizationId);
+
+        try (Client client = worldlineClientFactory.getClient()) {
+            CalculateSurchargeRequest request=new CalculateSurchargeRequest();
+            request.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
+            request.withCardSource(new CardSource()).getCardSource().setHostedTokenizationId(hostedTokenizationId);
+            CalculateSurchargeResponse calculateSurchargeResponse = client.merchant(getMerchantId()).services().surchargeCalculation(request);
+            WorldlineLogUtils.logAction(LOGGER, "calculateSurchargeResponse", hostedTokenizationId, "Calculate Surcharge");
+            return calculateSurchargeResponse;
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during surcharge calculation", e);
+            return null;
+        }
+
+    }
+    private AmountOfMoney getAmoutOfMoney(AbstractOrderModel abstractOrderModel) {
+        final AmountOfMoney amountOfMoney = new AmountOfMoney();
+        final String currencyCode = abstractOrderModel.getCurrency().getIsocode();
+        final long amount;
+        amount = worldlineAmountUtils.createAmount(abstractOrderModel.getTotalPrice(), abstractOrderModel.getCurrency().getIsocode());
+        amountOfMoney.setAmount(amount);
+        amountOfMoney.setCurrencyCode(currencyCode);
+
+        return amountOfMoney;
+    }
+
+    @Override
     public PaymentResponse getPayment(String paymentId) {
         validateParameterNotNull(paymentId, "paymentId cannot be null");
         try (Client client = worldlineClientFactory.getClient()) {
