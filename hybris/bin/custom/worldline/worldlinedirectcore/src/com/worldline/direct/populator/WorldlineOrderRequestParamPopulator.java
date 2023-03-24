@@ -8,6 +8,7 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
+import org.apache.commons.lang.BooleanUtils;
 
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
@@ -21,7 +22,10 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         order.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
         order.setShipping(getShipping(abstractOrderModel));
         order.setReferences(getReferences(abstractOrderModel));
-
+        if (BooleanUtils.isTrue(abstractOrderModel.getStore().getWorldlineConfiguration().isApplySurcharge()))
+        {
+            order.withSurchargeSpecificInput(new SurchargeSpecificInput()).getSurchargeSpecificInput().setMode("on-behalf-of");
+        }
     }
 
     private Shipping getShipping(AbstractOrderModel abstractOrderModel) {

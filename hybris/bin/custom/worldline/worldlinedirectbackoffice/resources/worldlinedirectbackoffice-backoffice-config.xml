@@ -81,6 +81,7 @@
 					<ea:attribute qualifier="submitOrderPromotion"/>
 					<ea:attribute qualifier="replenishmentAttempts"/>
 					<ea:attribute qualifier="firstRecurringPayment"/>
+					<ea:attribute qualifier="applySurcharge"/>
 					<ea:attribute qualifier="variant"/>
 				</ea:section>
 				<ea:section name="hmc.worldline.settings.3ds">
