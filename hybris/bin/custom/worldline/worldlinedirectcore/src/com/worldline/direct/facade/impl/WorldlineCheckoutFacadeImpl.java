@@ -16,10 +16,7 @@ import com.worldline.direct.model.WorldlineMandateModel;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
-import com.worldline.direct.service.WorldlineBusinessProcessService;
-import com.worldline.direct.service.WorldlineCustomerAccountService;
-import com.worldline.direct.service.WorldlinePaymentService;
-import com.worldline.direct.service.WorldlineTransactionService;
+import com.worldline.direct.service.*;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -72,7 +69,6 @@ import org.springframework.beans.factory.annotation.Required;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP;
 
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
@@ -80,6 +76,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     protected CommonI18NService commonI18NService;
     protected ModelService modelService;
+    private List<String> virtualPaymentModes=new ArrayList<>();
 
     protected Converter<AddressData, AddressModel> addressReverseConverter;
     protected Converter<OrderModel, OrderData> orderConverter;
@@ -98,6 +95,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     protected WorldlinePaymentService worldlinePaymentService;
     protected WorldlineTransactionService worldlineTransactionService;
     protected WorldlineBusinessProcessService worldlineBusinessProcessService;
+
+    protected WorldlineConfigurationService worldlineConfigurationService;
 
     @Override
     public List<PaymentProduct> getAvailablePaymentMethods() {
@@ -119,6 +118,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             return createHtpGroupedCardPaymentProduct();
         } else if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP) {
             return createHcpGroupedCardPaymentProduct();
+        } else if (paymentId== WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS)
+        {
+            return createGroupCartPaymentProduct();
         }
         final CartData cartData = checkoutFacade.getCheckoutCart();
         final PriceData totalPrice = cartData.getTotalPrice();
@@ -445,7 +447,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             paymentInfo.setId(worldlinePaymentInfoData.getId());
             paymentModeCode = String.valueOf(worldlinePaymentInfoData.getId());
         }
-        if (!StringUtils.equals(paymentModeCode, String.valueOf(PAYMENT_METHOD_HTP)) && !StringUtils.equals(paymentModeCode, String.valueOf(PAYMENT_METHOD_HCP))) {
+        if (!virtualPaymentModes.contains(paymentModeCode)) {
             PaymentModeModel paymentMode = paymentModeService.getPaymentModeForCode(paymentModeCode);
             cartModel.setPaymentMode(paymentMode);
             modelService.save(cartModel);
@@ -574,6 +576,18 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return paymentProduct;
     }
 
+    private PaymentProduct createGroupCartPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS);
+        paymentProduct.setPaymentMethod(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.groupedCards"));
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getUrl());
+        return paymentProduct;
+    }
+
+
     private Boolean isValidPaymentMethod(PaymentProduct paymentProduct) {
         final WorldlineCheckoutTypesEnum worldlineCheckoutType = getWorldlineCheckoutType();
         if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutType)) {
@@ -668,5 +682,13 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     @Required
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    public void setVirtualPaymentModes(List<String> virtualPaymentModes) {
+        this.virtualPaymentModes = virtualPaymentModes;
+    }
+
+    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
+        this.worldlineConfigurationService = worldlineConfigurationService;
     }
 }
