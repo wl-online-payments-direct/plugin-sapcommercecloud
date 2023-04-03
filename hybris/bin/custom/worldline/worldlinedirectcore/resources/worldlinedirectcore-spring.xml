@@ -73,6 +73,8 @@
         <property name="customerAccountService" ref="customerAccountService"/>
         <property name="paymentModeService" ref="worldlinePaymentModeService"/>
         <property name="userService" ref="userService"/>
+        <property name="virtualPaymentModes" ref="virtualPaymentModes"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
     <bean id="worldlineRecurringCheckoutFacade" parent="worldlineCheckoutFacade"
@@ -124,6 +126,10 @@
           class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByAvailabilityStrategy">
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
     </bean>
+
+    <bean id="worldlinePaymentProductFilterByGroupCardsStrategy" class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByGroupCardsStrategy">
+    <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+    </bean>
     <bean id="worldlinePaymentProductFilterByCheckoutStrategy"
           class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByCheckoutStrategy">
         <property name="baseStoreService" ref="baseStoreService"/>
@@ -139,6 +145,7 @@
               map-class="java.util.HashMap">
         <entry key="CHECKOUT_TYPE" value-ref="worldlinePaymentProductFilterByCheckoutStrategy"/>
         <entry key="ACTIVE_PAYMENTS" value-ref="worldlinePaymentProductFilterByAvailabilityStrategy"/>
+        <entry key="GROUP_CARDS" value-ref="worldlinePaymentProductFilterByGroupCardsStrategy"/>
     </util:map>
     <bean id="worldlinePaymentProductFilterStrategyFactory"
           class="com.worldline.direct.factory.impl.DefaultWorldlinePaymentProductFilterStrategyFactory">
@@ -175,4 +182,12 @@
         <ref bean="worldlineBcmcPaymentProductsEvaluator"/>
     </utils:list>
 
+    <utils:list id="virtualPaymentModes">
+        <utils:constant
+                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS"/>
+        <utils:constant
+                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP"/>
+        <utils:constant
+                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP"/>
+    </utils:list>
 </beans>
