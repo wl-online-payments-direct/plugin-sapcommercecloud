@@ -164,6 +164,15 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
         }
     }
 
+    public interface ACCOUNT_TYPE {
+        String GUEST = "none";
+        String CUSTOMER = "created";
+    }
+
+    public interface ADDRESS_INDICATEUR {
+        String SAME_AS_BILLING = "same-as-billing";
+        String NEW = "different-than-billing";
+    }
     public enum WEBHOOK_TYPE_ENUM {
         PAYMENT_CREATED("payment.created"),
         PAYMENT_REDIRECTED("payment.redirected"),
