@@ -84,7 +84,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @ApiBaseSiteIdUserIdAndCartIdParam
     public PaymentProductListWsDTO getCartPaymentProducts(
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
-        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE).get();
+        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE,WorldlinePaymentProductFilterEnum.GROUP_CARDS).get();
 
         GetPaymentProductsResponse productsResponse = new GetPaymentProductsResponse();
         productsResponse.setPaymentProducts(availablePaymentMethods);

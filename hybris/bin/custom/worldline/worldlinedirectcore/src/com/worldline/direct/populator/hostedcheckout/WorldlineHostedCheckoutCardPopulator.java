@@ -42,7 +42,9 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
         cardPaymentMethodSpecificInput.setTokenize(false);
         cardPaymentMethodSpecificInput.setToken(paymentInfo.getToken());
-        cardPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
+        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS!=paymentInfo.getId()) {
+            cardPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
+        }
 
         return cardPaymentMethodSpecificInput;
     }
