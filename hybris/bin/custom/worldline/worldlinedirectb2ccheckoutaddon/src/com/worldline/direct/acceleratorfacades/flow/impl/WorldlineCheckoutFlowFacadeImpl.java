@@ -6,10 +6,8 @@ import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commerceservices.order.CommercePaymentProviderStrategy;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.List;
 import java.util.function.Predicate;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 
 public class WorldlineCheckoutFlowFacadeImpl extends DefaultCheckoutFlowFacade {
