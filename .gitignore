@@ -36,6 +36,7 @@ eclipsebin
 # allow only custom extensions
 **/hybris/bin/*
 **/hybris/bin/custom/yb2bacceleratorstorefront/
+**/hybris/bin/custom/spartacussampledata/
 !**/hybris/bin/custom/
 
 # Folders to ignore at the root of the repository

@@ -13,6 +13,9 @@
     <c:if test="${empty paymentProducts}">
         <p><spring:theme code="payment.methods.not.found"/></p>
     </c:if>
+    <c:if test="${applySurcharge eq true && isCardPaymentMethodExisting eq true}">
+        <spring:theme code="checkout.paymentProduct.displaySurcharge.label"/>
+    </c:if>
 	<c:forEach items="${paymentProducts}" var="paymentProduct" varStatus="index">
         <worldline:paymentProductDetails paymentInfo="${cartData.worldlinePaymentInfo}"
                                          paymentProduct="${paymentProduct}" tabindex="${tabindex+index.count}"

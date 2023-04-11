@@ -194,10 +194,6 @@
             </attributes>
         </itemtype>
 
-
-
-
-
         <itemtype code="WorldlinePaymentInfo" extends="PaymentInfo"
                   jaloclass="de.hybris.platform.jalo.order.payment.PaymentInfo"
                   generate="false">
