@@ -98,6 +98,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         List<PaymentProduct> filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS).get();
         model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
         model.addAttribute("paymentProducts", filteredPaymentProducts);
+        model.addAttribute("isCardPaymentMethodExisting", worldlinePaymentProductFilterStrategyFactory.checkForCardPaymentMethods(filteredPaymentProducts));
 
         model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
         model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));

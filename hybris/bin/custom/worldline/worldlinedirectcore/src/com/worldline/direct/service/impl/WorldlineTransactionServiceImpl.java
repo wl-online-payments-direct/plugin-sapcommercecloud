@@ -1,8 +1,6 @@
 package com.worldline.direct.service.impl;
 
-import com.onlinepayments.domain.AmountOfMoney;
-import com.onlinepayments.domain.Capture;
-import com.onlinepayments.domain.WebhooksEvent;
+import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.dao.WorldlineTransactionDao;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
@@ -11,6 +9,8 @@ import com.worldline.direct.util.WorldlineAmountUtils;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.order.CalculationService;
+import de.hybris.platform.order.exceptions.CalculationException;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
@@ -31,10 +31,16 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineTransactionServiceImpl implements WorldlineTransactionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineTransactionServiceImpl.class);
 
+    private static final int PAYMENT_ID_LENGTH = 10;
+
+    private static final int PAYMENT_ID_START_STRIP_LENGTH = 6;
+
     private WorldlineTransactionDao worldlineTransactionDao;
     private WorldlineBusinessProcessService worldlineBusinessProcessService;
     private WorldlineAmountUtils worldlineAmountUtils;
     private ModelService modelService;
+
+    private CalculationService calculationService;
 
 
     @Override
@@ -54,7 +60,6 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
 
         return paymentTransaction;
     }
-
 
     @Override
     public PaymentTransactionModel createAuthorizationPaymentTransaction(AbstractOrderModel abstractOrderModel,
@@ -157,6 +162,26 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 webhooksEvent.getRefund().getRefundOutput().getAmountOfMoney(),
                 PaymentTransactionType.REFUND_FOLLOW_ON
         );
+
+    }
+
+    @Override
+    public void savePaymentCost(AbstractOrderModel orderModel, PaymentResponse paymentResponse) {
+
+
+        SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
+
+        if (surchargeSpecificOutput != null) {
+            Double surchargeAmount = worldlineAmountUtils.fromAmount(surchargeSpecificOutput.getSurchargeAmount().getAmount(), orderModel.getCurrency().getIsocode()).doubleValue();
+            orderModel.setPaymentCost(surchargeAmount);
+            try {
+                calculationService.calculateTotals(orderModel, true);
+            } catch (CalculationException ex) {
+                LOGGER.error("[ WORLDLINE ] Error was thrown while recalculating the order.", ex);
+            }
+            modelService.refresh(orderModel);
+
+        }
 
     }
 
@@ -308,8 +333,12 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         }
     }
 
-    private String getPaymentId(String paymentTransactionId) {
-        return StringUtils.split(paymentTransactionId, "_")[0];
+    private String getPaymentId(String rawPaymentTransactionId) {
+        String paymentTransactionId = StringUtils.split(rawPaymentTransactionId, "_")[0];
+        if (paymentTransactionId.length() > PAYMENT_ID_LENGTH) {
+            paymentTransactionId = paymentTransactionId.substring(PAYMENT_ID_START_STRIP_LENGTH, PAYMENT_ID_LENGTH + PAYMENT_ID_START_STRIP_LENGTH);
+        }
+        return paymentTransactionId;
     }
 
 
@@ -327,5 +356,9 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
 
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
+    }
+
+    public void setCalculationService(CalculationService calculationService) {
+        this.calculationService = calculationService;
     }
 }

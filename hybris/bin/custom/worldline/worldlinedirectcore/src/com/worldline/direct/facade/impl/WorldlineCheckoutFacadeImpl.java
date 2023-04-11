@@ -17,6 +17,7 @@ import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.*;
+import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -45,6 +46,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.core.model.user.TitleModel;
+import de.hybris.platform.order.CalculationService;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.order.PaymentModeService;
@@ -98,6 +100,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     protected WorldlineConfigurationService worldlineConfigurationService;
 
+    private WorldlineAmountUtils worldlineAmountUtils;
+
     @Override
     public List<PaymentProduct> getAvailablePaymentMethods() {
         final CartData cartData = checkoutFacade.getCheckoutCart();
@@ -110,7 +114,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
         return paymentProducts;
     }
-
 
     @Override
     public PaymentProduct getPaymentMethodById(int paymentId) {
@@ -389,6 +392,10 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     protected void updateOrderFromPaymentResponse(AbstractOrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) {
         updatePaymentInfoIfNeeded(orderModel, paymentResponse);
+
+        worldlineTransactionService.savePaymentCost(orderModel, paymentResponse);
+
+
         final PaymentTransactionModel paymentTransaction = worldlineTransactionService.getOrCreatePaymentTransaction(orderModel,
                 paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
                 paymentResponse.getId());
@@ -397,9 +404,10 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 paymentTransaction,
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
-                paymentResponse.getPaymentOutput().getAmountOfMoney(),
+                paymentResponse.getPaymentOutput().getAcquiredAmount() != null ? paymentResponse.getPaymentOutput().getAcquiredAmount() : paymentResponse.getPaymentOutput().getAmountOfMoney(),
                 paymentTransactionType
         );
+
         cartService.removeSessionCart();
         cartService.getSessionCart();
         modelService.refresh(orderModel);
@@ -690,5 +698,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
         this.worldlineConfigurationService = worldlineConfigurationService;
+    }
+
+    public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
+        this.worldlineAmountUtils = worldlineAmountUtils;
     }
 }

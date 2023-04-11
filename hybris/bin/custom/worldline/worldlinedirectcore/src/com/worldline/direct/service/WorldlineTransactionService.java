@@ -2,6 +2,7 @@ package com.worldline.direct.service;
 
 import com.onlinepayments.domain.AmountOfMoney;
 import com.onlinepayments.domain.Capture;
+import com.onlinepayments.domain.PaymentResponse;
 import com.onlinepayments.domain.WebhooksEvent;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
@@ -30,5 +31,7 @@ public interface WorldlineTransactionService {
     void processCapture(Capture capture);
 
     void processRefundedEvent(WebhooksEvent webhooksEvent);
+
+    void savePaymentCost(AbstractOrderModel orderModel, PaymentResponse paymentResponse);
 
 }
