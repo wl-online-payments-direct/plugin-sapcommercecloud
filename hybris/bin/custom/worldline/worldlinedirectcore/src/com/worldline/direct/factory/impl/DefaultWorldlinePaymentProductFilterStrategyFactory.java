@@ -1,9 +1,11 @@
 package com.worldline.direct.factory.impl;
 
 import com.onlinepayments.domain.PaymentProduct;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
 import com.worldline.direct.strategy.WorldlinePaymentProductFilterStrategy;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.ArrayList;
@@ -23,6 +25,17 @@ public class DefaultWorldlinePaymentProductFilterStrategyFactory implements Worl
             }
             return paymentProductList;
         };
+    }
+
+    @Override
+    public Boolean checkForCardPaymentMethods(List<PaymentProduct> paymentProducts) {
+        for (PaymentProduct paymentProduct : paymentProducts) {
+           if (StringUtils.equals(paymentProduct.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
+               return Boolean.TRUE;
+           }
+        }
+
+        return Boolean.FALSE;
     }
 
     @Required

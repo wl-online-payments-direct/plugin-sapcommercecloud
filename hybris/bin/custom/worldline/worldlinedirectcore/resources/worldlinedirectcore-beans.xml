@@ -34,6 +34,7 @@
 
     <bean class="de.hybris.platform.commercefacades.order.data.AbstractOrderData">
         <property name="worldlinePaymentInfo" type="com.worldline.direct.order.data.WorldlinePaymentInfoData"/>
+        <property name="surcharge" type="de.hybris.platform.commercefacades.product.data.PriceData"/>
     </bean>
 
     <bean class="com.worldline.direct.order.data.WorldlineHostedTokenizationData">

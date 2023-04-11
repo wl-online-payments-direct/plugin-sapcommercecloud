@@ -169,6 +169,7 @@
 
     <bean name="worldlineOrderPopulator" class="com.worldline.direct.populator.WorldlineOrderPopulator">
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="priceDataFactory" ref="priceDataFactory"/>
     </bean>
 
     <bean name="worldlineMandatePopulator" class="com.worldline.direct.populator.WorldlineMandatePopulator">

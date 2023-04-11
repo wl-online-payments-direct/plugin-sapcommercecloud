@@ -12,6 +12,7 @@
 <c:set var="isChecked" value="${false}"/>
 
 <div class="js-hostedTokenization-partialRedirectUrl" value="${hostedTokenization.partialRedirectUrl}"></div>
+
 <fieldset class="credit-card-selector-block form-check">
     <table>
         <body>

@@ -89,7 +89,7 @@ INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]        
                          ;                          ; BodyContent-my-replenishment-orders ; Body Content Slot for My Account Replenishment Orders ; true  ; AccountMyReplenishmentOrdersComponent ; ; ;
 
 INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]          ; name                                           ; active; cmsComponents(uid, $contentCV)                                                                                                                                                                                                                                    ;
-                         ;                          ; BodyContentSlot-orderdetail ; Body Content Slot for My Account Order Details ; true  ; AccountOrderDetailsHeadlineComponent,AccountOrderDetailsOverviewComponent,AccountOrderDetailsItemsComponent,WorldlineMandateDetailsComponent,WorldlineAccountOrderDetailsShippingComponent,AccountOrderDetailsTotalsComponent,AccountOrderDetailsActionsComponent ;
+                         ;                          ; BodyContentSlot-orderdetail ; Body Content Slot for My Account Order Details ; true  ; AccountOrderDetailsHeadlineComponent,AccountOrderDetailsOverviewComponent,AccountOrderDetailsItemsComponent,WorldlineMandateDetailsComponent,WorldlineAccountOrderDetailsShippingComponent,WorldlineOrderDetailsOrderTotalsComponent,AccountOrderDetailsActionsComponent ;
 
 INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                    ; name                                      ; page                                                                                                                          ; actions(uid, $contentCV); &componentRef
                                  ;                          ; AccountMyReplenishmentOrdersComponent ; Account My Replenishment Orders Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentSchedule.jsp ;                         ; AccountMyReplenishmentOrdersComponent
@@ -243,3 +243,7 @@ INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];po
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
                        ;;ReplenishmentCartNonValidEmail;Cart Non Valid Email;ReplenishmentCartNonValidEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
 
+####### UPDATE Order details totals block to include surcharge field #######
+
+INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;page;actions(uid,$contentCV);&componentRef
+                                 ;;WorldlineOrderDetailsOrderTotalsComponent;Worldline Order Totals Component;/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/worldlineAccountOrderDetailOrderTotals.jsp;;WorldlineOrderDetailsOrderTotalsComponent

@@ -9,7 +9,9 @@
 <%@ taglib prefix="paymentproduct"
            tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/paymentproducts" %>
 <%@ attribute name="paymentInfo" required="false" type="com.worldline.direct.order.data.WorldlinePaymentInfoData" %>
+
 <c:set var="isSelectedStoredCard" value="${not empty paymentInfo.savedPayment}" />
+
 <c:choose>
     <c:when test="${paymentProduct.id==-1}">
         <div class="worldline_payment_product htp" style="margin-bottom:-7px" title="${groupedCardsLabel}">
