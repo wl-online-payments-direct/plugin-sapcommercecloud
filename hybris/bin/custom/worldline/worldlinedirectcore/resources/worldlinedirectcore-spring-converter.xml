@@ -145,6 +145,7 @@
 
     <bean name="worldlineCartPopulator" class="com.worldline.direct.populator.WorldlineCartPopulator">
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="priceDataFactory" ref="priceDataFactory"/>
     </bean>
 
     <bean parent="modifyPopulatorList">
