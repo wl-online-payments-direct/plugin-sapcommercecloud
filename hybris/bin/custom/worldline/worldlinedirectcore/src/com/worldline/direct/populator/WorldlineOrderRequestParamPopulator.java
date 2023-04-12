@@ -74,7 +74,11 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         final AmountOfMoney amountOfMoney = new AmountOfMoney();
         final String currencyCode = abstractOrderModel.getCurrency().getIsocode();
         final long amount;
-        amount = worldlineAmountUtils.createAmount(abstractOrderModel.getTotalPrice(), abstractOrderModel.getCurrency().getIsocode());
+        double totalAmountToSend = abstractOrderModel.getTotalPrice();
+        if (abstractOrderModel.getPaymentCost() > 0.0d) { // subtract the surcharge so the amount that is sent to WL is the one expected /HTP/
+            totalAmountToSend -= abstractOrderModel.getPaymentCost();
+        }
+        amount = worldlineAmountUtils.createAmount(totalAmountToSend, abstractOrderModel.getCurrency().getIsocode());
         amountOfMoney.setAmount(amount);
         amountOfMoney.setCurrencyCode(currencyCode);
 

@@ -359,9 +359,18 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
+        if (StringUtils.equals(worldlinePaymentInfoData.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
+            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId());
+        }
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
 
         commerceCheckoutService.setPaymentInfo(parameter);
+    }
+
+    private void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID) {
+        CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, cartModel);
+        AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
+        worldlineTransactionService.savePaymentCost(cartModel, surcharge);
     }
 
 
@@ -403,7 +412,12 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     protected void updateOrderFromPaymentResponse(AbstractOrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) {
         updatePaymentInfoIfNeeded(orderModel, paymentResponse);
 
-        worldlineTransactionService.savePaymentCost(orderModel, paymentResponse);
+        AmountOfMoney transactionAmount = paymentResponse.getPaymentOutput().getAmountOfMoney();
+        if (paymentResponse.getPaymentOutput().getSurchargeSpecificOutput() != null) {
+            SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
+            transactionAmount = paymentResponse.getPaymentOutput().getAcquiredAmount();
+            worldlineTransactionService.savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
+        }
 
 
         final PaymentTransactionModel paymentTransaction = worldlineTransactionService.getOrCreatePaymentTransaction(orderModel,
@@ -414,7 +428,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 paymentTransaction,
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
-                paymentResponse.getPaymentOutput().getAcquiredAmount() != null ? paymentResponse.getPaymentOutput().getAcquiredAmount() : paymentResponse.getPaymentOutput().getAmountOfMoney(),
+                transactionAmount,
                 paymentTransactionType
         );
 
