@@ -27,17 +27,6 @@ public class DefaultWorldlinePaymentProductFilterStrategyFactory implements Worl
         };
     }
 
-    @Override
-    public Boolean checkForCardPaymentMethods(List<PaymentProduct> paymentProducts) {
-        for (PaymentProduct paymentProduct : paymentProducts) {
-           if (StringUtils.equals(paymentProduct.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
-               return Boolean.TRUE;
-           }
-        }
-
-        return Boolean.FALSE;
-    }
-
     @Required
     public void setPaymentProductFilterStrategyMap(Map<WorldlinePaymentProductFilterEnum, WorldlinePaymentProductFilterStrategy> paymentProductFilterStrategyMap) {
         this.paymentProductFilterStrategyMap = paymentProductFilterStrategyMap;
