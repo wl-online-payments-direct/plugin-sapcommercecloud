@@ -6,6 +6,7 @@ import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePaymentDetailsForm;
 import com.worldline.direct.checkoutaddon.forms.validation.WorldlinePaymentDetailsValidator;
 import com.worldline.direct.constants.WorldlineCheckoutConstants;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
@@ -30,6 +31,7 @@ import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commerceservices.enums.CountryType;
 import de.hybris.platform.util.Config;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -98,7 +100,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         List<PaymentProduct> filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS).get();
         model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
         model.addAttribute("paymentProducts", filteredPaymentProducts);
-        model.addAttribute("isCardPaymentMethodExisting", worldlinePaymentProductFilterStrategyFactory.checkForCardPaymentMethods(filteredPaymentProducts));
+        model.addAttribute("isCardPaymentMethodExisting", worldlineCheckoutFacade.checkForCardPaymentMethods(filteredPaymentProducts));
 
         model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
         model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));
@@ -184,6 +186,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         worldlinePaymentDetailsForm.setBillingAddress(addressForm);
         return WorldlineCheckoutConstants.Views.Fragments.Checkout.BillingAddressForm;
     }
+
 
     protected void setupSelectPaymentPage(final Model model) throws CMSItemNotFoundException {
         model.addAttribute("metaRobots", "noindex,nofollow");

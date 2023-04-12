@@ -9,5 +9,4 @@ import java.util.function.Supplier;
 public interface WorldlinePaymentProductFilterStrategyFactory {
     Supplier<List<PaymentProduct>> filter(List<PaymentProduct> paymentProducts, WorldlinePaymentProductFilterEnum... paymentProductFilter);
 
-    Boolean checkForCardPaymentMethods(List<PaymentProduct> paymentProducts);
 }

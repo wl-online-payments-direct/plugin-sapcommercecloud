@@ -114,6 +114,16 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
         return paymentProducts;
     }
+    @Override
+    public Boolean checkForCardPaymentMethods(List<PaymentProduct> paymentProducts) {
+        for (PaymentProduct paymentProduct : paymentProducts) {
+            if (StringUtils.equals(paymentProduct.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
+                return Boolean.TRUE;
+            }
+        }
+
+        return Boolean.FALSE;
+    }
 
     @Override
     public PaymentProduct getPaymentMethodById(int paymentId) {
