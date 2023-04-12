@@ -24,3 +24,11 @@ tr .new-cart {
 .radio_image_row{
     margin-bottom: 5px !important;
 }
+
+.surchage {
+    padding: 5px 0;
+}
+.surcharge span{
+    float: right;
+    font-weight: 600;
+  }

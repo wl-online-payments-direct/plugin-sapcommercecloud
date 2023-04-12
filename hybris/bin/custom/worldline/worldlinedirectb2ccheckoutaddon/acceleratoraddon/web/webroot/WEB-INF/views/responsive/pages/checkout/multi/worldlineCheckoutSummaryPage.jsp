@@ -9,6 +9,7 @@
 <%@ taglib prefix="replenishment" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/replenishment" %>
 <%@ taglib prefix="multi-checkout" tagdir="/WEB-INF/tags/responsive/checkout/multi" %>
 <%@ taglib prefix="b2b-multi-checkout" tagdir="/WEB-INF/tags/addons/b2bacceleratoraddon/responsive/checkout/multi" %>
+<%@ taglib prefix="worldline-multi-checkout" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/checkout/multi" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
@@ -28,7 +29,7 @@
                     <ycommerce:testId code="checkoutStepFour">
                         <div class="checkout-review hidden-xs">
                             <div class="checkout-order-summary">
-                                <multi-checkout:orderTotals cartData="${cartData}" showTaxEstimate="${showTaxEstimate}"
+                                <worldline-multi-checkout:orderTotals cartData="${cartData}" showTaxEstimate="${showTaxEstimate}"
                                                             showTax="${showTax}" subtotalsCssClasses="dark"/>
                             </div>
                         </div>

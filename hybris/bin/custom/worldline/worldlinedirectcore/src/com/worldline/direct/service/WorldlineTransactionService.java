@@ -32,6 +32,6 @@ public interface WorldlineTransactionService {
 
     void processRefundedEvent(WebhooksEvent webhooksEvent);
 
-    void savePaymentCost(AbstractOrderModel orderModel, PaymentResponse paymentResponse);
+    void savePaymentCost(AbstractOrderModel orderModel, AmountOfMoney surchargeAmount);
 
 }
