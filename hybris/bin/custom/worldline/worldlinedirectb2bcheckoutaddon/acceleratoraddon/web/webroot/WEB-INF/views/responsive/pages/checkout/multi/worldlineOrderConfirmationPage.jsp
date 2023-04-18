@@ -5,6 +5,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="ycommerce" uri="http://hybris.com/tld/ycommercetags" %>
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2bcheckoutaddon/responsive" %>
+<%@ taglib prefix="worldlineOrderTotals" tagdir="/WEB-INF/tags/addons/worldlinedirectb2bcheckoutaddon/responsive/order" %>
 <%@ taglib prefix="order" tagdir="/WEB-INF/tags/responsive/order" %>
 
 <template:page pageTitle="${pageTitle}" hideHeaderLinks="true">
@@ -44,7 +45,7 @@
                 </ycommerce:testId>
             </div>
 
-            <order:accountOrderDetailOrderTotals order="${orderData}"/>
+            <worldlineOrderTotals:accountOrderDetailOrderTotals order="${orderData}"/>
             <jsp:include page="/WEB-INF/views/responsive/pages/checkout/checkoutConfirmationContinueButton.jsp"/>
         </div>
     </jsp:body>

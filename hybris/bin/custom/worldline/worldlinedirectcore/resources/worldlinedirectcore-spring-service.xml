@@ -47,6 +47,7 @@
         <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
         <property name="worldlineTransactionDao" ref="worldlineTransactionDao"/>
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="calculationService" ref="calculationService"/>
         <property name="modelService" ref="modelService"/>
     </bean>
 

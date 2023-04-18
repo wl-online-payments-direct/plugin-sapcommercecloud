@@ -82,9 +82,9 @@ worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hos
 $htpTemplate=HTPTemplate.html
 $htpTemplate=HTPTemplate11_Full.html
 INSERT_UPDATE WorldlineConfiguration; merchantID[unique=true]           ; apiKey               ; apiSecret                                        ; webhookKeyId                   ; webhookSecret                        ; variant          ; defaultOperationCode(code); endpointURL;
-                                   ; greenlightcommerce1  ; 052BEFE7F9CD932D58D1 ; NGMyZmU0M2EtMjYzMi00YmFkLWI2YjMtYTcyZTJjZTI3ZTNi ; dfe212d95b794eb5971331c8f0ea82 ; ec73cb3b-e771-4fcb-a393-2bd6711351c9 ; $htpTemplate ; SALE                      ; https://payment.preprod.direct.ingenico.com
-                                   ; greenlightcommerceAP ; 052BEFE7F9CD932D58D1 ; NGMyZmU0M2EtMjYzMi00YmFkLWI2YjMtYTcyZTJjZTI3ZTNi ; dfe212d95b794eb5971331c8f0ea82 ; ec73cb3b-e771-4fcb-a393-2bd6711351c9 ; $htpTemplate ; SALE                      ; https://payment.preprod.direct.ingenico.com    
-                                   
+                                   ; greenlightcommerce1  ; 052BEFE7F9CD932D58D1 ; NGMyZmU0M2EtMjYzMi00YmFkLWI2YjMtYTcyZTJjZTI3ZTNi ; dfe212d95b794eb5971331c8f0ea82 ; ec73cb3b-e771-4fcb-a393-2bd6711351c9 ; $htpTemplate ; SALE                      ; https://payment.preprod.direct.worldline-solutions.com
+                                   ; greenlightcommerceAP ; 052BEFE7F9CD932D58D1 ; NGMyZmU0M2EtMjYzMi00YmFkLWI2YjMtYTcyZTJjZTI3ZTNi ; dfe212d95b794eb5971331c8f0ea82 ; ec73cb3b-e771-4fcb-a393-2bd6711351c9 ; $htpTemplate ; SALE                      ; https://payment.preprod.direct.worldline-solutions.com    
+                                   ; Sales4sSurchargeTestMerchant   ; 88F7FFB04C05168D933E   ; E11AE1A39D5A25F757137018226631CA85A844CC8A4B342E1E843457C587CCDCA87E274B2AEC4D7934223EEE7CDE8C102FB405F16AD2616030E857A50F27223A ; 61471108437A20481E11  ; 458E153890AC52D63ED19064BC04A77A5EE5A20726D316CA18276436EA0ACEA13BCC38F34C9632A57ED125942FD5B702F3821426134C9095553233A804CFE500  ; $htpTemplate  ; SALE  ; https://payment.preprod.direct.worldline-solutions.com
 
 UPDATE BaseStore; uid[unique = true]; paymentProvider; checkoutFlowGroup      ; submitOrderProcessCode ; createReturnProcessCode
                 ; apparel-uk        ; WORLDLINE  ; worldlineB2CResponsiveCheckoutGroup ; worldline-order-process ;worldline-return-process

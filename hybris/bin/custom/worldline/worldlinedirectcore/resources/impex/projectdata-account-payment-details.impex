@@ -11,3 +11,4 @@ INSERT_UPDATE ServicelayerJob; code[unique = true]                ; active; retr
                              ; worldlineAcceleratorCartToOrderJob ; true  ; true ; 4       ; worldlineAcceleratorCartToOrderJob
 
 
+####### Worldline order totals block #######

@@ -46,6 +46,7 @@
                 <c:if test="${idealID eq paymentProduct.id}">
                     <paymentproduct:idealDetail idealIssuers="${idealIssuers}"/>
                 </c:if>
+
             </div>
 
         </div>
