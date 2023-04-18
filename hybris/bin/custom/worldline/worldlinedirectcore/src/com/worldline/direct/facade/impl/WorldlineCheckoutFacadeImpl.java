@@ -359,18 +359,24 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
-        if (StringUtils.equals(worldlinePaymentInfoData.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
-            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId());
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType())) {
+            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), worldlinePaymentInfoData);
         }
+
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
 
         commerceCheckoutService.setPaymentInfo(parameter);
     }
 
-    private void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID) {
-        CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, cartModel);
-        AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
-        worldlineTransactionService.savePaymentCost(cartModel, surcharge);
+    private void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, WorldlinePaymentInfoData worldlinePaymentInfoData) {
+        final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (currentWorldlineConfiguration.isApplySurcharge() &&
+              StringUtils.equals(worldlinePaymentInfoData.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
+
+            CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, cartModel);
+            AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
+            worldlineTransactionService.savePaymentCost(cartModel, surcharge);
+        }
     }
 
 

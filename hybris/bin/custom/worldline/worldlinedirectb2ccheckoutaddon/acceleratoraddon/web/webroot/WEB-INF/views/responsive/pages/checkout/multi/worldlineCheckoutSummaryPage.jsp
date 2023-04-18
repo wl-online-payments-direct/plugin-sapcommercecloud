@@ -8,7 +8,6 @@
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive" %>
 <%@ taglib prefix="replenishment" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/replenishment" %>
 <%@ taglib prefix="multi-checkout" tagdir="/WEB-INF/tags/responsive/checkout/multi" %>
-<%@ taglib prefix="b2b-multi-checkout" tagdir="/WEB-INF/tags/addons/b2bacceleratoraddon/responsive/checkout/multi" %>
 <%@ taglib prefix="worldline-multi-checkout" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/checkout/multi" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
