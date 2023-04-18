@@ -47,10 +47,6 @@
                     <paymentproduct:idealDetail idealIssuers="${idealIssuers}"/>
                 </c:if>
 
-
-                <c:if test="${applySurcharge eq true && paymentProduct.paymentMethod eq 'card'}">
-                    <spring:theme code="checkout.paymentProduct.displaySurcharge.label"/>
-                </c:if>
             </div>
 
         </div>

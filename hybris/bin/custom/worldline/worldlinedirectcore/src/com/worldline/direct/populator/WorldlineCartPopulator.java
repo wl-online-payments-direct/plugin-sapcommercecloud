@@ -25,7 +25,9 @@ public class WorldlineCartPopulator implements Populator<CartModel, CartData> {
             WorldlinePaymentInfoData worldlinePaymentInfoData = new WorldlinePaymentInfoData();
             worldlinePaymentInfoConverter.convert((WorldlinePaymentInfoModel) paymentInfo, worldlinePaymentInfoData);
             target.setWorldlinePaymentInfo(worldlinePaymentInfoData);
-            target.setSurcharge(priceDataFactory.create(PriceDataType.BUY, new BigDecimal(source.getPaymentCost()), source.getCurrency()));
+            if (source.getPaymentCost() > 0.0d) {
+                target.setSurcharge(priceDataFactory.create(PriceDataType.BUY, new BigDecimal(source.getPaymentCost()), source.getCurrency()));
+            }
         }
     }
 
