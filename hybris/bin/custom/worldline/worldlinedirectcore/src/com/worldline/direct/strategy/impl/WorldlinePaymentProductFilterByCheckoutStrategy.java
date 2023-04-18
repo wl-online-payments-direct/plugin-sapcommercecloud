@@ -48,7 +48,7 @@ public class WorldlinePaymentProductFilterByCheckoutStrategy implements Worldlin
                         .filter(paymentProduct -> worldlineHostedTokenizationPaymentProductsEvaluatorList.stream().anyMatch(pr -> pr.evaluate().test(paymentProduct)))
                         .collect(Collectors.toList());
 
-                if (isCardsPresent && paymentProducts.get(0).getId() != WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP) {
+                if (isCardsPresent && (paymentProducts.size() == 0 || paymentProducts.get(0).getId() != WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP)) {
                     paymentProducts.add(0, createHtpGroupedCardPaymentProduct());
                 }
                 break;

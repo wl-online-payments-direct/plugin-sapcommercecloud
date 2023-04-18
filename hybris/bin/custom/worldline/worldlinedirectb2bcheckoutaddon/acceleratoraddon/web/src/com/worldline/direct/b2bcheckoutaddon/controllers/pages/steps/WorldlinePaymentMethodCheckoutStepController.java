@@ -17,6 +17,7 @@ import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateQuoteCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
@@ -34,6 +35,7 @@ import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commercefacades.user.data.CountryData;
 import de.hybris.platform.commerceservices.enums.CountryType;
 import de.hybris.platform.util.Config;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -58,7 +60,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(value = WorldlineWebConstants.URL.Checkout.Payment.root)
-public class WorldlinePaymentMethodCheckoutStepController extends AbstractCheckoutStepController {
+public class    WorldlinePaymentMethodCheckoutStepController extends AbstractCheckoutStepController {
     protected static final Map<String, String> CYBERSOURCE_SOP_CARD_TYPES = new HashMap<>();
     private static final String PAYMENT_METHOD = "payment-method";
     private static final String CART_DATA_ATTR = "cartData";
@@ -87,6 +89,9 @@ public class WorldlinePaymentMethodCheckoutStepController extends AbstractChecko
     @Resource(name = "worldlinePaymentProductFilterStrategyFactory")
     private WorldlinePaymentProductFilterStrategyFactory worldlinePaymentProductFilterStrategyFactory;
 
+    @Resource(name = "worldlineConfigurationService")
+    private WorldlineConfigurationService worldlineConfigurationService;
+
     @ModelAttribute("billingCountries")
     public Collection<CountryData> getBillingCountries() {
         return getCheckoutFacade().getCountries(CountryType.BILLING);
@@ -112,8 +117,13 @@ public class WorldlinePaymentMethodCheckoutStepController extends AbstractChecko
         setupAddPaymentPage(model);
         model.addAttribute("worldlinePaymentDetailsForm", new WorldlinePaymentDetailsForm());
         final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS).get();
-        model.addAttribute("paymentProducts", worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE,WorldlinePaymentProductFilterEnum.GROUP_CARDS).get());
+        List<PaymentProduct> filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS).get();
+
+        model.addAttribute("paymentProducts", filteredPaymentProducts);
         model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));
+        model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
+        model.addAttribute("isCardPaymentMethodExisting", worldlineCheckoutFacade.checkForCardPaymentMethods(filteredPaymentProducts));
+
         if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
             final CreateHostedTokenizationResponse hostedTokenization = worldlineCheckoutFacade.createHostedTokenization();
             model.addAttribute("hostedTokenization", hostedTokenization);
