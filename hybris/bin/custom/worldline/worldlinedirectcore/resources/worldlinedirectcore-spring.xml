@@ -157,13 +157,26 @@
           class="com.worldline.direct.evaluate.impl.WorldlineHostedCheckoutPaymentProductsEvaluator"/>
     <bean id="worldlineHostedTokenizationPaymentProductsEvaluator"
           class="com.worldline.direct.evaluate.impl.WorldlineHostedTokenizationPaymentProductsEvaluator"/>
+
+    <bean id="defaultWorldlinePaymentProductEvaluator" abstract="true"
+          class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator"/>
+
     <bean id="worldlineBcmcPaymentProductsEvaluator"
-          class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
+          parent="defaultWorldlinePaymentProductEvaluator">
         <property name="paymentProductId">
             <utils:constant
                     static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_BCC"/>
         </property>
     </bean>
+
+    <bean id="worldlineIntersolvePaymentProductsEvaluator"
+          parent="defaultWorldlinePaymentProductEvaluator">
+        <property name="paymentProductId">
+            <utils:constant
+                    static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE"/>
+        </property>
+    </bean>
+
     <bean id="worldlineApplePayPaymentProductsEvaluator"
           class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
         <property name="paymentProductId">
@@ -180,6 +193,7 @@
     <utils:list id="worldlineHostedTokenizationPaymentProductsEvaluatorList">
         <ref bean="worldlineHostedTokenizationPaymentProductsEvaluator"/>
         <ref bean="worldlineBcmcPaymentProductsEvaluator"/>
+        <ref bean="worldlineIntersolvePaymentProductsEvaluator"/>
     </utils:list>
 
     <utils:list id="virtualPaymentModes">
@@ -190,4 +204,11 @@
         <utils:constant
                 static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP"/>
     </utils:list>
+
+    <utils:list id="worldlineSalePaymentProductList">
+        <utils:constant
+                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE"/>
+
+    </utils:list>
+
 </beans>
