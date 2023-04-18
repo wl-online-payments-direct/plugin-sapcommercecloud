@@ -13,7 +13,7 @@
     <c:if test="${empty paymentProducts}">
         <p><spring:theme code="payment.methods.not.found"/></p>
     </c:if>
-    <c:if test="${applySurcharge eq true && isCardPaymentMethodExisting eq true}">
+    <c:if test="${applySurcharge && isCardPaymentMethodExisting}">
         <spring:theme code="checkout.paymentProduct.displaySurcharge.label"/>
     </c:if>
 	<c:forEach items="${paymentProducts}" var="paymentProduct" varStatus="index">
