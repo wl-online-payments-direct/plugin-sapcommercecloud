@@ -13,6 +13,7 @@
 <%@ taglib prefix="order" tagdir="/WEB-INF/tags/responsive/order" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive" %>
+<%@ taglib prefix="worldline-multi-checkout" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/checkout/multi" %>
 
 <spring:htmlEscape defaultHtmlEscape="true" />
 
@@ -35,7 +36,7 @@
         <worldline:worldlinePaymentInfo cartData="${cartData}" paymentInfo="${cartData.worldlinePaymentInfo}" paymentProduct="${paymentProduct}" showPaymentInfo="${showPaymentInfo}" />
 
 
-        <multi-checkout:orderTotals cartData="${cartData}" showTaxEstimate="${showTaxEstimate}" showTax="${showTax}" />
+        <worldline-multi-checkout:orderTotals cartData="${cartData}" showTaxEstimate="${showTaxEstimate}" showTax="${showTax}" />
     </ycommerce:testId>
 </div>
 

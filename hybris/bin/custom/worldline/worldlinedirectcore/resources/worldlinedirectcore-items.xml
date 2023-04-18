@@ -151,6 +151,12 @@
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                     <description>Enforce SCA for all transactions.</description>
                 </attribute>
+                <attribute qualifier="applySurcharge" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Apply Surcharge for all transactions.</description>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -187,10 +193,6 @@
                 </attribute>
             </attributes>
         </itemtype>
-
-
-
-
 
         <itemtype code="WorldlinePaymentInfo" extends="PaymentInfo"
                   jaloclass="de.hybris.platform.jalo.order.payment.PaymentInfo"

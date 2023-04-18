@@ -18,6 +18,8 @@ public interface WorldlineCheckoutFacade {
 
     List<PaymentProduct> getAvailablePaymentMethods();
 
+    Boolean checkForCardPaymentMethods(List<PaymentProduct> paymentProducts);
+
     WorldlineCheckoutTypesEnum getWorldlineCheckoutType();
 
     PaymentProduct getPaymentMethodById(int paymentId);

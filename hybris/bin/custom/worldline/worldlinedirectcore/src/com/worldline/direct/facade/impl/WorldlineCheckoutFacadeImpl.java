@@ -17,6 +17,7 @@ import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.*;
+import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -45,6 +46,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.core.model.user.TitleModel;
+import de.hybris.platform.order.CalculationService;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.order.PaymentModeService;
@@ -98,6 +100,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     protected WorldlineConfigurationService worldlineConfigurationService;
 
+    private WorldlineAmountUtils worldlineAmountUtils;
+
     @Override
     public List<PaymentProduct> getAvailablePaymentMethods() {
         final CartData cartData = checkoutFacade.getCheckoutCart();
@@ -110,7 +114,16 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
         return paymentProducts;
     }
+    @Override
+    public Boolean checkForCardPaymentMethods(List<PaymentProduct> paymentProducts) {
+        for (PaymentProduct paymentProduct : paymentProducts) {
+            if (StringUtils.equals(paymentProduct.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
+                return Boolean.TRUE;
+            }
+        }
 
+        return Boolean.FALSE;
+    }
 
     @Override
     public PaymentProduct getPaymentMethodById(int paymentId) {
@@ -346,9 +359,24 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType())) {
+            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), worldlinePaymentInfoData);
+        }
+
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
 
         commerceCheckoutService.setPaymentInfo(parameter);
+    }
+
+    private void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, WorldlinePaymentInfoData worldlinePaymentInfoData) {
+        final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (currentWorldlineConfiguration.isApplySurcharge() &&
+              StringUtils.equals(worldlinePaymentInfoData.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
+
+            CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, cartModel);
+            AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
+            worldlineTransactionService.savePaymentCost(cartModel, surcharge);
+        }
     }
 
 
@@ -389,6 +417,15 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     protected void updateOrderFromPaymentResponse(AbstractOrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) {
         updatePaymentInfoIfNeeded(orderModel, paymentResponse);
+
+        AmountOfMoney transactionAmount = paymentResponse.getPaymentOutput().getAmountOfMoney();
+        if (paymentResponse.getPaymentOutput().getSurchargeSpecificOutput() != null) {
+            SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
+            transactionAmount = paymentResponse.getPaymentOutput().getAcquiredAmount();
+            worldlineTransactionService.savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
+        }
+
+
         final PaymentTransactionModel paymentTransaction = worldlineTransactionService.getOrCreatePaymentTransaction(orderModel,
                 paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
                 paymentResponse.getId());
@@ -397,9 +434,10 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 paymentTransaction,
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
-                paymentResponse.getPaymentOutput().getAmountOfMoney(),
+                transactionAmount,
                 paymentTransactionType
         );
+
         cartService.removeSessionCart();
         cartService.getSessionCart();
         modelService.refresh(orderModel);
@@ -690,5 +728,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
         this.worldlineConfigurationService = worldlineConfigurationService;
+    }
+
+    public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
+        this.worldlineAmountUtils = worldlineAmountUtils;
     }
 }
