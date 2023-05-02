@@ -144,7 +144,7 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             return WorldlineRecurringPaymentStatus.ACTIVE;
         } else {
             WorldlinePaymentInfoModel worldlinePaymentInfoModel = (WorldlinePaymentInfoModel)cartToOrderCronJobModel.getPaymentInfo();
-            if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel) && worldlinePaymentInfoModel.getMandateDetail() != null) {
+            if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfoModel) && worldlinePaymentInfoModel.getMandateDetail() != null) {
                 return (worldlinePaymentInfoModel.getMandateDetail().getStatus());
             } else {
                 return WorldlineRecurringPaymentStatus.BLOCKED;

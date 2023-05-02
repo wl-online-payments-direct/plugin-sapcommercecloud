@@ -55,7 +55,7 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         if (worldlinePaymentInfoModel.getUsedSavedPayment() != null) {
             worldlinePaymentInfoData.setSavedPayment(worldlinePaymentInfoModel.getUsedSavedPayment().getCode());
         }
-        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel) && worldlinePaymentInfoModel.getMandateDetail() != null) {
+        if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfoModel) && worldlinePaymentInfoModel.getMandateDetail() != null) {
             worldlinePaymentInfoData.setMandateDetail(worldlineMandateConverter.convert(worldlinePaymentInfoModel.getMandateDetail()));
         }
 

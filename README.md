@@ -15,6 +15,7 @@ ant addoninstall -Daddonnames="adaptivesearchsamplesaddon,assistedservicecustome
 
 # install our checkoutaddon in yacceleratorstorefront
 ant addoninstall -Daddonnames="worldlinedirectb2ccheckoutaddon" -DaddonStorefront.yacceleratorstorefront="yacceleratorstorefront"
+ant addoninstall -Daddonnames="worldlinedirectb2bcheckoutaddon" -DaddonStorefront.yacceleratorstorefront="yb2bacceleratorstorefront"
 
 # initialize
 ant initialize

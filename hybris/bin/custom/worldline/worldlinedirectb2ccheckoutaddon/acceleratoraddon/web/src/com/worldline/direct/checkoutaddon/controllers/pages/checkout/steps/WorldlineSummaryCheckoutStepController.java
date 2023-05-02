@@ -6,6 +6,7 @@ import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants.URL.
 import com.worldline.direct.checkoutaddon.controllers.utils.WorldlinePlaceOrderUtils;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.constants.WorldlineCheckoutConstants;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import de.hybris.platform.b2bacceleratorfacades.exception.EntityValidationException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
@@ -145,7 +146,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
         model.addAttribute("daysOfWeek", worldlineDirectCheckoutFacade.getDaysOfWeekForReplenishmentCheckoutSummary());
         if (worldlinePaymentInfo != null) {
-            model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfo));
+            model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
         } else {
             model.addAttribute("showReplenishment", true);
         }

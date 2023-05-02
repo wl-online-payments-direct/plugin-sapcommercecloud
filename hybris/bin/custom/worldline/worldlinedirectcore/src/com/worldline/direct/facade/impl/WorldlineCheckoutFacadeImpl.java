@@ -278,6 +278,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 modelService.save(worldlinePaymentInfoModel);
             }
         }
+        // TODO: Update for recurring by card
     }
 
     private WorldlineMandateModel createMandate(MandateResponse mandateResponse, WorldlineConfigurationModel worldlineConfigurationModel) {
