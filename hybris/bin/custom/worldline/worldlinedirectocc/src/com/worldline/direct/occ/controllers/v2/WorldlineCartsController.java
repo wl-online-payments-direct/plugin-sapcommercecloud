@@ -202,7 +202,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
             throw new CartException("No cart found.", CartException.NOT_FOUND);
         }
         final CartData cartData = cartFacade.getSessionCart();
-        return !CheckoutPaymentType.CARD.getCode().equals(cartData.getPaymentType().getCode()) || WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(cartData.getWorldlinePaymentInfo());
+        return !CheckoutPaymentType.CARD.getCode().equals(cartData.getPaymentType().getCode()) || WorldlinePaymentProductUtils.isPaymentSupportingRecurring(cartData.getWorldlinePaymentInfo());
     }
 
 
