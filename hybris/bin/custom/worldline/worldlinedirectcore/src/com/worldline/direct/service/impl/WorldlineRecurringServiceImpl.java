@@ -54,6 +54,7 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                     return Optional.empty();
                 }
             }
+            // TODO : case (CARD)
             default:
                 return Optional.empty();
         }

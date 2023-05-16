@@ -61,6 +61,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             params.setCountryCode(countryCode);
             params.setLocale(shopperLocale);
             params.setHide(Collections.singletonList("fields"));
+            params.setIsRecurring(Boolean.TRUE);
             final GetPaymentProductsResponse paymentProducts = client.merchant(getMerchantId()).products().getPaymentProducts(params);
 
             WorldlineLogUtils.logAction(LOGGER, "getPaymentProducts", params, paymentProducts);

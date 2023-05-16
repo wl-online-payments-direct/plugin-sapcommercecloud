@@ -311,6 +311,7 @@
 						<ea:attribute qualifier="cardholderName"/>
 						<ea:attribute qualifier="expiryDate"/>
 						<ea:attribute qualifier="usedSavedPayment"/>
+						<ea:attribute qualifier="recurringToken"/>
 					</ea:section>
 				</ea:tab>
 			</ea:editorArea>
