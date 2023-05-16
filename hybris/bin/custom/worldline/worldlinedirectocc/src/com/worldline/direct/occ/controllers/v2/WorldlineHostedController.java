@@ -119,7 +119,7 @@ public class WorldlineHostedController extends WorldlineBaseController {
                     orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
                 }
                 worldlineCheckoutFacade.validateReturnMAC(orderData, returnMAC);
-                worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderData.getCode(), hostedCheckoutId);
+                worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderData.getCode(), hostedCheckoutId, Boolean.FALSE);
                 orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
                 return getDataMapper().map(orderData, OrderWsDTO.class, fields);
             }

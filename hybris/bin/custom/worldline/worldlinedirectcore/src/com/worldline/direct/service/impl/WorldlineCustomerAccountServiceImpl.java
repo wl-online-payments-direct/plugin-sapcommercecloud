@@ -36,6 +36,15 @@ public class WorldlineCustomerAccountServiceImpl implements WorldlineCustomerAcc
             return null;
         }
     }
+    public WorldlinePaymentInfoModel getWorldlinePaymentInfoByRecurringToken(CustomerModel customerModel, String token, boolean recurring) {
+        validateParameterNotNull(customerModel, "Customer model cannot be null");
+        validateParameterNotNull(token, "token cannot be null");
+        try {
+            return worldlineCustomerAccountDao.findWorldlinePaymentInfosByCustomerAndRecurringToken(customerModel, token, recurring);
+        } catch (ModelNotFoundException ex) {
+            return null;
+        }
+    }
 
     @Override
     public WorldlinePaymentInfoModel getWorldlinePaymentInfoByCode(CustomerModel customerModel, String code) {
@@ -43,6 +52,17 @@ public class WorldlineCustomerAccountServiceImpl implements WorldlineCustomerAcc
         validateParameterNotNull(code, "code cannot be null");
         try {
             return worldlineCustomerAccountDao.findWorldlinePaymentInfosByCustomerAndCode(customerModel, code);
+        } catch (ModelNotFoundException ex) {
+            return null;
+        }
+    }
+
+    @Override
+    public WorldlinePaymentInfoModel getWroldlinePaymentInfoByRecurringToken(CustomerModel customerModel, String token) {
+        validateParameterNotNull(customerModel, "Customer model cannot be null");
+        validateParameterNotNull(token, "code cannot be null");
+        try {
+            return worldlineCustomerAccountDao.findWorldlinePaymentInfosByCustomerAndRecurringToken(customerModel, token, Boolean.TRUE);
         } catch (ModelNotFoundException ex) {
             return null;
         }

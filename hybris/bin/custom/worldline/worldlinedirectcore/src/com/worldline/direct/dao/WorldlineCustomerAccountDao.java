@@ -12,4 +12,7 @@ public interface WorldlineCustomerAccountDao {
     WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndCode(CustomerModel customerModel, String code);
 
     WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndToken(CustomerModel customerModel, String token, boolean saved);
+
+    WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndRecurringToken(CustomerModel customerModel, String token, boolean recurring);
+
 }

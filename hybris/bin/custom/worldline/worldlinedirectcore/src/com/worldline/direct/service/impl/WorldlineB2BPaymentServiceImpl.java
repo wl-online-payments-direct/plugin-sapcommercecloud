@@ -41,7 +41,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 params.getOrder().getAmountOfMoney().setAmount(0L);
                 mandate.setCustomerReference(cartToOrderCronJobModel.getCode() + System.currentTimeMillis());
             }
-            params.getHostedCheckoutSpecificInput().withIsRecurring(true);
+            //params.getHostedCheckoutSpecificInput().withIsRecurring(true);
 
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
 
@@ -68,7 +68,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 CreateMandateRequest mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
             }
-            params.getHostedCheckoutSpecificInput().withIsRecurring(true);
+            //params.getHostedCheckoutSpecificInput().withIsRecurring(true);
 
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
 

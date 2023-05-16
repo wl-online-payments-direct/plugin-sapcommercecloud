@@ -25,7 +25,7 @@ public class WorldlinePaymentProductUtils {
     }
 
     public static boolean isPaymentSupportingRecurring(WorldlinePaymentInfoData worldlinePaymentInfoData) {
-        return worldlinePaymentInfoData.getCode().equals(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue()) ||
+        return worldlinePaymentInfoData.getPaymentMethod().equals(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue()) ||
               WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoData.getId();
     }
 

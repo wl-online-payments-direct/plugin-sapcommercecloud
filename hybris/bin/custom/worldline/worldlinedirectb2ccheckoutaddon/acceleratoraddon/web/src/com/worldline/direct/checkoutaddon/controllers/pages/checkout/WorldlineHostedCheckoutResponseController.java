@@ -99,7 +99,7 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
             switch (orderType) {
                 case PLACE_ORDER:
                     if (orderDetails instanceof OrderData) {
-                        worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderDetails.getCode(), hostedCheckoutId);
+                        worldlineCheckoutFacade.authorisePaymentForHostedCheckout(orderDetails.getCode(), hostedCheckoutId, Boolean.FALSE);
                     }
                     break;
                 case SCHEDULE_REPLENISHMENT_ORDER:

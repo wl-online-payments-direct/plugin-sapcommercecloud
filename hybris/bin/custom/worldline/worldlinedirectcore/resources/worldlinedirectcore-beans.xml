@@ -9,6 +9,7 @@
         <property name="paymentMethodImageUrl" type="String"/>
         <property name="savedPayment" type="String"/>
         <property name="saved" type="boolean"/>
+        <property name="recurring" type="boolean"/>
         <property name="paymentProductDirectoryId" type="String"/>
         <property name="hostedTokenizationId" type="String"/>
         <property name="worldlineCheckoutType" type="com.worldline.direct.enums.WorldlineCheckoutTypesEnum"/>
@@ -95,6 +96,10 @@
         <property name="firstName" type="String"/>
         <property name="lastName" type="String"/>
         <property name="title" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.direct.order.data.WorldlineRecurringTokenData">
+        <property name="recurringToken" type="String"/>
     </bean>
 
 </beans>
