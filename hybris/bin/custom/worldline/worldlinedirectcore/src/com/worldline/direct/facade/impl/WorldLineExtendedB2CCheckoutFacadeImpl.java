@@ -18,7 +18,10 @@ import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
+import de.hybris.platform.core.model.order.payment.PaymentModeModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
+import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.cronjob.model.TriggerModel;
 import de.hybris.platform.order.InvalidCartException;
@@ -27,10 +30,12 @@ import de.hybris.platform.servicelayer.cronjob.TriggerService;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.i18n.I18NService;
 import de.hybris.platform.servicelayer.keygenerator.KeyGenerator;
+import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.util.StandardDateRange;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +58,6 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
     private Populator<TriggerData, TriggerModel> triggerPopulator;
     private Converter<DayOfWeek, B2BDaysOfWeekData> b2bDaysOfWeekConverter;
     private WorldlineConfigurationService worldlineConfigurationService;
-
 
     @Override
     protected void afterPlaceOrder(@SuppressWarnings("unused") final CartModel cartModel, final OrderModel orderModel) //NOSONAR
@@ -86,6 +90,7 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
             populateTriggerDataFromPlaceOrderData(placeOrderData, triggerDataListData);
 
             final CartModel cartModel = getCart();
+            updatePaymentInfo(cartModel);
             final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cartModel.getPaymentType().getCode());
 
             if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment() && BooleanUtils.isTrue(cardPaymentType)) {
@@ -97,6 +102,16 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
 
         return (T) super.placeOrder();
 
+    }
+
+    private void updatePaymentInfo(CartModel cartModel) {
+        WorldlinePaymentInfoModel paymentInfo;
+        if (cartModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
+            paymentInfo = (WorldlinePaymentInfoModel) cartModel.getPaymentInfo();
+            paymentInfo.setRecurringToken(Boolean.TRUE);
+            getModelService().save(cartModel);
+            getModelService().save(paymentInfo);
+        }
     }
 
     private OrderData scheduleOrderAndPlaceOrder(List<TriggerData> triggerDataList) throws InvalidCartException {
@@ -297,4 +312,5 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
     public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
         this.worldlineConfigurationService = worldlineConfigurationService;
     }
+
 }

@@ -214,7 +214,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
         cleanHostedCheckoutId();
         final PaymentResponse payment = paymentForHostedTokenization.getPayment();
-        savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION, payment);
+        savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION, payment, Boolean.FALSE);
         if (paymentForHostedTokenization.getMerchantAction() != null) {
             storeReturnMac(orderForCode, paymentForHostedTokenization.getMerchantAction().getRedirectData().getRETURNMAC());
             throw new WorldlineNonAuthorizedPaymentException(payment,
@@ -243,7 +243,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
 
     @Override
-    public void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+    public void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId, Boolean isRecurring) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         GetHostedCheckoutResponse hostedCheckoutData = worldlinePaymentService.getHostedCheckout(hostedCheckoutId);
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         switch (WorldlinedirectcoreConstants.HOSTED_CHECKOUT_STATUS_ENUM.valueOf(hostedCheckoutData.getStatus())) {
@@ -257,7 +257,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             case IN_PROGRESS:
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
-                savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                saveOrUpdatePaymentToken(orderForCode, hostedCheckoutData, isRecurring);
                 handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 saveMandateIfNeeded(orderForCode.getStore().getWorldlineConfiguration(),(WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 break;
@@ -265,6 +265,15 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 LOGGER.error(String.format("Unexpected HostedCheckout Status value: %s", hostedCheckoutData.getStatus()));
                 throw new IllegalStateException(String.format("Unexpected HostedCheckout Status value: %s", hostedCheckoutData.getStatus()));
         }
+    }
+
+    protected void saveOrUpdatePaymentToken(AbstractOrderModel orderModel, GetHostedCheckoutResponse hostedCheckoutData, Boolean isRecurring) {
+        WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
+        final TokenResponse tokenResponse = worldlinePaymentService.getToken(hostedCheckoutData.getCreatedPaymentOutput().getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken());
+        if (StringUtils.isNotEmpty(paymentInfoModel.getToken()) && isRecurring) {
+            worldlineUserFacade.updateWorldlinePaymentInfo(paymentInfoModel, tokenResponse);
+        }
+        savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, hostedCheckoutData.getCreatedPaymentOutput().getPayment(), isRecurring);
     }
 
     protected void saveMandateIfNeeded(WorldlineConfigurationModel worldlineConfigurationModel, WorldlinePaymentInfoModel worldlinePaymentInfoModel, PaymentResponse paymentResponse) {
@@ -278,7 +287,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 modelService.save(worldlinePaymentInfoModel);
             }
         }
-        // TODO: Update for recurring by card
     }
 
     private WorldlineMandateModel createMandate(MandateResponse mandateResponse, WorldlineConfigurationModel worldlineConfigurationModel) {
@@ -567,7 +575,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return cartService.hasSessionCart() ? cartService.getSessionCart() : null;
     }
 
-    protected void savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum checkoutType, PaymentResponse paymentResponse) {
+    protected void savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum checkoutType, PaymentResponse paymentResponse, Boolean isRecurring) {
 
         String token = null;
         final String paymentMethod = paymentResponse.getPaymentOutput().getPaymentMethod();
@@ -592,7 +600,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final TokenResponse tokenResponse = worldlinePaymentService.getToken(token);
         if (tokenResponse != null && (!WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(checkoutType) || BooleanUtils.isFalse(tokenResponse.getIsTemporary()))) {
             final PaymentProduct paymentProduct = getPaymentMethodById(tokenResponse.getPaymentProductId());
-            worldlineUserFacade.saveWorldlinePaymentInfo(checkoutType,tokenResponse, paymentProduct);
+            worldlineUserFacade.saveWorldlinePaymentInfo(checkoutType, tokenResponse, paymentProduct, isRecurring);
 
         }
     }

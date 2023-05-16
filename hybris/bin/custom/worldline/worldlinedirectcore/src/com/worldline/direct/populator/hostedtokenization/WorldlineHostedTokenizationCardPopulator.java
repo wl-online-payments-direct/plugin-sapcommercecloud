@@ -18,6 +18,7 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineHostedTokenizationCardPopulator implements Populator<AbstractOrderModel, CreatePaymentRequest> {
 
     private static final String ECOMMERCE = "ECOMMERCE";
+    private static final String RECCURANCE = "recurring";
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentService worldlinePaymentService;

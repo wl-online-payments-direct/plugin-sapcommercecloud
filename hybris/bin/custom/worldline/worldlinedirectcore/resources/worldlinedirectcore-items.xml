@@ -256,6 +256,12 @@
                     <persistence type="property"/>
                     <modifiers/>
                 </attribute>
+                <attribute qualifier="recurringToken" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Determines wether or not the token is used for recurring payment</description>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -381,5 +387,6 @@
                 </index>
             </indexes>
         </itemtype>
+
     </itemtypes>
 </items>

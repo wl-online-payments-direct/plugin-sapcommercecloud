@@ -14,6 +14,8 @@ public interface WorldlineCustomerAccountService {
 
     WorldlinePaymentInfoModel getWorldlinePaymentInfoByToken(CustomerModel customerModel, String token, boolean saved);
 
+    WorldlinePaymentInfoModel getWroldlinePaymentInfoByRecurringToken(CustomerModel customerModel, String token);
+
     CartToOrderCronJobModel getCartToOrderCronJob(String jobCode);
 
 }

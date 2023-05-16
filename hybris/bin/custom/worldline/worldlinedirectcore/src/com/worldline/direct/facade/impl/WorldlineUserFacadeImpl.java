@@ -112,18 +112,24 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     }
 
     @Override
-    public void saveWorldlinePaymentInfo(WorldlineCheckoutTypesEnum checkoutType, TokenResponse tokenResponse, PaymentProduct paymentProduct) {
+    public void saveWorldlinePaymentInfo(WorldlineCheckoutTypesEnum checkoutType, TokenResponse tokenResponse, PaymentProduct paymentProduct, Boolean isRecurring) {
         final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
         WorldlinePaymentInfoModel worldlinePaymentInfoByToken = worldlineCustomerAccountService.getWorldlinePaymentInfoByToken(
                 currentCustomer,
                 tokenResponse.getId(),
                 true);
+        WorldlinePaymentInfoModel worldlinePaymentInfoModelByRecurringToken = worldlineCustomerAccountService.getWroldlinePaymentInfoByRecurringToken(
+              currentCustomer,
+              tokenResponse.getId());
         if (worldlinePaymentInfoByToken == null) {
-            worldlinePaymentInfoByToken = modelService.create(WorldlinePaymentInfoModel.class);
-            worldlinePaymentInfoByToken.setCode(String.valueOf(UUID.randomUUID()));
-            worldlinePaymentInfoByToken.setUser(currentCustomer);
+            if (worldlinePaymentInfoModelByRecurringToken == null) {
+                worldlinePaymentInfoByToken = modelService.create(WorldlinePaymentInfoModel.class);
+                worldlinePaymentInfoByToken.setCode(String.valueOf(UUID.randomUUID()));
+                worldlinePaymentInfoByToken.setUser(currentCustomer);
+            } else {
+                worldlinePaymentInfoByToken = worldlinePaymentInfoModelByRecurringToken;
+            }
         }
-        worldlinePaymentInfoByToken.setId(tokenResponse.getPaymentProductId());
         final CardWithoutCvv cardWithoutCvv = tokenResponse.getCard().getData().getCardWithoutCvv();
         worldlinePaymentInfoByToken.setCardholderName(cardWithoutCvv.getCardholderName());
         worldlinePaymentInfoByToken.setAlias(cardWithoutCvv.getCardNumber());
@@ -131,9 +137,14 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         worldlinePaymentInfoByToken.setToken(tokenResponse.getId());
         worldlinePaymentInfoByToken.setCardBrand(paymentProduct.getDisplayHints().getLabel());
         worldlinePaymentInfoByToken.setId(tokenResponse.getPaymentProductId());
-        worldlinePaymentInfoByToken.setSaved(true);
         worldlinePaymentInfoByToken.setWorldlineCheckoutType(checkoutType);
         worldlinePaymentInfoByToken.setPaymentMethod(paymentProduct.getPaymentMethod());
+        if (isRecurring) {
+            worldlinePaymentInfoByToken.setSaved(false);
+            worldlinePaymentInfoByToken.setRecurringToken(true);
+        } else {
+            worldlinePaymentInfoByToken.setSaved(true);
+        }
         modelService.save(worldlinePaymentInfoByToken);
     }
 
@@ -160,6 +171,14 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         if (worldlinePaymentInfoModel != null) {
             customerAccountService.setDefaultPaymentInfo(currentCustomer, worldlinePaymentInfoModel);
         }
+    }
+
+    @Override
+    public void updateWorldlinePaymentInfo(WorldlinePaymentInfoModel paymentInfoModel, TokenResponse tokenResponse) {
+        paymentInfoModel.setRecurringToken(Boolean.TRUE);
+        paymentInfoModel.setSaved(Boolean.FALSE);
+        paymentInfoModel.setToken(tokenResponse.getId());
+        modelService.save(paymentInfoModel);
     }
 
     @Required
