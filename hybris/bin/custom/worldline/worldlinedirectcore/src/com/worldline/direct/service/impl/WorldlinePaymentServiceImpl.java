@@ -61,7 +61,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             params.setCountryCode(countryCode);
             params.setLocale(shopperLocale);
             params.setHide(Collections.singletonList("fields"));
-            params.setIsRecurring(Boolean.TRUE);
+            params.setIsRecurring(Boolean.FALSE);
             final GetPaymentProductsResponse paymentProducts = client.merchant(getMerchantId()).products().getPaymentProducts(params);
 
             WorldlineLogUtils.logAction(LOGGER, "getPaymentProducts", params, paymentProducts);
@@ -285,6 +285,18 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
         try (Client client = worldlineClientFactory.getClient()) {
             client.merchant(getMerchantId()).tokens().deleteToken(tokenId);
+            WorldlineLogUtils.logAction(LOGGER, "deleteToken", tokenId, "Token deleted!");
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during deleteToken", e);
+        }
+    }
+
+    @Override
+    public void deleteToken(String tokenId, WorldlineConfigurationModel worldlineConfigurationModel) {
+        validateParameterNotNullStandardMessage("tokenId", tokenId);
+
+        try (Client client = worldlineClientFactory.getClient(worldlineConfigurationModel)) {
+            client.merchant(worldlineConfigurationModel.getMerchantID()).tokens().deleteToken(tokenId);
             WorldlineLogUtils.logAction(LOGGER, "deleteToken", tokenId, "Token deleted!");
         } catch (IOException e) {
             LOGGER.error("[ WORLDLINE ] Errors during deleteToken", e);

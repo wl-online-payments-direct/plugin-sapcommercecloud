@@ -16,6 +16,7 @@ public class WorldlinePlaceOrderForm {
     private String timezoneOffset;
     private Integer colorDepth;
     private boolean termsCheck;
+    private boolean cardDetailsCheck;
     private String securityCode;
     private boolean replenishmentOrder;
     private Date replenishmentStartDate;
@@ -170,5 +171,13 @@ public class WorldlinePlaceOrderForm {
 
     public void setnMonths(String nMonths) {
         this.nMonths = nMonths;
+    }
+
+    public boolean isCardDetailsCheck() {
+        return cardDetailsCheck;
+    }
+
+    public void setCardDetailsCheck(boolean cardDetailsCheck) {
+        this.cardDetailsCheck = cardDetailsCheck;
     }
 }

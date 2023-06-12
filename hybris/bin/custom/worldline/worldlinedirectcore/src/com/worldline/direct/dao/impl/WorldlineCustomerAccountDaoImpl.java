@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.worldline.direct.dao.WorldlineCustomerAccountDao;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.servicelayer.internal.dao.AbstractItemDao;
@@ -33,9 +34,6 @@ public class WorldlineCustomerAccountDaoImpl extends AbstractItemDao implements 
 
     private static final String FIND_SAVED_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_AND_TOKEN_QUERY = FIND_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_AND_TOKEN_QUERY
             + " AND {" + WorldlinePaymentInfoModel.SAVED + "} = ?saved";
-
-    private static final String FIND_SAVED_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_AND_RECCURING_TOKEN_QUERY = FIND_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_AND_TOKEN_QUERY
-          + " AND {" + WorldlinePaymentInfoModel.RECURRINGTOKEN + "} = ?recurringToken";
 
     @Override
     public List<WorldlinePaymentInfoModel> findWorldlinePaymentInfosByCustomer(CustomerModel customerModel, boolean saved) {
@@ -82,18 +80,4 @@ public class WorldlineCustomerAccountDaoImpl extends AbstractItemDao implements 
 
     }
 
-    @Override
-    public WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndRecurringToken(CustomerModel customerModel, String token, boolean recurring) {
-        final Map<String, Object> queryParams = new HashMap<String, Object>();
-        queryParams.put("customer", customerModel);
-        queryParams.put("token", token);
-        if (recurring) {
-            queryParams.put("recurring", Boolean.TRUE);
-        }
-        queryParams.put("duplicate", Boolean.FALSE);
-        FlexibleSearchQuery flexibleSearchQuery = new FlexibleSearchQuery(FIND_SAVED_WORLDLINE_PAYMENT_INFOS_BY_CUSTOMER_AND_RECCURING_TOKEN_QUERY,
-              queryParams);
-
-        return getFlexibleSearchService().searchUnique(flexibleSearchQuery);
-    }
 }

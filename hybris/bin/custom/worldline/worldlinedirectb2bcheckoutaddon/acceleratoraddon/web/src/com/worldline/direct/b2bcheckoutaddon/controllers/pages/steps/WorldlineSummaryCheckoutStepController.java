@@ -8,6 +8,7 @@ import com.worldline.direct.b2bcheckoutaddon.constants.WorldlineCheckoutConstant
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.b2bcheckoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.b2bcheckoutaddon.utils.WorldlinePlaceOrderUtils;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.order.data.BrowserData;
@@ -136,6 +137,9 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("daysOfWeek", getB2BCheckoutFacade().getDaysOfWeekForReplenishmentCheckoutSummary());
         if (worldlinePaymentInfo != null) {
             model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
+            if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfo.getPaymentMethod())) {
+                model.addAttribute("tokenizePayment", Boolean.TRUE);
+            }
         } else {
             model.addAttribute("showReplenishment", true);
         }
@@ -212,6 +216,8 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         placeOrderData.setReplenishmentEndDate(worldlinePlaceOrderForm.getReplenishmentEndDate());
         placeOrderData.setSecurityCode(worldlinePlaceOrderForm.getSecurityCode());
         placeOrderData.setTermsCheck(worldlinePlaceOrderForm.isTermsCheck());
+        placeOrderData.setCardDetailsCheck(worldlinePlaceOrderForm.isCardDetailsCheck());
+
         AbstractOrderData abstractOrderData;
         try {
             final BrowserData browserData = fillBrowserData(request, worldlinePlaceOrderForm);

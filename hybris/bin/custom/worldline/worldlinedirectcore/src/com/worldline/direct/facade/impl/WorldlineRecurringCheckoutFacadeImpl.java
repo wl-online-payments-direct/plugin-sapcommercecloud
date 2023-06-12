@@ -1,8 +1,6 @@
 package com.worldline.direct.facade.impl;
 
-import com.onlinepayments.domain.CreateHostedCheckoutResponse;
-import com.onlinepayments.domain.GetHostedCheckoutResponse;
-import com.onlinepayments.domain.PaymentResponse;
+import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.RecurringPaymentEnum;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
@@ -14,6 +12,7 @@ import com.worldline.direct.service.WorldlineCartToOrderService;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -67,7 +66,8 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
             case IN_PROGRESS:
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
-                saveOrUpdatePaymentToken(cartToOrderCronJob.getCart(), hostedCheckoutData, Boolean.TRUE);
+                saveSurchargeData(cartToOrderCronJob.getCart(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                savePaymentToken(cartToOrderCronJob.getCart(), hostedCheckoutData, Boolean.TRUE, cartToOrderCronJob.getCode());
                 saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getWorldlineConfiguration(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 return handlePaymentResponse(cartToOrderCronJob);
             default:
@@ -84,11 +84,12 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
         WorldlinePaymentInfoModel orderPaymentInfo = (WorldlinePaymentInfoModel) order.getPaymentInfo();
         WorldlinePaymentInfoModel recurringPaymentInfo = (WorldlinePaymentInfoModel) schedulingCronJob.getPaymentInfo();
         recurringPaymentInfo.setMandateDetail(orderPaymentInfo.getMandateDetail()); // if recurring payment should be done by SEPA DD
-        recurringPaymentInfo.setToken(orderPaymentInfo.getToken()); // if recurring payment should be done by card
+        recurringPaymentInfo.setWorldlineRecurringToken(orderPaymentInfo.getWorldlineRecurringToken()); // if recurring payment should be done by card
         modelService.save(recurringPaymentInfo);
         worldlineCartToOrderService.enableCartToOrderJob(schedulingCronJob,false);
         return scheduledCartConverter.convert(schedulingCronJob);
     }
+
 
     protected ScheduledCartData handlePaymentResponse(CartToOrderCronJobModel cartToOrderCronJobModel) {
         worldlineCartToOrderService.enableCartToOrderJob(cartToOrderCronJobModel, true);

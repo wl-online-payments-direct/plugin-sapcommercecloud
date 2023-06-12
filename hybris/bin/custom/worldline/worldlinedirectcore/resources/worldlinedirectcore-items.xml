@@ -260,7 +260,50 @@
                     <persistence type="property" />
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
-                    <description>Determines wether or not the token is used for recurring payment</description>
+                    <description>Determines whether the token is used for recurring payment</description>
+                </attribute>
+                <attribute qualifier="worldlineRecurringToken" type="WorldlineRecurringToken">
+                    <persistence type="property" />
+                    <description>Token that is used for recurring payment</description>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="WorldlineRecurringToken" extends="GenericItem">
+            <deployment table="worldlineRecurringToken" typecode="15008"/>
+            <attributes>
+                <attribute qualifier="token" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="alias" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="cardholderName" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="expiryDate" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="status" type="WorldlineRecurringPaymentStatus">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineRecurringPaymentStatus","ACTIVE")</defaultvalue>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="subscriptionID" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers read="true" search="true"/>
+                </attribute>
+                <attribute qualifier="customer" type="Customer">
+                    <description>The customer who is using the token for recurring payments</description>
+                    <persistence type="property" />
+                </attribute>
+                <attribute qualifier="worldlineConfiguration" type="WorldlineConfiguration">
+                    <persistence type="property"/>
+                    <modifiers/>
                 </attribute>
             </attributes>
         </itemtype>

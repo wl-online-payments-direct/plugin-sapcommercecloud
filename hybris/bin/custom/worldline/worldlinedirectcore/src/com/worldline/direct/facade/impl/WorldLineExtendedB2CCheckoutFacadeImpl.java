@@ -90,7 +90,7 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
             populateTriggerDataFromPlaceOrderData(placeOrderData, triggerDataListData);
 
             final CartModel cartModel = getCart();
-            updatePaymentInfo(cartModel);
+            worldlineScheduleOrderService.updateCartRecurringPaymentInfo(cartModel, placeOrderData.isCardDetailsCheck());
             final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cartModel.getPaymentType().getCode());
 
             if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment() && BooleanUtils.isTrue(cardPaymentType)) {
@@ -102,16 +102,6 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
 
         return (T) super.placeOrder();
 
-    }
-
-    private void updatePaymentInfo(CartModel cartModel) {
-        WorldlinePaymentInfoModel paymentInfo;
-        if (cartModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
-            paymentInfo = (WorldlinePaymentInfoModel) cartModel.getPaymentInfo();
-            paymentInfo.setRecurringToken(Boolean.TRUE);
-            getModelService().save(cartModel);
-            getModelService().save(paymentInfo);
-        }
     }
 
     private OrderData scheduleOrderAndPlaceOrder(List<TriggerData> triggerDataList) throws InvalidCartException {
