@@ -24,6 +24,11 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final int PAYMENT_METHOD_BCC = 3012;
 
     public static final int PAYMENT_METHOD_INTERSOLVE = 5700;
+    public static final int PAYMENT_METHOD_AMERICAN_EXPRESS = 2;
+    public static final int PAYMENT_METHOD_DINERS_CLUB = 132;
+    public static final int PAYMENT_METHOD_MASTERCARD = 3;
+    public static final int PAYMENT_METHOD_JCB = 125;
+    public static final int PAYMENT_METHOD_VISA = 1;
 
 
     public static final String PAYMENT_METHOD_IDEAL_COUNTRY = "NL";

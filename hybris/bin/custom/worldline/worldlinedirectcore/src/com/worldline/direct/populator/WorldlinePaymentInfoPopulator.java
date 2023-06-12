@@ -1,8 +1,10 @@
 package com.worldline.direct.populator;
 
 import com.worldline.direct.model.WorldlineMandateModel;
+import com.worldline.direct.model.WorldlineRecurringTokenModel;
 import com.worldline.direct.order.data.WorldlineMandateDetail;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.order.data.WorldlineRecurringTokenData;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.commercefacades.order.data.CardTypeData;
 import de.hybris.platform.commercefacades.user.data.AddressData;
@@ -18,6 +20,8 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
 
     private Converter<AddressModel, AddressData> addressConverter;
     private Converter<WorldlineMandateModel, WorldlineMandateDetail> worldlineMandateConverter;
+
+    private Converter<WorldlineRecurringTokenModel, WorldlineRecurringTokenData> worldlineRecurringTokenConverter;
 
     @Override
     public void populate(WorldlinePaymentInfoModel worldlinePaymentInfoModel, WorldlinePaymentInfoData worldlinePaymentInfoData) throws ConversionException {
@@ -56,10 +60,13 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         if (worldlinePaymentInfoModel.getUsedSavedPayment() != null) {
             worldlinePaymentInfoData.setSavedPayment(worldlinePaymentInfoModel.getUsedSavedPayment().getCode());
         }
-        if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfoModel) && worldlinePaymentInfoModel.getMandateDetail() != null) {
-            worldlinePaymentInfoData.setMandateDetail(worldlineMandateConverter.convert(worldlinePaymentInfoModel.getMandateDetail()));
+        if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfoModel)) {
+            if (worldlinePaymentInfoModel.getMandateDetail() != null) {
+                worldlinePaymentInfoData.setMandateDetail(worldlineMandateConverter.convert(worldlinePaymentInfoModel.getMandateDetail()));
+            } else if (worldlinePaymentInfoModel.getWorldlineRecurringToken() != null) {
+                worldlinePaymentInfoData.setRecurringToken(worldlineRecurringTokenConverter.convert(worldlinePaymentInfoModel.getWorldlineRecurringToken()));
+            }
         }
-
     }
 
     private String formattedAlias(String alias) {
@@ -77,5 +84,9 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
 
     public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {
         this.addressConverter = addressConverter;
+    }
+
+    public void setWorldlineRecurringTokenConverter(Converter<WorldlineRecurringTokenModel, WorldlineRecurringTokenData> worldlineRecurringTokenConverter) {
+        this.worldlineRecurringTokenConverter = worldlineRecurringTokenConverter;
     }
 }

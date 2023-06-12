@@ -2,6 +2,7 @@ package com.worldline.direct.dao;
 
 import java.util.List;
 
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 
@@ -12,7 +13,4 @@ public interface WorldlineCustomerAccountDao {
     WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndCode(CustomerModel customerModel, String code);
 
     WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndToken(CustomerModel customerModel, String token, boolean saved);
-
-    WorldlinePaymentInfoModel findWorldlinePaymentInfosByCustomerAndRecurringToken(CustomerModel customerModel, String token, boolean recurring);
-
 }
