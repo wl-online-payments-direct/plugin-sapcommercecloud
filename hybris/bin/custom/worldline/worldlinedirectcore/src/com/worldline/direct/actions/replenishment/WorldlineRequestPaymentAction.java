@@ -1,6 +1,7 @@
 package com.worldline.direct.actions.replenishment;
 
 import com.onlinepayments.domain.CreatePaymentResponse;
+import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineRecurringService;
@@ -45,7 +46,6 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
                         Integer attemptSequence = getAttemptSequence(process, placedOrder.getStore().getWorldlineConfiguration());
                         if (processParameterHelper.getProcessParameterByName(process, ATTEMPTS) == null || attemptSequence > 0) {
                             try {
-
                                 Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
                                 if (recurringPayment.isPresent()) {
                                     worldlineCheckoutFacade.handlePaymentResponse(placedOrder, recurringPayment.get().getPayment());

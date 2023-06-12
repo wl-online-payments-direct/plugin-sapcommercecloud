@@ -10,4 +10,6 @@ import java.util.List;
 
 public interface WorldlineScheduleOrderService {
     CartToOrderCronJobModel createOrderFromCartCronJob(CartModel cart, AddressModel deliveryAddress, AddressModel paymentAddress, PaymentInfoModel paymentInfo, List<TriggerModel> triggers);
+
+    void updateCartRecurringPaymentInfo(CartModel cartModel, boolean tokenizePayment);
 }

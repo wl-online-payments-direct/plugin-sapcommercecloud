@@ -4,6 +4,7 @@ import com.onlinepayments.domain.PaymentProduct;
 import com.onlinepayments.domain.TokenResponse;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 
 import java.util.List;
@@ -22,9 +23,9 @@ public interface WorldlineUserFacade {
 
     WorldlinePaymentInfoData getWorldlinePaymentInfoByCode(String code);
 
-    void saveWorldlinePaymentInfo(WorldlineCheckoutTypesEnum checkoutType, TokenResponse tokenResponse, PaymentProduct paymentProduct, Boolean isRecurring);
+    void saveWorldlinePaymentInfo(WorldlineCheckoutTypesEnum checkoutType, TokenResponse tokenResponse, PaymentProduct paymentProduct);
 
-    void updateWorldlinePaymentInfo(WorldlinePaymentInfoModel paymentInfoModel, TokenResponse tokenResponse);
+    void updateWorldlinePaymentInfo(WorldlinePaymentInfoModel paymentInfoModel, TokenResponse tokenResponse, String cronjobId);
 
     void deleteSavedWorldlinePaymentInfo(String code);
 

@@ -26,6 +26,7 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
     private List<String> salePaymentProduct;
 
     public static final String CHALLENGE_REQUIRED = "challenge-required";
+    public static final String CARD_HOLDER_INITIATED = "cardholderInitiated";
     public static final String LOW_VALUE = "low-value";
 
     @Override
@@ -74,12 +75,10 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(FIRST_RECCURANCE);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
 
-            // TODO: set the property as static value
-            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor("cardholderInitiated");
+            //cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(CARD_HOLDER_INITIATED);
         } else {
             cardPaymentMethodSpecificInput.setTokenize(false);
         }
-        //cardPaymentMethodSpecificInput.setUnscheduledCardOnFileSequenceIndicator("first");
 
         return cardPaymentMethodSpecificInput;
     }

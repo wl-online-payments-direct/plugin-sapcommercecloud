@@ -25,6 +25,7 @@
 			<et:navigation-node id="hmc.worldline">
 				<et:type-node code="WorldlineConfiguration" id="hmc.worldline.worldlineConfiguration"/>
 				<et:type-node code="worldlineMandate" id="hmc.worldline.worldlineMandate"/>
+				<et:type-node code="WorldlineRecurringToken" id="hmc.worldline.worldlineRecurringToken"/>
 			</et:navigation-node>
 		</et:explorer-tree>
 	</context>
@@ -236,8 +237,6 @@
 	<!-- WorldlineMandate BO appearance END -->
 
 
-	<!-- WorldlineMandate BO appearance END -->
-
 	<!-- BaseStore update BO appearance START -->
 	<context merge-by="type" parent="GenericItem" type="BaseStore" component="editor-area">
 		<ea:editorArea name="">
@@ -312,6 +311,7 @@
 						<ea:attribute qualifier="expiryDate"/>
 						<ea:attribute qualifier="usedSavedPayment"/>
 						<ea:attribute qualifier="recurringToken"/>
+						<ea:attribute qualifier="worldlineRecurringToken"/>
 					</ea:section>
 				</ea:tab>
 			</ea:editorArea>
@@ -395,5 +395,84 @@
 		</y:actions>
 	</context>
 	<!-- CS Backoffice END -->
+
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="listview">
+		<lv:list-view>
+			<lv:column qualifier="token"/>
+			<lv:column qualifier="subscriptionID"/>
+			<lv:column qualifier="status"/>
+		</lv:list-view>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="advanced-search">
+		<as:advanced-search>
+			<as:field-list>
+				<as:field name="subscriptionID" selected="true"/>
+				<as:field name="status" />
+			</as:field-list>
+		</as:advanced-search>
+	</context>
+
+	<context type="WorldlineRecurringToken" component="base" merge-by="type" parent="GenericItem">
+		<y:base>
+			<y:labels>
+				<y:label>subscriptionID + ' - ' + token</y:label>
+			</y:labels>
+		</y:base>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="editor-area">
+		<ea:editorArea name="">
+			<ea:essentials>
+				<ea:essentialSection name="hmc.essential">
+					<ea:attribute qualifier="token" readonly="true"/>
+					<ea:attribute qualifier="subscriptionID" readonly="true"/>
+					<ea:attribute qualifier="status" readonly="true"/>
+				</ea:essentialSection>
+			</ea:essentials>
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.worldlineRecurringPaymentInfo">
+					<ea:attribute qualifier="token" readonly="true"/>
+					<ea:attribute qualifier="alias"/>
+					<ea:attribute qualifier="cardholderName"/>
+					<ea:attribute qualifier="expiryDate"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineRecurringInfo">
+					<ea:attribute qualifier="subscriptionID" readonly="true"/>
+					<ea:attribute qualifier="status" readonly="true"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+
+	<!-- WorldlineRecurringToken actions -->
+	<context merge-by="type" component="editorareaactions" type="WorldlineRecurringToken">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common" merge-mode="append">
+				<y:label>worldline.common</y:label>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.block" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.unblock" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.revoke" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+			</y:group>
+		</y:actions>
+	</context>
+
+	<!-- WorldlineRecurringToken BO appearance END -->
 
 </config>

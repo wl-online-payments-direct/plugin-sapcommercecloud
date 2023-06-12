@@ -59,6 +59,8 @@ public interface WorldlinePaymentService {
 
     void deleteToken(String tokenId);
 
+    void deleteToken(String tokenId, WorldlineConfigurationModel worldlineConfigurationModel);
+
     GetMandateResponse getMandate(String uniqueMandateReference);
 
     GetMandateResponse getMandate(WorldlineMandateModel worldlineMandateModel);

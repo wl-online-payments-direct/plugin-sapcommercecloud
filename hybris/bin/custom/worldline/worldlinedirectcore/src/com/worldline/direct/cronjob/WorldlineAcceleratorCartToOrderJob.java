@@ -36,41 +36,41 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
             LOG.info("Worldline Accelerator Cart To Order Job has reached the ending date");
             cronJob.setActive(false);
             modelService.save(cronJob);
+            worldlineRecurringService.cancelRecurringPayment(cronJob);
             return new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED);
 
         }
-        if (BooleanUtils.isTrue(cronJob.isSubmitted()) && WorldlineRecurringPaymentStatus.ACTIVE.equals(worldlineRecurringService.isRecurringPaymentEnable(cronJob)))
-        {
-        final String replenishmentOrderProcessCode = "worldlineReplenishmentOrderProcess" + cronJob.getCode() + System.currentTimeMillis();
-        final ReplenishmentProcessModel businessProcessModel = getBusinessProcessService()
-                .createProcess(replenishmentOrderProcessCode, "worldlineReplenishmentOrderProcess");
-        businessProcessModel.setCartToOrderCronJob(cronJob);
-        modelService.save(businessProcessModel);
-        getBusinessProcessService().startProcess(businessProcessModel);
-        modelService.refresh(businessProcessModel);
-        while (businessProcessModel.getProcessState().equals(ProcessState.RUNNING)
-                || businessProcessModel.getProcessState().equals(ProcessState.CREATED)) {
+        if (BooleanUtils.isTrue(cronJob.isSubmitted()) && WorldlineRecurringPaymentStatus.ACTIVE.equals(worldlineRecurringService.isRecurringPaymentEnable(cronJob))) {
+            final String replenishmentOrderProcessCode = "worldlineReplenishmentOrderProcess" + cronJob.getCode() + System.currentTimeMillis();
+            final ReplenishmentProcessModel businessProcessModel = getBusinessProcessService()
+                    .createProcess(replenishmentOrderProcessCode, "worldlineReplenishmentOrderProcess");
+            businessProcessModel.setCartToOrderCronJob(cronJob);
+            modelService.save(businessProcessModel);
+            getBusinessProcessService().startProcess(businessProcessModel);
             modelService.refresh(businessProcessModel);
+            while (businessProcessModel.getProcessState().equals(ProcessState.RUNNING)
+                    || businessProcessModel.getProcessState().equals(ProcessState.CREATED)) {
+                modelService.refresh(businessProcessModel);
 
-            try {
-                Thread.sleep(1000);
-            } catch (final InterruptedException e) {
-                LOG.warn("Thread interrupted " + e.getMessage());
-                Thread.currentThread().interrupt();
+                try {
+                    Thread.sleep(1000);
+                } catch (final InterruptedException e) {
+                    LOG.warn("Thread interrupted " + e.getMessage());
+                    Thread.currentThread().interrupt();
+                }
             }
-        }
 
-        final PerformResult cronJobResult;
-        if (businessProcessModel.getProcessState().equals(ProcessState.SUCCEEDED)) {
-            cronJobResult = new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED);
-        } else if (businessProcessModel.getProcessState().equals(ProcessState.ERROR)
-                || businessProcessModel.getProcessState().equals(ProcessState.FAILED)) {
-            cronJobResult = new PerformResult(CronJobResult.ERROR, CronJobStatus.UNKNOWN);
+            final PerformResult cronJobResult;
+            if (businessProcessModel.getProcessState().equals(ProcessState.SUCCEEDED)) {
+                cronJobResult = new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED);
+            } else if (businessProcessModel.getProcessState().equals(ProcessState.ERROR)
+                    || businessProcessModel.getProcessState().equals(ProcessState.FAILED)) {
+                cronJobResult = new PerformResult(CronJobResult.ERROR, CronJobStatus.UNKNOWN);
+            } else {
+                cronJobResult = new PerformResult(CronJobResult.FAILURE, CronJobStatus.FINISHED);
+            }
+            return cronJobResult;
         } else {
-            cronJobResult = new PerformResult(CronJobResult.FAILURE, CronJobStatus.FINISHED);
-        }
-        return cronJobResult;
-        }else {
             LOG.error("payment was not received for this replenishment");
             final PerformResult cronJobResult;
             cronJobResult = new PerformResult(CronJobResult.FAILURE, CronJobStatus.FINISHED);

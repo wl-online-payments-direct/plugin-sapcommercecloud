@@ -1,5 +1,6 @@
 package com.worldline.direct.service;
 
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
@@ -13,8 +14,6 @@ public interface WorldlineCustomerAccountService {
     WorldlinePaymentInfoModel getWorldlinePaymentInfoByCode(CustomerModel customerModel, String code);
 
     WorldlinePaymentInfoModel getWorldlinePaymentInfoByToken(CustomerModel customerModel, String token, boolean saved);
-
-    WorldlinePaymentInfoModel getWroldlinePaymentInfoByRecurringToken(CustomerModel customerModel, String token);
 
     CartToOrderCronJobModel getCartToOrderCronJob(String jobCode);
 
