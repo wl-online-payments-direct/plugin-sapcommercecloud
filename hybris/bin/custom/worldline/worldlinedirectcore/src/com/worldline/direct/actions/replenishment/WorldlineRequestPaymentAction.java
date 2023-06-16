@@ -1,10 +1,15 @@
 package com.worldline.direct.actions.replenishment;
 
+import com.onlinepayments.domain.AmountOfMoney;
+import com.onlinepayments.domain.CalculateSurchargeResponse;
 import com.onlinepayments.domain.CreatePaymentResponse;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineRecurringService;
+import com.worldline.direct.service.WorldlineTransactionService;
 import de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel;
 import de.hybris.platform.commerceservices.impersonation.ImpersonationContext;
 import de.hybris.platform.commerceservices.impersonation.ImpersonationService;
@@ -17,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
+import javax.annotation.Resource;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +38,10 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
     private ImpersonationService impersonationService;
     private WorldlineCheckoutFacade worldlineCheckoutFacade;
     private WorldlineRecurringService worldlineRecurringService;
+    private WorldlinePaymentService worldlinePaymentService;
+
+    protected WorldlineTransactionService worldlineTransactionService;
+
 
     @Override
     public String execute(final ReplenishmentProcessModel process) throws Exception {
@@ -46,6 +56,12 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
                         Integer attemptSequence = getAttemptSequence(process, placedOrder.getStore().getWorldlineConfiguration());
                         if (processParameterHelper.getProcessParameterByName(process, ATTEMPTS) == null || attemptSequence > 0) {
                             try {
+//                                if (placedOrder.getStore().getWorldlineConfiguration().isApplySurcharge()) {
+//                                    CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(((WorldlinePaymentInfoModel)placedOrder.getPaymentInfo()).getHostedTokenizationId(), placedOrder);
+//                                    AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
+//                                    worldlineTransactionService.savePaymentCost(placedOrder, surcharge);
+//                                }
+
                                 Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
                                 if (recurringPayment.isPresent()) {
                                     worldlineCheckoutFacade.handlePaymentResponse(placedOrder, recurringPayment.get().getPayment());
@@ -121,6 +137,14 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
     @Required
     public void setWorldlineRecurringService(WorldlineRecurringService worldlineRecurringService) {
         this.worldlineRecurringService = worldlineRecurringService;
+    }
+
+    public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
+        this.worldlinePaymentService = worldlinePaymentService;
+    }
+
+    public void setWorldlineTransactionService(WorldlineTransactionService worldlineTransactionService) {
+        this.worldlineTransactionService = worldlineTransactionService;
     }
 
     enum Transition {

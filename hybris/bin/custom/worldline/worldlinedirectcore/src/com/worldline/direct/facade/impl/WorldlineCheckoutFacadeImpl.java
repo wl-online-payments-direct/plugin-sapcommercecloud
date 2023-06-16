@@ -258,7 +258,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
                 saveSurchargeData(orderForCode.getSchedulingCronJob().getCart(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
-                savePaymentToken(orderForCode, hostedCheckoutData, isRecurring, StringUtils.EMPTY);
+                savePaymentToken(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment(), isRecurring, isRecurring ? orderForCode.getSchedulingCronJob().getCode() : StringUtils.EMPTY);
                 handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 saveMandateIfNeeded(orderForCode.getStore().getWorldlineConfiguration(),(WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 break;
@@ -268,16 +268,16 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         }
     }
 
-    protected void savePaymentToken(AbstractOrderModel orderModel, GetHostedCheckoutResponse hostedCheckoutData, Boolean isRecurring, String cronjobId) {
+    protected void savePaymentToken(AbstractOrderModel orderModel, PaymentResponse paymentData, Boolean isRecurring, String cronjobId) {
         WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
-        if (hostedCheckoutData.getCreatedPaymentOutput().getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
+        if (paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
             final TokenResponse tokenResponse = worldlinePaymentService.getToken(
-                  hostedCheckoutData.getCreatedPaymentOutput().getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken());
+                  paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken());
             if (isRecurring) {
                 worldlineUserFacade.updateWorldlinePaymentInfo(paymentInfoModel, tokenResponse, cronjobId);
                 modelService.refresh(orderModel);
             } else {
-                savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, paymentData);
             }
 
         }
@@ -523,6 +523,12 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
             if (paymentOutput.getCardPaymentMethodSpecificOutput() != null && paymentInfo.getId().equals(PAYMENT_METHOD_HTP)) {
                 paymentInfo.setId(paymentOutput.getCardPaymentMethodSpecificOutput().getPaymentProductId());
+                if (paymentInfo.isRecurringToken()) {
+                    // update cart so the recurring payments for subscription made by HTP to have valid payment method
+                    AbstractOrderModel cartModel = cartService.getSessionCart();
+                    ((WorldlinePaymentInfoModel)cartModel.getPaymentInfo()).setId(paymentOutput.getCardPaymentMethodSpecificOutput().getPaymentProductId());
+                    modelService.save(cartModel);
+                }
                 modelService.save(paymentInfo);
                 modelService.refresh(orderModel);
             }
