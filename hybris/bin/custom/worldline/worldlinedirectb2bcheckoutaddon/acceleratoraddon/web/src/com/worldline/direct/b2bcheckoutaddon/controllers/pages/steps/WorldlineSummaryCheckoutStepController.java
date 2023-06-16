@@ -136,7 +136,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
         model.addAttribute("daysOfWeek", getB2BCheckoutFacade().getDaysOfWeekForReplenishmentCheckoutSummary());
         if (worldlinePaymentInfo != null) {
-            model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
+            model.addAttribute("showReplenishment", WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
             if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfo.getPaymentMethod())) {
                 model.addAttribute("tokenizePayment", Boolean.TRUE);
             }

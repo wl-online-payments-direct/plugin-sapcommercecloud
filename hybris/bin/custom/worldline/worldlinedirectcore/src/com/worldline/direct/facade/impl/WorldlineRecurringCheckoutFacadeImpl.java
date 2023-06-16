@@ -7,6 +7,7 @@ import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
 import com.worldline.direct.order.data.BrowserData;
+import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.service.WorldlineB2BPaymentService;
 import com.worldline.direct.service.WorldlineCartToOrderService;
 import com.worldline.direct.util.WorldlineUrlUtils;
@@ -67,7 +68,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
                 saveSurchargeData(cartToOrderCronJob.getCart(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
-                savePaymentToken(cartToOrderCronJob.getCart(), hostedCheckoutData, Boolean.TRUE, cartToOrderCronJob.getCode());
+                savePaymentToken(cartToOrderCronJob.getCart(), hostedCheckoutData.getCreatedPaymentOutput().getPayment(), Boolean.TRUE, cartToOrderCronJob.getCode());
                 saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getWorldlineConfiguration(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 return handlePaymentResponse(cartToOrderCronJob);
             default:
@@ -79,6 +80,10 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
     @Override
     public ScheduledCartData authorisePaymentForImmediateReplenishmentHostedCheckout(String orderCode, String hostedCheckoutId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         super.authorisePaymentForHostedCheckout(orderCode, hostedCheckoutId, Boolean.TRUE);
+        return prepareCronJob(orderCode);
+    }
+
+    private ScheduledCartData prepareCronJob(String orderCode) {
         OrderModel order = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         CartToOrderCronJobModel schedulingCronJob = order.getSchedulingCronJob();
         WorldlinePaymentInfoModel orderPaymentInfo = (WorldlinePaymentInfoModel) order.getPaymentInfo();
@@ -90,6 +95,50 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
         return scheduledCartConverter.convert(schedulingCronJob);
     }
 
+    @Override
+    public ScheduledCartData authorizeRecurringPaymentForHostedTokenization(String code, WorldlineHostedTokenizationData worldlineHostedTokenizationData, RecurringPaymentEnum recurringPaymentType)
+          throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+
+        CreatePaymentResponse paymentResponse;
+        ScheduledCartData scheduledCartData;
+        switch (recurringPaymentType) {
+            case IMMEDIATE:
+                final OrderModel order = customerAccountService.getOrderForCode(code, baseStoreService.getCurrentBaseStore());
+                paymentResponse = worldlineB2BPaymentService.createRecurringPaymentForImmediateReplenishmentHostedTokenization(order.getSchedulingCronJob(), worldlineHostedTokenizationData);
+
+                if (paymentResponse.getMerchantAction() != null) {
+                    storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
+                    throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
+                          paymentResponse.getMerchantAction(),
+                          WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
+                }
+                saveSurchargeData(order, paymentResponse.getPayment());
+                savePaymentToken(order, paymentResponse.getPayment(), Boolean.TRUE, order.getSchedulingCronJob().getCode());
+                saveMandateIfNeeded(order.getStore().getWorldlineConfiguration(), (WorldlinePaymentInfoModel) order.getSchedulingCronJob().getPaymentInfo(), paymentResponse.getPayment());
+
+                handlePaymentResponse(order, paymentResponse.getPayment());
+                scheduledCartData = prepareCronJob(code);
+                break;
+            case SCHEDULED:
+                CartToOrderCronJobModel cartToOrderCronJob = worldlineCustomerAccountService.getCartToOrderCronJob(code);
+                paymentResponse = worldlineB2BPaymentService.createRecurringPaymentForScheduledReplenishmentHostedTokenization(cartToOrderCronJob, worldlineHostedTokenizationData);
+                if (paymentResponse.getMerchantAction() != null) {
+                    storeReturnMac(cartToOrderCronJob.getCart(), paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
+                    throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
+                          paymentResponse.getMerchantAction(),
+                          WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
+                }
+                saveSurchargeData(cartToOrderCronJob.getCart(), paymentResponse.getPayment());
+                savePaymentToken(cartToOrderCronJob.getCart(), paymentResponse.getPayment(), Boolean.TRUE, cartToOrderCronJob.getCode());
+                saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getWorldlineConfiguration(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), paymentResponse.getPayment());
+                scheduledCartData = handlePaymentResponse(cartToOrderCronJob);
+            default:
+
+                LOGGER.error("Unexpected Error when creating a payment for recurring order: " + code);
+                throw new IllegalStateException("Unexpected HostedTokenization error");
+        }
+        return scheduledCartData;
+    }
 
     protected ScheduledCartData handlePaymentResponse(CartToOrderCronJobModel cartToOrderCronJobModel) {
         worldlineCartToOrderService.enableCartToOrderJob(cartToOrderCronJobModel, true);
