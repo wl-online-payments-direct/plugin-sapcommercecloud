@@ -104,12 +104,13 @@ public class WorldlinePlaceOrderUtils {
                 {
                     storeHOPReturnUrlInSession(((ScheduledCartData) abstractOrderData).getJobCode(), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
                     hostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.SCHEDULED);
-                }else {
+                } else {
                     storeHOPReturnUrlInSession(abstractOrderData.getCode(), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
                     hostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.IMMEDIATE);
                 }
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
+
                 throw new UnsupportedOperationException();
         }
         return StringUtils.EMPTY;

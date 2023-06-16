@@ -1,15 +1,20 @@
 package com.worldline.direct.checkoutaddon.controllers.pages.checkout;
 
 import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
+import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.facade.WorldlineCustomerAccountFacade;
+import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractCheckoutController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
+import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.commercefacades.order.OrderFacade;
-import de.hybris.platform.commercefacades.order.data.OrderData;
+import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.commerceservices.order.CommerceCartModificationException;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.order.InvalidCartException;
@@ -33,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 public class WorldlineTokenizationCheckoutResponseController extends AbstractCheckoutController {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineTokenizationCheckoutResponseController.class);
     private static final String ORDER_CODE_PATH_VARIABLE_PATTERN = "{orderCode:.*}";
+    private static final String REDIRECT_URL_REPLENISHMENT_CONFIRMATION = REDIRECT_PREFIX
+          + "/checkout/replenishment/confirmation/";
 
     @Resource(name = "worldlineCheckoutFacade")
     private WorldlineCheckoutFacade worldlineCheckoutFacade;
@@ -46,18 +53,39 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
     @Autowired
     private HttpServletRequest httpServletRequest;
 
+    @Resource(name = "worldlineConfigurationService")
+    private WorldlineConfigurationService worldlineConfigurationService;
+
+    @Resource(name = "worldlineCustomerAccountFacade")
+    private WorldlineCustomerAccountFacade worldlineCustomerAccountFacade;
+
     @RequestMapping(value = WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = RequestMethod.GET)
     @RequireHardLogIn
     public String handle3ds(@PathVariable(value = "orderCode") final String orderCode,
+                            @PathVariable(value = "orderType") final OrderType orderType,
                             @RequestParam(value = "REF", required = true) final String ref,
                             @RequestParam(value = "RETURNMAC", required = true) final String returnMAC,
                             @RequestParam(value = "paymentId", required = true) final String paymentId,
                             final Model model,
                             final HttpServletRequest request,
                             final RedirectAttributes redirectAttributes) throws CMSItemNotFoundException, CommerceCartModificationException, InvalidCartException {
-        final OrderData orderDetails;
+        final AbstractOrderData orderDetails;
+        WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+
         try {
-            orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+            switch (orderType) {
+                case PLACE_ORDER:
+                    orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+                    break;
+                case SCHEDULE_REPLENISHMENT_ORDER:
+                default:
+                    if (currentWorldlineConfiguration.isFirstRecurringPayment()) {
+                        orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+                    } else {
+                        orderDetails = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+                    }
+                    break;
+            }
         } catch (final UnknownIdentifierException e) {
             LOGGER.warn("[WORLDLIINE] Attempted to handle hosted Tokenization payment on an order that does not exist. Redirect to cart page.");
             return REDIRECT_PREFIX + "/cart";
@@ -66,6 +94,7 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
         try {
             worldlineCheckoutFacade.validateReturnMAC(orderDetails, returnMAC);
             worldlineCheckoutFacade.handle3dsResponse(orderDetails.getCode(), paymentId);
+
             return redirectToOrderConfirmationPage(orderDetails);
         } catch (WorldlineNonAuthorizedPaymentException e) {
             switch (e.getReason()) {
@@ -91,12 +120,15 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
         }
     }
 
-    @Override
-    protected String redirectToOrderConfirmationPage(OrderData orderData) {
-        return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
+    protected String redirectToOrderConfirmationPage(AbstractOrderData abstractOrderData) {
+        if (abstractOrderData instanceof ScheduledCartData) {
+            return REDIRECT_URL_REPLENISHMENT_CONFIRMATION + ((ScheduledCartData) abstractOrderData).getJobCode();
+        } else {
+            return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(abstractOrderData);
+        }
     }
 
-    protected String getOrderCode(OrderData orderData) {
+    protected String getOrderCode(AbstractOrderData orderData) {
         return checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
     }
 

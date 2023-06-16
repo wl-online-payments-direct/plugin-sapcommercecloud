@@ -19,6 +19,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
     private static final String ECOMMERCE = "ECOMMERCE";
     private static final String RECCURANCE = "recurring";
+    private static final String RECCURANCE_FIRST = "first";
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentService worldlinePaymentService;
@@ -31,27 +32,37 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
 
-        if (paymentInfo.isRecurringToken()) {
-            createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE));
-            createPaymentRequest.getCardPaymentMethodSpecificInput()
-                  .setToken(paymentInfo.getWorldlineRecurringToken().getToken());
-            createPaymentRequest.getCardPaymentMethodSpecificInput()
-                  .setPaymentProductId(paymentInfo.getId());
-        } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentInfo.getPaymentMethod())) {
+        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentInfo.getPaymentMethod())) {
             final GetHostedTokenizationResponse hostedTokenization = worldlinePaymentService.getHostedTokenization(paymentInfo.getHostedTokenizationId());
             validateParameterNotNull(hostedTokenization, "tokenizationResponse cannot be null");
+            //TODO try to combine first recurring payment data and one-off payment data
+            if (paymentInfo.isRecurringToken()) {
+                if (paymentInfo.getWorldlineRecurringToken() != null) {
+                    createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, RECCURANCE));
+                    createPaymentRequest.getCardPaymentMethodSpecificInput().setToken(paymentInfo.getWorldlineRecurringToken().getToken());
 
-            createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.FALSE));
-            createPaymentRequest.getCardPaymentMethodSpecificInput()
-                    .setToken(hostedTokenization.getToken().getId());
-            createPaymentRequest.getCardPaymentMethodSpecificInput()
-                    .setPaymentProductId(hostedTokenization.getToken().getPaymentProductId());
+                    createPaymentRequest.getCardPaymentMethodSpecificInput().setPaymentProductId(paymentInfo.getId());
+                } else {
+                    createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, RECCURANCE_FIRST));
+                    createPaymentRequest.getCardPaymentMethodSpecificInput()
+                          .setToken(hostedTokenization.getToken().getId());
+                    createPaymentRequest.getCardPaymentMethodSpecificInput()
+                          .setPaymentProductId(hostedTokenization.getToken().getPaymentProductId());
+                }
+            } else {
+
+                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.FALSE, ""));
+                createPaymentRequest.getCardPaymentMethodSpecificInput()
+                        .setToken(hostedTokenization.getToken().getId());
+                createPaymentRequest.getCardPaymentMethodSpecificInput()
+                        .setPaymentProductId(hostedTokenization.getToken().getPaymentProductId());
+            }
 
         }
 
     }
 
-    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring) {
+    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring, String recurrance) {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
 
         CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
@@ -65,7 +76,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
         if (isRecurring) {
             CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
-            cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(RECCURANCE);
+            cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
         } else {
             cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
