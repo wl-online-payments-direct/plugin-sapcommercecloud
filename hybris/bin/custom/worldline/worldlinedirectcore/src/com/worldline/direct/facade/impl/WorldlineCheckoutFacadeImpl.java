@@ -383,7 +383,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
         if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType())) {
-            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), worldlinePaymentInfoData);
+            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getPaymentMethod());
         }
 
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
@@ -391,12 +391,19 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         commerceCheckoutService.setPaymentInfo(parameter);
     }
 
-    private void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, WorldlinePaymentInfoData worldlinePaymentInfoData) {
+    @Override
+    public boolean isTemporaryToken(String hostedTokenizationID) {
+        GetHostedTokenizationResponse hostedTokenizationResponse = worldlinePaymentService.getHostedTokenization(hostedTokenizationID);
+
+        return hostedTokenizationResponse.getToken().getIsTemporary();
+    }
+
+    public void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String paymentMethodType) {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         if (currentWorldlineConfiguration.isApplySurcharge() &&
-              StringUtils.equals(worldlinePaymentInfoData.getPaymentMethod(), WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
+              StringUtils.equals( WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue(), paymentMethodType)) {
 
-            CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, cartModel);
+            CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, token, cartModel);
             AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
             worldlineTransactionService.savePaymentCost(cartModel, surcharge);
         }

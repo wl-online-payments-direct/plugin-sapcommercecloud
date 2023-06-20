@@ -401,13 +401,19 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
-    public CalculateSurchargeResponse calculateSurcharge(String hostedTokenizationId, AbstractOrderModel abstractOrderModel) {
+    public CalculateSurchargeResponse calculateSurcharge(String hostedTokenizationId, String token, AbstractOrderModel abstractOrderModel) {
         validateParameterNotNullStandardMessage("hostedTokenizationId", hostedTokenizationId);
 
         try (Client client = worldlineClientFactory.getClient()) {
             CalculateSurchargeRequest request = new CalculateSurchargeRequest();
             request.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
-            request.withCardSource(new CardSource()).getCardSource().setHostedTokenizationId(hostedTokenizationId);
+            CardSource cardSource = new CardSource();
+            if (!StringUtils.EMPTY.equals(hostedTokenizationId)) {
+                cardSource.setHostedTokenizationId(hostedTokenizationId);
+            } else if (!StringUtils.EMPTY.equals(token)) {
+                cardSource.setToken(token);
+            }
+            request.withCardSource(cardSource);
             CalculateSurchargeResponse calculateSurchargeResponse = client.merchant(getMerchantId()).services().surchargeCalculation(request);
             WorldlineLogUtils.logAction(LOGGER, "calculateSurchargeResponse", hostedTokenizationId, "Calculate Surcharge");
             return calculateSurchargeResponse;
