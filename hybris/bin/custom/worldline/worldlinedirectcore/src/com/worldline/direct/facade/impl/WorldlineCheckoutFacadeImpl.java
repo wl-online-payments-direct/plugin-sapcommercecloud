@@ -257,7 +257,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             case IN_PROGRESS:
                 throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
             case PAYMENT_CREATED:
-                saveSurchargeData(orderForCode.getSchedulingCronJob().getCart(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                saveSurchargeData(orderForCode.getSchedulingCronJob() != null ? orderForCode.getSchedulingCronJob().getCart() : orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 savePaymentToken(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment(), isRecurring, isRecurring ? orderForCode.getSchedulingCronJob().getCode() : StringUtils.EMPTY);
                 handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 saveMandateIfNeeded(orderForCode.getStore().getWorldlineConfiguration(),(WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
@@ -271,9 +271,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     protected void savePaymentToken(AbstractOrderModel orderModel, PaymentResponse paymentData, Boolean isRecurring, String cronjobId) {
         WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
         if (paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
-            final TokenResponse tokenResponse = worldlinePaymentService.getToken(
-                  paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken());
             if (isRecurring) {
+                final TokenResponse tokenResponse = worldlinePaymentService.getToken(
+                    paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken());
                 worldlineUserFacade.updateWorldlinePaymentInfo(paymentInfoModel, tokenResponse, cronjobId);
                 modelService.refresh(orderModel);
             } else {
