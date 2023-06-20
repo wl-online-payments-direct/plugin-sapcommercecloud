@@ -138,7 +138,13 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         if (worldlinePaymentInfo != null) {
             model.addAttribute("showReplenishment", WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
             if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfo.getPaymentMethod())) {
-                model.addAttribute("tokenizePayment", Boolean.TRUE);
+
+                if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType()) &&
+                      worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
+                    model.addAttribute("tokenizePayment", Boolean.FALSE);
+                } else {
+                    model.addAttribute("tokenizePayment", Boolean.TRUE);
+                }
             }
         } else {
             model.addAttribute("showReplenishment", true);

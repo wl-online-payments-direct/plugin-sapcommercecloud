@@ -53,6 +53,7 @@ ACC.checkoutsummary = {
 
                 if (checked) {
                     checkoutBtns.prop('disabled', false);
+                    cssClass.find('.scheduleReplenishmentButton').prop('disabled', true);
                 } else {
                     checkoutBtns.prop('disabled', true);
                 }

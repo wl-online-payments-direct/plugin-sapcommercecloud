@@ -18,6 +18,7 @@ import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.processengine.action.AbstractAction;
 import de.hybris.platform.processengine.model.BusinessProcessParameterModel;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -56,11 +57,9 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
                         Integer attemptSequence = getAttemptSequence(process, placedOrder.getStore().getWorldlineConfiguration());
                         if (processParameterHelper.getProcessParameterByName(process, ATTEMPTS) == null || attemptSequence > 0) {
                             try {
-//                                if (placedOrder.getStore().getWorldlineConfiguration().isApplySurcharge()) {
-//                                    CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(((WorldlinePaymentInfoModel)placedOrder.getPaymentInfo()).getHostedTokenizationId(), placedOrder);
-//                                    AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
-//                                    worldlineTransactionService.savePaymentCost(placedOrder, surcharge);
-//                                }
+                                WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) placedOrder.getPaymentInfo();
+                                worldlineCheckoutFacade.calculateSurcharge(placedOrder, paymentInfoModel.getHostedTokenizationId(), paymentInfoModel.getWorldlineRecurringToken().getToken(), paymentInfoModel.getPaymentMethod());
+
 
                                 Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
                                 if (recurringPayment.isPresent()) {

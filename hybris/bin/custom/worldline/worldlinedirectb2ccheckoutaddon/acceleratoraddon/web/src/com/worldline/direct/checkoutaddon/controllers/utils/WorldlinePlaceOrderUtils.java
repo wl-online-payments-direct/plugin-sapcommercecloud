@@ -136,9 +136,6 @@ public class WorldlinePlaceOrderUtils {
                                   WorldlineWebConstants.URL.Checkout.Payment.select;
                     }
                 }
-
-
-                throw new UnsupportedOperationException();
         }
         return StringUtils.EMPTY;
     }
