@@ -147,9 +147,8 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("daysOfWeek", worldlineDirectCheckoutFacade.getDaysOfWeekForReplenishmentCheckoutSummary());
         if (!checkoutCustomerStrategy.isAnonymousCheckout() && worldlinePaymentInfo != null) {
            model.addAttribute("showReplenishment", WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
-            if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfo.getPaymentMethod())) {
-
-                if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType()) &&
+            if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
+               if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType()) &&
                       worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
                     model.addAttribute("tokenizePayment", Boolean.FALSE);
                 } else {

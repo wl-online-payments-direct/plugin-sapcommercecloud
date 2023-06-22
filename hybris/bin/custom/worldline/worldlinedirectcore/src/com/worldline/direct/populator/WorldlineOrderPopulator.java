@@ -26,7 +26,9 @@ public class WorldlineOrderPopulator implements Populator<OrderModel, OrderData>
          WorldlinePaymentInfoData worldlinePaymentInfoData = new WorldlinePaymentInfoData();
          worldlinePaymentInfoConverter.convert((WorldlinePaymentInfoModel) paymentInfo, worldlinePaymentInfoData);
          orderData.setWorldlinePaymentInfo(worldlinePaymentInfoData);
-         orderData.setSurcharge(priceDataFactory.create(PriceDataType.BUY, new BigDecimal(orderModel.getPaymentCost()), orderModel.getCurrency()));
+         if (orderModel.getPaymentCost() != 0d) {
+            orderData.setSurcharge(priceDataFactory.create(PriceDataType.BUY, new BigDecimal(orderModel.getPaymentCost()), orderModel.getCurrency()));
+         }
       }
    }
 
