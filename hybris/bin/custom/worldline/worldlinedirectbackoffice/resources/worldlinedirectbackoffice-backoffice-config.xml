@@ -91,7 +91,6 @@
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineGroupedCardsConfig">
 					<ea:attribute qualifier="groupCards"/>
-					<ea:attribute qualifier="groupedCardsPaymentModes"/>
 					<ea:attribute qualifier="groupCardsLogo"/>
 				</ea:section>
 			</ea:tab>
