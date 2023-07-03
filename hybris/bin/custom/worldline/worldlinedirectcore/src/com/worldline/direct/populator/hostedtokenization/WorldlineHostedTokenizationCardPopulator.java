@@ -11,7 +11,9 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
+import org.apache.commons.lang.BooleanUtils;
 
+import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator.CHALLENGE_REQUIRED;
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
@@ -82,6 +84,10 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
             cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
             cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
             cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
+
+            if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
+                cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
+            }
         }
 
         return cardPaymentMethodSpecificInput;
