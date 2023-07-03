@@ -5,9 +5,6 @@
 
 <items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="items.xsd">
-    <collectiontypes>
-        <collectiontype code="groupedCardsPaymentModeSet" elementtype="StandardPaymentMode" type="set"/>
-    </collectiontypes>
 
     <enumtypes>
         <enumtype generate="true" code="WorldlineCheckoutTypesEnum" autocreate="true">
@@ -107,11 +104,6 @@
                     <description>Group cards for Hosted Checkout Page.</description>
                     <modifiers read="true" write="true" optional="false"/>
                     <defaultvalue>Boolean.FALSE</defaultvalue>
-                    <persistence type="property"/>
-                </attribute>
-                <attribute qualifier="groupedCardsPaymentModes" type="groupedCardsPaymentModeSet">
-                    <description>Group cards Payment Modes.</description>
-                    <modifiers read="true" write="true"/>
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="groupCardsLogo" type="Media">
