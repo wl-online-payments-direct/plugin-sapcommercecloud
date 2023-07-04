@@ -1,9 +1,6 @@
 package com.worldline.direct.populator.hostedcheckout;
 
-import com.onlinepayments.domain.CardPaymentMethodSpecificInputForHostedCheckout;
-import com.onlinepayments.domain.CreateHostedCheckoutRequest;
-import com.onlinepayments.domain.HostedCheckoutSpecificInput;
-import com.onlinepayments.domain.Order;
+import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.model.WorldlineConfigurationModel;
@@ -17,6 +14,8 @@ import de.hybris.platform.servicelayer.session.SessionService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
@@ -24,6 +23,8 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineHostedCheckoutBasicPopulator implements Populator<AbstractOrderModel, CreateHostedCheckoutRequest> {
 
     public static final String HOSTED_CHECKOUT_RETURN_URL = "hostedCheckoutReturnUrl";
+
+    public static final String HOSTED_CHECKOUT_GROUP_CARDS = "cards";
 
     private SessionService sessionService;
     private I18NService i18NService;
@@ -44,9 +45,13 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         hostedCheckoutSpecificInput.setIsRecurring(Boolean.FALSE);
         hostedCheckoutSpecificInput.setShowResultPage(Boolean.FALSE);
         hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
-        hostedCheckoutSpecificInput.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInputForHostedCheckout(abstractOrderModel));
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
         hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
+
+        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS == paymentInfo.getId()) {
+            hostedCheckoutSpecificInput.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInputForHostedCheckout());
+            hostedCheckoutSpecificInput.setPaymentProductFilters(getPaymentProductFiltersForHostedCheckout());
+        }
 
         hostedCheckoutSpecificInput.setReturnUrl(getReturnUrlFromSession());
         if (worldlineConfiguration.getSessionTimout() != null) {
@@ -56,11 +61,21 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         return hostedCheckoutSpecificInput;
     }
 
-    private CardPaymentMethodSpecificInputForHostedCheckout getCardPaymentMethodSpecificInputForHostedCheckout(AbstractOrderModel abstractOrderModel)
-    {
-        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+    private PaymentProductFiltersHostedCheckout getPaymentProductFiltersForHostedCheckout() {
+        PaymentProductFilter paymentProductFilter = new PaymentProductFilter();
+        paymentProductFilter.setGroups(Arrays.asList(HOSTED_CHECKOUT_GROUP_CARDS));
+        paymentProductFilter.setProducts(null);
+
+        PaymentProductFiltersHostedCheckout paymentProductFiltersHostedCheckout = new PaymentProductFiltersHostedCheckout();
+        paymentProductFiltersHostedCheckout.setRestrictTo(paymentProductFilter);
+
+        return paymentProductFiltersHostedCheckout;
+    }
+
+    private CardPaymentMethodSpecificInputForHostedCheckout getCardPaymentMethodSpecificInputForHostedCheckout() {
         CardPaymentMethodSpecificInputForHostedCheckout cardPaymentMethodSpecificInputForHostedCheckout=new CardPaymentMethodSpecificInputForHostedCheckout();
-        cardPaymentMethodSpecificInputForHostedCheckout.setGroupCards(WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS==paymentInfo.getId());
+        cardPaymentMethodSpecificInputForHostedCheckout.setGroupCards(Boolean.TRUE);
+
         return cardPaymentMethodSpecificInputForHostedCheckout;
     }
 

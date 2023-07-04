@@ -30,6 +30,7 @@ public class WorldlinePlaceOrderAction extends AbstractProceduralAction<Replenis
         final CartModel cart = (CartModel) clonedCartParameter.getValue();
         this.modelService.refresh(cart);
 
+
         final ImpersonationContext context = new ImpersonationContext();
         context.setOrder(cart);
         context.setLanguage(cart.getUser().getSessionLanguage());

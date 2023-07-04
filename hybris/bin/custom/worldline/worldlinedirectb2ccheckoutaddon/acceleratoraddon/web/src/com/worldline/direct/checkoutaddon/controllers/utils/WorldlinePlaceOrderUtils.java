@@ -32,6 +32,9 @@ import static de.hybris.platform.acceleratorstorefrontcommons.controllers.Abstra
 @Component("worldlinePlaceOrderUtils")
 public class WorldlinePlaceOrderUtils {
 
+    private static final String REDIRECT_URL_REPLENISHMENT_CONFIRMATION = REDIRECT_PREFIX
+          + "/checkout/replenishment/confirmation/";
+
     @Resource(name = "checkoutFacade")
     private CheckoutFacade checkoutFacade;
     @Resource(name = "worldlineCheckoutFacade")
@@ -47,7 +50,7 @@ public class WorldlinePlaceOrderUtils {
     @Resource(name = "baseSiteService")
     private BaseSiteService baseSiteService;
 
-    public String submiOrder(AbstractOrderData abstractOrderData, BrowserData browserData, RedirectAttributes redirectAttributes) throws InvalidCartException {
+    public String submitOrder(AbstractOrderData abstractOrderData, BrowserData browserData, RedirectAttributes redirectAttributes) throws InvalidCartException {
         final CartData cartData = checkoutFacade.getCheckoutCart();
         switch (cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType()) {
             case HOSTED_CHECKOUT:
@@ -57,13 +60,7 @@ public class WorldlinePlaceOrderUtils {
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
                 try {
-
-                    final String hostedTokenizationId = abstractOrderData.getWorldlinePaymentInfo().getHostedTokenizationId();
-                    WorldlineHostedTokenizationData worldlineHostedTokenizationData = new WorldlineHostedTokenizationData();
-                    worldlineHostedTokenizationData.setBrowserData(browserData);
-                    worldlineHostedTokenizationData.setHostedTokenizationId(hostedTokenizationId);
-                    worldlineHostedTokenizationData.setReturnUrl(sessionService.getAttribute(HOSTED_TOKENIZATION_RETURN_URL));
-                    storeHTPReturnUrlInSession(getOrderCode(abstractOrderData));
+                    WorldlineHostedTokenizationData worldlineHostedTokenizationData = prepareHTPData(abstractOrderData, browserData);
                     worldlineCheckoutFacade.authorisePaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData);
                     return redirectToOrderConfirmationPage(abstractOrderData);
                 } catch (WorldlineNonAuthorizedPaymentException e) {
@@ -90,8 +87,6 @@ public class WorldlinePlaceOrderUtils {
                 break;
         }
         return StringUtils.EMPTY;
-
-
     }
 
 
@@ -110,11 +105,49 @@ public class WorldlinePlaceOrderUtils {
                 }
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
-                throw new UnsupportedOperationException();
+
+                try {
+                    WorldlineHostedTokenizationData worldlineHostedTokenizationData = prepareHTPData(abstractOrderData, browserData);
+                    if (abstractOrderData instanceof ScheduledCartData) {
+                        storeHTPReturnUrlInSession(((ScheduledCartData) abstractOrderData).getJobCode(),  OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+                        worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.SCHEDULED);
+                    } else {
+                        storeHTPReturnUrlInSession(getOrderCode(abstractOrderData),  OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+                        abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.IMMEDIATE);
+                    }
+                    return redirectToOrderConfirmationPage(abstractOrderData);
+                } catch (WorldlineNonAuthorizedPaymentException e) {
+                    switch (e.getReason()) {
+                        case NEED_3DS:
+                            return REDIRECT_PREFIX + e.getMerchantAction().getRedirectData().getRedirectURL();
+                        case REJECTED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                  GlobalMessages.ERROR_MESSAGES_HOLDER,
+                                  "checkout.error.payment.rejected");
+                            return REDIRECT_PREFIX +
+                                  WorldlineWebConstants.URL.Checkout.Payment.root +
+                                  WorldlineWebConstants.URL.Checkout.Payment.select;
+                        case CANCELLED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                  GlobalMessages.INFO_MESSAGES_HOLDER,
+                                  "checkout.error.payment.cancelled");
+                            return REDIRECT_PREFIX +
+                                  WorldlineWebConstants.URL.Checkout.Payment.root +
+                                  WorldlineWebConstants.URL.Checkout.Payment.select;
+                    }
+                }
         }
         return StringUtils.EMPTY;
     }
 
+    private WorldlineHostedTokenizationData prepareHTPData(AbstractOrderData abstractOrderData, BrowserData browserData) {
+        final String hostedTokenizationId = abstractOrderData.getWorldlinePaymentInfo().getHostedTokenizationId();
+        WorldlineHostedTokenizationData worldlineHostedTokenizationData = new WorldlineHostedTokenizationData();
+        worldlineHostedTokenizationData.setBrowserData(browserData);
+        worldlineHostedTokenizationData.setHostedTokenizationId(hostedTokenizationId);
+        worldlineHostedTokenizationData.setReturnUrl(sessionService.getAttribute(HOSTED_TOKENIZATION_RETURN_URL));
+        return worldlineHostedTokenizationData;
+    }
     private void storeHOPReturnUrlInSession(String code, OrderType orderType) {
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
                 true, WorldlineWebConstants.URL.Checkout.Payment.HOP.root + "/" + orderType +
@@ -122,9 +155,9 @@ public class WorldlinePlaceOrderUtils {
         sessionService.setAttribute(HOSTED_CHECKOUT_RETURN_URL, returnUrl);
     }
 
-    private void storeHTPReturnUrlInSession(String code) {
+    private void storeHTPReturnUrlInSession(String code, OrderType orderType) {
         final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
-                true, WorldlineWebConstants.URL.Checkout.Payment.HTP.root + "/" +
+                true, WorldlineWebConstants.URL.Checkout.Payment.HTP.root + "/" + orderType +
                         WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + code);
         sessionService.setAttribute(HOSTED_TOKENIZATION_RETURN_URL, returnUrl);
     }
@@ -133,10 +166,11 @@ public class WorldlinePlaceOrderUtils {
         return checkoutCustomerStrategy.isAnonymousCheckout() ? orderData.getGuid() : orderData.getCode();
     }
 
-    protected String redirectToOrderConfirmationPage(AbstractOrderData orderData) {
-        return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
+    protected String redirectToOrderConfirmationPage(AbstractOrderData abstractOrderData) {
+        if (abstractOrderData instanceof ScheduledCartData) {
+            return REDIRECT_URL_REPLENISHMENT_CONFIRMATION + ((ScheduledCartData) abstractOrderData).getJobCode();
+        } else {
+            return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(abstractOrderData);
+        }
     }
-
-
-
 }

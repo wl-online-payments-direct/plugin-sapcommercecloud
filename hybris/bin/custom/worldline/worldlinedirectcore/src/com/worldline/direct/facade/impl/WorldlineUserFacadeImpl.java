@@ -3,17 +3,24 @@ package com.worldline.direct.facade.impl;
 import com.onlinepayments.domain.CardWithoutCvv;
 import com.onlinepayments.domain.PaymentProduct;
 import com.onlinepayments.domain.TokenResponse;
+import com.worldline.direct.enums.RecurringPaymentEnum;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.facade.WorldlineUserFacade;
+import com.worldline.direct.jalo.WorldlineRecurringToken;
+import com.worldline.direct.model.WorldlineRecurringTokenModel;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlineCustomerAccountService;
 import com.worldline.direct.service.WorldlinePaymentModeService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.commerceservices.customer.CustomerAccountService;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
+import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
@@ -40,6 +47,8 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     private Converter<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> worldlinePaymentInfoConverter;
     private CustomerAccountService customerAccountService;
     private WorldlinePaymentModeService worldlinePaymentModeService;
+    private WorldlineConfigurationService worldlineConfigurationService;
+
     @Override
     public List<WorldlinePaymentInfoData> getWorldlinePaymentInfos(boolean saved) {
         final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
@@ -122,8 +131,8 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
             worldlinePaymentInfoByToken = modelService.create(WorldlinePaymentInfoModel.class);
             worldlinePaymentInfoByToken.setCode(String.valueOf(UUID.randomUUID()));
             worldlinePaymentInfoByToken.setUser(currentCustomer);
+
         }
-        worldlinePaymentInfoByToken.setId(tokenResponse.getPaymentProductId());
         final CardWithoutCvv cardWithoutCvv = tokenResponse.getCard().getData().getCardWithoutCvv();
         worldlinePaymentInfoByToken.setCardholderName(cardWithoutCvv.getCardholderName());
         worldlinePaymentInfoByToken.setAlias(cardWithoutCvv.getCardNumber());
@@ -131,9 +140,10 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         worldlinePaymentInfoByToken.setToken(tokenResponse.getId());
         worldlinePaymentInfoByToken.setCardBrand(paymentProduct.getDisplayHints().getLabel());
         worldlinePaymentInfoByToken.setId(tokenResponse.getPaymentProductId());
-        worldlinePaymentInfoByToken.setSaved(true);
         worldlinePaymentInfoByToken.setWorldlineCheckoutType(checkoutType);
         worldlinePaymentInfoByToken.setPaymentMethod(paymentProduct.getPaymentMethod());
+        worldlinePaymentInfoByToken.setSaved(true);
+
         modelService.save(worldlinePaymentInfoByToken);
     }
 
@@ -160,6 +170,24 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         if (worldlinePaymentInfoModel != null) {
             customerAccountService.setDefaultPaymentInfo(currentCustomer, worldlinePaymentInfoModel);
         }
+    }
+
+    @Override
+    public void updateWorldlinePaymentInfo(WorldlinePaymentInfoModel paymentInfoModel, TokenResponse tokenResponse, String cronjobId) {
+        CustomerModel customer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+        WorldlineRecurringTokenModel worldlineRecurringTokenModel = modelService.create(WorldlineRecurringTokenModel.class);
+        worldlineRecurringTokenModel.setToken(tokenResponse.getId());
+        worldlineRecurringTokenModel.setSubscriptionID(cronjobId);
+        worldlineRecurringTokenModel.setStatus(WorldlineRecurringPaymentStatus.ACTIVE);
+        final CardWithoutCvv cardWithoutCvv = tokenResponse.getCard().getData().getCardWithoutCvv();
+        worldlineRecurringTokenModel.setCardholderName(cardWithoutCvv.getCardholderName());
+        worldlineRecurringTokenModel.setAlias(cardWithoutCvv.getCardNumber());
+        worldlineRecurringTokenModel.setExpiryDate(String.join("/", EXPIRY_DATE_PATTERN.split(cardWithoutCvv.getExpiryDate())));
+        worldlineRecurringTokenModel.setCustomer(customer);
+        worldlineRecurringTokenModel.setWorldlineConfiguration(worldlineConfigurationService.getCurrentWorldlineConfiguration());
+        paymentInfoModel.setWorldlineRecurringToken(worldlineRecurringTokenModel);
+
+        modelService.saveAll(paymentInfoModel, worldlineRecurringTokenModel);
     }
 
     @Required
@@ -195,5 +223,9 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     @Required
     public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
         this.worldlinePaymentModeService = worldlinePaymentModeService;
+    }
+
+    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
+        this.worldlineConfigurationService = worldlineConfigurationService;
     }
 }

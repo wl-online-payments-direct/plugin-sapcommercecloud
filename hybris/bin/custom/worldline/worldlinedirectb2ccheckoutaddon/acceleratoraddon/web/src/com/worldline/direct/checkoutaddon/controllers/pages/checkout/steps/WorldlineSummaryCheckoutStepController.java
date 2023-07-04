@@ -6,7 +6,9 @@ import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants.URL.
 import com.worldline.direct.checkoutaddon.controllers.utils.WorldlinePlaceOrderUtils;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.constants.WorldlineCheckoutConstants;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.b2bacceleratorfacades.exception.EntityValidationException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineDirectCheckoutFacade;
@@ -98,7 +100,6 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
     @Resource(name = "worldlineExtendedCheckoutFacade")
     private WorldlineDirectCheckoutFacade worldlineDirectCheckoutFacade;
 
-
     @Autowired
     private HttpServletRequest httpServletRequest;
 
@@ -144,8 +145,16 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("nthWeek", getNumberRange(1, 12));
         model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
         model.addAttribute("daysOfWeek", worldlineDirectCheckoutFacade.getDaysOfWeekForReplenishmentCheckoutSummary());
-        if (worldlinePaymentInfo != null) {
-            model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfo));
+        if (!checkoutCustomerStrategy.isAnonymousCheckout() && worldlinePaymentInfo != null) {
+           model.addAttribute("showReplenishment", WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
+            if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
+               if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType()) &&
+                      worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
+                    model.addAttribute("tokenizePayment", Boolean.FALSE);
+                } else {
+                    model.addAttribute("tokenizePayment", Boolean.TRUE);
+                }
+            }
         } else {
             model.addAttribute("showReplenishment", true);
         }
@@ -210,6 +219,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         placeOrderData.setReplenishmentEndDate(worldlinePlaceOrderForm.getReplenishmentEndDate());
         placeOrderData.setSecurityCode(worldlinePlaceOrderForm.getSecurityCode());
         placeOrderData.setTermsCheck(worldlinePlaceOrderForm.isTermsCheck());
+        placeOrderData.setCardDetailsCheck(worldlinePlaceOrderForm.isCardDetailsCheck());
         AbstractOrderData abstractOrderData;
 
         try {
@@ -222,7 +232,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
                     if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder())) {
                         redirect = worldlinePlaceOrderUtils.submitReplenishmentOrder(abstractOrderData, browserData, redirectModel);
                     } else {
-                        redirect = worldlinePlaceOrderUtils.submiOrder(abstractOrderData, browserData, redirectModel);
+                        redirect = worldlinePlaceOrderUtils.submitOrder(abstractOrderData, browserData, redirectModel);
                     }
                 }
 

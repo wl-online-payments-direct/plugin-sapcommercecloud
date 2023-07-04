@@ -4,6 +4,7 @@ import com.worldline.direct.dao.WorldlineCustomerAccountDao;
 import com.worldline.direct.service.WorldlineCustomerAccountService;
 import de.hybris.platform.b2bacceleratorservices.customer.B2BCustomerAccountService;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;

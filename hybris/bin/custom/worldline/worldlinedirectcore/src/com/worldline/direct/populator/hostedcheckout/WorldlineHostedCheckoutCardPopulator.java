@@ -2,6 +2,7 @@ package com.worldline.direct.populator.hostedcheckout;
 
 import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.CardPaymentMethodSpecificInputBase;
+import com.onlinepayments.domain.CardRecurrenceDetails;
 import com.onlinepayments.domain.CreateHostedCheckoutRequest;
 import com.onlinepayments.domain.ThreeDSecureBase;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
@@ -20,9 +21,12 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractOrderModel, CreateHostedCheckoutRequest> {
 
     private static final String ECOMMERCE = "ECOMMERCE";
+
+    private static final String FIRST_RECCURANCE = "first";
     private List<String> salePaymentProduct;
 
     public static final String CHALLENGE_REQUIRED = "challenge-required";
+    public static final String CARD_HOLDER_INITIATED = "cardholderInitiated";
     public static final String LOW_VALUE = "low-value";
 
     @Override
@@ -43,7 +47,7 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         final WorldlineConfigurationModel currentWorldlineConfiguration = abstractOrderModel.getStore().getWorldlineConfiguration();
         final CardPaymentMethodSpecificInputBase cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInputBase();
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
-        cardPaymentMethodSpecificInput.setTokenize(false);
+
         cardPaymentMethodSpecificInput.setToken(paymentInfo.getToken());
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS != paymentInfo.getId()) {
             cardPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
@@ -59,10 +63,21 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
             }
             cardPaymentMethodSpecificInput.setThreeDSecure(threeDSecureBase);
         }
-        if (salePaymentProduct.contains(paymentInfo.getId())) {
+        if (salePaymentProduct.contains(paymentInfo.getId().toString())) {
             cardPaymentMethodSpecificInput.setAuthorizationMode(OperationCodesEnum.SALE.getCode());
         } else if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
             cardPaymentMethodSpecificInput.setAuthorizationMode(currentWorldlineConfiguration.getDefaultOperationCode().getCode());
+        }
+
+        if (paymentInfo.isRecurringToken()) {
+            cardPaymentMethodSpecificInput.setTokenize(true);
+            CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
+            cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(FIRST_RECCURANCE);
+            cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
+
+            //cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(CARD_HOLDER_INITIATED);
+        } else {
+            cardPaymentMethodSpecificInput.setTokenize(false);
         }
 
         return cardPaymentMethodSpecificInput;

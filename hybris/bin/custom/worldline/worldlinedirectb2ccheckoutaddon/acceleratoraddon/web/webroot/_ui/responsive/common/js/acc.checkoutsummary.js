@@ -15,21 +15,52 @@ ACC.checkoutsummary = {
 
         var cssClass = $(document).find(selector);
         var checkoutBtns = cssClass.find('.checkoutSummaryButton');
-        var checkBox = cssClass.find('input[name=termsCheck]')
+        var checkBox = cssClass.find('input[name=termsCheck]');
+        var checkBoxPD = cssClass.find('input[name=cardDetailsCheck]');
 
-        if (checkBox.is(':checked')) {
-            checkoutBtns.prop('disabled', false);
+        if (checkBoxPD.length) {
+            if (checkBox.is(':checked') && checkBoxPD.is(':checked')) {
+                checkoutBtns.prop('disabled', false);
+            }
+
+            checkBox.on('click', function () {
+                var checked = $(this).prop('checked');
+
+                if (checked && checkBoxPD.is(':checked')) {
+                    checkoutBtns.prop('disabled', false);
+                } else {
+                    checkoutBtns.prop('disabled', true);
+                }
+            });
+
+            checkBoxPD.on('click', function () {
+                var checked = $(this).prop('checked');
+
+                if (checked && checkBox.is(':checked')) {
+                    checkoutBtns.prop('disabled', false);
+                } else {
+                    checkoutBtns.prop('disabled', true);
+                }
+            });
+
+        } else {
+            if (checkBox.is(':checked')) {
+                checkoutBtns.prop('disabled', false);
+            }
+
+            checkBox.on('click', function () {
+                var checked = $(this).prop('checked');
+
+                if (checked) {
+                    checkoutBtns.prop('disabled', false);
+                    cssClass.find('.scheduleReplenishmentButton').prop('disabled', true);
+                } else {
+                    checkoutBtns.prop('disabled', true);
+                }
+            });
+
         }
 
-        checkBox.on('click', function () {
-            var checked = $(this).prop('checked');
-
-            if (checked) {
-                checkoutBtns.prop('disabled', false);
-            } else {
-                checkoutBtns.prop('disabled', true);
-            }
-        });
     },
 
     validateDate: function (date, dateFormat) {
@@ -92,7 +123,9 @@ ACC.checkoutsummary = {
             e.preventDefault();
 
             var termChecked = $(this).closest("form").find('input[name=termsCheck]').is(':checked');
+            var cardDetailsChecked = $(this).closest("form").find('input[name=cardDetailsCheck]').is(':checked');
             form.find('input[name=termsCheck]').prop('checked', termChecked);
+            form.find('input[name=cardDetailsCheck]').prop('checked', cardDetailsChecked);
 
             var titleHtml = $('.scheduleReplenishmentButton').first().html();
 
