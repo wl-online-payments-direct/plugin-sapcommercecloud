@@ -173,7 +173,7 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
 
     public interface ACCOUNT_TYPE {
         String GUEST = "none";
-        String CUSTOMER = "created";
+        String CUSTOMER = "existing";
     }
 
     public interface ADDRESS_INDICATEUR {

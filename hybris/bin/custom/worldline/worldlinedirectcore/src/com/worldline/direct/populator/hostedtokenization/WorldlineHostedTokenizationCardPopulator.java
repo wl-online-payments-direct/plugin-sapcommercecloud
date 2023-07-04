@@ -80,14 +80,14 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
             CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
-        } else {
-            cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
-            cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
-            cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
+        }
+        cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
+        cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
+        cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
 
-            if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
-                cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
-            }
+        if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
+            cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
+
         }
 
         return cardPaymentMethodSpecificInput;
