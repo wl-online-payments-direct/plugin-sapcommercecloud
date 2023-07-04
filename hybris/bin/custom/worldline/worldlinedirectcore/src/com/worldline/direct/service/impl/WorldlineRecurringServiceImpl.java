@@ -2,9 +2,11 @@ package com.worldline.direct.service.impl;
 
 import com.onlinepayments.domain.CreatePaymentResponse;
 import com.onlinepayments.domain.GetMandateResponse;
+import com.onlinepayments.domain.TokenResponse;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.model.WorldlineMandateModel;
+import com.worldline.direct.model.WorldlineRecurringTokenModel;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineRecurringService;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
@@ -13,17 +15,21 @@ import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.model.ModelService;
+import javolution.io.Struct;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Optional;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.*;
 
 public class WorldlineRecurringServiceImpl implements WorldlineRecurringService {
     private static final Logger LOG = LoggerFactory.getLogger(WorldlineRecurringServiceImpl.class);
+
     private WorldlinePaymentService worldlinePaymentService;
+
     private ModelService modelService;
 
     @Override
@@ -54,6 +60,24 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                     return Optional.empty();
                 }
             }
+            case PAYMENT_METHOD_AMERICAN_EXPRESS:
+            case PAYMENT_METHOD_DINERS_CLUB:
+            case PAYMENT_METHOD_JCB:
+            case PAYMENT_METHOD_MASTERCARD:
+            case PAYMENT_METHOD_VISA:
+            case PAYMENT_METHOD_GROUP_CARDS: {
+                if (WorldlineRecurringPaymentStatus.ACTIVE.equals(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getWorldlineRecurringToken().getStatus())) {
+                    try {
+                        CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
+                        return Optional.of(createPaymentResponse);
+                    } catch (Exception e) {
+                        LOG.error("something went wrong during payment creation", e);
+                        return Optional.empty();
+                    }
+                } else {
+                    LOG.info("No token id is saved against payment info: " + worldlinePaymentInfo.getCode());
+                }
+            }
             default:
                 return Optional.empty();
         }
@@ -66,19 +90,34 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
         if (paymentInfo instanceof WorldlinePaymentInfoModel) {
             WorldlinePaymentInfoModel worldlinePaymentInfoModel = (WorldlinePaymentInfoModel) paymentInfo;
             switch (worldlinePaymentInfoModel.getId()) {
-                case PAYMENT_METHOD_SEPA:
-                default:
-                {
+                case PAYMENT_METHOD_SEPA: {
                     WorldlineMandateModel mandateDetail = worldlinePaymentInfoModel.getMandateDetail();
                     GetMandateResponse revokeMandate = worldlinePaymentService.revokeMandate(mandateDetail);
                     if (!(revokeMandate != null && WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.valueOf(revokeMandate.getMandate().getStatus()) == WorldlinedirectcoreConstants.SEPA_MANDATE_STATUS.REVOKED)) {
                         LOG.error("something went wrong while cancelling Recurring payment");
-                    }else {
+                    } else {
                         mandateDetail.setStatus(WorldlineRecurringPaymentStatus.REVOKED);
                         modelService.save(mandateDetail);
                     }
+                    break;
                 }
-                break;
+                case PAYMENT_METHOD_AMERICAN_EXPRESS:
+                case PAYMENT_METHOD_DINERS_CLUB:
+                case PAYMENT_METHOD_JCB:
+                case PAYMENT_METHOD_MASTERCARD:
+                case PAYMENT_METHOD_VISA:
+                case PAYMENT_METHOD_GROUP_CARDS: {
+                    WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfoModel.getWorldlineRecurringToken();
+
+                    worldlinePaymentService.deleteToken(tokenModel.getToken(), tokenModel.getWorldlineConfiguration());
+                    tokenModel.setStatus(WorldlineRecurringPaymentStatus.REVOKED);
+                    modelService.save(tokenModel);
+
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
         }
     }
@@ -130,6 +169,19 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                 }
                 break;
             }
+            case PAYMENT_METHOD_AMERICAN_EXPRESS:
+            case PAYMENT_METHOD_DINERS_CLUB:
+            case PAYMENT_METHOD_JCB:
+            case PAYMENT_METHOD_MASTERCARD:
+            case PAYMENT_METHOD_VISA:
+            case PAYMENT_METHOD_GROUP_CARDS: {
+                WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfo.getWorldlineRecurringToken();
+
+                worldlinePaymentService.deleteToken(tokenModel.getToken());
+                tokenModel.setStatus(WorldlineRecurringPaymentStatus.BLOCKED);
+                modelService.save(tokenModel);
+                break;
+            }
             default: {
                 LOG.warn("recurring Order have no recurring payment");
                 break;
@@ -137,19 +189,23 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
         }
     }
 
-
     @Override
     public WorldlineRecurringPaymentStatus isRecurringPaymentEnable(CartToOrderCronJobModel cartToOrderCronJobModel) {
         if (!(cartToOrderCronJobModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
             return WorldlineRecurringPaymentStatus.ACTIVE;
         } else {
-            WorldlinePaymentInfoModel worldlinePaymentInfoModel = (WorldlinePaymentInfoModel)cartToOrderCronJobModel.getPaymentInfo();
-            if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel) && worldlinePaymentInfoModel.getMandateDetail() != null) {
-                return (worldlinePaymentInfoModel.getMandateDetail().getStatus());
+            WorldlinePaymentInfoModel worldlinePaymentInfoModel = (WorldlinePaymentInfoModel) cartToOrderCronJobModel.getPaymentInfo();
+            if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfoModel)) {
+                if (worldlinePaymentInfoModel.getMandateDetail() != null) {
+                    return (worldlinePaymentInfoModel.getMandateDetail().getStatus());
+                } else if (worldlinePaymentInfoModel.getWorldlineRecurringToken() != null) {
+                    return worldlinePaymentInfoModel.getWorldlineRecurringToken().getStatus();
+                }
             } else {
                 return WorldlineRecurringPaymentStatus.BLOCKED;
             }
         }
+        return WorldlineRecurringPaymentStatus.BLOCKED;
     }
 
     @Required

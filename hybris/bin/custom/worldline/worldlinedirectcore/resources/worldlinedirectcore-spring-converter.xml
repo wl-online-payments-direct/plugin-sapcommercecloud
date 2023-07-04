@@ -10,6 +10,7 @@
     <bean name="worldlinePaymentInfoPopulator" class="com.worldline.direct.populator.WorldlinePaymentInfoPopulator">
         <property name="addressConverter" ref="addressConverter"/>
         <property name="worldlineMandateConverter" ref="worldlineMandateConverter"/>
+        <property name="worldlineRecurringTokenConverter" ref="worldlineRecurringTokenConverter"/>
     </bean>
 
     <bean id="worldlinePaymentInfoConverter" parent="abstractPopulatingConverter">
@@ -182,6 +183,19 @@
         <property name="populators">
             <list>
                 <ref bean="worldlineMandatePopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean name="worldlineRecurringTokenPopulator" class="com.worldline.direct.populator.WorldlineRecurringTokenPopulator">
+        <property name="enumerationService" ref="enumerationService"/>
+    </bean>
+
+    <bean id="worldlineRecurringTokenConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.worldline.direct.order.data.WorldlineRecurringTokenData"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineRecurringTokenPopulator"/>
             </list>
         </property>
     </bean>

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.worldline.direct.dao.WorldlineCustomerAccountDao;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.servicelayer.internal.dao.AbstractItemDao;
@@ -78,4 +79,5 @@ public class WorldlineCustomerAccountDaoImpl extends AbstractItemDao implements 
         return getFlexibleSearchService().searchUnique(flexibleSearchQuery);
 
     }
+
 }

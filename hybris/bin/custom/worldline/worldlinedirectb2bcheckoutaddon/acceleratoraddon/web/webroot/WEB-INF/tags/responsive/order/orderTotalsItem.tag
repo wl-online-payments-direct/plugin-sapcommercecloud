@@ -7,7 +7,6 @@
 <%@ attribute name="containerCSS" required="false" type="java.lang.String" %>
 
 <spring:htmlEscape defaultHtmlEscape="true" />
-
 <div class="orderTotal">
     <div class="row">
         <div class="col-xs-6">

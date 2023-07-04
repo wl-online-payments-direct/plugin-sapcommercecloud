@@ -9,6 +9,7 @@ import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.order.InvalidCartException;
 
@@ -38,10 +39,14 @@ public interface WorldlineCheckoutFacade {
 
     CreateHostedCheckoutResponse createHostedCheckout(String orderCode, BrowserData browserData) throws InvalidCartException;
 
-    void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
+    void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId, Boolean isRecurring) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
     void handlePaymentResponse(OrderModel abstractOrderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
     void validateReturnMAC(AbstractOrderData orderDetails, String returnMAC) throws WorldlineNonValidReturnMACException;
+
+    boolean isTemporaryToken(String hostedtokenizationID);
+
+    void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String paymentMethodType);
 
 }
