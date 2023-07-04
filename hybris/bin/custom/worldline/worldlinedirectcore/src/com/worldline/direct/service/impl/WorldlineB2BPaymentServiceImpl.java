@@ -38,9 +38,9 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
                 CreateMandateRequest mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
-                params.getOrder().getAmountOfMoney().setAmount(0L);
                 mandate.setCustomerReference(cartToOrderCronJobModel.getCode() + System.currentTimeMillis());
             }
+            params.getOrder().getAmountOfMoney().setAmount(0L);
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
 
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
@@ -80,22 +80,60 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             LOGGER.error("[ WORLDLINE ] Errors during getting createHostedCheckout ", e);
             //TODO Throw Logical Exception
             return null;
-        }    }
+        }
+    }
 
     @Override
-    public CreatePaymentResponse createRecurringPaymentForHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
+    public CreatePaymentResponse createRecurringPaymentForImmediateReplenishmentHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(cartToOrderCronJob, "cartToOrderCronJob cannot be null");
         validateParameterNotNull(cartToOrderCronJob.getCart(), "cartToOrderCronJob.cart cannot be null");
         try (Client client = worldlineClientFactory.getClient()) {
 
             final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
-            params.getRedirectPaymentMethodSpecificInput().getRedirectionData().setReturnUrl(siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
-                    true, "/checkout/multi/worldline/hosted-tokenization/handle3ds/replenishment/" + cartToOrderCronJob.getCode()));
+//            params.getRedirectPaymentMethodSpecificInput().getRedirectionData().setReturnUrl(siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
+//                    true, "/checkout/multi/worldline/hosted-tokenization/handle3ds/replenishment/" + cartToOrderCronJob.getCode()));
+
+            if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
+                CreateMandateWithReturnUrl mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
+                mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
+            }
+
 
             final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
 
-            WorldlineLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, payment);
+            WorldlineLogUtils.logAction(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, payment);
+
+            return payment;
+        } catch (DeclinedPaymentException e) {
+            LOGGER.debug(String.format("[ WORLDLINE ] Errors during getting createPayment %s", e.getMessage()));
+            throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
+            //TODO Throw Logical Exception
+        }
+        return null;
+    }
+
+    public CreatePaymentResponse createRecurringPaymentForScheduledReplenishmentHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
+        validateParameterNotNull(cartToOrderCronJob, "cartToOrderCronJob cannot be null");
+        validateParameterNotNull(cartToOrderCronJob.getCart(), "cartToOrderCronJob.cart cannot be null");
+        try (Client client = worldlineClientFactory.getClient()) {
+
+            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
+            params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
+//            params.getRedirectPaymentMethodSpecificInput().getRedirectionData().setReturnUrl(siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
+//                  true, "/checkout/multi/worldline/hosted-tokenization/handle3ds/replenishment/" + cartToOrderCronJob.getCode()));
+
+            if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
+                CreateMandateWithReturnUrl mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
+                mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
+            }
+            params.getOrder().getAmountOfMoney().setAmount(0L);
+
+            final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
+
+            WorldlineLogUtils.logAction(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, payment);
 
             return payment;
         } catch (DeclinedPaymentException e) {

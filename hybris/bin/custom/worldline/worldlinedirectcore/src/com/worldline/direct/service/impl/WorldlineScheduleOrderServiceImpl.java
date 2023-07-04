@@ -5,6 +5,7 @@ import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.core.model.order.CartEntryModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.cronjob.model.CronJobModel;
 import de.hybris.platform.cronjob.model.TriggerModel;
@@ -35,8 +36,8 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
         cartToOrderCronJob.setPaymentInfo(paymentInfo);
         cartToOrderCronJob.setJob(cronJobService.getJob(ACCELERATOR_CART_TO_ORDER_JOB));
         setCronJobToTrigger(cartToOrderCronJob, triggers);
-        final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cart.getPaymentType().getCode());
-        cartToOrderCronJob.setSubmitted(!cardPaymentType);
+//        final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cart.getPaymentType().getCode());
+//        cartToOrderCronJob.setSubmitted(!cardPaymentType);
         modelService.save(cartToOrderCronJob);
         return cartToOrderCronJob;
     }
@@ -57,6 +58,17 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
             trigger.setCronJob(cronJob);
         }
         cronJob.setTriggers(triggers);
+    }
+
+    @Override
+    public void updateCartRecurringPaymentInfo(CartModel cartModel, boolean tokenizePayment) {
+        WorldlinePaymentInfoModel paymentInfo;
+        if (cartModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
+            paymentInfo = (WorldlinePaymentInfoModel) cartModel.getPaymentInfo();
+            paymentInfo.setRecurringToken(tokenizePayment);
+            modelService.save(paymentInfo);
+            modelService.save(cartModel);
+        }
     }
 
     @Required

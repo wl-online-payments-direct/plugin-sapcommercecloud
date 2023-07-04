@@ -61,6 +61,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             params.setCountryCode(countryCode);
             params.setLocale(shopperLocale);
             params.setHide(Collections.singletonList("fields"));
+            params.setIsRecurring(Boolean.FALSE);
             final GetPaymentProductsResponse paymentProducts = client.merchant(getMerchantId()).products().getPaymentProducts(params);
 
             WorldlineLogUtils.logAction(LOGGER, "getPaymentProducts", params, paymentProducts);
@@ -291,6 +292,18 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
+    public void deleteToken(String tokenId, WorldlineConfigurationModel worldlineConfigurationModel) {
+        validateParameterNotNullStandardMessage("tokenId", tokenId);
+
+        try (Client client = worldlineClientFactory.getClient(worldlineConfigurationModel)) {
+            client.merchant(worldlineConfigurationModel.getMerchantID()).tokens().deleteToken(tokenId);
+            WorldlineLogUtils.logAction(LOGGER, "deleteToken", tokenId, "Token deleted!");
+        } catch (IOException e) {
+            LOGGER.error("[ WORLDLINE ] Errors during deleteToken", e);
+        }
+    }
+
+    @Override
     public GetMandateResponse getMandate(String uniqueMandateReference) {
         validateParameterNotNullStandardMessage("uniqueMandateReference", uniqueMandateReference);
 
@@ -388,13 +401,19 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
-    public CalculateSurchargeResponse calculateSurcharge(String hostedTokenizationId, AbstractOrderModel abstractOrderModel) {
+    public CalculateSurchargeResponse calculateSurcharge(String hostedTokenizationId, String token, AbstractOrderModel abstractOrderModel) {
         validateParameterNotNullStandardMessage("hostedTokenizationId", hostedTokenizationId);
 
         try (Client client = worldlineClientFactory.getClient()) {
             CalculateSurchargeRequest request = new CalculateSurchargeRequest();
             request.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
-            request.withCardSource(new CardSource()).getCardSource().setHostedTokenizationId(hostedTokenizationId);
+            CardSource cardSource = new CardSource();
+            if (!StringUtils.EMPTY.equals(hostedTokenizationId)) {
+                cardSource.setHostedTokenizationId(hostedTokenizationId);
+            } else if (!StringUtils.EMPTY.equals(token)) {
+                cardSource.setToken(token);
+            }
+            request.withCardSource(cardSource);
             CalculateSurchargeResponse calculateSurchargeResponse = client.merchant(getMerchantId()).services().surchargeCalculation(request);
             WorldlineLogUtils.logAction(LOGGER, "calculateSurchargeResponse", hostedTokenizationId, "Calculate Surcharge");
             return calculateSurchargeResponse;

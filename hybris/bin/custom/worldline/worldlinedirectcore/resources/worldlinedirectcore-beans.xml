@@ -9,6 +9,8 @@
         <property name="paymentMethodImageUrl" type="String"/>
         <property name="savedPayment" type="String"/>
         <property name="saved" type="boolean"/>
+        <property name="recurring" type="boolean"/>
+        <property name="recurringToken" type="com.worldline.direct.order.data.WorldlineRecurringTokenData"/>
         <property name="paymentProductDirectoryId" type="String"/>
         <property name="hostedTokenizationId" type="String"/>
         <property name="worldlineCheckoutType" type="com.worldline.direct.enums.WorldlineCheckoutTypesEnum"/>
@@ -65,6 +67,7 @@
         <property name="nMonths" type="String"/>
         <property name="nYear" type="String"/>
         <property name="replenishmentEndDate" type="java.util.Date"/>
+        <property name="cardDetailsCheck" type="boolean"/>
     </bean>
 
     <bean class="com.worldline.direct.order.data.WorldlineMandateDetail">
@@ -95,6 +98,18 @@
         <property name="firstName" type="String"/>
         <property name="lastName" type="String"/>
         <property name="title" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.direct.order.data.WorldlineRecurringTokenData">
+        <property name="recurringToken" type="String"/>
+        <property name="status" type="String"/>
+        <property name="subscriptionId" type="String"/>
+        <property name="alias" type="String"/>
+        <property name="cardholderName" type="String"/>
+        <property name="expiryDate" type="String"/>
+        <property name="expiryMonth" type="String"/>
+        <property name="expiryYear" type="String"/>
+        <property name="customer" type="de.hybris.platform.core.model.user.CustomerModel"/>
     </bean>
 
 </beans>

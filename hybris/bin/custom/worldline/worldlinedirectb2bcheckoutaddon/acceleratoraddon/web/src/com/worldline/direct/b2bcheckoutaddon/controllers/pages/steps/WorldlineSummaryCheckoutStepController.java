@@ -8,6 +8,7 @@ import com.worldline.direct.b2bcheckoutaddon.constants.WorldlineCheckoutConstant
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.b2bcheckoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.b2bcheckoutaddon.utils.WorldlinePlaceOrderUtils;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.order.data.BrowserData;
@@ -135,7 +136,15 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
         model.addAttribute("daysOfWeek", getB2BCheckoutFacade().getDaysOfWeekForReplenishmentCheckoutSummary());
         if (worldlinePaymentInfo != null) {
-            model.addAttribute("showReplenishment", WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(worldlinePaymentInfo.getWorldlineCheckoutType()) && WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfo));
+            model.addAttribute("showReplenishment", WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
+            if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
+                if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType()) && worldlineCheckoutFacade.isTemporaryToken(
+                      worldlinePaymentInfo.getHostedTokenizationId())) {
+                    model.addAttribute("tokenizePayment", Boolean.FALSE);
+                } else {
+                    model.addAttribute("tokenizePayment", Boolean.TRUE);
+                }
+            }
         } else {
             model.addAttribute("showReplenishment", true);
         }
@@ -212,6 +221,8 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         placeOrderData.setReplenishmentEndDate(worldlinePlaceOrderForm.getReplenishmentEndDate());
         placeOrderData.setSecurityCode(worldlinePlaceOrderForm.getSecurityCode());
         placeOrderData.setTermsCheck(worldlinePlaceOrderForm.isTermsCheck());
+        placeOrderData.setCardDetailsCheck(worldlinePlaceOrderForm.isCardDetailsCheck());
+
         AbstractOrderData abstractOrderData;
         try {
             final BrowserData browserData = fillBrowserData(request, worldlinePlaceOrderForm);

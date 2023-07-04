@@ -29,6 +29,8 @@
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
         <property name="impersonationService" ref="impersonationService"/>
         <property name="worldlineCheckoutFacade" ref="worldlineCheckoutFacade"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlineTransactionService" ref="worldlineTransactionService"/>
     </bean>
 
     <bean name="worldlinePlaceOrderAction"

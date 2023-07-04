@@ -19,4 +19,21 @@ public class WorldlinePaymentProductUtils {
         return WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoData.getId();
     }
 
+    public static boolean isPaymentSupportingRecurring(WorldlinePaymentInfoModel worldlinePaymentInfoModel) {
+        return (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoModel.getPaymentMethod()) &&
+                WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE != worldlinePaymentInfoModel.getId()) ||
+                WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoModel.getId();
+    }
+
+    public static boolean isPaymentSupportingRecurring(WorldlinePaymentInfoData worldlinePaymentInfoData) {
+        return (worldlinePaymentInfoData.getPaymentMethod().equals(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue()) &&
+                WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE != worldlinePaymentInfoData.getId()) ||
+                WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoData.getId();
+    }
+
+    public static boolean isCreditCard(WorldlinePaymentInfoData worldlinePaymentInfoData) {
+        return WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoData.getPaymentMethod()) &&
+                WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE != worldlinePaymentInfoData.getId();
+    }
+
 }

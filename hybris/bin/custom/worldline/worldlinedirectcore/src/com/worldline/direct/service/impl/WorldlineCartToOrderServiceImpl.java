@@ -29,7 +29,7 @@ public class WorldlineCartToOrderServiceImpl implements WorldlineCartToOrderServ
     public void enableCartToOrderJob(CartToOrderCronJobModel cronJobModel, boolean performCronjob) {
         List<TriggerModel> triggers = cronJobModel.getTriggers();
         WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cronJobModel.getPaymentInfo();
-        cronJobModel.setSubmitted(true);
+        //cronJobModel.setSubmitted(true);
 
         modelService.saveAll(cronJobModel,paymentInfo);
 

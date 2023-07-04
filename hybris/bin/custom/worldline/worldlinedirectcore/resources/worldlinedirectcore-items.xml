@@ -5,9 +5,6 @@
 
 <items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="items.xsd">
-    <collectiontypes>
-        <collectiontype code="groupedCardsPaymentModeSet" elementtype="StandardPaymentMode" type="set"/>
-    </collectiontypes>
 
     <enumtypes>
         <enumtype generate="true" code="WorldlineCheckoutTypesEnum" autocreate="true">
@@ -107,11 +104,6 @@
                     <description>Group cards for Hosted Checkout Page.</description>
                     <modifiers read="true" write="true" optional="false"/>
                     <defaultvalue>Boolean.FALSE</defaultvalue>
-                    <persistence type="property"/>
-                </attribute>
-                <attribute qualifier="groupedCardsPaymentModes" type="groupedCardsPaymentModeSet">
-                    <description>Group cards Payment Modes.</description>
-                    <modifiers read="true" write="true"/>
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="groupCardsLogo" type="Media">
@@ -256,6 +248,55 @@
                     <persistence type="property"/>
                     <modifiers/>
                 </attribute>
+                <attribute qualifier="recurringToken" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Determines whether the token is used for recurring payment</description>
+                </attribute>
+                <attribute qualifier="worldlineRecurringToken" type="WorldlineRecurringToken">
+                    <persistence type="property" />
+                    <description>Token that is used for recurring payment</description>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="WorldlineRecurringToken" extends="GenericItem">
+            <deployment table="worldlineRecurringToken" typecode="15008"/>
+            <attributes>
+                <attribute qualifier="token" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="alias" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="cardholderName" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="expiryDate" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="status" type="WorldlineRecurringPaymentStatus">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineRecurringPaymentStatus","ACTIVE")</defaultvalue>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="subscriptionID" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers read="true" search="true"/>
+                </attribute>
+                <attribute qualifier="customer" type="Customer">
+                    <description>The customer who is using the token for recurring payments</description>
+                    <persistence type="property" />
+                </attribute>
+                <attribute qualifier="worldlineConfiguration" type="WorldlineConfiguration">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -381,5 +422,6 @@
                 </index>
             </indexes>
         </itemtype>
+
     </itemtypes>
 </items>

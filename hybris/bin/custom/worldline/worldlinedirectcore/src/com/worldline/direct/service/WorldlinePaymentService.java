@@ -59,6 +59,8 @@ public interface WorldlinePaymentService {
 
     void deleteToken(String tokenId);
 
+    void deleteToken(String tokenId, WorldlineConfigurationModel worldlineConfigurationModel);
+
     GetMandateResponse getMandate(String uniqueMandateReference);
 
     GetMandateResponse getMandate(WorldlineMandateModel worldlineMandateModel);
@@ -69,6 +71,6 @@ public interface WorldlinePaymentService {
 
     GetMandateResponse unBlockMandate(WorldlineMandateModel worldlineMandateModel);
 
-    CalculateSurchargeResponse calculateSurcharge(String token,AbstractOrderModel abstractOrderModel);
+    CalculateSurchargeResponse calculateSurcharge(String hostedTokenizationId, String token, AbstractOrderModel abstractOrderModel);
 
 }
