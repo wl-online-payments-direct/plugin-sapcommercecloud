@@ -31,7 +31,7 @@ public interface WorldlineWebConstants {
             }
 
             interface Payment {
-                String root = Checkout.root;
+                String root = Checkout.root + "/payment";
                 String select = "/select-payment-method";
                 String billing = "/billingaddressform";
 
@@ -45,6 +45,14 @@ public interface WorldlineWebConstants {
                     String handleResponse = "/response/";
                 }
 
+            }
+
+            interface DeliveryAddress {
+                String root = Checkout.root + "/delivery-address";
+                String add = "/add";
+                String edit = "/edit";
+                String remove = "/remove";
+                String select = "/select";
             }
 
 

@@ -72,7 +72,7 @@ ACC.worldlineOrderPost = {
 
     displayWorldlineAddressForm: function (options, callback) {
         $.ajax({
-            url: ACC.config.encodedContextPath + '/checkout/multi/worldline/billingaddressform',
+            url: ACC.config.encodedContextPath + '/checkout/multi/worldline/payment/billingaddressform',
             async: true,
             data: options,
             dataType: "html",
