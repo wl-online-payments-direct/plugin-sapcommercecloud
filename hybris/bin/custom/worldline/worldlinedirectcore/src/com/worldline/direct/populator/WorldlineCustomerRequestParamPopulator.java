@@ -25,6 +25,8 @@ public class WorldlineCustomerRequestParamPopulator implements Populator<Abstrac
     private CommonI18NService commonI18NService;
     private CustomerEmailResolutionService customerEmailResolutionService;
     private CustomerNameStrategy customerNameStrategy;
+
+    private static int PHONE_NUMBERS_LENGHT = 15;
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
         order.setCustomer(getCustomer(abstractOrderModel));
@@ -68,8 +70,8 @@ public class WorldlineCustomerRequestParamPopulator implements Populator<Abstrac
             customer.setPersonalInformation(personalInformation);
             ContactDetails contactDetails = new ContactDetails();
             contactDetails.setEmailAddress(customerEmailResolutionService.getEmailForCustomer(customerModel));
-            contactDetails.setPhoneNumber(billingAddress.getPhone1());
-            contactDetails.setMobilePhoneNumber(StringUtils.trim(StringUtils.defaultIfBlank(billingAddress.getCellphone(), StringUtils.EMPTY)));
+            contactDetails.setPhoneNumber(formatPhoneNumber(billingAddress.getPhone1()));
+            contactDetails.setMobilePhoneNumber(formatPhoneNumber(billingAddress.getCellphone()));
             customer.setContactDetails(contactDetails);
             customer.setAccountType(isGuestUser(customerModel) ? GUEST : CUSTOMER);
         }
@@ -86,6 +88,14 @@ public class WorldlineCustomerRequestParamPopulator implements Populator<Abstrac
 
     protected boolean isGuestUser(UserModel userModel) {
         return (userModel instanceof CustomerModel) && (CustomerType.GUEST.equals(((CustomerModel) userModel).getType()));
+    }
+
+    private String formatPhoneNumber(String phone) {
+        phone = StringUtils.trim(StringUtils.defaultIfBlank(phone, StringUtils.EMPTY));
+        if (phone.length() > PHONE_NUMBERS_LENGHT) {
+            phone = phone.substring(0, PHONE_NUMBERS_LENGHT);
+        }
+        return phone;
     }
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {

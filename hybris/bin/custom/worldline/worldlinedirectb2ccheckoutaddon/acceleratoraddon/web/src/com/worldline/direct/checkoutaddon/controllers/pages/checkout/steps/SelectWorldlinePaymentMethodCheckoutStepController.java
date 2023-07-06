@@ -3,10 +3,11 @@ package com.worldline.direct.checkoutaddon.controllers.pages.checkout.steps;
 import com.onlinepayments.domain.CreateHostedTokenizationResponse;
 import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
+import com.worldline.direct.checkoutaddon.controllers.utils.WorldlineAddressDataUtil;
+import com.worldline.direct.checkoutaddon.forms.WorldlineAddressForm;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePaymentDetailsForm;
 import com.worldline.direct.checkoutaddon.forms.validation.WorldlinePaymentDetailsValidator;
 import com.worldline.direct.constants.WorldlineCheckoutConstants;
-import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
@@ -31,7 +32,6 @@ import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commerceservices.enums.CountryType;
 import de.hybris.platform.util.Config;
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -59,8 +59,8 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
 
     protected static final String PAYMENT_METHOD_STEP_NAME = "choose-payment-method";
 
-    @Resource(name = "addressDataUtil")
-    private AddressDataUtil addressDataUtil;
+    @Resource(name = "worldlineDefaultAddressDataUtil")
+    private WorldlineAddressDataUtil addressDataUtil;
 
     @Resource(name = "userFacade")
     private UserFacade userFacade;
@@ -149,7 +149,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
             }
             addressData.setBillingAddress(Boolean.TRUE);
         } else {
-            final AddressForm addressForm = worldlinePaymentDetailsForm.getBillingAddress();
+            final WorldlineAddressForm addressForm = worldlinePaymentDetailsForm.getBillingAddress();
             addressData = addressDataUtil.convertToAddressData(addressForm);
             addressData.setBillingAddress(Boolean.TRUE);
         }
@@ -177,7 +177,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         model.addAttribute("country", countryIsoCode);
 
         final WorldlinePaymentDetailsForm worldlinePaymentDetailsForm = new WorldlinePaymentDetailsForm();
-        final AddressForm addressForm = new AddressForm();
+        final WorldlineAddressForm addressForm = new WorldlineAddressForm();
         model.addAttribute("worldlinePaymentDetailsForm", worldlinePaymentDetailsForm);
         if (useDeliveryAddress) {
             final AddressData deliveryAddress = getCheckoutFacade().getCheckoutCart().getDeliveryAddress();
