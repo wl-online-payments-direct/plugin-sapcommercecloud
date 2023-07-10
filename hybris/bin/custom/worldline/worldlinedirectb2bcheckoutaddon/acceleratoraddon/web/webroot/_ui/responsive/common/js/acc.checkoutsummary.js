@@ -15,52 +15,20 @@ ACC.checkoutsummary = {
 
         var cssClass = $(document).find(selector);
         var checkoutBtns = cssClass.find('.checkoutSummaryButton');
-        var checkBox = cssClass.find('input[name=termsCheck]');
-        var checkBoxPD = cssClass.find('input[name=cardDetailsCheck]');
+         var checkBox = cssClass.find('input[name=termsCheck]');
 
-        if (checkBoxPD.length) {
-            if (checkBox.is(':checked') && checkBoxPD.is(':checked')) {
-                checkoutBtns.prop('disabled', false);
+        checkoutBtns.each(function () {$( this ).prop('disabled', true)});
+        checkBox.on('click', function () {
+            var checked = $(this).prop('checked');
+
+            if (checked) {
+                checkoutBtns.each(function () {$( this ).prop('disabled', false)});
+            } else {
+                checkoutBtns.each(function () {$( this ).prop('disabled', true)});
             }
-
-            checkBox.on('click', function () {
-                var checked = $(this).prop('checked');
-
-                if (checked && checkBoxPD.is(':checked')) {
-                    checkoutBtns.prop('disabled', false);
-                } else {
-                    checkoutBtns.prop('disabled', true);
-                }
-            });
-
-            checkBoxPD.on('click', function () {
-                var checked = $(this).prop('checked');
-
-                if (checked && checkBox.is(':checked')) {
-                    checkoutBtns.prop('disabled', false);
-                } else {
-                    checkoutBtns.prop('disabled', true);
-                }
-            });
-
-        } else {
-            if (checkBox.is(':checked')) {
-                checkoutBtns.prop('disabled', false);
-            }
-
-            checkBox.on('click', function () {
-                var checked = $(this).prop('checked');
-
-                if (checked) {
-                    checkoutBtns.prop('disabled', false);
-                    cssClass.find('.scheduleReplenishmentButton').prop('disabled', true);
-                } else {
-                    checkoutBtns.prop('disabled', true);
-                }
-            });
-
-        }
+        });
     },
+
 
     validateDate: function (date, dateFormat) {
         var validDate = true;
@@ -117,6 +85,9 @@ ACC.checkoutsummary = {
     bindScheduleReplenishment: function (data) {
         var form = $('#placeOrderForm1');
         var placeReplenishment = false;
+
+        var scheduleOrderBtn = $('#replenishmentSchedule #placeReplenishmentOrder');
+        scheduleOrderBtn.prop('disabled', true);
 
         $(document).on("click", ".scheduleReplenishmentButton", function (e) {
             e.preventDefault();
@@ -183,6 +154,11 @@ ACC.checkoutsummary = {
             e.preventDefault();
             $(".replenishmentOrderClass").val(false);
             $.colorbox.close();
+        });
+
+        $(document).on("click", '#replenishmentSchedule input[name=cardDetailsCheck]', function() {
+            scheduleOrderBtn.prop('disabled', !$(this).is(':checked'));
+
         });
 
         $(document).on("click", '#replenishmentSchedule #placeReplenishmentOrder', function (e) {
