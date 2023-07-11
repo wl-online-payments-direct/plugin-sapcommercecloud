@@ -42,6 +42,10 @@ public class WorldlineUnblockRecurringTokenAction implements CockpitAction<World
    @Override
    public boolean canPerform(ActionContext<WorldlineRecurringTokenModel> ctx) {
       WorldlineRecurringTokenModel data = ctx.getData();
+
+      if (data == null) {
+         return Boolean.FALSE;
+      }
       return WorldlineRecurringPaymentStatus.BLOCKED.equals(data.getStatus());
    }
 }

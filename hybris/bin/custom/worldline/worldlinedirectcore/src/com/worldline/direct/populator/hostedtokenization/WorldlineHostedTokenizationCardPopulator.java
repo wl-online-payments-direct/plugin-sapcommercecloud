@@ -12,6 +12,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 
 import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator.CHALLENGE_REQUIRED;
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
@@ -35,32 +36,23 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
 
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentInfo.getPaymentMethod())) {
-            final GetHostedTokenizationResponse hostedTokenization = worldlinePaymentService.getHostedTokenization(paymentInfo.getHostedTokenizationId());
-            validateParameterNotNull(hostedTokenization, "tokenizationResponse cannot be null");
-            //TODO try to combine first recurring payment data and one-off payment data
-            if (paymentInfo.isRecurringToken()) {
-                if (paymentInfo.getWorldlineRecurringToken() != null) {
-                    createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, RECCURANCE));
-                    createPaymentRequest.getCardPaymentMethodSpecificInput().setToken(paymentInfo.getWorldlineRecurringToken().getToken());
+            if (paymentInfo.getWorldlineRecurringToken() != null) {
+                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, RECCURANCE));
+                createPaymentRequest.getCardPaymentMethodSpecificInput().setToken(paymentInfo.getWorldlineRecurringToken().getToken());
 
-                    createPaymentRequest.getCardPaymentMethodSpecificInput().setPaymentProductId(paymentInfo.getId());
-                } else {
-                    createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, RECCURANCE_FIRST));
-                    createPaymentRequest.getCardPaymentMethodSpecificInput()
-                          .setToken(hostedTokenization.getToken().getId());
-                    createPaymentRequest.getCardPaymentMethodSpecificInput()
-                          .setPaymentProductId(hostedTokenization.getToken().getPaymentProductId());
-                }
+                createPaymentRequest.getCardPaymentMethodSpecificInput().setPaymentProductId(paymentInfo.getId());
             } else {
+                final GetHostedTokenizationResponse hostedTokenization = worldlinePaymentService.getHostedTokenization(paymentInfo.getHostedTokenizationId());
+                validateParameterNotNull(hostedTokenization, "tokenizationResponse cannot be null");
 
-                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.FALSE, ""));
+                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(paymentInfo.isRecurringToken(), paymentInfo.isRecurringToken() ? RECCURANCE_FIRST : StringUtils.EMPTY));
                 createPaymentRequest.getCardPaymentMethodSpecificInput()
-                        .setToken(hostedTokenization.getToken().getId());
+                      .setToken(hostedTokenization.getToken().getId());
                 createPaymentRequest.getCardPaymentMethodSpecificInput()
-                        .setPaymentProductId(hostedTokenization.getToken().getPaymentProductId());
+                      .setPaymentProductId(hostedTokenization.getToken().getPaymentProductId());
             }
-
         }
+
 
     }
 
@@ -76,18 +68,19 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
         cardPaymentMethodSpecificInput.setIsRecurring(isRecurring);
 
-        if (isRecurring) {
+
+        if (!StringUtils.equals(RECCURANCE_FIRST, recurrance)) {
             CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
-        }
-        cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
-        cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
-        cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
+        } else {
+            cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
+            cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
+            cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
 
-        if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
-            cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
-
+            if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
+                cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
+            }
         }
 
         return cardPaymentMethodSpecificInput;
