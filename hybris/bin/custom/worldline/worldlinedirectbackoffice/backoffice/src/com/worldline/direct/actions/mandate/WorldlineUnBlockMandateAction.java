@@ -58,6 +58,10 @@ public class WorldlineUnBlockMandateAction implements CockpitAction<WorldlineMan
     @Override
     public boolean canPerform(ActionContext<WorldlineMandateModel> ctx) {
         WorldlineMandateModel data = ctx.getData();
+
+        if (data == null) {
+            return Boolean.FALSE;
+        }
         return WorldlineRecurringPaymentStatus.BLOCKED.equals(data.getStatus());
     }
 }
