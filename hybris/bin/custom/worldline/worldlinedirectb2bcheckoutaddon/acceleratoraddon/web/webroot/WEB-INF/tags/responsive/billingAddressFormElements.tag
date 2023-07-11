@@ -34,6 +34,9 @@
                                   inputCSS="text" mandatory="true" tabindex="${tabindex + 8}"/>
         <formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone"
                                   inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
+        <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone"
+                                  inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+
     </c:when>
     <c:when test="${country == 'CA'}">
         <formElement:formSelectBoxDefaultEnabled idKey="address.title" labelKey="address.title"
@@ -59,6 +62,9 @@
                                   inputCSS="text" mandatory="true" tabindex="${tabindex + 8}"/>
         <formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone"
                                   inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
+        <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone"
+                                  inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+
     </c:when>
     <c:when test="${country == 'CN'}">
         <formElement:formInputBox idKey="address.postcode" labelKey="address.postcode" path="billingAddress.postcode"
@@ -85,6 +91,9 @@
                                                  selectCSSClass="form-control"/>
         <formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone"
                                   inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
+        <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone"
+                                  inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+
     </c:when>
     <c:when test="${country == 'JP'}">
         <formElement:formSelectBoxDefaultEnabled idKey="address.title" labelKey="address.title"
@@ -110,6 +119,9 @@
                                   inputCSS="text" mandatory="true" tabindex="${tabindex + 8}"/>
         <formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone"
                                   inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
+        <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone"
+                                  inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+
     </c:when>
     <c:otherwise>
         <formElement:formSelectBoxDefaultEnabled idKey="address.title" labelKey="address.title"
@@ -131,5 +143,8 @@
                                   inputCSS="text" mandatory="true" tabindex="${tabindex + 7}"/>
         <formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone"
                                   inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
+        <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone"
+                                  inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+
     </c:otherwise>
 </c:choose>

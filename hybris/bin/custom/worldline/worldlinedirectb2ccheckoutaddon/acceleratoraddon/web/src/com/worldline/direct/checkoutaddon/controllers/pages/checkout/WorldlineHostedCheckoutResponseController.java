@@ -105,7 +105,7 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
                 case SCHEDULE_REPLENISHMENT_ORDER:
                     if (BooleanUtils.isFalse(currentWorldlineConfiguration.isFirstRecurringPayment()) && orderDetails instanceof ScheduledCartData && BooleanUtils.isFalse(((ScheduledCartData) orderDetails).getTriggerData().isActive())) {
                         worldlineRecurringCheckoutFacade.authorisePaymentForSchudledReplenishmentHostedCheckout(((ScheduledCartData) orderDetails).getJobCode(), hostedCheckoutId);
-                    } else if (BooleanUtils.isTrue(currentWorldlineConfiguration.isFirstRecurringPayment()) &&orderDetails instanceof OrderData)
+                    } else if (BooleanUtils.isTrue(currentWorldlineConfiguration.isFirstRecurringPayment()) && orderDetails instanceof OrderData)
                     {
                         orderDetails = worldlineRecurringCheckoutFacade.authorisePaymentForImmediateReplenishmentHostedCheckout(orderDetails.getCode(), hostedCheckoutId);
                     }

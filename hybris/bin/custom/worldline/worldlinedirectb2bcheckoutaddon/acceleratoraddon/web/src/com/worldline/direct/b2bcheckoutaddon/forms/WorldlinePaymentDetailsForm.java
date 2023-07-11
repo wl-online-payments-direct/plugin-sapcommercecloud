@@ -16,7 +16,7 @@ public class WorldlinePaymentDetailsForm {
 
     private boolean newBillingAddress;
 
-    private AddressForm billingAddress;
+    private WorldlineAddressForm billingAddress;
 
     public String getHostedTokenizationId() {
         return hostedTokenizationId;
@@ -50,14 +50,13 @@ public class WorldlinePaymentDetailsForm {
         this.newBillingAddress = newBillingAddress;
     }
 
-    public AddressForm getBillingAddress() {
+    public WorldlineAddressForm getBillingAddress() {
         return billingAddress;
     }
 
-    public void setBillingAddress(AddressForm billingAddress) {
+    public void setBillingAddress(WorldlineAddressForm billingAddress) {
         this.billingAddress = billingAddress;
     }
-
 
     public Integer getPaymentProductId() {
         return paymentProductId;
