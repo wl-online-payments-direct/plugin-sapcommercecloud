@@ -8,8 +8,10 @@ import com.onlinepayments.domain.CreateHostedTokenizationResponse;
 import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.b2bcheckoutaddon.constants.WorldlineCheckoutConstants;
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
+import com.worldline.direct.b2bcheckoutaddon.forms.WorldlineAddressForm;
 import com.worldline.direct.b2bcheckoutaddon.forms.WorldlinePaymentDetailsForm;
 import com.worldline.direct.b2bcheckoutaddon.forms.validation.WorldlinePaymentDetailsValidator;
+import com.worldline.direct.b2bcheckoutaddon.utils.WorldlineAddressDataUtil;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
@@ -25,8 +27,6 @@ import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutSt
 import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.AbstractCheckoutStepController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
-import de.hybris.platform.acceleratorstorefrontcommons.forms.AddressForm;
-import de.hybris.platform.acceleratorstorefrontcommons.util.AddressDataUtil;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
 import de.hybris.platform.commercefacades.order.data.CartData;
@@ -76,8 +76,8 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
         CYBERSOURCE_SOP_CARD_TYPES.put("maestro", "024");
     }
 
-    @Resource(name = "addressDataUtil")
-    private AddressDataUtil addressDataUtil;
+    @Resource(name = "worldlineDefaultAddressDataUtil")
+    private WorldlineAddressDataUtil addressDataUtil;
     @Resource(name = "userFacade")
     private UserFacade userFacade;
     @Resource(name = "worldlineCheckoutFacade")
@@ -168,7 +168,7 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
             }
             addressData.setBillingAddress(Boolean.TRUE);
         } else {
-            final AddressForm addressForm = worldlinePaymentDetailsForm.getBillingAddress();
+            final WorldlineAddressForm addressForm = worldlinePaymentDetailsForm.getBillingAddress();
             addressData = addressDataUtil.convertToAddressData(addressForm);
             addressData.setBillingAddress(Boolean.TRUE);
         }
@@ -196,7 +196,7 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
         model.addAttribute("country", countryIsoCode);
 
         final WorldlinePaymentDetailsForm worldlinePaymentDetailsForm = new WorldlinePaymentDetailsForm();
-        final AddressForm addressForm = new AddressForm();
+        final WorldlineAddressForm addressForm = new WorldlineAddressForm();
         model.addAttribute("worldlinePaymentDetailsForm", worldlinePaymentDetailsForm);
         if (useDeliveryAddress) {
             final AddressData deliveryAddress = getCheckoutFacade().getCheckoutCart().getDeliveryAddress();

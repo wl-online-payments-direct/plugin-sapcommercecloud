@@ -34,7 +34,7 @@
             <map merge="true">
                 <entry key="previous" value-ref="REDIRECT_TO_CART"/>
                 <entry key="current" value-ref="REDIRECT_TO_PAYMENT_TYPE"/>
-                <entry key="next" value-ref="REDIRECT_TO_DELIVERY_ADDRESS"/>
+                <entry key="next" value-ref="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE"/>
             </map>
         </property>
         <property name="progressBarId" value="paymentType"/>
@@ -47,7 +47,7 @@
         <property name="transitions">
             <map merge="true">
                 <entry key="previous" value-ref="REDIRECT_TO_PAYMENT_TYPE"/>
-                <entry key="current" value-ref="REDIRECT_TO_DELIVERY_ADDRESS"/>
+                <entry key="current" value-ref="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE"/>
                 <entry key="next" value-ref="REDIRECT_TO_DELIVERY_METHOD"/>
             </map>
         </property>
@@ -60,7 +60,7 @@
         <property name="checkoutStepValidator" ref="deliveryMethodCheckoutValidator"/>
         <property name="transitions">
             <map merge="true">
-                <entry key="previous" value-ref="REDIRECT_TO_DELIVERY_ADDRESS"/>
+                <entry key="previous" value-ref="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE"/>
                 <entry key="current" value-ref="REDIRECT_TO_DELIVERY_METHOD"/>
                 <entry key="next" value-ref="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE"/>
             </map>
@@ -137,7 +137,7 @@
             <map merge="true">
                 <entry key="FAILED" value-ref="REDIRECT_TO_CART"/>
                 <entry key="REDIRECT_TO_PAYMENT_TYPE" value-ref="REDIRECT_TO_PAYMENT_TYPE"/>
-                <entry key="REDIRECT_TO_DELIVERY_ADDRESS" value-ref="REDIRECT_TO_DELIVERY_ADDRESS"/>
+                <entry key="REDIRECT_TO_DELIVERY_ADDRESS" value-ref="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE"/>
                 <entry key="REDIRECT_TO_PICKUP_LOCATION" value-ref="REDIRECT_TO_PICKUP_LOCATION"/>
                 <entry key="REDIRECT_TO_CART" value-ref="REDIRECT_TO_CART"/>
                 <entry key="REDIRECT_TO_PAYMENT_METHOD" value-ref="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE"/>
@@ -171,10 +171,14 @@
     </bean>
 
     <bean id="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE" class="java.lang.String">
-        <constructor-arg value="redirect:/checkout/multi/worldline/select-payment-method"/>
+        <constructor-arg value="redirect:/checkout/multi/worldline/payment/select-payment-method"/>
     </bean>
 
     <bean id="REDIRECT_TO_ORDER_CONFIRMATION_WORLDLINE" class="java.lang.String">
         <constructor-arg value="redirect:/checkout/worldline/orderConfirmation/%s"/>
+    </bean>
+
+    <bean id="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE" class="java.lang.String">
+        <constructor-arg value="redirect:/checkout/multi/worldline/delivery-address/add"/>
     </bean>
 </beans>

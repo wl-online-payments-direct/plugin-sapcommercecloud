@@ -12,7 +12,7 @@
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive" %>
 
 
-<c:url value="/checkout/multi/worldline/select-payment-method" var="selectPaymentMethod"/>
+<c:url value="/checkout/multi/worldline/payment/select-payment-method" var="selectPaymentMethod"/>
 
 <template:page pageTitle="${pageTitle}" hideHeaderLinks="true">
 

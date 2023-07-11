@@ -16,52 +16,19 @@ ACC.checkoutsummary = {
         var cssClass = $(document).find(selector);
         var checkoutBtns = cssClass.find('.checkoutSummaryButton');
         var checkBox = cssClass.find('input[name=termsCheck]');
-        var checkBoxPD = cssClass.find('input[name=cardDetailsCheck]');
 
-        if (checkBoxPD.length) {
-            if (checkBox.is(':checked') && checkBoxPD.is(':checked')) {
-                checkoutBtns.prop('disabled', false);
+        checkoutBtns.each(function () {$( this ).prop('disabled', true)});
+        checkBox.on('click', function () {
+            var checked = $(this).prop('checked');
+
+            if (checked) {
+                checkoutBtns.each(function () {$( this ).prop('disabled', false)});
+            } else {
+                checkoutBtns.each(function () {$( this ).prop('disabled', true)});
             }
-
-            checkBox.on('click', function () {
-                var checked = $(this).prop('checked');
-
-                if (checked && checkBoxPD.is(':checked')) {
-                    checkoutBtns.prop('disabled', false);
-                } else {
-                    checkoutBtns.prop('disabled', true);
-                }
-            });
-
-            checkBoxPD.on('click', function () {
-                var checked = $(this).prop('checked');
-
-                if (checked && checkBox.is(':checked')) {
-                    checkoutBtns.prop('disabled', false);
-                } else {
-                    checkoutBtns.prop('disabled', true);
-                }
-            });
-
-        } else {
-            if (checkBox.is(':checked')) {
-                checkoutBtns.prop('disabled', false);
-            }
-
-            checkBox.on('click', function () {
-                var checked = $(this).prop('checked');
-
-                if (checked) {
-                    checkoutBtns.prop('disabled', false);
-                    cssClass.find('.scheduleReplenishmentButton').prop('disabled', true);
-                } else {
-                    checkoutBtns.prop('disabled', true);
-                }
-            });
-
-        }
-
+        });
     },
+
 
     validateDate: function (date, dateFormat) {
         var validDate = true;
@@ -118,14 +85,14 @@ ACC.checkoutsummary = {
     bindScheduleReplenishment: function (data) {
         var form = $('#placeOrderForm1');
         var placeReplenishment = false;
+        var scheduleOrderBtn = $('#replenishmentSchedule #placeReplenishmentOrder');
+        scheduleOrderBtn.prop('disabled', true);
 
         $(document).on("click", ".scheduleReplenishmentButton", function (e) {
             e.preventDefault();
 
             var termChecked = $(this).closest("form").find('input[name=termsCheck]').is(':checked');
-            var cardDetailsChecked = $(this).closest("form").find('input[name=cardDetailsCheck]').is(':checked');
             form.find('input[name=termsCheck]').prop('checked', termChecked);
-            form.find('input[name=cardDetailsCheck]').prop('checked', cardDetailsChecked);
 
             var titleHtml = $('.scheduleReplenishmentButton').first().html();
 
@@ -163,12 +130,12 @@ ACC.checkoutsummary = {
                         $('.scheduleformD').hide();
                         $('.scheduleformW').show();
                         $('.scheduleformM').hide();
-						break;
+                        break;
                     case "MONTHLY":
                         $('.scheduleformD').hide();
                         $('.scheduleformW').hide();
-						$('.scheduleformM').show();
-						break
+                        $('.scheduleformM').show();
+                        break
                     default :
                         $('.scheduleformD').hide();
                         $('.scheduleformW').hide();
@@ -188,31 +155,35 @@ ACC.checkoutsummary = {
             $.colorbox.close();
         });
 
+        $(document).on("click", '#replenishmentSchedule input[name=cardDetailsCheck]', function() {
+            scheduleOrderBtn.prop('disabled', !$(this).is(':checked'));
+        });
+
         $(document).on("click", '#replenishmentSchedule #placeReplenishmentOrder', function (e) {
             e.preventDefault();
 
             var localeDateFormat = $('#replenishmentSchedule').data('dateForDatePicker');
             var startDateEntered = $("#replenishmentStartDate").val();
             var endDateEntered = $("#replenishmentEndDate").val();
-                let validateStartDate = ACC.checkoutsummary.validateDate(startDateEntered, localeDateFormat);
-                let validateEndDate = ACC.checkoutsummary.validateDate(endDateEntered, localeDateFormat);
-                if (validateStartDate  &&validateEndDate) {
-                    $(".replenishmentOrderClass").val(true);
-                    placeReplenishment = true;
-                    $.colorbox.close();
-                } else
+            let validateStartDate = ACC.checkoutsummary.validateDate(startDateEntered, localeDateFormat);
+            let validateEndDate = ACC.checkoutsummary.validateDate(endDateEntered, localeDateFormat);
+            if (validateStartDate  &&validateEndDate) {
+                $(".replenishmentOrderClass").val(true);
+                placeReplenishment = true;
+                $.colorbox.close();
+            } else
+            {
+                if (!validateStartDate)
                 {
-                    if (!validateStartDate)
-                    {
-                        ACC.checkoutsummary.toggleReplenishmentScheduleStartDateError(true);
-                    }
-                    if (!validateEndDate)
-                    {
-                        ACC.checkoutsummary.toggleReplenishmentScheduleEndDateError(true);
-                    }
-                    $.colorbox.resize();
-
+                    ACC.checkoutsummary.toggleReplenishmentScheduleStartDateError(true);
                 }
+                if (!validateEndDate)
+                {
+                    ACC.checkoutsummary.toggleReplenishmentScheduleEndDateError(true);
+                }
+                $.colorbox.resize();
+
+            }
 
 
         });
