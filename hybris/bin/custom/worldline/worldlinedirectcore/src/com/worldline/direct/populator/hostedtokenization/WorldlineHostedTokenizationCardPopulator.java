@@ -14,7 +14,6 @@ import de.hybris.platform.servicelayer.session.SessionService;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 
-import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator.CHALLENGE_REQUIRED;
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
@@ -23,6 +22,8 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
     private static final String ECOMMERCE = "ECOMMERCE";
     private static final String RECCURANCE = "recurring";
     private static final String RECCURANCE_FIRST = "first";
+    public static final String CHALLENGE_REQUIRED = "challenge-required";
+    public static final String LOW_VALUE = "low-value";
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentService worldlinePaymentService;
@@ -37,7 +38,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentInfo.getPaymentMethod())) {
             if (paymentInfo.getWorldlineRecurringToken() != null) {
-                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, RECCURANCE));
+                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, RECCURANCE, abstractOrderModel));
                 createPaymentRequest.getCardPaymentMethodSpecificInput().setToken(paymentInfo.getWorldlineRecurringToken().getToken());
 
                 createPaymentRequest.getCardPaymentMethodSpecificInput().setPaymentProductId(paymentInfo.getId());
@@ -45,7 +46,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
                 final GetHostedTokenizationResponse hostedTokenization = worldlinePaymentService.getHostedTokenization(paymentInfo.getHostedTokenizationId());
                 validateParameterNotNull(hostedTokenization, "tokenizationResponse cannot be null");
 
-                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(paymentInfo.isRecurringToken(), paymentInfo.isRecurringToken() ? RECCURANCE_FIRST : StringUtils.EMPTY));
+                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(paymentInfo.isRecurringToken(), paymentInfo.isRecurringToken() ? RECCURANCE_FIRST : StringUtils.EMPTY, abstractOrderModel));
                 createPaymentRequest.getCardPaymentMethodSpecificInput()
                       .setToken(hostedTokenization.getToken().getId());
                 createPaymentRequest.getCardPaymentMethodSpecificInput()
@@ -56,7 +57,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
     }
 
-    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring, String recurrance) {
+    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring, String recurrance, AbstractOrderModel abstractOrderModel) {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
 
         CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
@@ -69,7 +70,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         cardPaymentMethodSpecificInput.setIsRecurring(isRecurring);
 
 
-        if (!StringUtils.equals(RECCURANCE_FIRST, recurrance)) {
+        if (StringUtils.equals(RECCURANCE, recurrance)) {
             CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
@@ -80,6 +81,14 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
             if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
                 cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
+            }
+            boolean isExemptionRequestLowValue = BooleanUtils.isTrue(currentWorldlineConfiguration.isExemptionRequest()) && abstractOrderModel.getCurrency().getIsocode().equals("EUR") && abstractOrderModel.getTotalPrice() < 30;
+            boolean isChallengeRequired = BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired());
+
+            if (isChallengeRequired) {
+                cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
+            } else if (isExemptionRequestLowValue) {
+                cardPaymentMethodSpecificInput.getThreeDSecure().setExemptionRequest(LOW_VALUE);
             }
         }
 
