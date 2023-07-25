@@ -79,10 +79,6 @@
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineTokenizationConfig">
 					<ea:attribute qualifier="askConsumerConsent"/>
-					<ea:attribute qualifier="submitOrderPromotion"/>
-					<ea:attribute qualifier="replenishmentAttempts"/>
-					<ea:attribute qualifier="firstRecurringPayment"/>
-					<ea:attribute qualifier="applySurcharge"/>
 					<ea:attribute qualifier="variant"/>
 				</ea:section>
 				<ea:section name="hmc.worldline.settings.3ds">
@@ -92,6 +88,14 @@
 				<ea:section name="hmc.worldline.worldlineGroupedCardsConfig">
 					<ea:attribute qualifier="groupCards"/>
 					<ea:attribute qualifier="groupCardsLogo"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineRecurringPaymentsConfig">
+					<ea:attribute qualifier="replenishmentAttempts"/>
+					<ea:attribute qualifier="firstRecurringPayment"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineUnboundConfig">
+					<ea:attribute qualifier="submitOrderPromotion"/>
+					<ea:attribute qualifier="applySurcharge"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
@@ -234,7 +238,6 @@
 	</context>
 
 	<!-- WorldlineMandate BO appearance END -->
-
 
 	<!-- BaseStore update BO appearance START -->
 	<context merge-by="type" parent="GenericItem" type="BaseStore" component="editor-area">
@@ -442,6 +445,7 @@
 			<as:field-list>
 				<as:field name="subscriptionID" selected="true"/>
 				<as:field name="status" />
+				<as:field name="customer" />
 			</as:field-list>
 		</as:advanced-search>
 	</context>
@@ -482,7 +486,6 @@
 			</y:group>
 		</y:actions>
 	</context>
-
 
 	<!-- WorldlineMandate CSBO appearance START -->
 	<context merge-by="type" parent="GenericItem" type="WorldlineMandate" component="cs-listview"
@@ -588,9 +591,7 @@
 
 	<!-- WorldlineMandate CSBO appearance END -->
 
-
 	<!-- CS Backoffice END -->
-
 
 	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="listview">
 		<lv:list-view>
@@ -605,6 +606,7 @@
 			<as:field-list>
 				<as:field name="subscriptionID" selected="true"/>
 				<as:field name="status" />
+				<as:field name="customer" />
 			</as:field-list>
 		</as:advanced-search>
 	</context>
