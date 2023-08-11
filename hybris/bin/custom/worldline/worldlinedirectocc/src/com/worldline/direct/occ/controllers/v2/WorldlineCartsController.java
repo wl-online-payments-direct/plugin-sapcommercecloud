@@ -16,6 +16,7 @@ import com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO;
 import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
 import com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO;
 import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.commercefacades.order.CartFacade;
@@ -74,6 +75,8 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @Resource(name = "worldlinePaymentProductFilterStrategyFactory")
     private WorldlinePaymentProductFilterStrategyFactory worldlinePaymentProductFilterStrategyFactory;
 
+    @Resource(name = "worldlineConfigurationService")
+    private WorldlineConfigurationService worldlineConfigurationService;
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @GetMapping(value = "/{cartId}/paymentProducts")
@@ -203,6 +206,23 @@ public class WorldlineCartsController extends WorldlineBaseController {
         }
         final CartData cartData = cartFacade.getSessionCart();
         return !CheckoutPaymentType.CARD.getCode().equals(cartData.getPaymentType().getCode()) || WorldlinePaymentProductUtils.isPaymentSupportingRecurring(cartData.getWorldlinePaymentInfo());
+    }
+
+    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
+    @GetMapping(value = "/{cartId}/displaySurcharge")
+    @ResponseBody
+    @Operation(operationId = "displaySurcharge", summary = "Check if surcharge should be applied.", description =
+          "return True if the payment can be paid by card and if the surcharge could be applied.")
+    @ApiBaseSiteIdUserIdAndCartIdParam
+    public Boolean displaySurcharge (
+          @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
+        if (!checkoutFacade.hasCheckoutCart()) {
+            throw new CartException("No cart found.", CartException.NOT_FOUND);
+        }
+        final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS).get();
+
+        return worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge() &&
+               worldlineCheckoutFacade.checkForCardPaymentMethods(availablePaymentMethods);
     }
 
 
