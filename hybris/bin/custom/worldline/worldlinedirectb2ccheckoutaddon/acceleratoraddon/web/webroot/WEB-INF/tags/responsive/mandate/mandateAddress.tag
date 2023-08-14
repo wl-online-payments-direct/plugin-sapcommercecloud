@@ -12,7 +12,7 @@
 	${fn:escapeXml(mandateAddress.street)}
 	<br>
 </c:if>
-<c:if test="${not empty mandateAddress.city}">ss
+<c:if test="${not empty mandateAddress.city}">
 	${fn:escapeXml(mandateAddress.city)}
 	<br>
 </c:if>
