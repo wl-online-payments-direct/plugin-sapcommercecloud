@@ -10,6 +10,7 @@
 
     <bean class="de.hybris.platform.commercewebservicescommons.dto.order.AbstractOrderWsDTO">
         <property name="worldlinePaymentInfo" type="com.worldline.direct.payment.dto.WorldlinePaymentInfoWsDTO"/>
+        <property name="surcharge" type="de.hybris.platform.commercewebservicescommons.dto.product.PriceWsDTO"/>
     </bean>
 
     <bean class="com.worldline.direct.payment.dto.PaymentProductDisplayHintsWsDTO">
