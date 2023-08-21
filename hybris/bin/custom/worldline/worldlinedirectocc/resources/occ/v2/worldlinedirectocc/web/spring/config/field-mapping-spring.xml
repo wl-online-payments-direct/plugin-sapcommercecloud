@@ -19,7 +19,7 @@
             </map>
         </property>
     </bean>
-    <bean parent="fieldSetLevelMapping" id="worldlineCartWsDTOFieldSetLevelMapping">
+        <bean parent="fieldSetLevelMapping" id="worldlineCartWsDTOFieldSetLevelMapping">
         <property name="dtoClass"
                   value="de.hybris.platform.commercewebservicescommons.dto.order.CartWsDTO"/>
         <property name="levelMapping">

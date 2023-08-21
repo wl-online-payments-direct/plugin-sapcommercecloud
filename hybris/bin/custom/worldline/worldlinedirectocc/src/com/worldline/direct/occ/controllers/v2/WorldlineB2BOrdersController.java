@@ -202,6 +202,7 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
     public HostedCheckoutResponseWsDTO placeReplenishmentOrderHostedCheckout(
             @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true) @RequestParam(required = true) final String cartId,
             @Parameter(description = "Whether terms were accepted or not.", required = true) @RequestParam(required = true) final boolean termsChecked,
+            @Parameter(description = "Tokenize payment if card is used.", required = true) @RequestParam(required = false) final boolean tokenizePayment,
             @Parameter(description = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true) @RequestBody final RecurringDataWSDTO recurringDataWSDTO,
             @ApiFieldsParam @RequestParam(required = false, defaultValue = FieldSetLevelHelper.DEFAULT_LEVEL) final String fields, final HttpServletRequest request)
             throws InvalidCartException {
@@ -274,6 +275,7 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
         dataMapper.map(scheduleReplenishmentForm, placeOrderData, false);
         if (scheduleReplenishmentForm != null) {
             placeOrderData.setReplenishmentOrder(Boolean.TRUE);
+           // placeOrderData.setCardDetailsCheck(scheduleReplenishmentForm.getTokenizePayment);
         }
         placeOrderData.setTermsCheck(Boolean.TRUE);
         return placeOrderData;
