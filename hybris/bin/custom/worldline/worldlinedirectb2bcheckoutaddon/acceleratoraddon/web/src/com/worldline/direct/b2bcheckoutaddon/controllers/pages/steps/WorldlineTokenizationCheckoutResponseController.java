@@ -84,7 +84,7 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
             }
 
         } catch (final UnknownIdentifierException e) {
-            LOGGER.warn("[WORLDLINE] Attempted to handle hosted checkout payment on an order that does not exist. Redirect to cart page.");
+            LOGGER.warn("[WORLDLIINE] Attempted to handle hosted Tokenization payment on an order that does not exist. Redirect to cart page.");
             return REDIRECT_PREFIX + "/cart";
         }
 
