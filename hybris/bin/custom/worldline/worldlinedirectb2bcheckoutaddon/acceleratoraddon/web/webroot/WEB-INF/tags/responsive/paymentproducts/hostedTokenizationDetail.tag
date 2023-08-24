@@ -80,9 +80,6 @@
         <tr class="display-none">
             <td colspan="5">
                 <div id="hostedTokenization-new" name="hostedTokenization-new" class="hostedTokenization"></div>
-                <c:if test="${displayReplenishmentMessage}">
-                    <spring:theme code="checkout.paymentProduct.replenishOrderMessage.label"/>
-                </c:if>
             </td>
         </tr>
         </body>
