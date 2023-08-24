@@ -154,9 +154,6 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
                 if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
                     WorldlineConfigurationModel currentConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
                     model.addAttribute("tokenizePayment", Boolean.FALSE);
-                    if (currentConfiguration.getAskConsumerConsent()) {
-                        model.addAttribute("displayReplenishmentMessage", Boolean.TRUE);
-                    }
                     if (worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
                         model.addAttribute("showReplenishment", Boolean.FALSE);
                     }
