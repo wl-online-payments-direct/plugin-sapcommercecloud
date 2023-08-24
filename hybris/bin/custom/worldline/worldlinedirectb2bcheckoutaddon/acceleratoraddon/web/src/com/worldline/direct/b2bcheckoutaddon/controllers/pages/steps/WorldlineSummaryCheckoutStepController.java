@@ -11,8 +11,10 @@ import com.worldline.direct.b2bcheckoutaddon.utils.WorldlinePlaceOrderUtils;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.acceleratorservices.enums.CheckoutPciOptionEnum;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
@@ -91,6 +93,9 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
     @Resource(name = "worldlinePlaceOrderUtils")
     private WorldlinePlaceOrderUtils worldlinePlaceOrderUtils;
 
+    @Resource(name = "worldlineConfigurationService")
+    private WorldlineConfigurationService worldlineConfigurationService;
+
     @RequestMapping(value = "/view", method = RequestMethod.GET)
     @RequireHardLogIn
     @Override
@@ -136,14 +141,23 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
         model.addAttribute("daysOfWeek", getB2BCheckoutFacade().getDaysOfWeekForReplenishmentCheckoutSummary());
         if (worldlinePaymentInfo != null) {
-            model.addAttribute("showReplenishment", WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo));
-            if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
-                if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType()) && worldlineCheckoutFacade.isTemporaryToken(
-                      worldlinePaymentInfo.getHostedTokenizationId())) {
+            if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo)) {
+                model.addAttribute("showReplenishment", Boolean.TRUE);
+                if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
+                    WorldlineConfigurationModel currentConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
                     model.addAttribute("tokenizePayment", Boolean.FALSE);
+                    if (currentConfiguration.getAskConsumerConsent()) {
+                        model.addAttribute("displayReplenishmentMessage", Boolean.TRUE);
+                    }
+                    if (worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
+                        model.addAttribute("showReplenishment", Boolean.FALSE);
+                    }
                 } else {
-                    model.addAttribute("tokenizePayment", Boolean.TRUE);
+                    if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
+                        model.addAttribute("tokenizePayment", Boolean.TRUE);
+                    }
                 }
+
             }
         } else {
             model.addAttribute("showReplenishment", true);

@@ -38,6 +38,9 @@ import javax.servlet.http.HttpServletRequest;
 public class WorldlineTokenizationCheckoutResponseController extends AbstractCheckoutController {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineTokenizationCheckoutResponseController.class);
     private static final String ORDER_CODE_PATH_VARIABLE_PATTERN = "{orderCode:.*}";
+
+    private static final String ORDER_CONFIRMATION_PATH_VARIABLE = "/{orderType:.*}";
+
     private static final String REDIRECT_URL_REPLENISHMENT_CONFIRMATION = REDIRECT_PREFIX
           + "/checkout/replenishment/confirmation/";
 
@@ -59,7 +62,7 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
     @Resource(name = "worldlineCustomerAccountFacade")
     private WorldlineCustomerAccountFacade worldlineCustomerAccountFacade;
 
-    @RequestMapping(value = WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = RequestMethod.GET)
+    @RequestMapping(value = ORDER_CONFIRMATION_PATH_VARIABLE + WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = RequestMethod.GET)
     @RequireHardLogIn
     public String handle3ds(@PathVariable(value = "orderCode") final String orderCode,
                             @PathVariable(value = "orderType") final OrderType orderType,
