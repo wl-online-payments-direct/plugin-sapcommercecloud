@@ -87,7 +87,9 @@ ACC.checkoutsummary = {
         var placeReplenishment = false;
 
         var scheduleOrderBtn = $('#replenishmentSchedule #placeReplenishmentOrder');
-        scheduleOrderBtn.prop('disabled', true);
+        var tokenizePayment = '${tokenizePayment}';
+        console.log(tokenizePayment)
+        scheduleOrderBtn.prop('disabled', !tokenizePayment);
 
         $(document).on("click", ".scheduleReplenishmentButton", function (e) {
             e.preventDefault();

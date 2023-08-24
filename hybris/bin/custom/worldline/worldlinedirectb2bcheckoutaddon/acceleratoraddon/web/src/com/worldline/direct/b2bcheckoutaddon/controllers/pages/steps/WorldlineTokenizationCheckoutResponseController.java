@@ -1,9 +1,14 @@
 package com.worldline.direct.b2bcheckoutaddon.controllers.pages.steps;
 
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
+import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.facade.WorldlineCustomerAccountFacade;
+import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
+import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractCheckoutController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
@@ -30,6 +35,8 @@ import javax.annotation.Resource;
 public class WorldlineTokenizationCheckoutResponseController extends AbstractCheckoutController {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineTokenizationCheckoutResponseController.class);
     private static final String ORDER_CODE_PATH_VARIABLE_PATTERN = "{orderCode:.*}";
+
+    private static final String ORDER_CONFIRMATION_PATH_VARIABLE = "/{orderType:.*}";
     private static final String REDIRECT_URL_REPLENISHMENT_CONFIRMATION = REDIRECT_PREFIX
             + "/checkout/replenishment/confirmation/";
 
@@ -39,20 +46,45 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
     @Resource(name = "checkoutCustomerStrategy")
     private CheckoutCustomerStrategy checkoutCustomerStrategy;
 
+    @Resource(name = "worldlineRecurringCheckoutFacade")
+    private WorldlineRecurringCheckoutFacade worldlineRecurringCheckoutFacade;
+
+    @Resource(name = "worldlineCustomerAccountFacade")
+    private WorldlineCustomerAccountFacade worldlineCustomerAccountFacade;
+
     @Resource(name = "orderFacade")
     private OrderFacade orderFacade;
 
-    @RequestMapping(value = WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = RequestMethod.GET)
+    @Resource(name = "worldlineConfigurationService")
+    private WorldlineConfigurationService worldlineConfigurationService;
+
+    @RequestMapping(value = ORDER_CONFIRMATION_PATH_VARIABLE + WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = RequestMethod.GET)
     @RequireHardLogIn
     public String handle3ds(@PathVariable(value = "orderCode") final String orderCode,
+                            @PathVariable(value = "orderType") final OrderType orderType,
                             @RequestParam(value = "RETURNMAC") final String returnMAC,
                             @RequestParam(value = "paymentId") final String paymentId,
                             final RedirectAttributes redirectAttributes) throws InvalidCartException {
         final AbstractOrderData orderDetails;
+        WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         try {
-            orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+            switch (orderType) {
+                case PLACE_ORDER:
+                    orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+                    break;
+                case SCHEDULE_REPLENISHMENT_ORDER:
+                default:
+                    if (currentWorldlineConfiguration.isFirstRecurringPayment())
+                    {
+                        orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
+                    }else {
+                        orderDetails = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
+                    }
+                    break;
+            }
+
         } catch (final UnknownIdentifierException e) {
-            LOGGER.warn("[WORLDLIINE] Attempted to handle hosted Tokenization payment on an order that does not exist. Redirect to cart page.");
+            LOGGER.warn("[WORLDLINE] Attempted to handle hosted checkout payment on an order that does not exist. Redirect to cart page.");
             return REDIRECT_PREFIX + "/cart";
         }
 
