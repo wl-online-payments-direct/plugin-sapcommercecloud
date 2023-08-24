@@ -90,6 +90,12 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
             } else if (isExemptionRequestLowValue) {
                 cardPaymentMethodSpecificInput.getThreeDSecure().setExemptionRequest(LOW_VALUE);
             }
+
+            if (isRecurring) {
+                CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
+                cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
+                cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
+            }
         }
 
         return cardPaymentMethodSpecificInput;

@@ -508,7 +508,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             AddressModel billingAddress = convertToAddressModel(worldlinePaymentInfoData.getBillingAddress());
             paymentInfo.setBillingAddress(billingAddress);
             billingAddress.setOwner(paymentInfo);
-            String paymentModeCode;
+            String paymentModeCode = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(worldlinePaymentInfoData.getSavedPayment()))
         {
             final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
@@ -524,9 +524,18 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             paymentModeCode = String.valueOf(worldlinePaymentInfoData.getId());
         }
         if (!virtualPaymentModes.contains(paymentModeCode)) {
+
+            Double keepPaymentCost = cartModel.getPaymentCost();
             PaymentModeModel paymentMode = paymentModeService.getPaymentModeForCode(paymentModeCode);
             cartModel.setPaymentMode(paymentMode);
             modelService.save(cartModel);
+            if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType()) &&
+                worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge()) {
+                AmountOfMoney surcharge = new AmountOfMoney();
+                surcharge.setAmount(keepPaymentCost.longValue());
+                surcharge.setCurrencyCode(cartModel.getCurrency().getIsocode());
+                worldlineTransactionService.savePaymentCost(cartModel, surcharge);
+            }
         }
         modelService.save(paymentInfo);
         return paymentInfo;
