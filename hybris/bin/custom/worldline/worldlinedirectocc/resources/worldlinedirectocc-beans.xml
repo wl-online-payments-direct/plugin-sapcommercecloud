@@ -116,6 +116,9 @@
                 <hint name="example">2020-12-31T09:00:00+0000</hint>
             </hints>
         </property>
+        <property name="tokenizePayment" type="boolean">
+            <description>If recurring payment is paid by card the customer must accept to keep his payment details</description>
+        </property>
     </bean>
 
 
