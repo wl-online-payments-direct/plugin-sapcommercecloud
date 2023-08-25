@@ -60,6 +60,7 @@ public class WorldlinePlaceOrderUtils {
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
                 try {
+                    storeHTPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
                     WorldlineHostedTokenizationData worldlineHostedTokenizationData = prepareHTPData(abstractOrderData, browserData);
                     worldlineCheckoutFacade.authorisePaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData);
                     return redirectToOrderConfirmationPage(abstractOrderData);
