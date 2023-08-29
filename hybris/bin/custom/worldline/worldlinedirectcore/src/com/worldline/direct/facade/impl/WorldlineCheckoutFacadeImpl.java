@@ -674,7 +674,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
         paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.groupedCards"));
         WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
-        paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getUrl());
+        if (configuration.getGroupCardsLogo() != null) {
+            paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getUrl());
+        }
         return paymentProduct;
     }
 
