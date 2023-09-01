@@ -140,7 +140,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
-    public CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale, List<String> savedTokens) {
+    public CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale, List<String> savedTokens, Boolean isAnonymousUser) {
         validateParameterNotNull(shopperLocale, "shopperLocale cannot be null");
         try (Client client = worldlineClientFactory.getClient()) {
             final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
@@ -149,7 +149,8 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             if (StringUtils.isNotBlank(currentWorldlineConfiguration.getVariant())) {
                 params.setVariant(currentWorldlineConfiguration.getVariant());
             }
-            params.setAskConsumerConsent(BooleanUtils.isTrue(currentWorldlineConfiguration.getAskConsumerConsent()));
+            params.setAskConsumerConsent(isAnonymousUser ? Boolean.FALSE : BooleanUtils.isTrue(currentWorldlineConfiguration.getAskConsumerConsent()));
+
             if (CollectionUtils.isNotEmpty(savedTokens)) {
                 params.setTokens(String.join(",", savedTokens));
             }

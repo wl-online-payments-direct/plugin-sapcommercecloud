@@ -148,7 +148,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     public CreateHostedTokenizationResponse createHostedTokenization() {
         final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfos(true);
         final List<String> savedTokens = worldlinePaymentInfos.stream().map(WorldlinePaymentInfoData::getToken).collect(Collectors.toList());
-        final CreateHostedTokenizationResponse hostedTokenization = worldlinePaymentService.createHostedTokenization(getShopperLocale(), savedTokens);
+        final CreateHostedTokenizationResponse hostedTokenization = worldlinePaymentService.createHostedTokenization(getShopperLocale(), savedTokens, userService.isAnonymousUser(userService.getCurrentUser()));
         hostedTokenization.setPartialRedirectUrl(WorldlineUrlUtils.buildFullURL(hostedTokenization.getPartialRedirectUrl()));
         if (CollectionUtils.isNotEmpty(hostedTokenization.getInvalidTokens())) {
             LOGGER.warn("[ WORLDLINE ] invalid tokens : {}", hostedTokenization.getInvalidTokens());
