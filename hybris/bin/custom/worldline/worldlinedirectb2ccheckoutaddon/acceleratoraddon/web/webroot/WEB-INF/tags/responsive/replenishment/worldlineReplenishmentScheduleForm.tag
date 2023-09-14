@@ -16,14 +16,13 @@
 <spring:theme code="responsive.replenishmentScheduleForm.activateYearly" var="Yearly" htmlEscape="false"/>
 <spring:theme code="text.store.dateformat.datepicker.selection" text="mm/dd/yy" var="dateForForDatePicker"/>
 
-<div style="display:none;">
+<div class="replenishment-form-container" style="display: none">
     <div class="clearfix" id="replenishmentSchedule"
          data-date-For-Date-Picker="${dateForForDatePicker}"
-         data-place-Order-Form-Replenishment-Recurrence="${fn:escapeXml(worldlinePlaceOrderForm.replenishmentRecurrence)}"
-         data-place-Order-Form-N-Days="${fn:escapeXml(worldlinePlaceOrderForm.nDays)}"
-         data-place-Order-Form-Nth-Day-Of-Month="${fn:escapeXml(worldlinePlaceOrderForm.nthDayOfMonth)}"
-         data-place-Order-Form-Replenishment-Order="${worldlinePlaceOrderForm.replenishmentOrder}">
-
+         data-place-Order-Form-Replenishment-Recurrence="${fn:escapeXml(replenishmentForm.replenishmentRecurrence)}"
+         data-place-Order-Form-N-Days="${fn:escapeXml(replenishmentForm.nDays)}"
+         data-place-Order-Form-Nth-Day-Of-Month="${fn:escapeXml(replenishmentForm.nthDayOfMonth)}"
+         data-place-Order-Form-Replenishment-Order="${replenishmentForm.replenishmentOrder}">
 
         <div class="column scheduleform  scheduleform_left">
             <div class="replenishmentFrequency_left">
@@ -134,7 +133,7 @@
         </div>
 
 
-        <div class="js-replenishment-actions">
+        <!--<div class="js-replenishment-actions">
             <div class="modal-actions">
                 <form:input type="hidden" id="replenishmentOrder" class="replenishmentOrderClass"
                             path="replenishmentOrder"/>
@@ -152,6 +151,6 @@
                     <spring:theme code="checkout.summary.replenishmentScheduleForm.cancel"/>
                 </button>
             </div>
-        </div>
+        </div>-->
     </div>
 </div>
