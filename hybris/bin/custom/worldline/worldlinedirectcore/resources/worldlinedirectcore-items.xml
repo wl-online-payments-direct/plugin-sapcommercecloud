@@ -44,6 +44,12 @@
             <value code="WORLDLINE_WAITING_CAPTURE" />
             <value code="WORLDLINE_CAPTURED" />
         </enumtype>
+        <enumtype code="WorldlineReplenishmentOccurrenceEnum">
+            <value code="DAILY" />
+            <value code="WEEKLY" />
+            <value code="MONTHLY" />
+            <value code="YEARLY" />
+        </enumtype>
     </enumtypes>
     <itemtypes>
         <itemtype code="WorldlineConfiguration"
@@ -422,6 +428,47 @@
                 </index>
             </indexes>
         </itemtype>
-
+        <itemtype code="Cart" autocreate="false" generate="false">
+            <description>Extending Cart type with additional attributes for future order occurrence functionality</description>
+            <attributes>
+                <attribute qualifier="worldlineReplenishmentOrder" type="boolean">
+                    <description>set if the order is recurring or not</description>
+                    <persistence type="property"/>
+                    <defaultvalue>Boolean.FALSE</defaultvalue>
+                </attribute>
+                <attribute qualifier="worldlineNDays" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineNWeeks" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineNMonths" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineNthDayOfMonth" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineReplenishmentRecurrence" type="WorldlineReplenishmentOccurrenceEnum">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineReplenishmentStartDate" type="java.util.Date">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineReplenishmentEndDate" type="java.util.Date">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineNDaysOfWeek" type="DayOfWeekList">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
     </itemtypes>
 </items>

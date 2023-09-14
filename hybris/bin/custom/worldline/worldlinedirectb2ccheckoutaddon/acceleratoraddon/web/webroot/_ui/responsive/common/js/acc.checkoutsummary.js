@@ -2,8 +2,8 @@ ACC.checkoutsummary = {
 
     _autoload: [
         "bindAllButtons",
-        "bindScheduleReplenishment",
-        "replenishmentInit"
+        //"bindScheduleReplenishment",
+        //"replenishmentInit"
     ],
 
     bindAllButtons: function () {
@@ -214,6 +214,8 @@ ACC.checkoutsummary = {
         var dateForDatePicker = $('#replenishmentSchedule').data("dateForDatePicker");
         var placeOrderFormNDays = $('#replenishmentSchedule').data("placeOrderFormNDays");
         var placeOrderFormNthDayOfMonth = $('#replenishmentSchedule').data("placeOrderFormNthDayOfMonth");
+
+
 
         if (placeOrderFormReplenishmentOrder === undefined) {
             return;

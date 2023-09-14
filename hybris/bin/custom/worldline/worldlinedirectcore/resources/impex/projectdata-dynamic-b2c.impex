@@ -246,3 +246,11 @@ INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemp
 
 INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;page;actions(uid,$contentCV);&componentRef
                                  ;;WorldlineOrderDetailsOrderTotalsComponent;Worldline Order Totals Component;/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/worldlineAccountOrderDetailOrderTotals.jsp;;WorldlineOrderDetailsOrderTotalsComponent
+
+
+####### UPDATE cart checkoutDisplay to include replenish form #######
+INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;page;actions(uid,$contentCV);&componentRef
+                                 ;;WorldlineCheckoutComponent;Worldline Checkout Display Component;/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/cart/worldlineCheckoutDisplay.jsp;;WorldlineCheckoutComponent
+
+INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents()
+                         ;;BottomContentSlot-cartPage;Worldline Bottom Content Slot for Cart Page;true;WorldlineCheckoutComponent,CartSuggestions
