@@ -10,6 +10,7 @@
 
 <spring:htmlEscape defaultHtmlEscape="true" />
 <c:url value="/cart/checkout" var="checkoutUrl" scope="session"/>
+<c:url value="/cart/savePlaceOrderData" var="replenishmentFormUrl" scope="session"/>
 <div class="row">
     <div class="col-xs-12 col-sm-10 col-md-7 col-lg-6 pull-right cart-actions--print">
 
@@ -17,7 +18,7 @@
             <sec:authorize access="hasAnyRole('ROLE_ANONYMOUS')" var="isAnonymous"/>
             <div class="headline"><spring:theme code="text.basket.auto.replenish.block"/></div>
             <c:choose>
-                <c:when test="${!isAnonymous}">
+                <c:when test="${isAnonymous}">
                     <div class="checkbox">
                         <label style="color: rgba(50,54,58,0.6)">
                             <input type="checkbox" disabled/>
@@ -29,15 +30,17 @@
                     </p>
                 </c:when>
                 <c:otherwise>
-                    <form:form action="${checkoutUrl}" id="replenishmentForm"
+                    <form:form action="${replenishmentFormUrl}" id="replenishmentForm"
+                           name="replenishmentForm"
                            cssClass="js-replenishmentForm"
-                           modelAttribute="replenishmentForm">
+                           modelAttribute="replenishmentForm"
+                           method="POST">
                         <div class="checkbox">
                             <label> <form:checkbox id="replenishmentOrder" path="replenishmentOrder"/>
                                 <spring:theme code="text.order.type.checkbox"/>
                             </label>
                         </div>
-                        <replenishment:worldlineReplenishmentScheduleForm/>
+                        <replenishment:worldlineReplenishmentScheduleForm displayForm="${replenishmentForm.replenishmentOrder}"/>
                     </form:form>
                 </c:otherwise>
             </c:choose>
@@ -72,7 +75,7 @@
     <div class="row">
         <div class="col-sm-4 col-md-3 pull-right">
             <ycommerce:testId code="checkoutButton">
-                <button class="btn btn-primary btn-block btn--continue-checkout js-continue-checkout-button" data-checkout-url="${fn:escapeXml(checkoutUrl)}">
+                <button class="btn btn-primary btn-block btn--continue-checkout js-worldline-continue-checkout-button" data-checkout-url="${fn:escapeXml(checkoutUrl)}">
                     <spring:theme code="checkout.checkout"/>
                 </button>
             </ycommerce:testId>

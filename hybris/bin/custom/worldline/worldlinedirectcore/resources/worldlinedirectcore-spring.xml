@@ -76,7 +76,6 @@
         <property name="userService" ref="userService"/>
         <property name="virtualPaymentModes" ref="virtualPaymentModes"/>
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
-        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
     </bean>
 
     <bean id="worldlineRecurringCheckoutFacade" parent="worldlineCheckoutFacade"

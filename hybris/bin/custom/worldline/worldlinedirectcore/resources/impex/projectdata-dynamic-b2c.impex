@@ -252,5 +252,5 @@ INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;
 INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;page;actions(uid,$contentCV);&componentRef
                                  ;;WorldlineCheckoutComponent;Worldline Checkout Display Component;/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/cart/worldlineCheckoutDisplay.jsp;;WorldlineCheckoutComponent
 
-INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents()
+INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents(uid, $contentCV)
                          ;;BottomContentSlot-cartPage;Worldline Bottom Content Slot for Cart Page;true;WorldlineCheckoutComponent,CartSuggestions

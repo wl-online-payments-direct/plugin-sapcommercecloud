@@ -1,6 +1,9 @@
 package com.worldline.direct.checkoutaddon.controllers.pages;
 
+import com.worldline.direct.checkoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.checkoutaddon.forms.WorldlineReplenishmentForm;
+import com.worldline.direct.enums.WorldlineReplenishmentOccurrenceEnum;
+import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineDirectCheckoutFacade;
 import de.hybris.platform.acceleratorfacades.cart.action.CartEntryAction;
 import de.hybris.platform.acceleratorfacades.cart.action.CartEntryActionFacade;
@@ -43,6 +46,8 @@ import de.hybris.platform.yacceleratorstorefront.controllers.ControllerConstants
 import de.hybris.platform.yacceleratorstorefront.controllers.pages.CartPageController;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
@@ -58,10 +63,8 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/cart")
@@ -114,6 +117,9 @@ public class WorldlineCartPageController extends AbstractCartPageController {
 
    @Resource(name = "worldlineExtendedCheckoutFacade")
    private WorldlineDirectCheckoutFacade worldlineDirectCheckoutFacade;
+
+   @Resource(name="worldlineCheckoutFacade")
+   private WorldlineCheckoutFacade worldlineCheckoutFacade;
 
    @ModelAttribute("showCheckoutStrategies")
    public boolean isCheckoutStrategyVisible()
@@ -184,18 +190,41 @@ public class WorldlineCartPageController extends AbstractCartPageController {
          return REDIRECT_CART_URL;
       }
 
-
       if (validateCart(redirectModel))
       {
          GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.ERROR_MESSAGES_HOLDER, CART_CHECKOUT_ERROR, null);
          return REDIRECT_CART_URL;
       }
-
       // Redirect to the start of the checkout flow to begin the checkout process
       // We just redirect to the generic '/checkout' page which will actually select the checkout flow
       // to use. The customer is not necessarily logged in on this request, but will be forced to login
       // when they arrive on the '/checkout' page.
       return REDIRECT_PREFIX + "/checkout";
+   }
+   @ResponseBody
+   @RequestMapping(value = "/savePlaceOrderData", method = RequestMethod.POST)
+   public ResponseEntity<String> savePlaceOrderData(
+         //@RequestBody() final WorldlineReplenishmentForm worldlineReplenishmentForm,
+         @RequestParam("replenishmentStartDate") final String replenishmentStartDate,
+         @RequestParam("replenishmentEndDate") final String replenishmentEndDate,
+         @RequestParam("replenishmentOrder") final boolean replenishmentOrder,
+         @RequestParam("nDays") final String nDays,
+         @RequestParam("nWeeks") final String nWeeks,
+         @RequestParam("nMonths") final String nMonths,
+         @RequestParam("nthDayOfMonth") final String nthDayOfMonth,
+         @RequestParam("nDaysOfWeek") final String nDaysOfWeek,
+         @RequestParam("replenishmentRecurrence") final String replenishmentRecurrence) {
+
+      worldlineCheckoutFacade.saveReplenishmentData(replenishmentOrder,
+                        new Date(replenishmentStartDate),
+                        new Date(replenishmentEndDate),
+                        nDays,
+                        nWeeks,
+                        nMonths,
+                        nthDayOfMonth,
+                        StringUtils.isNotEmpty(nDaysOfWeek) ? Arrays.stream(nDaysOfWeek.split(",")).toList() : new ArrayList<>(),
+                        replenishmentRecurrence);
+      return new ResponseEntity<>(HttpStatus.OK);
    }
 
    @RequestMapping(value = "/getProductVariantMatrix", method = RequestMethod.GET)
@@ -343,7 +372,34 @@ public class WorldlineCartPageController extends AbstractCartPageController {
       model.addAttribute("siteQuoteEnabled", Config.getBoolean(siteQuoteProperty, Boolean.FALSE));
       model.addAttribute(WebConstants.BREADCRUMBS_KEY, resourceBreadcrumbBuilder.getBreadcrumbs("breadcrumb.cart"));
       model.addAttribute("pageType", PageType.CART.name());
-      if (!model.containsAttribute("replenishmentForm")) {
+      CartData cart = (CartData) model.getAttribute("cartData");
+      if (cart.getReplenishmentOrder()) {
+         final WorldlineReplenishmentForm worldlineReplenishmentForm = new WorldlineReplenishmentForm();
+         // TODO: Make setting of default recurrence enum value backoffice driven rather hard coding in controller
+         worldlineReplenishmentForm.setReplenishmentOrder(cart.getReplenishmentOrder());
+         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+         worldlineReplenishmentForm.setReplenishmentEndDate(dateFormat.format(cart.getReplenishmentEndDate()));
+         worldlineReplenishmentForm.setReplenishmentStartDate(dateFormat.format(cart.getReplenishmentStartDate()));
+         worldlineReplenishmentForm.setReplenishmentRecurrence(cart.getReplenishmentRecurrence());
+
+            switch (cart.getReplenishmentRecurrence()) {
+               case DAILY:
+                  worldlineReplenishmentForm.setnDays(cart.getNDays());
+                  break;
+               case WEEKLY:
+                  worldlineReplenishmentForm.setnWeeks(cart.getNWeeks());
+                  worldlineReplenishmentForm.setnDaysOfWeek(cart.getNDaysOfWeek());
+                  break;
+               case MONTHLY:
+                  worldlineReplenishmentForm.setnMonths(cart.getNMonths());
+                  worldlineReplenishmentForm.setNthDayOfMonth(cart.getNthDayOfMonth());
+                  break;
+               case YEARLY: {
+                  //No additional input is required
+               }
+            }
+         model.addAttribute("replenishmentForm", worldlineReplenishmentForm);
+      } else if (!model.containsAttribute("replenishmentForm")) {
          final WorldlineReplenishmentForm worldlineReplenishmentForm = new WorldlineReplenishmentForm();
          // TODO: Make setting of default recurrence enum value backoffice driven rather hard coding in controller
          worldlineReplenishmentForm.setReplenishmentRecurrence(B2BReplenishmentRecurrenceEnum.MONTHLY);

@@ -672,4 +672,23 @@
 
 	<!-- WorldlineRecurringToken BO appearance END -->
 
+	<!-- Worldline Recurring data in Cart START -->
+	<context merge-by="type" parent="AbstractOrder" type="Cart" component="editor-area">
+		<ea:editorArea name="">
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.replenishment.order.data">
+					<ea:attribute qualifier="worldlineReplenishmentOrder"/>
+					<ea:attribute qualifier="worldlineReplenishmentStartDate"/>
+					<ea:attribute qualifier="worldlineReplenishmentEndDate"/>
+					<ea:attribute qualifier="worldlineReplenishmentRecurrence"/>
+					<ea:attribute qualifier="worldlineNDays"/>
+					<ea:attribute qualifier="worldlineNWeeks"/>
+					<ea:attribute qualifier="worldlineNDaysOfWeek"/>
+					<ea:attribute qualifier="worldlineNMonths"/>
+					<ea:attribute qualifier="worldlineNthDayOfMonth"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+	<!-- Worldline Recurring data in Cart END -->
 </config>

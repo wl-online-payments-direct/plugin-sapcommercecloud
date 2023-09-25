@@ -2,6 +2,7 @@ package com.worldline.direct.facade;
 
 import com.onlinepayments.domain.*;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.direct.enums.WorldlineReplenishmentOccurrenceEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
@@ -11,8 +12,10 @@ import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.order.InvalidCartException;
 
+import java.util.Date;
 import java.util.List;
 
 public interface WorldlineCheckoutFacade {
@@ -48,5 +51,16 @@ public interface WorldlineCheckoutFacade {
     boolean isTemporaryToken(String hostedtokenizationID);
 
     void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String paymentMethodType);
+
+    void saveReplenishmentData( boolean replenishmentOrder,
+                                Date replenishmentStartDate,
+                                Date replenishmentEndDate,
+                                String nDays,
+                                String nWeeks,
+                                String nMonths,
+                                String nthDayOfMonth,
+                                List<String> nDaysOfWeek,
+                                String replenishmentRecurrence);
+
 
 }

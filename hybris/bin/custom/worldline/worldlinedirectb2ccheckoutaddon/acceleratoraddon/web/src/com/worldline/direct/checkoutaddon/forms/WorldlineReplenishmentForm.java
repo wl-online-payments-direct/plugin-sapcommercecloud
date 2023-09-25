@@ -8,8 +8,8 @@ import java.util.List;
 
 public class WorldlineReplenishmentForm {
    private boolean replenishmentOrder;
-   private Date replenishmentStartDate;
-   private Date replenishmentEndDate;
+   private String replenishmentStartDate;
+   private String replenishmentEndDate;
    private String nDays;
    private String nWeeks;
    private String nMonths;
@@ -25,19 +25,19 @@ public class WorldlineReplenishmentForm {
       this.replenishmentOrder = replenishmentOrder;
    }
 
-   public Date getReplenishmentStartDate() {
+   public String getReplenishmentStartDate() {
       return replenishmentStartDate;
    }
 
-   public void setReplenishmentStartDate(Date replenishmentStartDate) {
+   public void setReplenishmentStartDate(String replenishmentStartDate) {
       this.replenishmentStartDate = replenishmentStartDate;
    }
 
-   public Date getReplenishmentEndDate() {
+   public String getReplenishmentEndDate() {
       return replenishmentEndDate;
    }
 
-   public void setReplenishmentEndDate(Date replenishmentEndDate) {
+   public void setReplenishmentEndDate(String replenishmentEndDate) {
       this.replenishmentEndDate = replenishmentEndDate;
    }
 

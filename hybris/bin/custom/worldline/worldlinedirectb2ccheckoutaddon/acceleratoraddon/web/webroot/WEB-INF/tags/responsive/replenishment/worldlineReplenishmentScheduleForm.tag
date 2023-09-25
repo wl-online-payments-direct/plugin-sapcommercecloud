@@ -7,6 +7,7 @@
 <%@ taglib prefix="common" tagdir="/WEB-INF/tags/responsive/common" %>
 <%@ taglib prefix="template" tagdir="/WEB-INF/tags/responsive/template" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ attribute name="displayForm" required="true" type="java.lang.Boolean" %>
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
 <spring:url value="/checkout/summary/placeOrder" var="placeOrderUrl" htmlEscape="false"/>
@@ -16,7 +17,9 @@
 <spring:theme code="responsive.replenishmentScheduleForm.activateYearly" var="Yearly" htmlEscape="false"/>
 <spring:theme code="text.store.dateformat.datepicker.selection" text="mm/dd/yy" var="dateForForDatePicker"/>
 
-<div class="replenishment-form-container" style="display: none">
+<c:set var="styleDisplay" value="${displayForm ? 'display: block' : 'display: none'}" />
+
+<div class="replenishment-form-container" style="${styleDisplay}">
     <div class="clearfix" id="replenishmentSchedule"
          data-date-For-Date-Picker="${dateForForDatePicker}"
          data-place-Order-Form-Replenishment-Recurrence="${fn:escapeXml(replenishmentForm.replenishmentRecurrence)}"
@@ -50,6 +53,9 @@
                                       arguments="${dateForForDatePicker}"/>
                     </div>
                 </div>
+            </div>
+            <div id="errorDatesValidity" style="display: none" class="help-block">
+                <spring:theme code="responsive.replenishmentScheduleForm.invalidDates"/>
             </div>
         </div>
 
