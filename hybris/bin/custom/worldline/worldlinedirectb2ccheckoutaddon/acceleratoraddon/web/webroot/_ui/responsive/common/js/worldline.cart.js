@@ -13,9 +13,6 @@ ACC.worldlineCart = {
             if (replenishOrderCheckbox.is(':checked')) {
                 formContainer.prop("style", "display: block");
                 $("input:radio[name=replenishmentRecurrence]").click(function () {
-//                    if ($("#replenishmentStartDate").val() != '' && ACC.worldlineCart.validateDates()) {
-//                        $('#replenishmentSchedule .js-replenishment-actions').show();
-//                    }
                     switch (this.value) {
                         case "DAILY":
                             $('.scheduleformD').show();
@@ -46,46 +43,17 @@ ACC.worldlineCart = {
         })
 
         $(document).on("click", '#replenishmentSchedule .js-open-datepicker', function () {
-            console.log($(this));
             $(this).datepicker('show');
-            console.log("event added")
         });
 
-//        $(document).on("click", '#replenishmentSchedule #placeReplenishmentOrder', function (e) {
-//            e.preventDefault();
-//
-//            var localeDateFormat = $('#replenishmentSchedule').data('dateForDatePicker');
-//            var startDateEntered = $("#replenishmentStartDate").val();
-//            var endDateEntered = $("#replenishmentEndDate").val();
-//            let validateStartDate = ACC.checkoutsummary.validateDate(startDateEntered, localeDateFormat);
-//            let validateEndDate = ACC.checkoutsummary.validateDate(endDateEntered, localeDateFormat);
-//            if (validateStartDate  &&validateEndDate) {
-//                $(".replenishmentOrderClass").val(true);
-//                placeReplenishment = true;
-//                $.colorbox.close();
-//            } else
-//            {
-//                if (!validateStartDate)
-//                {
-//                    ACC.checkoutsummary.toggleReplenishmentScheduleStartDateError(true);
-//                }
-//                if (!validateEndDate)
-//                {
-//                    ACC.checkoutsummary.toggleReplenishmentScheduleEndDateError(true);
-//                }
-//                $.colorbox.resize();
-//
-//            }
-//
-//
-//        });
-
         $(document).on("change", '#replenishmentStartDate', function (e) {
-            ACC.checkoutsummary.toggleReplenishmentScheduleStartDateError(false);
+            ACC.worldlineCart.toggleReplenishmentScheduleStartDateError(false);
+            ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(false);
         });
 
         $(document).on("change", '#replenishmentEndDate', function (e) {
-            ACC.checkoutsummary.toggleReplenishmentScheduleEndDateError(false);
+            ACC.worldlineCart.toggleReplenishmentScheduleEndDateError(false);
+            ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(false);
         });
     },
     validateDate: function (date, dateFormat) {
@@ -139,6 +107,22 @@ ACC.worldlineCart = {
             $('#errorReplenishmentEndDate').hide();
         }
     },
+    toggleReplenishmentScheduleWrongDatesError: function (showError) {
+        if (showError) {
+            var datePickerElem = $('#replenishmentSchedule .datepicker');
+            datePickerElem.each(function () {
+                if (!$(this).hasClass('has-error')) {
+                    $(this).addClass('has-error');
+                }
+            })
+
+            $('#errorDatesValidity').show();
+        } else {
+            $('#replenishmentSchedule .datepicker.start').removeClass('has-error');
+            $('#replenishmentSchedule .datepicker.end').removeClass('has-error');
+            $('#errorDatesValidity').hide();
+        }
+    },
 
     replenishmentInit: function () {
         var placeOrderFormReplenishmentOrder = $('#replenishmentSchedule').data("placeOrderFormReplenishmentOrder");
@@ -153,8 +137,6 @@ ACC.worldlineCart = {
 
         // replenishment schedule data not set to cart yet
         if (!placeOrderFormReplenishmentOrder) {
-
-            //$('#replenishmentSchedule .js-replenishment-actions').hide();
 
             // default value for daily
             $("input:radio[name='replenishmentRecurrence'][value=DAILY]").prop('checked', false);
@@ -197,11 +179,7 @@ ACC.worldlineCart = {
             onClose: function () {
                 if (!ACC.worldlineCart.validateDates())
                 {
-                    console.log("Do something if the dates are not valid")
-                } else {
-                    if ($("input:radio[name=replenishmentRecurrence]").is(':checked')) {
-                        console.log("Do something if the dates are valid")
-                    }
+                    toggleReplenishmentScheduleWrongDatesError(true);
                 }
 
             }
