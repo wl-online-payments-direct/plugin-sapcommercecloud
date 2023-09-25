@@ -6,6 +6,7 @@ import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.enums.WorldlineRecurringType;
+import com.worldline.direct.enums.WorldlineReplenishmentOccurrenceEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
@@ -17,7 +18,6 @@ import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.*;
-import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
@@ -46,6 +46,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.core.model.user.TitleModel;
+import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.order.CartService;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.order.PaymentModeService;
@@ -98,8 +99,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     protected WorldlineBusinessProcessService worldlineBusinessProcessService;
 
     protected WorldlineConfigurationService worldlineConfigurationService;
-
-    private WorldlineAmountUtils worldlineAmountUtils;
 
     @Override
     public List<PaymentProduct> getAvailablePaymentMethods() {
@@ -491,6 +490,35 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return null;
     }
 
+    @Override
+    public void saveReplenishmentData(boolean replenishmentOrder, Date replenishmentStartDate, Date replenishmentEndDate, String nDays, String nWeeks,
+          String nMonths, String nthDayOfMonth, List<String> nDaysOfWeek, String replenishmentRecurrence) {
+        CartModel cartModel = getCart();
+        WorldlineReplenishmentOccurrenceEnum replenishmentOccurrenceEnum = WorldlineReplenishmentOccurrenceEnum.valueOf(replenishmentRecurrence);
+        cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
+        if (replenishmentOrder) {
+            cartModel.setWorldlineReplenishmentStartDate(replenishmentStartDate);
+            cartModel.setWorldlineReplenishmentEndDate(replenishmentEndDate);
+            cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
+            cartModel.setWorldlineNDays(nDays);
+            cartModel.setWorldlineNWeeks(nWeeks);
+            cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
+            cartModel.setWorldlineNMonths(nMonths);
+            cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
+        }
+        modelService.save(cartModel);
+    }
+
+    private List<DayOfWeek> replenishmentOrderDaysOfWeek(List<String> nDaysOfWeek) {
+        List<DayOfWeek> result = new ArrayList<>();
+        if (nDaysOfWeek.size() > 0) {
+            for (String dayOfWeek : nDaysOfWeek) {
+                result.add(DayOfWeek.valueOf(dayOfWeek));
+            }
+        }
+        return result;
+    }
+
     protected PaymentInfoModel updateOrCreatePaymentInfo(final CartModel cartModel, WorldlinePaymentInfoData worldlinePaymentInfoData) {
         WorldlinePaymentInfoModel paymentInfo;
         if (cartModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
@@ -785,7 +813,4 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         this.worldlineConfigurationService = worldlineConfigurationService;
     }
 
-    public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
-        this.worldlineAmountUtils = worldlineAmountUtils;
-    }
 }
