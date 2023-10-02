@@ -6,10 +6,7 @@ import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants.URL.
 import com.worldline.direct.checkoutaddon.controllers.utils.WorldlinePlaceOrderUtils;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.constants.WorldlineCheckoutConstants;
-import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
-import com.worldline.direct.jalo.WorldlineConfiguration;
-import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.b2bacceleratorfacades.exception.EntityValidationException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
@@ -25,7 +22,6 @@ import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.AbstractCheckoutStepController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
 import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
-import de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
@@ -39,9 +35,7 @@ import de.hybris.platform.commercefacades.product.ProductOption;
 import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.commerceservices.order.CommerceCartModificationException;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
-import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.order.InvalidCartException;
-import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -61,9 +55,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator.HOSTED_CHECKOUT_RETURN_URL;
-import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 
 @Controller
 @RequestMapping(value = Summary.root)

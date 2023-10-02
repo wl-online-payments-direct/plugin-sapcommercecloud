@@ -25,3 +25,25 @@ tr .new-cart {
 .radio_image_row {
     margin-bottom: 5px !important;
 }
+
+
+.scheduleform-container {
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.replenishmentFrequency {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.replenishmentFrequency .controls{
+    margin-bottom: 15px;
+}
+
+.scheduleformD, .scheduleformW, .scheduleformM {
+    margin-inline-end: 1.8rem;
+}
