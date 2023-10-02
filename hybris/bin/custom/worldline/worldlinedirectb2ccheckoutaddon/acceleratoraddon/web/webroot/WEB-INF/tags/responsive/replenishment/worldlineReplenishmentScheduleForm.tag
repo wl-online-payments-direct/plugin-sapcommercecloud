@@ -27,7 +27,82 @@
          data-place-Order-Form-Nth-Day-Of-Month="${fn:escapeXml(replenishmentForm.nthDayOfMonth)}"
          data-place-Order-Form-Replenishment-Order="${replenishmentForm.replenishmentOrder}">
 
+        <!-- Frequency replenishment data -->
         <div class="column scheduleform  scheduleform_left">
+            <div class="column scheduleform scheduleformD" style="display: none;">
+                <div class="form-group">
+                    <label class="control-label" for="nDays">
+                        <spring:theme code="responsive.replenishmentScheduleForm.daily.days"/>
+                    </label>
+                    <div class="controls">
+                        <form:select id="nDays" path="nDays" style="width: 100px;" class="form-control">
+                            <form:options items="${nDays}"/>
+                        </form:select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column scheduleform scheduleformW" style="display: none;">
+                <div class="div_nWeeks1">
+                    <div class="form-group">
+                        <label class="control-label" for="nWeeks">
+                            <spring:theme code="responsive.replenishmentScheduleForm.weekly.weeks"/>
+                        </label>
+                        <div class="controls">
+                            <form:select id="nWeeks" path="nWeeks" style="width: 100px;" class="form-control">
+                                <form:options items="${nthWeek}"/>
+                            </form:select>
+                        </div>
+                    </div>
+                </div>
+
+                <!--<div class="div_nWeeks2">
+                    <div>
+                        <spring:theme code="responsive.replenishmentScheduleForm.weekly.daysOfWeek"/>
+                    </div>
+                    <div class="row scheduleform-checkboxes">
+                        <form:checkboxes id="daysOfWeek" items="${daysOfWeek}" itemLabel="name" itemValue="code"
+                                         path="nDaysOfWeek" element="div class='scheduleform-checkbox col-md-4 col-xs-6'"/>
+                    </div>
+                </div>-->
+            </div>
+
+            <div class="column scheduleform scheduleformM" style="display: none;">
+                <div class="form-group">
+                    <label class="control-label" for="nthDayOfMonth">
+                        <spring:theme code="responsive.replenishmentScheduleForm.monthly.day"/>
+                    </label>
+                    <div class="controls">
+                        <form:select id="nthDayOfMonth" path="nthDayOfMonth" style="width: 100px;" class="form-control">
+                            <form:options items="${nthDayOfMonth}"/>
+                        </form:select>
+                    </div>
+                </div>
+                <!--<div class="form-group">
+                    <label class="control-label" for="nMonths">
+                        <spring:theme code="responsive.replenishmentScheduleForm.monthly.months"/>
+                    </label>
+                    <div class="controls">
+                        <form:select id="nMonths" path="nMonths" style="width: 100px;" class="form-control">
+                            <form:options items="${nthMonth}"/>
+                        </form:select>
+                    </div>
+                </div>-->
+            </div>
+            <div class="replenishmentFrequency">
+                <div class="controls">
+                    <form:select id="frequency" path="replenishmentRecurrence" style="width: 100px;" class="form-control">
+                        <form:option label="${Daily}" value="DAILY"/>
+                        <form:option label="${Weekly}" value="WEEKLY"/>
+                        <form:option label="${Monthly}" value="MONTHLY"/>
+                        <form:option label="${Yearly}" value="YEARLY"/>
+                    </form:select>
+                </div>
+            </div>
+        </div>
+
+        <!-- schedule start and end date -->
+        <div class="column scheduleform  scheduleform_left scheduleform-container">
             <div class="replenishmentFrequency_left">
                 <div class="form-element-icon datepicker start">
                     <formElement:formInputBox idKey="replenishmentStartDate"
@@ -59,104 +134,31 @@
             </div>
         </div>
 
-        <div class="replenishmentFrequency">
-            <form:radiobutton path="replenishmentRecurrence" id="replenishmentFrequencyD" label="${Daily}" value="DAILY"
-                              class="replenishmentfrequencyD"/>
-        </div>
-        <div class="replenishmentFrequency">
-            <form:radiobutton path="replenishmentRecurrence" id="replenishmentFrequencyW" label="${Weekly}"
-                              value="WEEKLY" class="replenishmentfrequencyW"/>
-        </div>
-        <div class="replenishmentFrequency">
-            <form:radiobutton path="replenishmentRecurrence" id="replenishmentFrequencyM" label="${Monthly}"
-                              value="MONTHLY" class="replenishmentfrequencyM"/>
-        </div>
-        <div class="replenishmentFrequency">
-            <form:radiobutton path="replenishmentRecurrence" id="replenishmentFrequencyY" label="${Yearly}"
-                              value="YEARLY" class="replenishmentfrequencyY"/>
-        </div>
-
-
-        <div class="column scheduleform scheduleformD" style="display: none;">
-            <div class="form-group">
-                <label class="control-label" for="nDays">
-                    <spring:theme code="responsive.replenishmentScheduleForm.daily.days"/>
-                </label>
-                <div class="controls">
-                    <form:select id="nDays" path="nDays" style="width: 100px;" class="form-control">
-                        <form:options items="${nDays}"/>
-                    </form:select>
+        <!-- Additional schedule form data -->
+        <div class="column scheduleform  scheduleform_left scheduleform-container">
+            <div class="column scheduleform scheduleformW" style="display: none;">
+                <div class="div_nWeeks2">
+                    <div>
+                        <spring:theme code="responsive.replenishmentScheduleForm.weekly.daysOfWeek"/>
+                    </div>
+                    <div class="row scheduleform-checkboxes">
+                        <form:checkboxes id="daysOfWeek" items="${daysOfWeek}" itemLabel="name" itemValue="code"
+                                         path="nDaysOfWeek" element="div class='scheduleform-checkbox col-md-4 col-xs-6'"/>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="column scheduleform scheduleformW" style="display: none;">
-            <div class="div_nWeeks1">
+            <div class="column scheduleform scheduleformM" style="display: none;">
                 <div class="form-group">
-                    <label class="control-label" for="nWeeks">
-                        <spring:theme code="responsive.replenishmentScheduleForm.weekly.weeks"/>
+                    <label class="control-label" for="nMonths">
+                        <spring:theme code="responsive.replenishmentScheduleForm.monthly.months"/>
                     </label>
                     <div class="controls">
-                        <form:select id="nWeeks" path="nWeeks" style="width: 100px;" class="form-control">
-                            <form:options items="${nthWeek}"/>
+                        <form:select id="nMonths" path="nMonths" style="width: 100px;" class="form-control">
+                            <form:options items="${nthMonth}"/>
                         </form:select>
                     </div>
                 </div>
             </div>
-
-            <div class="div_nWeeks2">
-                <div>
-                    <spring:theme code="responsive.replenishmentScheduleForm.weekly.daysOfWeek"/>
-                </div>
-                <div class="row scheduleform-checkboxes">
-                    <form:checkboxes id="daysOfWeek" items="${daysOfWeek}" itemLabel="name" itemValue="code"
-                                     path="nDaysOfWeek" element="div class='scheduleform-checkbox col-md-4 col-xs-6'"/>
-                </div>
-            </div>
         </div>
-
-        <div class="column scheduleform scheduleformM" style="display: none;">
-            <div class="form-group">
-                <label class="control-label" for="nthDayOfMonth">
-                    <spring:theme code="responsive.replenishmentScheduleForm.monthly.day"/>
-                </label>
-                <div class="controls">
-                    <form:select id="nthDayOfMonth" path="nthDayOfMonth" style="width: 100px;" class="form-control">
-                        <form:options items="${nthDayOfMonth}"/>
-                    </form:select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label" for="nMonths">
-                    <spring:theme code="responsive.replenishmentScheduleForm.monthly.months"/>
-                </label>
-                <div class="controls">
-                    <form:select id="nMonths" path="nMonths" style="width: 100px;" class="form-control">
-                        <form:options items="${nthMonth}"/>
-                    </form:select>
-                </div>
-            </div>
-        </div>
-
-
-        <!--<div class="js-replenishment-actions">
-            <div class="modal-actions">
-                <form:input type="hidden" id="replenishmentOrder" class="replenishmentOrderClass"
-                            path="replenishmentOrder"/>
-                <c:if test="${cartData.quoteData eq null && tokenizePayment eq true}">
-                    <div class="checkbox">
-                        <label> <form:checkbox id="saveCardDetails" path="cardDetailsCheck" />
-                            <spring:theme code="checkout.multi.order.saveCardDetails"/>
-                        </label>
-                    </div>
-                </c:if>
-                <button type="button" class="btn btn-block btn-primary" id="placeReplenishmentOrder">
-                    <spring:theme code="checkout.summary.scheduleReplenishment"/>
-                </button>
-                <button type="button" class="btn btn-block btn-default" id="cancelReplenishmentOrder">
-                    <spring:theme code="checkout.summary.replenishmentScheduleForm.cancel"/>
-                </button>
-            </div>
-        </div>-->
     </div>
 </div>

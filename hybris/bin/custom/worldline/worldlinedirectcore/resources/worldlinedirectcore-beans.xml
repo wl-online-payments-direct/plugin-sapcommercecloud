@@ -32,7 +32,7 @@
 
     <bean class="de.hybris.platform.commercefacades.order.data.CartData">
         <property name="worldlinePaymentInfo" type="com.worldline.direct.order.data.WorldlinePaymentInfoData"/>
-        <property name="replenishmentOrder" type="Boolean" />
+        <property name="replenishmentOrder" type="boolean" />
         <property name="replenishmentStartDate" type="java.util.Date" />
         <property name="replenishmentRecurrence" type="de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum" />
         <property name="nDaysOfWeek" type="java.util.List&lt;de.hybris.platform.cronjob.enums.DayOfWeek>"/>

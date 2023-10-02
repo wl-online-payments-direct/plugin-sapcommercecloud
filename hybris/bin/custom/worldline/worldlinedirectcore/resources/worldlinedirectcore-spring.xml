@@ -65,6 +65,7 @@
         <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
         <property name="addressReverseConverter" ref="addressReverseConverter"/>
         <property name="orderConverter" ref="orderConverter"/>
+        <property name="worldlinePlaceOrderConverter" ref="worldlinePlaceOrderConverter" />
         <property name="cartService" ref="cartService"/>
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
         <property name="modelService" ref="modelService"/>

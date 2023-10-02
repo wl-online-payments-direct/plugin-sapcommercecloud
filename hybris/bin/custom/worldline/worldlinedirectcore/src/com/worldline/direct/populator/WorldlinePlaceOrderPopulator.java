@@ -11,14 +11,16 @@ public class WorldlinePlaceOrderPopulator implements Populator<CartModel, PlaceO
    @Override
    public void populate(CartModel cartModel, PlaceOrderData placeOrderData) throws ConversionException {
 
-      placeOrderData.setNDays(cartModel.getWorldlineNDays());
-      placeOrderData.setNDaysOfWeek(cartModel.getWorldlineNDaysOfWeek());
-      placeOrderData.setNthDayOfMonth(cartModel.getWorldlineNthDayOfMonth());
-      placeOrderData.setNWeeks(cartModel.getWorldlineNWeeks());
-      placeOrderData.setNMonths(cartModel.getWorldlineNMonths());
-      placeOrderData.setReplenishmentOrder(cartModel.isWorldlineReplenishmentOrder());
-      placeOrderData.setReplenishmentRecurrence(B2BReplenishmentRecurrenceEnum.valueOf(cartModel.getWorldlineReplenishmentRecurrence().getCode()));
-      placeOrderData.setReplenishmentStartDate(cartModel.getWorldlineReplenishmentStartDate());
-      placeOrderData.setReplenishmentEndDate(cartModel.getWorldlineReplenishmentEndDate());
+      if (cartModel.isWorldlineReplenishmentOrder()) {
+         placeOrderData.setNDays(cartModel.getWorldlineNDays());
+         placeOrderData.setNDaysOfWeek(cartModel.getWorldlineNDaysOfWeek());
+         placeOrderData.setNthDayOfMonth(cartModel.getWorldlineNthDayOfMonth());
+         placeOrderData.setNWeeks(cartModel.getWorldlineNWeeks());
+         placeOrderData.setNMonths(cartModel.getWorldlineNMonths());
+         placeOrderData.setReplenishmentOrder(cartModel.isWorldlineReplenishmentOrder());
+         placeOrderData.setReplenishmentRecurrence(B2BReplenishmentRecurrenceEnum.valueOf(cartModel.getWorldlineReplenishmentRecurrence().getCode()));
+         placeOrderData.setReplenishmentStartDate(cartModel.getWorldlineReplenishmentStartDate());
+         placeOrderData.setReplenishmentEndDate(cartModel.getWorldlineReplenishmentEndDate());
+      }
    }
 }

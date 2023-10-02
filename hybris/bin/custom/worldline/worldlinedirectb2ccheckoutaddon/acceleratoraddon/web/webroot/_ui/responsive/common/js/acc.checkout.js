@@ -101,62 +101,55 @@ ACC.checkout = {
 			cartEntriesError = ACC.pickupinstore.validatePickupinStoreCartEntires();
 			var form = $('#replenishmentForm');
 			if (!cartEntriesError) {
-				if (form.length) {
-                    var localeDateFormat = $('#replenishmentSchedule').data('dateForDatePicker');
-                    var startDateEntered = $("#replenishmentStartDate").val();
-                    var endDateEntered = $("#replenishmentEndDate").val();
-                    let validateStartDate = ACC.worldlineCart.validateDate(startDateEntered, localeDateFormat);
-                    let validateEndDate = ACC.worldlineCart.validateDate(endDateEntered, localeDateFormat);
-                    let validateDates = ACC.worldlineCart.validateDates(endDateEntered, localeDateFormat);
+				if (form.length && $('input[name=replenishmentOrder]').prop('checked')) {
+          var localeDateFormat = $('#replenishmentSchedule').data('dateForDatePicker');
+          var startDateEntered = $("#replenishmentStartDate").val();
+          var endDateEntered = $("#replenishmentEndDate").val();
+          let validateStartDate = ACC.worldlineCart.validateDate(startDateEntered, localeDateFormat);
+          let validateEndDate = ACC.worldlineCart.validateDate(endDateEntered, localeDateFormat);
+          let validateDates = ACC.worldlineCart.validateDates(endDateEntered, localeDateFormat);
 
-                    if ((validateStartDate && validateEndDate) && validateDates) {
-                    $(".replenishmentOrderClass").val(true);
+          if ((validateStartDate && validateEndDate) && validateDates) {
+          $(".replenishmentOrderClass").val(true);
 
-                    var formData = new FormData(form[0]);
+          var formData = new FormData(form[0]);
 
-                    $('.scheduleformD').show();
-                    $('.scheduleformW').hide();
-                    $('.scheduleformM').hide();
-                    var options = {
-                      'replenishmentOrder' : formData.get('replenishmentOrder'),
-                      'replenishmentStartDate': formData.get('replenishmentStartDate'),
-                      'replenishmentEndDate': formData.get('replenishmentEndDate'),
-                      'nDays': $('.scheduleformD').is(":visible") ? formData.get('nDays') : "",
-                      'nWeeks': $('.scheduleformW').is(":visible") ? formData.get('nWeeks') : "",
-                      'nMonths': $('.scheduleformM').is(":visible") ? formData.get('nMonths') : "",
-                      'nthDayOfMonth': $('.scheduleformM').is(":visible") ? formData.get('nthDayOfMonth') : "",
-                      'nDaysOfWeek': $('.scheduleformW').is(":visible") ? formData.getAll('nDaysOfWeek').join(",") : "",
-                      'replenishmentRecurrence': formData.get('replenishmentRecurrence')
-                    };
+          var options = {
+            'replenishmentOrder' : formData.get('replenishmentOrder'),
+            'replenishmentStartDate': formData.get('replenishmentStartDate'),
+            'replenishmentEndDate': formData.get('replenishmentEndDate'),
+            'nDays': $('.scheduleformD').is(":visible") ? formData.get('nDays') : "",
+            'nWeeks': $('.scheduleformW').is(":visible") ? formData.get('nWeeks') : "",
+            'nMonths': $('.scheduleformM').is(":visible") ? formData.get('nMonths') : "",
+            'nthDayOfMonth': $('.scheduleformM').is(":visible") ? formData.get('nthDayOfMonth') : "",
+            'nDaysOfWeek': $('.scheduleformW').is(":visible") ? formData.getAll('nDaysOfWeek').join(",") : "",
+            'replenishmentRecurrence': formData.get('replenishmentRecurrence')
+          };
 
-                    $.ajax({
-                        url: form.attr('action'),
-                        type: 'POST',
-                        data: options,
-                        success: function () {
-                            //Continue to checkout
-                          //ACC.checkout.bindStartCheckout(checkoutUrl);
-                          console.log("Continue to checkout")
-                        }
-                    });
+          $.ajax({
+              url: form.attr('action'),
+              type: 'POST',
+              data: options,
+              success: function () {
+                  //Continue to checkout
+                  ACC.checkout.bindStartCheckout(checkoutUrl);
+              }
+          });
 
-                    } else {
-                     if (!validateStartDate) {
-                         ACC.worldlineCart.toggleReplenishmentScheduleStartDateError(true);
-                     }
-                     if (!validateEndDate) {
-                         ACC.worldlineCart.toggleReplenishmentScheduleEndDateError(true);
-                     }
-                     if (!validateDates) {
-                     		ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(true);
-                     }
-
-                    }
-
+          } else {
+           if (!validateStartDate) {
+               ACC.worldlineCart.toggleReplenishmentScheduleStartDateError(true);
+           }
+           if (!validateEndDate) {
+               ACC.worldlineCart.toggleReplenishmentScheduleEndDateError(true);
+           }
+           if (!validateDates) {
+           		ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(true);
+           }
+          }
 				} else {
 					ACC.checkout.bindStartCheckout(checkoutUrl);
 				}
-
 			}
 			return false;
 		});
@@ -166,35 +159,44 @@ ACC.checkout = {
     bindPlaceOrder: function ()
 	{
 	    ACC.checkout.toggleActionButtons('.place-order-form');
-
 	},
 
-	toggleActionButtons: function(selector) {
+	toggleActionButtons: function (selector) {
 
-		var cssClass = $(document).find(selector);
-		var checkoutBtns = cssClass.find('.btn-checkout-summary');
-		var checkBox = cssClass.find('input[name=termsCheck]');
+        var cssClass = $(document).find(selector);
+        var checkoutBtn = cssClass.find('.checkoutSummaryButton');
+        var checkBox = cssClass.find('input[name=termsCheck]');
+        var checkBoxRememberPaymentDetails = cssClass.find('input[name=cardDetailsCheck]');
 
-		if(checkBox.is(':checked')) {
-			checkoutBtns.prop('disabled', false);
-		}
+        checkoutBtn.prop('disabled', true);
 
-		checkBox.on('click', function() {
-			var checked = $(this).prop('checked');
+        checkBox.on('click', function () {
+            var checked = $(this).prop('checked');
+            var rememberPaymentDetails = checkBoxRememberPaymentDetails.prop('checked');
 
-			if(checked) {
-				checkoutBtns.prop('disabled', false);
-			} else {
-				checkoutBtns.prop('disabled', true);
-			}
-		});
-
-        checkoutBtns.on('click', function(){
-          checkoutBtns.prop('disabled', true);
-          $('#placeOrderForm1').submit();
+            if (checked && rememberPaymentDetails) {
+                checkoutBtn.prop('disabled', false);
+            } else {
+                checkoutBtn.prop('disabled', true);
+            }
         });
 
-	},
+        checkBoxRememberPaymentDetails.on('click', function () {
+            var rememberPaymentDetails = $(this).prop('checked');
+            var checked = checkBox.prop('checked');
+
+            if (checked && rememberPaymentDetails) {
+                checkoutBtn.prop('disabled', false);
+            } else {
+                checkoutBtn.prop('disabled', true);
+            }
+        });
+
+        checkoutBtn.on('click', function(){
+          checkoutBtn.prop('disabled', true);
+          $('#placeOrderForm1').submit();
+        });
+    },
 
 	bindStartCheckout: function(checkoutUrl) {
 		var expressCheckoutObject = $('.express-checkout-checkbox');

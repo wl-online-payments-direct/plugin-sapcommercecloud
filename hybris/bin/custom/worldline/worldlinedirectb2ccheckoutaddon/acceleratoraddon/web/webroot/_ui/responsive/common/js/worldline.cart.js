@@ -12,7 +12,7 @@ ACC.worldlineCart = {
             e.preventDefault();
             if (replenishOrderCheckbox.is(':checked')) {
                 formContainer.prop("style", "display: block");
-                $("input:radio[name=replenishmentRecurrence]").click(function () {
+                $("#frequency").change(function () {
                     switch (this.value) {
                         case "DAILY":
                             $('.scheduleformD').show();
@@ -138,21 +138,22 @@ ACC.worldlineCart = {
         // replenishment schedule data not set to cart yet
         if (!placeOrderFormReplenishmentOrder) {
 
+             $("#frequency option[value=" + placeOrderFormReplenishmentRecurrence + "]").attr('selected', 'selected');
             // default value for daily
-            $("input:radio[name='replenishmentRecurrence'][value=DAILY]").prop('checked', false);
+            //$("input:radio[name='replenishmentRecurrence'][value=DAILY]").prop('checked', false);
             $('.scheduleformD').hide();
             $("#nDays option[value=" + placeOrderFormNDays + "]").attr('selected', 'selected');
 
             // default value for weekly
-            $("input:radio[name='replenishmentRecurrence'][value=WEEKLY]").prop('checked', false);
+            //$("input:radio[name='replenishmentRecurrence'][value=WEEKLY]").prop('checked', false);
             $('.scheduleformW').hide();
 
             // default value for monthly
-            $("input:radio[name='replenishmentRecurrence'][value=MONTHLY]").prop('checked', false);
+            //$("input:radio[name='replenishmentRecurrence'][value=MONTHLY]").prop('checked', false);
             $('.scheduleformM').hide();
 
             // default value for yearly
-            $("input:radio[name='replenishmentRecurrence'][value=YEARLY]").prop('checked', false);
+            //$("input:radio[name='replenishmentRecurrence'][value=YEARLY]").prop('checked', false);
             $('.scheduleformY').hide();
 
             if (placeOrderFormNthDayOfMonth != '')
@@ -179,7 +180,7 @@ ACC.worldlineCart = {
             onClose: function () {
                 if (!ACC.worldlineCart.validateDates())
                 {
-                    toggleReplenishmentScheduleWrongDatesError(true);
+                    ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(true);
                 }
 
             }
