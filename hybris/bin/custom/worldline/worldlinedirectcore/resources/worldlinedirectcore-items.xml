@@ -434,7 +434,8 @@
                 <attribute qualifier="worldlineReplenishmentOrder" type="boolean">
                     <description>set if the order is recurring or not</description>
                     <persistence type="property"/>
-                    <defaultvalue>Boolean.FALSE</defaultvalue>
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                 </attribute>
                 <attribute qualifier="worldlineNDays" type="java.lang.String">
                     <modifiers read="true" write="true" search="true" optional="true"/>

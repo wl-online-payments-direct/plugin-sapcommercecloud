@@ -20,6 +20,7 @@ import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.*;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import com.worldline.direct.util.WorldlineUrlUtils;
+import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.commercefacades.order.data.CartData;
@@ -82,6 +83,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     protected Converter<AddressData, AddressModel> addressReverseConverter;
     protected Converter<OrderModel, OrderData> orderConverter;
+    protected Converter<CartModel, PlaceOrderData> worldlinePlaceOrderConverter;
 
     protected CartService cartService;
     protected UserService userService;
@@ -108,7 +110,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         List<PaymentProduct> paymentProducts = worldlinePaymentService.getPaymentProducts(totalPrice.getValue(),
                 totalPrice.getCurrencyIso(),
                 getCountryCode(cartData),
-                getShopperLocale());
+                getShopperLocale(),
+                cartData.isReplenishmentOrder());
 
         return paymentProducts;
     }
@@ -496,17 +499,22 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         CartModel cartModel = getCart();
         WorldlineReplenishmentOccurrenceEnum replenishmentOccurrenceEnum = WorldlineReplenishmentOccurrenceEnum.valueOf(replenishmentRecurrence);
         cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
-        if (replenishmentOrder) {
-            cartModel.setWorldlineReplenishmentStartDate(replenishmentStartDate);
-            cartModel.setWorldlineReplenishmentEndDate(replenishmentEndDate);
-            cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
-            cartModel.setWorldlineNDays(nDays);
-            cartModel.setWorldlineNWeeks(nWeeks);
-            cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
-            cartModel.setWorldlineNMonths(nMonths);
-            cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
-        }
+
+        cartModel.setWorldlineReplenishmentStartDate(replenishmentStartDate);
+        cartModel.setWorldlineReplenishmentEndDate(replenishmentEndDate);
+        cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
+        cartModel.setWorldlineNDays(nDays);
+        cartModel.setWorldlineNWeeks(nWeeks);
+        cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
+        cartModel.setWorldlineNMonths(nMonths);
+        cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
+
         modelService.save(cartModel);
+    }
+
+    @Override
+    public PlaceOrderData prepareOrderPlacementData() {
+        return worldlinePlaceOrderConverter.convert(getCart());
     }
 
     private List<DayOfWeek> replenishmentOrderDaysOfWeek(List<String> nDaysOfWeek) {
@@ -734,6 +742,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         modelService.save(paymentInfo);
     }
 
+    public void setWorldlinePlaceOrderConverter(Converter<CartModel, PlaceOrderData> worldlinePlaceOrderConverter) {
+        this.worldlinePlaceOrderConverter = worldlinePlaceOrderConverter;
+    }
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;

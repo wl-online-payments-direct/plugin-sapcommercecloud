@@ -373,10 +373,10 @@ public class WorldlineCartPageController extends AbstractCartPageController {
       model.addAttribute(WebConstants.BREADCRUMBS_KEY, resourceBreadcrumbBuilder.getBreadcrumbs("breadcrumb.cart"));
       model.addAttribute("pageType", PageType.CART.name());
       CartData cart = (CartData) model.getAttribute("cartData");
-      if (cart.getReplenishmentOrder()) {
+      if (cart.isReplenishmentOrder()) {
          final WorldlineReplenishmentForm worldlineReplenishmentForm = new WorldlineReplenishmentForm();
          // TODO: Make setting of default recurrence enum value backoffice driven rather hard coding in controller
-         worldlineReplenishmentForm.setReplenishmentOrder(cart.getReplenishmentOrder());
+         worldlineReplenishmentForm.setReplenishmentOrder(cart.isReplenishmentOrder());
          SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
          worldlineReplenishmentForm.setReplenishmentEndDate(dateFormat.format(cart.getReplenishmentEndDate()));
          worldlineReplenishmentForm.setReplenishmentStartDate(dateFormat.format(cart.getReplenishmentStartDate()));

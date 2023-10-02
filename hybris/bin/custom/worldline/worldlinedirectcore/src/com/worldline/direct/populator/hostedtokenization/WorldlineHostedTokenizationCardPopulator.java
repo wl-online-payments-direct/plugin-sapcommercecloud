@@ -3,6 +3,7 @@ package com.worldline.direct.populator.hostedtokenization;
 import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentService;
@@ -95,6 +96,8 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
                 CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
                 cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
                 cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
+                cardPaymentMethodSpecificInput.setAuthorizationMode(OperationCodesEnum.FINAL_AUTHORIZATION.getCode());
+
             }
         }
 

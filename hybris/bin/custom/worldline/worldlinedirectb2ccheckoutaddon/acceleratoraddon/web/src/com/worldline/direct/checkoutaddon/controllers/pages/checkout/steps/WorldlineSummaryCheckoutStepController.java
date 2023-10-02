@@ -142,40 +142,23 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("deliveryAddress", cartData.getDeliveryAddress());
         model.addAttribute("deliveryMode", cartData.getDeliveryMode());
         model.addAttribute("paymentProduct", paymentProduct);
-        model.addAttribute("nDays", getNumberRange(1, 30));
-        model.addAttribute("nthDayOfMonth", getNumberRange(1, 31));
-        model.addAttribute("nthWeek", getNumberRange(1, 12));
-        model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
-        model.addAttribute("daysOfWeek", worldlineDirectCheckoutFacade.getDaysOfWeekForReplenishmentCheckoutSummary());
-        if (!checkoutCustomerStrategy.isAnonymousCheckout() && worldlinePaymentInfo != null) {
-
-            if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo)) {
-                model.addAttribute("showReplenishment", Boolean.TRUE);
-                if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
-                    WorldlineConfigurationModel currentConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
-                    model.addAttribute("tokenizePayment", Boolean.FALSE);
-                    if (worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
-                        model.addAttribute("showReplenishment", Boolean.FALSE);
-                    }
-                } else {
-                    if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
-                        model.addAttribute("tokenizePayment", Boolean.TRUE);
-                    }
+        if (worldlinePaymentInfo != null && cartData.isReplenishmentOrder()) {
+            if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
+                if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo) &&
+                    worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
+                    GlobalMessages.addFlashMessage(redirectAttributes, GlobalMessages.ERROR_MESSAGES_HOLDER,
+                          "checkout.multi.paymentDetails.htp.replenishOrder.error.message");
+                    return back(redirectAttributes);
                 }
-
+            } else {
+                if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
+                    model.addAttribute("tokenizePayment", Boolean.TRUE);
+                }
             }
-        } else {
-            model.addAttribute("showReplenishment", true);
         }
 
         if (!model.containsAttribute("worldlinePlaceOrderForm")) {
             final WorldlinePlaceOrderForm worldlinePlaceOrderForm = new WorldlinePlaceOrderForm();
-            // TODO: Make setting of default recurrence enum value backoffice driven rather hard coding in controller
-            worldlinePlaceOrderForm.setReplenishmentRecurrence(B2BReplenishmentRecurrenceEnum.MONTHLY);
-            worldlinePlaceOrderForm.setnDays("14");
-            final List<DayOfWeek> daysOfWeek = new ArrayList();
-            daysOfWeek.add(DayOfWeek.MONDAY);
-            worldlinePlaceOrderForm.setnDaysOfWeek(daysOfWeek);
             model.addAttribute("worldlinePlaceOrderForm", worldlinePlaceOrderForm);
         }
 
@@ -215,20 +198,20 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
             // Invalid cart. Bounce back to the cart page.
             return REDIRECT_PREFIX + "/cart";
         }
-
-        final PlaceOrderData placeOrderData = new PlaceOrderData();
-        placeOrderData.setNDays(worldlinePlaceOrderForm.getnDays());
-        placeOrderData.setNDaysOfWeek(worldlinePlaceOrderForm.getnDaysOfWeek());
-        placeOrderData.setNthDayOfMonth(worldlinePlaceOrderForm.getNthDayOfMonth());
-        placeOrderData.setNWeeks(worldlinePlaceOrderForm.getnWeeks());
-        placeOrderData.setNMonths(worldlinePlaceOrderForm.getnMonths());
-        placeOrderData.setReplenishmentOrder(worldlinePlaceOrderForm.isReplenishmentOrder());
-        placeOrderData.setReplenishmentRecurrence(worldlinePlaceOrderForm.getReplenishmentRecurrence());
-        placeOrderData.setReplenishmentStartDate(worldlinePlaceOrderForm.getReplenishmentStartDate());
-        placeOrderData.setReplenishmentEndDate(worldlinePlaceOrderForm.getReplenishmentEndDate());
+        final CartData cartData = getCheckoutFacade().getCheckoutCart();
+        WorldlinePaymentInfoData worldlinePaymentInfo = cartData.getWorldlinePaymentInfo();
+        final PlaceOrderData placeOrderData = worldlineCheckoutFacade.prepareOrderPlacementData();
         placeOrderData.setSecurityCode(worldlinePlaceOrderForm.getSecurityCode());
         placeOrderData.setTermsCheck(worldlinePlaceOrderForm.isTermsCheck());
-        placeOrderData.setCardDetailsCheck(worldlinePlaceOrderForm.isCardDetailsCheck());
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
+            if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo) &&
+                !worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
+                placeOrderData.setCardDetailsCheck(Boolean.TRUE);
+            }
+        } else {
+            placeOrderData.setCardDetailsCheck(worldlinePlaceOrderForm.isCardDetailsCheck());
+        }
+
         AbstractOrderData abstractOrderData;
 
         try {
