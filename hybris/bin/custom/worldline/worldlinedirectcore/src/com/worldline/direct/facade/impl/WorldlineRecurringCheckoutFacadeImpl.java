@@ -132,6 +132,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                 savePaymentToken(cartToOrderCronJob.getCart(), paymentResponse.getPayment(), Boolean.TRUE, cartToOrderCronJob.getCode());
                 saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getWorldlineConfiguration(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), paymentResponse.getPayment());
                 scheduledCartData = handlePaymentResponse(cartToOrderCronJob);
+                break;
             default:
 
                 LOGGER.error("Unexpected Error when creating a payment for recurring order: " + code);

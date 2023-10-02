@@ -111,7 +111,7 @@ public class WorldlinePlaceOrderUtils {
                     WorldlineHostedTokenizationData worldlineHostedTokenizationData = prepareHTPData(abstractOrderData, browserData);
                     if (abstractOrderData instanceof ScheduledCartData) {
                         storeHTPReturnUrlInSession(((ScheduledCartData) abstractOrderData).getJobCode(),  OrderType.SCHEDULE_REPLENISHMENT_ORDER);
-                        worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.SCHEDULED);
+                        worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(((ScheduledCartData) abstractOrderData).getJobCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.SCHEDULED);
                     } else {
                         storeHTPReturnUrlInSession(getOrderCode(abstractOrderData),  OrderType.SCHEDULE_REPLENISHMENT_ORDER);
                         abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.IMMEDIATE);

@@ -48,19 +48,20 @@
         <form:input type="hidden" path="navigatorJavaScriptEnabled"/>
         <form:input type="hidden" path="timezoneOffset"/>
         <form:input type="hidden" path="colorDepth"/>
+        <c:if test="${cartData.quoteData eq null && tokenizePayment eq true}">
+            <div class="checkbox">
+                <label> <form:checkbox id="saveCardDetails" path="cardDetailsCheck" />
+                    <spring:theme code="checkout.multi.order.saveCardDetails"/>
+                </label>
+            </div>
+        </c:if>
         <div class="checkbox">
-            <c:if test="${cartData.quoteData eq null && tokenizePayment eq true}">
-                <div class="checkbox">
-                    <label> <form:checkbox id="saveCardDetails" path="cardDetailsCheck" />
-                        <spring:theme code="checkout.multi.order.saveCardDetails"/>
-                    </label>
-                </div>
-            </c:if>
             <label> <form:checkbox id="Terms1" path="termsCheck" />
                 <spring:theme var="termsAndConditionsHtml" code="checkout.summary.placeOrder.readTermsAndConditions" arguments="${fn:escapeXml(getTermsAndConditionsUrl)}" htmlEscape="false"/>
             	${ycommerce:sanitizeHTML(termsAndConditionsHtml)}
             </label>
         </div>
+
 
         <button id="placeOrder" type="submit" class="btn btn-primary btn-place-order btn-block">
             <spring:theme code="checkout.summary.placeOrder" />

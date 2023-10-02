@@ -55,15 +55,7 @@
                                         class="btn btn-primary btn-place-order btn-block checkout-next checkoutSummaryButton">
                                     <spring:theme code="checkout.summary.placeOrder" text="Place Order"/>
                                 </button>
-                                <c:if test="${cartData.quoteData eq null && showReplenishment eq true}">
-                                    <button id="scheduleReplenishment" type="button"
-                                            class="btn btn-default btn-block scheduleReplenishmentButton checkoutSummaryButton"
-                                            disabled="disabled">
-                                        <spring:theme code="checkout.summary.scheduleReplenishment"/>
-                                    </button>
 
-                                    <worldline:worldlineReplenishmentScheduleForm/>
-                                </c:if>
                             </form:form>
                         </div>
                     </ycommerce:testId>

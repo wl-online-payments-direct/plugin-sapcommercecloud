@@ -9,6 +9,7 @@ import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
+import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
 import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
@@ -61,6 +62,8 @@ public interface WorldlineCheckoutFacade {
                                 String nthDayOfMonth,
                                 List<String> nDaysOfWeek,
                                 String replenishmentRecurrence);
+
+    PlaceOrderData prepareOrderPlacementData();
 
 
 }

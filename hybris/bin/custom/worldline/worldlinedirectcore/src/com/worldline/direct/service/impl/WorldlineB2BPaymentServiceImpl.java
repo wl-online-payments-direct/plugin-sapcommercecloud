@@ -40,7 +40,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
                 mandate.setCustomerReference(cartToOrderCronJobModel.getCode() + System.currentTimeMillis());
             }
-            params.getOrder().getAmountOfMoney().setAmount(0L);
+//            params.getOrder().getAmountOfMoney().setAmount(0L);
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
 
             final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
@@ -122,6 +122,8 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
 
             final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
+            params.getOrder().getReferences().setMerchantReference(cartToOrderCronJob.getCode());
+
 //            params.getRedirectPaymentMethodSpecificInput().getRedirectionData().setReturnUrl(siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
 //                  true, "/checkout/multi/worldline/hosted-tokenization/handle3ds/replenishment/" + cartToOrderCronJob.getCode()));
 
@@ -129,11 +131,12 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 CreateMandateWithReturnUrl mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
             }
-            params.getOrder().getAmountOfMoney().setAmount(0L);
+//            params.getOrder().getAmountOfMoney().setAmount(0L);
 
+            WorldlineLogUtils.logAction(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, "payment");
             final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
-
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, payment);
+
 
             return payment;
         } catch (DeclinedPaymentException e) {

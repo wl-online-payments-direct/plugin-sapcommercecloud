@@ -12,7 +12,7 @@
 <c:url value="/cart/checkout" var="checkoutUrl" scope="session"/>
 <c:url value="/cart/savePlaceOrderData" var="replenishmentFormUrl" scope="session"/>
 <div class="row">
-    <div class="col-xs-12 col-sm-10 col-md-7 col-lg-6 pull-right cart-actions--print">
+    <div class="col-xs-12 col-sm-10 col-md-5 col-lg-6 pull-left cart-actions--print">
 
         <div class="express-checkout">
             <sec:authorize access="hasAnyRole('ROLE_ANONYMOUS')" var="isAnonymous"/>
@@ -45,9 +45,8 @@
                 </c:otherwise>
             </c:choose>
         </div>
-
-
-
+    </div>
+    <div class="col-xs-12 col-sm-10 col-md-7 col-lg-6 pull-right cart-actions--print">
         <div class="express-checkout">
             <div class="headline"><spring:theme code="text.expresscheckout.header"/></div>
             <strong><spring:theme code="text.expresscheckout.title"/></strong>
