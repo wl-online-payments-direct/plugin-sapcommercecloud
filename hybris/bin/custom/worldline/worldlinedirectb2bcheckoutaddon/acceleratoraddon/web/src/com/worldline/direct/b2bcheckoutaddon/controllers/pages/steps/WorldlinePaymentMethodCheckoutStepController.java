@@ -124,13 +124,19 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
         model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
         model.addAttribute("isCardPaymentMethodExisting", worldlineCheckoutFacade.checkForCardPaymentMethods(filteredPaymentProducts));
 
+        final CartData cartData = getCheckoutFacade().getCheckoutCart();
+
         if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
             final CreateHostedTokenizationResponse hostedTokenization = worldlineCheckoutFacade.createHostedTokenization();
             model.addAttribute("hostedTokenization", hostedTokenization);
+            if (cartData.isReplenishmentOrder()) {
+                model.addAttribute("displaySavePMDetailsMessage", Boolean.TRUE);
+            }
         }
-        model.addAttribute("savedPaymentInfos", worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE));
+        if (!cartData.isReplenishmentOrder()) {
+            model.addAttribute("savedPaymentInfos", worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE));
+        }
 
-        final CartData cartData = getCheckoutFacade().getCheckoutCart();
         model.addAttribute(CART_DATA_ATTR, cartData);
 
         return WorldlineCheckoutConstants.Views.Pages.MultiStepCheckout.worldlinePaymentMethod;

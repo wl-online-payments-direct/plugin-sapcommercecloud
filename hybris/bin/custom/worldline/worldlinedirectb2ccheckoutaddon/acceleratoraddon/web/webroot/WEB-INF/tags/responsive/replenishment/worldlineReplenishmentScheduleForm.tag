@@ -102,7 +102,7 @@
         </div>
 
         <!-- schedule start and end date -->
-        <div class="column scheduleform  scheduleform_left scheduleform-container">
+        <div class="column scheduleform  scheduleform_left">
             <div class="replenishmentFrequency_left">
                 <div class="form-element-icon datepicker start">
                     <formElement:formInputBox idKey="replenishmentStartDate"

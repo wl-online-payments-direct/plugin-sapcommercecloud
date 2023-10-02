@@ -22,8 +22,6 @@ import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutSt
 import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.AbstractCheckoutStepController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
-import de.hybris.platform.acceleratorstorefrontcommons.forms.AddressForm;
-import de.hybris.platform.acceleratorstorefrontcommons.util.AddressDataUtil;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
 import de.hybris.platform.commercefacades.order.data.CartData;
