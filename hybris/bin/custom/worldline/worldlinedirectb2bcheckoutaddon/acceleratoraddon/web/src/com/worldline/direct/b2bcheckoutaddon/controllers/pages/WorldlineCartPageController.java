@@ -1,6 +1,7 @@
-package com.worldline.direct.checkoutaddon.controllers.pages;
+package com.worldline.direct.b2bcheckoutaddon.controllers.pages;
 
-import com.worldline.direct.checkoutaddon.forms.WorldlineReplenishmentForm;
+import com.worldline.direct.b2bcheckoutaddon.constants.WorldlineCheckoutConstants;
+import com.worldline.direct.b2bcheckoutaddon.forms.WorldlineReplenishmentForm;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineDirectCheckoutFacade;
 import de.hybris.platform.acceleratorfacades.cart.action.CartEntryAction;
@@ -40,8 +41,6 @@ import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.enumeration.EnumerationService;
 import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.util.Config;
-import de.hybris.platform.yacceleratorstorefront.controllers.ControllerConstants;
-import de.hybris.platform.yacceleratorstorefront.controllers.pages.CartPageController;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -67,7 +66,6 @@ import java.util.*;
 @Controller
 @RequestMapping(value = "/cart")
 public class WorldlineCartPageController extends AbstractCartPageController {
-
    public static final String SHOW_CHECKOUT_STRATEGY_OPTIONS = "storefront.show.checkout.flows";
    public static final String ERROR_MSG_TYPE = "errorMsg";
    public static final String SUCCESSFUL_MODIFICATION_CODE = "success";
@@ -81,7 +79,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
    private static final String REDIRECT_QUOTE_EDIT_URL = REDIRECT_PREFIX + "/quote/%s/edit/";
    private static final String REDIRECT_QUOTE_VIEW_URL = REDIRECT_PREFIX + "/my-account/my-quotes/%s/";
 
-   private static final Logger LOG = Logger.getLogger(CartPageController.class);
+   private static final Logger LOG = Logger.getLogger(WorldlineCartPageController.class);
 
    @Resource(name = "simpleBreadcrumbBuilder")
    private ResourceBreadcrumbBuilder resourceBreadcrumbBuilder;
@@ -142,7 +140,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
       {
          prepareDataForPage(model);
 
-         return ControllerConstants.Views.Pages.Cart.CartPage;
+         return WorldlineCheckoutConstants.Views.Pages.Cart.CartPage;
       }
    }
 
@@ -188,17 +186,20 @@ public class WorldlineCartPageController extends AbstractCartPageController {
          return REDIRECT_CART_URL;
       }
 
+
       if (validateCart(redirectModel))
       {
          GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.ERROR_MESSAGES_HOLDER, CART_CHECKOUT_ERROR, null);
          return REDIRECT_CART_URL;
       }
+
       // Redirect to the start of the checkout flow to begin the checkout process
       // We just redirect to the generic '/checkout' page which will actually select the checkout flow
       // to use. The customer is not necessarily logged in on this request, but will be forced to login
       // when they arrive on the '/checkout' page.
       return REDIRECT_PREFIX + "/checkout";
    }
+
    @ResponseBody
    @RequestMapping(value = "/savePlaceOrderData", method = RequestMethod.POST)
    public ResponseEntity<String> savePlaceOrderData(
@@ -214,14 +215,14 @@ public class WorldlineCartPageController extends AbstractCartPageController {
          @RequestParam("replenishmentRecurrence") final String replenishmentRecurrence) {
 
       worldlineCheckoutFacade.saveReplenishmentData(replenishmentOrder,
-                        new Date(replenishmentStartDate),
-                        new Date(replenishmentEndDate),
-                        nDays,
-                        nWeeks,
-                        nMonths,
-                        nthDayOfMonth,
-                        StringUtils.isNotEmpty(nDaysOfWeek) ? Arrays.stream(nDaysOfWeek.split(",")).toList() : new ArrayList<>(),
-                        replenishmentRecurrence);
+            new Date(replenishmentStartDate),
+            new Date(replenishmentEndDate),
+            nDays,
+            nWeeks,
+            nMonths,
+            nthDayOfMonth,
+            StringUtils.isNotEmpty(nDaysOfWeek) ? Arrays.stream(nDaysOfWeek.split(",")).toList() : new ArrayList<>(),
+            replenishmentRecurrence);
       return new ResponseEntity<>(HttpStatus.OK);
    }
 
@@ -243,7 +244,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
       model.addAttribute("product", productData);
       model.addAttribute("readOnly", Boolean.valueOf(readOnly));
 
-      return ControllerConstants.Views.Fragments.Cart.ExpandGridInCart;
+      return WorldlineCheckoutConstants.Views.Fragments.Cart.ExpandGridInCart;
    }
 
    // This controller method is used to allow the site to force the visitor through a specified checkout flow.
@@ -370,6 +371,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
       model.addAttribute("siteQuoteEnabled", Config.getBoolean(siteQuoteProperty, Boolean.FALSE));
       model.addAttribute(WebConstants.BREADCRUMBS_KEY, resourceBreadcrumbBuilder.getBreadcrumbs("breadcrumb.cart"));
       model.addAttribute("pageType", PageType.CART.name());
+
       CartData cart = (CartData) model.getAttribute("cartData");
       if (cart.isReplenishmentOrder()) {
          final WorldlineReplenishmentForm worldlineReplenishmentForm = new WorldlineReplenishmentForm();
@@ -380,22 +382,22 @@ public class WorldlineCartPageController extends AbstractCartPageController {
          worldlineReplenishmentForm.setReplenishmentStartDate(dateFormat.format(cart.getReplenishmentStartDate()));
          worldlineReplenishmentForm.setReplenishmentRecurrence(cart.getReplenishmentRecurrence());
 
-            switch (cart.getReplenishmentRecurrence()) {
-               case DAILY:
-                  worldlineReplenishmentForm.setnDays(cart.getNDays());
-                  break;
-               case WEEKLY:
-                  worldlineReplenishmentForm.setnWeeks(cart.getNWeeks());
-                  worldlineReplenishmentForm.setnDaysOfWeek(cart.getNDaysOfWeek());
-                  break;
-               case MONTHLY:
-                  worldlineReplenishmentForm.setnMonths(cart.getNMonths());
-                  worldlineReplenishmentForm.setNthDayOfMonth(cart.getNthDayOfMonth());
-                  break;
-               case YEARLY: {
-                  //No additional input is required
-               }
+         switch (cart.getReplenishmentRecurrence()) {
+            case DAILY:
+               worldlineReplenishmentForm.setnDays(cart.getNDays());
+               break;
+            case WEEKLY:
+               worldlineReplenishmentForm.setnWeeks(cart.getNWeeks());
+               worldlineReplenishmentForm.setnDaysOfWeek(cart.getNDaysOfWeek());
+               break;
+            case MONTHLY:
+               worldlineReplenishmentForm.setnMonths(cart.getNMonths());
+               worldlineReplenishmentForm.setNthDayOfMonth(cart.getNthDayOfMonth());
+               break;
+            case YEARLY: {
+               //No additional input is required
             }
+         }
          model.addAttribute("replenishmentForm", worldlineReplenishmentForm);
       } else if (!model.containsAttribute("replenishmentForm")) {
          final WorldlineReplenishmentForm worldlineReplenishmentForm = new WorldlineReplenishmentForm();

@@ -23,4 +23,8 @@
         <property name="commercePaymentProviderStrategy" ref="commercePaymentProviderStrategy"/>
     </bean>
 
+    <alias name="worldlineCartPageController" alias="cartPageController"/>
+    <bean name="worldlineCartPageController"
+          class="com.worldline.direct.checkoutaddon.controllers.pages.WorldlineCartPageController"/>
+
 </beans>

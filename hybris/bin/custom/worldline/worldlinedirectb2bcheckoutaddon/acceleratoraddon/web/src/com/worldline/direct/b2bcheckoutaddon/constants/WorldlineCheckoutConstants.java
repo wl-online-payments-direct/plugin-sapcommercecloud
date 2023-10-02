@@ -15,6 +15,11 @@ public interface WorldlineCheckoutConstants {
                 String worldlineCheckoutSummaryPage = ADDON_PREFIX + "pages/checkout/multi/worldlineCheckoutSummaryPage";
                 String worldlineOrderConfirmationPage = ADDON_PREFIX + "pages/checkout/multi/worldlineOrderConfirmationPage";
             }
+
+            interface Cart {
+                String CartPage = "pages/cart/cartPage";
+            }
+
         }
 
         interface Fragments {
@@ -23,6 +28,10 @@ public interface WorldlineCheckoutConstants {
                 String CountryAddressForm = ADDON_PREFIX + "fragments/worldlineCountryAddressForm";
 
             }
+            interface Cart {
+                 String ExpandGridInCart = "fragments/cart/expandGridInCart";
+            }
+
         }
 
     }
