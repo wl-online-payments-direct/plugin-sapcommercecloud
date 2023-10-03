@@ -3,8 +3,7 @@ ACC.checkout = {
 	_autoload: [
 		"bindCheckO",
 		"bindForms",
-		"bindSavedPayments",
-		"bindPlaceOrder"
+		"bindSavedPayments"
 	],
 
 	selectPciOption: "#selectPciOption",
@@ -168,7 +167,12 @@ ACC.checkout = {
         var checkBox = cssClass.find('input[name=termsCheck]');
         var checkBoxRememberPaymentDetails = cssClass.find('input[name=cardDetailsCheck]');
 
-        checkoutBtn.prop('disabled', true);
+        var checkedOnInit = $(this).prop('checked');
+        if (checkBoxRememberPaymentDetails.length) {
+            checkoutBtn.prop('disabled', !(checkedOnInit && checkBoxRememberPaymentDetails.prop('checked')));
+        } else {
+            checkoutBtn.prop('disabled', !checkedOnInit);
+        }
 
         checkBox.on('click', function () {
             var checked = $(this).prop('checked');

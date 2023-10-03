@@ -99,6 +99,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
             }
 
+            WorldlineLogUtils.logAction(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, "payment");
 
             final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
 
@@ -124,14 +125,10 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
             params.getOrder().getReferences().setMerchantReference(cartToOrderCronJob.getCode());
 
-//            params.getRedirectPaymentMethodSpecificInput().getRedirectionData().setReturnUrl(siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
-//                  true, "/checkout/multi/worldline/hosted-tokenization/handle3ds/replenishment/" + cartToOrderCronJob.getCode()));
-
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
                 CreateMandateWithReturnUrl mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
             }
-//            params.getOrder().getAmountOfMoney().setAmount(0L);
 
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, "payment");
             final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
