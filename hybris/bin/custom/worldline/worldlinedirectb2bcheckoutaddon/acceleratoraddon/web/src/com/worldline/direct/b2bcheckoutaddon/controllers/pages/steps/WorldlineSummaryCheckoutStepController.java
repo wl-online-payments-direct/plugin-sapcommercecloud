@@ -148,6 +148,11 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
             }
         }
 
+        if (!model.containsAttribute("worldlinePlaceOrderForm")) {
+            final WorldlinePlaceOrderForm worldlinePlaceOrderForm = new WorldlinePlaceOrderForm();
+            model.addAttribute("worldlinePlaceOrderForm", worldlinePlaceOrderForm);
+        }
+
         // Only request the security code if the SubscriptionPciOption is set to Default.
         final boolean requestSecurityCode = (CheckoutPciOptionEnum.DEFAULT
                 .equals(getCheckoutFlowFacade().getSubscriptionPciOption()));

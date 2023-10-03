@@ -32,6 +32,9 @@ import static de.hybris.platform.acceleratorstorefrontcommons.controllers.Abstra
 @Component("worldlinePlaceOrderUtils")
 public class WorldlinePlaceOrderUtils {
 
+    private static final String REDIRECT_URL_REPLENISHMENT_CONFIRMATION = REDIRECT_PREFIX
+          + "/checkout/replenishment/confirmation/";
+
     @Resource(name = "checkoutFacade")
     private CheckoutFacade checkoutFacade;
     @Resource(name = "worldlineCheckoutFacade")
@@ -174,7 +177,11 @@ public class WorldlinePlaceOrderUtils {
     }
 
     protected String redirectToOrderConfirmationPage(AbstractOrderData orderData) {
-        return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
+        if (orderData instanceof ScheduledCartData) {
+            return REDIRECT_URL_REPLENISHMENT_CONFIRMATION + ((ScheduledCartData) orderData).getJobCode();
+        } else {
+            return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
+        }
     }
 
 

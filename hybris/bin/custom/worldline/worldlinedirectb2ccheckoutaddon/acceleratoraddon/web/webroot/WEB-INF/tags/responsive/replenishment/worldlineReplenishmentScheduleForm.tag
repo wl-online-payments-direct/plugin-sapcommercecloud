@@ -28,7 +28,7 @@
          data-place-Order-Form-Replenishment-Order="${replenishmentForm.replenishmentOrder}">
 
         <!-- Frequency replenishment data -->
-        <div class="column scheduleform  scheduleform_left">
+        <div class="column scheduleform  scheduleform_left scheduleform-container">
             <div class="column scheduleform scheduleformD" style="display: none;">
                 <div class="form-group">
                     <label class="control-label" for="nDays">
@@ -55,16 +55,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!--<div class="div_nWeeks2">
-                    <div>
-                        <spring:theme code="responsive.replenishmentScheduleForm.weekly.daysOfWeek"/>
-                    </div>
-                    <div class="row scheduleform-checkboxes">
-                        <form:checkboxes id="daysOfWeek" items="${daysOfWeek}" itemLabel="name" itemValue="code"
-                                         path="nDaysOfWeek" element="div class='scheduleform-checkbox col-md-4 col-xs-6'"/>
-                    </div>
-                </div>-->
             </div>
 
             <div class="column scheduleform scheduleformM" style="display: none;">
@@ -78,16 +68,6 @@
                         </form:select>
                     </div>
                 </div>
-                <!--<div class="form-group">
-                    <label class="control-label" for="nMonths">
-                        <spring:theme code="responsive.replenishmentScheduleForm.monthly.months"/>
-                    </label>
-                    <div class="controls">
-                        <form:select id="nMonths" path="nMonths" style="width: 100px;" class="form-control">
-                            <form:options items="${nthMonth}"/>
-                        </form:select>
-                    </div>
-                </div>-->
             </div>
             <div class="replenishmentFrequency">
                 <div class="controls">
@@ -137,10 +117,10 @@
         <!-- Additional schedule form data -->
         <div class="column scheduleform  scheduleform_left scheduleform-container">
             <div class="column scheduleform scheduleformW" style="display: none;">
-                <div class="div_nWeeks2">
-                    <div>
+                <div class="form-group">
+                    <label class="control-label">
                         <spring:theme code="responsive.replenishmentScheduleForm.weekly.daysOfWeek"/>
-                    </div>
+                    </label>
                     <div class="row scheduleform-checkboxes">
                         <form:checkboxes id="daysOfWeek" items="${daysOfWeek}" itemLabel="name" itemValue="code"
                                          path="nDaysOfWeek" element="div class='scheduleform-checkbox col-md-4 col-xs-6'"/>

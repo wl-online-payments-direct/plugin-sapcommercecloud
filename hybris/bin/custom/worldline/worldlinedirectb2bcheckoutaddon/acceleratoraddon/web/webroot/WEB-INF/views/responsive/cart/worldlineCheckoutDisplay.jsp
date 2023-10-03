@@ -77,7 +77,7 @@
     <div class="row">
         <div class="col-sm-4 col-md-3 pull-right">
             <ycommerce:testId code="checkoutButton">
-                <button class="btn btn-primary btn-block btn--continue-checkout js-continue-checkout-button" data-checkout-url="${fn:escapeXml(checkoutUrl)}">
+                <button class="btn btn-primary btn-block btn--continue-checkout js-worldline-continue-checkout-button" data-checkout-url="${fn:escapeXml(checkoutUrl)}">
                     <spring:theme code="checkout.checkout"/>
                 </button>
             </ycommerce:testId>
@@ -86,7 +86,7 @@
         <sec:authorize access="!hasAnyRole('ROLE_ANONYMOUS')">
             <c:if test="${not empty siteQuoteEnabled and siteQuoteEnabled eq 'true'}">
                 <div class="col-sm-4 col-md-3 col-md-offset-3 pull-right">
-                    <button class="btn btn-default btn-block btn--continue-shopping js-continue-shopping-button"    data-continue-shopping-url="${fn:escapeXml(createQuoteUrl)}">
+                    <button class="btn btn-default btn-block btn--continue-shopping js-continue-shopping-button" data-continue-shopping-url="${fn:escapeXml(createQuoteUrl)}">
                         <spring:theme code="quote.create"/>
                     </button>
                 </div>

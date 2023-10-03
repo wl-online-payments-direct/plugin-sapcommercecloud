@@ -96,8 +96,6 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
                 CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
                 cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
                 cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
-                cardPaymentMethodSpecificInput.setAuthorizationMode(OperationCodesEnum.FINAL_AUTHORIZATION.getCode());
-
             }
         }
 
