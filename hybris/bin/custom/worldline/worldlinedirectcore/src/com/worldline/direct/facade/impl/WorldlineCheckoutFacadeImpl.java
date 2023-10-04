@@ -148,7 +148,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     public CreateHostedTokenizationResponse createHostedTokenization() {
         final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfos(true);
         final List<String> savedTokens = worldlinePaymentInfos.stream().map(WorldlinePaymentInfoData::getToken).collect(Collectors.toList());
-        final CreateHostedTokenizationResponse hostedTokenization = worldlinePaymentService.createHostedTokenization(getShopperLocale(), savedTokens);
+        final CreateHostedTokenizationResponse hostedTokenization = worldlinePaymentService.createHostedTokenization(getShopperLocale(), savedTokens, userService.isAnonymousUser(userService.getCurrentUser()));
         hostedTokenization.setPartialRedirectUrl(WorldlineUrlUtils.buildFullURL(hostedTokenization.getPartialRedirectUrl()));
         if (CollectionUtils.isNotEmpty(hostedTokenization.getInvalidTokens())) {
             LOGGER.warn("[ WORLDLINE ] invalid tokens : {}", hostedTokenization.getInvalidTokens());
@@ -674,7 +674,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
         paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.groupedCards"));
         WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
-        paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getUrl());
+        if (configuration.getGroupCardsLogo() != null) {
+            paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getUrl());
+        }
         return paymentProduct;
     }
 

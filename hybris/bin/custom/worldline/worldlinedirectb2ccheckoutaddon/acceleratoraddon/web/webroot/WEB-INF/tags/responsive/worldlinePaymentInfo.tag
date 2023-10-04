@@ -16,10 +16,13 @@
                 <c:if test="${not empty paymentInfo.billingAddress}"> ${fn:escapeXml(paymentInfo.billingAddress.title)}</c:if>
                 <br>
                 <c:choose>
-                    <c:when test="${paymentProduct.id==-1}">
+                    <c:when test="${paymentProduct.id==-1 || paymentProduct.id==-3}">
                         <spring:theme code="checkout.paymentProduct.groupedCards.display.label"
                                       var="groupedCardsLabel"/>
                         <div class="payment_product" title="${groupedCardsLabel}">
+                            <c:if test="${not empty paymentProduct.displayHints.logo}">
+                                <img src="${paymentProduct.displayHints.logo}" alt="${paymentProduct.displayHints.label}"/>
+                            </c:if>
                             <span>${groupedCardsLabel}</span>
                         </div>
                     </c:when>
