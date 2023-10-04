@@ -25,6 +25,7 @@
     <bean id="worldlineOrderRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineOrderRequestParamPopulator">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
     <bean id="worldlineShoppingCartRequestParamPopulator"
@@ -234,4 +235,14 @@
     <alias name="worldlineTriggerReversePopulator" alias="triggerReversePopulator"/>
     <bean id="worldlineTriggerReversePopulator" class="com.worldline.direct.populator.WorldlineTriggerReversePopulator"/>
 
+    <bean id="worldlinePlaceOrderPopulator" class="com.worldline.direct.populator.WorldlinePlaceOrderPopulator"/>
+
+    <bean id="worldlinePlaceOrderConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlinePlaceOrderPopulator"/>
+            </list>
+        </property>
+    </bean>
 </beans>
