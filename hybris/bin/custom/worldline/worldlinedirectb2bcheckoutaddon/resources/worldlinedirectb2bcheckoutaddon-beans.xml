@@ -8,6 +8,6 @@
         <value>MONTHLY</value>
         <value>YEARLY</value>
     </enum>
-
+<!--TODO: remove once completed the moving of replenishment choice to the basket page -->
 
 </beans>
