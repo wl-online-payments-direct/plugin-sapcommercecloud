@@ -6,10 +6,7 @@ import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants.URL.
 import com.worldline.direct.checkoutaddon.controllers.utils.WorldlinePlaceOrderUtils;
 import com.worldline.direct.checkoutaddon.forms.WorldlinePlaceOrderForm;
 import com.worldline.direct.constants.WorldlineCheckoutConstants;
-import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
-import com.worldline.direct.jalo.WorldlineConfiguration;
-import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.b2bacceleratorfacades.exception.EntityValidationException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
@@ -25,7 +22,6 @@ import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.AbstractCheckoutStepController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
 import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
-import de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
@@ -39,9 +35,7 @@ import de.hybris.platform.commercefacades.product.ProductOption;
 import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.commerceservices.order.CommerceCartModificationException;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
-import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.order.InvalidCartException;
-import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -61,9 +55,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator.HOSTED_CHECKOUT_RETURN_URL;
-import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 
 @Controller
 @RequestMapping(value = Summary.root)
@@ -142,40 +133,23 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
         model.addAttribute("deliveryAddress", cartData.getDeliveryAddress());
         model.addAttribute("deliveryMode", cartData.getDeliveryMode());
         model.addAttribute("paymentProduct", paymentProduct);
-        model.addAttribute("nDays", getNumberRange(1, 30));
-        model.addAttribute("nthDayOfMonth", getNumberRange(1, 31));
-        model.addAttribute("nthWeek", getNumberRange(1, 12));
-        model.addAttribute("nthMonth", List.of("1","2","3","4","6"));
-        model.addAttribute("daysOfWeek", worldlineDirectCheckoutFacade.getDaysOfWeekForReplenishmentCheckoutSummary());
-        if (!checkoutCustomerStrategy.isAnonymousCheckout() && worldlinePaymentInfo != null) {
-
-            if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfo)) {
-                model.addAttribute("showReplenishment", Boolean.TRUE);
-                if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
-                    WorldlineConfigurationModel currentConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
-                    model.addAttribute("tokenizePayment", Boolean.FALSE);
-                    if (worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
-                        model.addAttribute("showReplenishment", Boolean.FALSE);
-                    }
-                } else {
-                    if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
-                        model.addAttribute("tokenizePayment", Boolean.TRUE);
-                    }
+        if (worldlinePaymentInfo != null && cartData.isReplenishmentOrder()) {
+            if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
+                if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo) &&
+                    worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
+                    GlobalMessages.addFlashMessage(redirectAttributes, GlobalMessages.ERROR_MESSAGES_HOLDER,
+                          "checkout.multi.paymentDetails.htp.replenishOrder.error.message");
+                    return back(redirectAttributes);
                 }
-
+            } else {
+                if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo)) {
+                    model.addAttribute("tokenizePayment", Boolean.TRUE);
+                }
             }
-        } else {
-            model.addAttribute("showReplenishment", true);
         }
 
         if (!model.containsAttribute("worldlinePlaceOrderForm")) {
             final WorldlinePlaceOrderForm worldlinePlaceOrderForm = new WorldlinePlaceOrderForm();
-            // TODO: Make setting of default recurrence enum value backoffice driven rather hard coding in controller
-            worldlinePlaceOrderForm.setReplenishmentRecurrence(B2BReplenishmentRecurrenceEnum.MONTHLY);
-            worldlinePlaceOrderForm.setnDays("14");
-            final List<DayOfWeek> daysOfWeek = new ArrayList();
-            daysOfWeek.add(DayOfWeek.MONDAY);
-            worldlinePlaceOrderForm.setnDaysOfWeek(daysOfWeek);
             model.addAttribute("worldlinePlaceOrderForm", worldlinePlaceOrderForm);
         }
 
@@ -215,20 +189,20 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
             // Invalid cart. Bounce back to the cart page.
             return REDIRECT_PREFIX + "/cart";
         }
-
-        final PlaceOrderData placeOrderData = new PlaceOrderData();
-        placeOrderData.setNDays(worldlinePlaceOrderForm.getnDays());
-        placeOrderData.setNDaysOfWeek(worldlinePlaceOrderForm.getnDaysOfWeek());
-        placeOrderData.setNthDayOfMonth(worldlinePlaceOrderForm.getNthDayOfMonth());
-        placeOrderData.setNWeeks(worldlinePlaceOrderForm.getnWeeks());
-        placeOrderData.setNMonths(worldlinePlaceOrderForm.getnMonths());
-        placeOrderData.setReplenishmentOrder(worldlinePlaceOrderForm.isReplenishmentOrder());
-        placeOrderData.setReplenishmentRecurrence(worldlinePlaceOrderForm.getReplenishmentRecurrence());
-        placeOrderData.setReplenishmentStartDate(worldlinePlaceOrderForm.getReplenishmentStartDate());
-        placeOrderData.setReplenishmentEndDate(worldlinePlaceOrderForm.getReplenishmentEndDate());
+        final CartData cartData = getCheckoutFacade().getCheckoutCart();
+        WorldlinePaymentInfoData worldlinePaymentInfo = cartData.getWorldlinePaymentInfo();
+        final PlaceOrderData placeOrderData = worldlineCheckoutFacade.prepareOrderPlacementData();
         placeOrderData.setSecurityCode(worldlinePlaceOrderForm.getSecurityCode());
         placeOrderData.setTermsCheck(worldlinePlaceOrderForm.isTermsCheck());
-        placeOrderData.setCardDetailsCheck(worldlinePlaceOrderForm.isCardDetailsCheck());
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
+            if (WorldlinePaymentProductUtils.isCreditCard(worldlinePaymentInfo) &&
+                !worldlineCheckoutFacade.isTemporaryToken(worldlinePaymentInfo.getHostedTokenizationId())) {
+                placeOrderData.setCardDetailsCheck(Boolean.TRUE);
+            }
+        } else {
+            placeOrderData.setCardDetailsCheck(worldlinePlaceOrderForm.isCardDetailsCheck());
+        }
+
         AbstractOrderData abstractOrderData;
 
         try {

@@ -22,8 +22,6 @@ import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutSt
 import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.AbstractCheckoutStepController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
-import de.hybris.platform.acceleratorstorefrontcommons.forms.AddressForm;
-import de.hybris.platform.acceleratorstorefrontcommons.util.AddressDataUtil;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
 import de.hybris.platform.commercefacades.order.data.CartData;
@@ -104,14 +102,19 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
 
         model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
         model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));
+        final CartData cartData = getCheckoutFacade().getCheckoutCart();
 
         if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
             final CreateHostedTokenizationResponse hostedTokenization = worldlineCheckoutFacade.createHostedTokenization();
             model.addAttribute("hostedTokenization", hostedTokenization);
+            if (cartData.isReplenishmentOrder()) {
+                model.addAttribute("displaySavePMDetailsMessage", Boolean.TRUE);
+            }
         }
-        model.addAttribute("savedPaymentInfos", worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE));
 
-        final CartData cartData = getCheckoutFacade().getCheckoutCart();
+        if (!cartData.isReplenishmentOrder()) {
+            model.addAttribute("savedPaymentInfos", worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE));
+        }
         model.addAttribute(CART_DATA_ATTR, cartData);
         return WorldlineCheckoutConstants.Views.Pages.MultiStepCheckout.worldlinePaymentMethod;
     }

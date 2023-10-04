@@ -1,6 +1,7 @@
 package com.worldline.direct.populator;
 
 import com.onlinepayments.domain.*;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;
@@ -17,6 +18,8 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
     private WorldlineAmountUtils worldlineAmountUtils;
+
+    private WorldlineConfigurationService worldlineConfigurationService;
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null!");
@@ -77,8 +80,11 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         double totalAmountToSend = abstractOrderModel.getTotalPrice();
         if (abstractOrderModel.getPaymentCost() > 0.0d) {// subtract the surcharge so the amount that is sent to WL is the one expected /HTP/ first transaction
             totalAmountToSend -= abstractOrderModel.getPaymentCost();
-
         }
+        if (!worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
+            totalAmountToSend = 0.0d;
+        }
+
         amount = worldlineAmountUtils.createAmount(totalAmountToSend, abstractOrderModel.getCurrency().getIsocode());
         amountOfMoney.setAmount(amount);
         amountOfMoney.setCurrencyCode(currencyCode);
@@ -90,4 +96,7 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         this.worldlineAmountUtils = worldlineAmountUtils;
     }
 
+    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
+        this.worldlineConfigurationService = worldlineConfigurationService;
+    }
 }

@@ -42,6 +42,13 @@
                                 <form:input type="hidden" path="navigatorJavaScriptEnabled"/>
                                 <form:input type="hidden" path="timezoneOffset"/>
                                 <form:input type="hidden" path="colorDepth"/>
+                                <c:if test="${cartData.quoteData eq null && tokenizePayment eq true}">
+                                    <div class="checkbox">
+                                        <label> <form:checkbox id="saveCardDetails" path="cardDetailsCheck" />
+                                            <spring:theme code="checkout.multi.order.saveCardDetails"/>
+                                        </label>
+                                    </div>
+                                </c:if>
                                 <div class="checkbox">
                                     <label> <form:checkbox id="Terms1" path="termsCheck"/>
                                         <spring:theme var="termsAndConditionsHtml"
@@ -56,15 +63,6 @@
                                         class="btn btn-primary btn-place-order btn-block checkout-next checkoutSummaryButton">
                                     <spring:theme code="checkout.summary.placeOrder" text="Place Order"/>
                                 </button>
-                                <c:if test="${cartData.quoteData eq null && showReplenishment eq true}">
-                                    <button id="scheduleReplenishment" type="button"
-                                            class="btn btn-default btn-block scheduleReplenishmentButton checkoutSummaryButton"
-                                            disabled="disabled">
-                                        <spring:theme code="checkout.summary.scheduleReplenishment"/>
-                                    </button>
-
-                                    <replenishment:worldlineReplenishmentScheduleForm/>
-                                </c:if>
                             </form:form>
                         </div>
                     </ycommerce:testId>

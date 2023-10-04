@@ -48,7 +48,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     protected Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter;
 
     @Override
-    public GetPaymentProductsResponse getPaymentProductsResponse(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
+    public GetPaymentProductsResponse getPaymentProductsResponse(BigDecimal amount, String currency, String countryCode, String shopperLocale, Boolean isReplenishmentOrder) {
         validateParameterNotNull(amount, "amount cannot be null");
         validateParameterNotNull(currency, "currency cannot be null");
         validateParameterNotNull(countryCode, "countryCode cannot be null");
@@ -61,7 +61,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             params.setCountryCode(countryCode);
             params.setLocale(shopperLocale);
             params.setHide(Collections.singletonList("fields"));
-            params.setIsRecurring(Boolean.FALSE);
+            params.setIsRecurring(isReplenishmentOrder);
             final GetPaymentProductsResponse paymentProducts = client.merchant(getMerchantId()).products().getPaymentProducts(params);
 
             WorldlineLogUtils.logAction(LOGGER, "getPaymentProducts", params, paymentProducts);
@@ -75,8 +75,8 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
-    public List<PaymentProduct> getPaymentProducts(BigDecimal amount, String currency, String countryCode, String shopperLocale) {
-        final GetPaymentProductsResponse getPaymentProductsResponse = getPaymentProductsResponse(amount, currency, countryCode, shopperLocale);
+    public List<PaymentProduct> getPaymentProducts(BigDecimal amount, String currency, String countryCode, String shopperLocale, Boolean isReplenishmentOrder) {
+        final GetPaymentProductsResponse getPaymentProductsResponse = getPaymentProductsResponse(amount, currency, countryCode, shopperLocale, isReplenishmentOrder);
         return getPaymentProductsResponse.getPaymentProducts();
     }
 
