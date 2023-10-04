@@ -130,7 +130,8 @@
     </bean>
 
     <bean id="worldlinePaymentProductFilterByGroupCardsStrategy" class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByGroupCardsStrategy">
-    <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
     </bean>
     <bean id="worldlinePaymentProductFilterByCheckoutStrategy"
           class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByCheckoutStrategy">
