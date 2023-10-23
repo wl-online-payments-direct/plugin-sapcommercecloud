@@ -303,6 +303,10 @@
                     <persistence type="property"/>
                     <modifiers/>
                 </attribute>
+                <attribute qualifier="storeId" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -356,6 +360,10 @@
                     <modifiers/>
                 </attribute>
                 <attribute qualifier="worldlineConfiguration" type="WorldlineConfiguration">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="storeId" type="java.lang.String">
                     <persistence type="property"/>
                     <modifiers/>
                 </attribute>

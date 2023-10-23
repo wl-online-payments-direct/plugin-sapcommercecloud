@@ -80,13 +80,13 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
                 final PaymentTransactionModel lastPaymentTransaction = getLastPaymentTransaction(orderModel);
                 final String paymentId = lastPaymentTransaction.getRequestId() + "_0";
 
-                final CapturesResponse captures = worldlinePaymentService.getCaptures(worldlineConfiguration, paymentId);
+                final CapturesResponse captures = worldlinePaymentService.getCaptures(orderModel.getStore().getUid(), paymentId);
 
                 if (CollectionUtils.isNotEmpty(captures.getCaptures())) {
                     captures.getCaptures().forEach(capture -> worldlineTransactionService.processCapture(capture));
                 }
 
-                final Long nonCapturedAmount = worldlinePaymentService.getNonCapturedAmount(worldlineConfiguration,
+                final Long nonCapturedAmount = worldlinePaymentService.getNonCapturedAmount(orderModel.getStore().getUid(),
                         paymentId,
                         captures,
                         lastPaymentTransaction.getPlannedAmount(),
@@ -94,7 +94,7 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
                 if (nonCapturedAmount > 0) {
 
                     final BigDecimal amount = worldlineAmountUtils.fromAmount(nonCapturedAmount, orderModel.getCurrency().getIsocode());
-                    final CaptureResponse captureResponse = worldlinePaymentService.capturePayment(worldlineConfiguration,
+                    final CaptureResponse captureResponse = worldlinePaymentService.capturePayment(orderModel.getStore().getUid(),
                             paymentId,
                             amount,
                             orderModel.getCurrency().getIsocode(),

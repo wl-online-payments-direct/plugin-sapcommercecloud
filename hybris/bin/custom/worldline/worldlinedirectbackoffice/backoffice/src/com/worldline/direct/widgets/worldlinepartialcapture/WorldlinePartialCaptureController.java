@@ -5,7 +5,6 @@ import com.hybris.cockpitng.annotations.ViewEvent;
 import com.hybris.cockpitng.util.DefaultWidgetController;
 import com.onlinepayments.domain.CaptureResponse;
 import com.onlinepayments.domain.CapturesResponse;
-import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineTransactionService;
@@ -14,7 +13,6 @@ import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
-import de.hybris.platform.store.BaseStoreModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +61,6 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
 
     private OrderModel orderModel;
     private PaymentTransactionEntryModel paymentTransactionToCapture;
-    private WorldlineConfigurationModel worldlineConfigurationModel;
     private Long amountToCapture;
     private Long nonCapturedAmount;
 
@@ -116,15 +113,14 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
         if (Messagebox.Button.YES.event.equals(obj.getName())) {
             try {
                 setPaymentTransactionToCapture(getPaymentTransactionToCapture(this.orderModel));
-                setWorldlineConfiguration(getWorldlineConfiguration(this.orderModel));
 
-                final CapturesResponse captures = worldlinePaymentService.getCaptures(worldlineConfigurationModel, paymentTransactionToCapture.getRequestId());
+                final CapturesResponse captures = worldlinePaymentService.getCaptures(orderModel.getStore().getUid(), paymentTransactionToCapture.getRequestId());
 
                 if (CollectionUtils.isNotEmpty(captures.getCaptures())) {
                     captures.getCaptures().forEach(capture -> worldlineTransactionService.processCapture(capture));
                 }
 
-                setNonCapturedAmount(worldlinePaymentService.getNonCapturedAmount(worldlineConfigurationModel,
+                setNonCapturedAmount(worldlinePaymentService.getNonCapturedAmount(orderModel.getStore().getUid(),
                         paymentTransactionToCapture.getRequestId(),
                         captures,
                         paymentTransactionToCapture.getPaymentTransaction().getPlannedAmount(),
@@ -164,7 +160,7 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
 
     private void capture() {
 
-        final CaptureResponse captureResponse = worldlinePaymentService.capturePayment(worldlineConfigurationModel,
+        final CaptureResponse captureResponse = worldlinePaymentService.capturePayment(orderModel.getStore().getUid(),
                 paymentTransactionToCapture.getRequestId(),
                 worldlineAmountUtils.fromAmount(amountToCapture, paymentTransactionToCapture.getCurrency().getIsocode()),
                 paymentTransactionToCapture.getCurrency().getIsocode(),
@@ -176,11 +172,6 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
                 PaymentTransactionType.CAPTURE);
 
         worldlineBusinessProcessService.triggerOrderProcessEvent(this.orderModel, WORLDLINE_EVENT_PAYMENT);
-    }
-
-    private WorldlineConfigurationModel getWorldlineConfiguration(OrderModel orderModel) {
-        final BaseStoreModel store = orderModel.getStore();
-        return store != null ? store.getWorldlineConfiguration() : null;
     }
 
     private PaymentTransactionEntryModel getPaymentTransactionToCapture(final OrderModel order) {
@@ -232,10 +223,6 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
 
     public void setPaymentTransactionToCapture(PaymentTransactionEntryModel paymentTransactionToCapture) {
         this.paymentTransactionToCapture = paymentTransactionToCapture;
-    }
-
-    public void setWorldlineConfiguration(WorldlineConfigurationModel worldlineConfigurationModel) {
-        this.worldlineConfigurationModel = worldlineConfigurationModel;
     }
 
     public void setAmountToCapture(Long amountToCapture) {
