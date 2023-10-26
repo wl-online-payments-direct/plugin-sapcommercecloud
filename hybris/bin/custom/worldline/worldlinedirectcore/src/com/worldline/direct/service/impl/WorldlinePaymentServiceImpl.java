@@ -20,6 +20,7 @@ import com.worldline.direct.util.WorldlineLogUtils;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.store.services.BaseStoreService;
 import org.apache.commons.collections.CollectionUtils;
@@ -201,6 +202,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
             final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(orderForCode);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
+
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, payment);
