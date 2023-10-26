@@ -89,7 +89,7 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
                 final Long nonCapturedAmount = worldlinePaymentService.getNonCapturedAmount(orderModel.getStore().getUid(),
                         paymentId,
                         captures,
-                        lastPaymentTransaction.getPlannedAmount(),
+                        getPlannedAMount(orderModel, lastPaymentTransaction),
                         orderModel.getCurrency().getIsocode());
                 if (nonCapturedAmount > 0) {
 
@@ -132,6 +132,14 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
     private WorldlineConfigurationModel getWorldlineConfiguration(AbstractOrderModel orderModel) {
         final BaseStoreModel store = orderModel.getStore();
         return store != null ? store.getWorldlineConfiguration() : null;
+    }
+
+    private BigDecimal getPlannedAMount(AbstractOrderModel orderModel, PaymentTransactionModel paymentTransactionToCapture) {
+        BigDecimal plannedAmount = paymentTransactionToCapture.getPlannedAmount();
+        if (orderModel.getStore().getWorldlineConfiguration().isApplySurcharge()) {
+            plannedAmount = plannedAmount.subtract(new BigDecimal(orderModel.getPaymentCost()));
+        }
+        return plannedAmount;
     }
 
     public ModelService getModelService() {
