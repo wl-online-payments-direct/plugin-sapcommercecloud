@@ -432,14 +432,14 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             CardSource cardSource = new CardSource();
             if (!StringUtils.EMPTY.equals(hostedTokenizationId)) {
                 cardSource.setHostedTokenizationId(hostedTokenizationId);
-            } else if (!StringUtils.EMPTY.equals(token)) {
-                cardSource.setToken(token);
             }
+            cardSource.setToken(token);
+
             request.withCardSource(cardSource);
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
             CalculateSurchargeResponse calculateSurchargeResponse = merchant.services().surchargeCalculation(request);
-            WorldlineLogUtils.logAction(LOGGER, "calculateSurchargeResponse", hostedTokenizationId, "Calculate Surcharge");
+            WorldlineLogUtils.logAction(LOGGER, "calculateSurchargeResponse", request, calculateSurchargeResponse);
             return calculateSurchargeResponse;
         } catch (Exception e) {
             LOGGER.error("[ WORLDLINE ] Errors during surcharge calculation", e);

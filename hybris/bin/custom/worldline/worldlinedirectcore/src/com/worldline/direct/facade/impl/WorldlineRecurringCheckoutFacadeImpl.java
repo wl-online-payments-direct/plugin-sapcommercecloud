@@ -69,7 +69,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
             case PAYMENT_CREATED:
                 saveSurchargeData(cartToOrderCronJob.getCart(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 savePaymentToken(cartToOrderCronJob.getCart(), hostedCheckoutData.getCreatedPaymentOutput().getPayment(), Boolean.TRUE, cartToOrderCronJob.getCode());
-                saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getWorldlineConfiguration(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getUid(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 return handlePaymentResponse(cartToOrderCronJob);
             default:
                 LOGGER.error("Unexpected HostedCheckout Status value: " + hostedCheckoutData.getStatus());
@@ -114,7 +114,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                 }
                 saveSurchargeData(order, paymentResponse.getPayment());
                 savePaymentToken(order, paymentResponse.getPayment(), Boolean.TRUE, order.getSchedulingCronJob().getCode());
-                saveMandateIfNeeded(order.getStore().getWorldlineConfiguration(), (WorldlinePaymentInfoModel) order.getSchedulingCronJob().getPaymentInfo(), paymentResponse.getPayment());
+                saveMandateIfNeeded(order.getStore().getUid(), (WorldlinePaymentInfoModel) order.getSchedulingCronJob().getPaymentInfo(), paymentResponse.getPayment());
 
                 handlePaymentResponse(order, paymentResponse.getPayment());
                 scheduledCartData = prepareCronJob(code);
@@ -130,7 +130,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                 }
                 saveSurchargeData(cartToOrderCronJob.getCart(), paymentResponse.getPayment());
                 savePaymentToken(cartToOrderCronJob.getCart(), paymentResponse.getPayment(), Boolean.TRUE, cartToOrderCronJob.getCode());
-                saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getWorldlineConfiguration(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), paymentResponse.getPayment());
+                saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getUid(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), paymentResponse.getPayment());
                 scheduledCartData = handlePaymentResponse(cartToOrderCronJob);
                 break;
             default:

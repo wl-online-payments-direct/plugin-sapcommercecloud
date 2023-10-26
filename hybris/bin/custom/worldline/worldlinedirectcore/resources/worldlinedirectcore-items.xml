@@ -299,10 +299,6 @@
                     <description>The customer who is using the token for recurring payments</description>
                     <persistence type="property" />
                 </attribute>
-                <attribute qualifier="worldlineConfiguration" type="WorldlineConfiguration">
-                    <persistence type="property"/>
-                    <modifiers/>
-                </attribute>
                 <attribute qualifier="storeId" type="java.lang.String">
                     <persistence type="property"/>
                     <modifiers/>
@@ -356,10 +352,6 @@
                     <modifiers unique="true" search="true"/>
                 </attribute>
                 <attribute qualifier="customer" type="Customer">
-                    <persistence type="property"/>
-                    <modifiers/>
-                </attribute>
-                <attribute qualifier="worldlineConfiguration" type="WorldlineConfiguration">
                     <persistence type="property"/>
                     <modifiers/>
                 </attribute>
