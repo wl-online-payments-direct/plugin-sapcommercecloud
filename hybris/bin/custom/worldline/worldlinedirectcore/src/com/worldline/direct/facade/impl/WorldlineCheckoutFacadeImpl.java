@@ -392,7 +392,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
-        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType()) && !worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType()) && worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
             calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
         }
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
@@ -462,7 +462,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     protected void updateOrderFromPaymentResponse(AbstractOrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) {
         updatePaymentInfoIfNeeded(orderModel, paymentResponse);
-
+        if (paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
+            updatePaymentMode(paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getPaymentProductId().toString(), orderModel);
+        }
         AmountOfMoney transactionAmount = paymentResponse.getPaymentOutput().getAmountOfMoney();
         if (paymentResponse.getPaymentOutput().getSurchargeSpecificOutput() != null) {
             SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
@@ -564,22 +566,25 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             paymentInfo.setId(worldlinePaymentInfoData.getId());
             paymentModeCode = String.valueOf(worldlinePaymentInfoData.getId());
         }
-        if (!virtualPaymentModes.contains(paymentModeCode)) {
-
-            Double keepPaymentCost = cartModel.getPaymentCost();
-            PaymentModeModel paymentMode = paymentModeService.getPaymentModeForCode(paymentModeCode);
-            cartModel.setPaymentMode(paymentMode);
-            modelService.save(cartModel);
-            if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType()) &&
-                worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge()) {
-                AmountOfMoney surcharge = new AmountOfMoney();
-                surcharge.setAmount(keepPaymentCost.longValue());
-                surcharge.setCurrencyCode(cartModel.getCurrency().getIsocode());
-                worldlineTransactionService.savePaymentCost(cartModel, surcharge);
-            }
-        }
+        updatePaymentMode(paymentModeCode, cartModel);
         modelService.save(paymentInfo);
         return paymentInfo;
+    }
+
+    private void updatePaymentMode(String paymentModeCode, AbstractOrderModel abstractOrderModel) {
+        if (!virtualPaymentModes.contains(paymentModeCode)) {
+
+            Double keepPaymentCost = abstractOrderModel.getPaymentCost();
+            PaymentModeModel paymentMode = paymentModeService.getPaymentModeForCode(paymentModeCode);
+            abstractOrderModel.setPaymentMode(paymentMode);
+            modelService.save(abstractOrderModel);
+            if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge()) {
+                AmountOfMoney surcharge = new AmountOfMoney();
+                surcharge.setAmount(keepPaymentCost.longValue());
+                surcharge.setCurrencyCode(abstractOrderModel.getCurrency().getIsocode());
+                worldlineTransactionService.savePaymentCost(abstractOrderModel, surcharge);
+            }
+        }
     }
 
     protected void updatePaymentInfoIfNeeded(final AbstractOrderModel orderModel, PaymentResponse paymentResponse) {

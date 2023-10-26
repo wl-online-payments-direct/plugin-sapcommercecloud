@@ -81,9 +81,6 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         if (abstractOrderModel.getPaymentCost() > 0.0d) {// subtract the surcharge so the amount that is sent to WL is the one expected /HTP/ first transaction
             totalAmountToSend -= abstractOrderModel.getPaymentCost();
         }
-        if (!worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
-            totalAmountToSend = 0.0d;
-        }
 
         amount = worldlineAmountUtils.createAmount(totalAmountToSend, abstractOrderModel.getCurrency().getIsocode());
         amountOfMoney.setAmount(amount);
