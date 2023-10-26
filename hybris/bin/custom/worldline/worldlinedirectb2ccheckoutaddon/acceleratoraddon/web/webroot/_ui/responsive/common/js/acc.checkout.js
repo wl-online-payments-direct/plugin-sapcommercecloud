@@ -101,51 +101,51 @@ ACC.checkout = {
 			var form = $('#replenishmentForm');
 			if (!cartEntriesError) {
 				if (form.length && $('input[name=replenishmentOrder]').prop('checked')) {
-          var localeDateFormat = $('#replenishmentSchedule').data('dateForDatePicker');
-          var startDateEntered = $("#replenishmentStartDate").val();
-          var endDateEntered = $("#replenishmentEndDate").val();
-          let validateStartDate = ACC.worldlineCart.validateDate(startDateEntered, localeDateFormat);
-          let validateEndDate = ACC.worldlineCart.validateDate(endDateEntered, localeDateFormat);
-          let validateDates = ACC.worldlineCart.validateDates(endDateEntered, localeDateFormat);
+                  var localeDateFormat = $('#replenishmentSchedule').data('dateForDatePicker');
+                  var startDateEntered = $("#replenishmentStartDate").val();
+                  var endDateEntered = $("#replenishmentEndDate").val();
+                  let validateStartDate = ACC.worldlineCart.validateDate(startDateEntered, localeDateFormat);
+                  let validateEndDate = ACC.worldlineCart.validateDate(endDateEntered, localeDateFormat);
+                  let validateDates = ACC.worldlineCart.validateDates(endDateEntered, localeDateFormat);
 
-          if ((validateStartDate && validateEndDate) && validateDates) {
-          $(".replenishmentOrderClass").val(true);
+                  if ((validateStartDate && validateEndDate) && validateDates) {
+                      $(".replenishmentOrderClass").val(true);
 
-          var formData = new FormData(form[0]);
+                      var formData = new FormData(form[0]);
 
-          var options = {
-            'replenishmentOrder' : formData.get('replenishmentOrder'),
-            'replenishmentStartDate': formData.get('replenishmentStartDate'),
-            'replenishmentEndDate': formData.get('replenishmentEndDate'),
-            'nDays': $('.scheduleformD').is(":visible") ? formData.get('nDays') : "",
-            'nWeeks': $('.scheduleformW').is(":visible") ? formData.get('nWeeks') : "",
-            'nMonths': $('.scheduleformM').is(":visible") ? formData.get('nMonths') : "",
-            'nthDayOfMonth': $('.scheduleformM').is(":visible") ? formData.get('nthDayOfMonth') : "",
-            'nDaysOfWeek': $('.scheduleformW').is(":visible") ? formData.getAll('nDaysOfWeek').join(",") : "",
-            'replenishmentRecurrence': formData.get('replenishmentRecurrence')
-          };
+                      var options = {
+                        'replenishmentOrder' : formData.get('replenishmentOrder'),
+                        'replenishmentStartDate': formData.get('replenishmentStartDate'),
+                        'replenishmentEndDate': formData.get('replenishmentEndDate'),
+                        'nDays': $('.scheduleformD').is(":visible") ? formData.get('nDays') : "",
+                        'nWeeks': $('.scheduleformW').is(":visible") ? formData.get('nWeeks') : "",
+                        'nMonths': $('.scheduleformM').is(":visible") ? formData.get('nMonths') : "",
+                        'nthDayOfMonth': $('.scheduleformM').is(":visible") ? formData.get('nthDayOfMonth') : "",
+                        'nDaysOfWeek': $('.scheduleformW').is(":visible") ? formData.getAll('nDaysOfWeek').join(",") : "",
+                        'replenishmentRecurrence': formData.get('replenishmentRecurrence')
+                      };
 
-          $.ajax({
-              url: form.attr('action'),
-              type: 'POST',
-              data: options,
-              success: function () {
-                  //Continue to checkout
-                  ACC.checkout.bindStartCheckout(checkoutUrl);
-              }
-          });
+                      $.ajax({
+                          url: form.attr('action'),
+                          type: 'POST',
+                          data: options,
+                          success: function () {
+                              //Continue to checkout
+                              ACC.checkout.bindStartCheckout(checkoutUrl);
+                          }
+                      });
 
-          } else {
-           if (!validateStartDate) {
-               ACC.worldlineCart.toggleReplenishmentScheduleStartDateError(true);
-           }
-           if (!validateEndDate) {
-               ACC.worldlineCart.toggleReplenishmentScheduleEndDateError(true);
-           }
-           if (!validateDates) {
-           		ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(true);
-           }
-          }
+                  } else {
+                       if (!validateStartDate) {
+                           ACC.worldlineCart.toggleReplenishmentScheduleStartDateError(true);
+                       }
+                       if (!validateEndDate) {
+                           ACC.worldlineCart.toggleReplenishmentScheduleEndDateError(true);
+                       }
+                       if (!validateDates) {
+                            ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(true);
+                       }
+                  }
 				} else {
 					ACC.checkout.bindStartCheckout(checkoutUrl);
 				}
