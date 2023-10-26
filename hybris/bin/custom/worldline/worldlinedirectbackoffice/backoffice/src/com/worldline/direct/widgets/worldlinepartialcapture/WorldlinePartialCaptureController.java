@@ -123,7 +123,7 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
                 setNonCapturedAmount(worldlinePaymentService.getNonCapturedAmount(orderModel.getStore().getUid(),
                         paymentTransactionToCapture.getRequestId(),
                         captures,
-                        paymentTransactionToCapture.getPaymentTransaction().getPlannedAmount(),
+                        getPlannedAMount(),
                         paymentTransactionToCapture.getCurrency().getIsocode()));
                 final Long requestedAmount = worldlineAmountUtils.createAmount(amount.doubleValue(), paymentTransactionToCapture.getCurrency().getIsocode());
 
@@ -227,6 +227,14 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
 
     public void setAmountToCapture(Long amountToCapture) {
         this.amountToCapture = amountToCapture;
+    }
+
+    private BigDecimal getPlannedAMount() {
+        BigDecimal plannedAmount = paymentTransactionToCapture.getPaymentTransaction().getPlannedAmount();
+        if (orderModel.getStore().getWorldlineConfiguration().isApplySurcharge()) {
+            plannedAmount = plannedAmount.subtract(new BigDecimal(orderModel.getPaymentCost()));
+        }
+        return plannedAmount;
     }
 
     public void setNonCapturedAmount(Long nonCapturedAmount) {
