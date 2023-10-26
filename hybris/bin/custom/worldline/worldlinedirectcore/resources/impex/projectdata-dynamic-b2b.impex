@@ -113,4 +113,4 @@ INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;
                                  ;;WorldlineCartComponent;Worldline Cart Display Component;/WEB-INF/views/addons/worldlinedirectb2bcheckoutaddon/responsive/cart/worldlineCartDisplay.jsp;;WorldlineCartComponent
 INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents(uid, $contentCV)
                          ;;BottomContentSlot-cartPage;Worldline Bottom Content Slot for Cart Page;true;WorldlineCheckoutComponent,CartSuggestions
-                         ;;TopContentSlot-cartPage;Top content for Cart Slot;true;WorldlineCartComponent
+                         ;;TopContent-cartPage;Top content for Cart Slot;true;NextDayDeliveryBanner120,WorldlineCartComponent
