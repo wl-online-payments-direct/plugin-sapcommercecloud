@@ -262,7 +262,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 saveSurchargeData(orderForCode.getSchedulingCronJob() != null ? orderForCode.getSchedulingCronJob().getCart() : orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 savePaymentToken(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment(), isRecurring, isRecurring ? orderForCode.getSchedulingCronJob().getCode() : StringUtils.EMPTY);
                 handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
-                saveMandateIfNeeded(orderForCode.getStore().getWorldlineConfiguration(),(WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                saveMandateIfNeeded(orderForCode.getStore().getUid(),(WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
 
                 break;
             default:
@@ -277,7 +277,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             if (isRecurring) {
                 final TokenResponse tokenResponse = worldlinePaymentService.getToken(
                     paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken());
-                worldlineUserFacade.updateWorldlinePaymentInfo(paymentInfoModel, tokenResponse, cronjobId);
+                worldlineUserFacade.updateWorldlinePaymentInfo(paymentInfoModel, tokenResponse, cronjobId, baseStoreService.getCurrentBaseStore().getUid());
                 modelService.refresh(orderModel);
             } else {
                 savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, paymentData);
@@ -293,12 +293,12 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         }
     }
 
-    protected void saveMandateIfNeeded(WorldlineConfigurationModel worldlineConfigurationModel, WorldlinePaymentInfoModel worldlinePaymentInfoModel, PaymentResponse paymentResponse) {
+    protected void saveMandateIfNeeded(String storeId, WorldlinePaymentInfoModel worldlinePaymentInfoModel, PaymentResponse paymentResponse) {
         SepaDirectDebitPaymentMethodSpecificOutput sepaDirectDebitPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getSepaDirectDebitPaymentMethodSpecificOutput();
         if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel)  && sepaDirectDebitPaymentMethodSpecificOutput != null && StringUtils.isNotEmpty(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference())){
             GetMandateResponse mandate = worldlinePaymentService.getMandate(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference());
             if (mandate != null) {
-                worldlinePaymentInfoModel.setMandateDetail(createMandate(mandate.getMandate(),worldlineConfigurationModel));
+                worldlinePaymentInfoModel.setMandateDetail(createMandate(mandate.getMandate(),storeId));
                 MandatePersonalName personalName = mandate.getMandate().getCustomer().getPersonalInformation().getName();
                 worldlinePaymentInfoModel.setCardholderName(personalName.getFirstName() + " " + personalName.getSurname());
                 modelService.save(worldlinePaymentInfoModel);
@@ -313,7 +313,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         worldlineBusinessProcessService.triggerOrderProcessEvent(orderForCode, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
     }
 
-    private WorldlineMandateModel createMandate(MandateResponse mandateResponse, WorldlineConfigurationModel worldlineConfigurationModel) {
+    private WorldlineMandateModel createMandate(MandateResponse mandateResponse, String storeId) {
         WorldlineMandateModel worldlineMandateModel = modelService.create(WorldlineMandateModel.class);
         try {
             WorldlineRecurringPaymentStatus worldlineRecurringPaymentStatus = WorldlineRecurringPaymentStatus.valueOf(mandateResponse.getStatus());
@@ -322,7 +322,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             worldlineMandateModel.setStatus(WorldlineRecurringPaymentStatus.UNKNOWN);
         }
         worldlineMandateModel.setAlias(mandateResponse.getAlias());
-        worldlineMandateModel.setWorldlineConfiguration(worldlineConfigurationModel);
+        worldlineMandateModel.setStoreId(storeId);
         worldlineMandateModel.setUniqueMandateReference(mandateResponse.getUniqueMandateReference());
         worldlineMandateModel.setCustomerReference(mandateResponse.getCustomerReference());
         try {
@@ -392,10 +392,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
-        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType())) {
-            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getPaymentMethod());
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType()) && !worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
+            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
         }
-
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
 
         commerceCheckoutService.setPaymentInfo(parameter);
@@ -408,12 +407,18 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return hostedTokenizationResponse.getToken().getIsTemporary();
     }
 
-    public void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String paymentMethodType) {
+    public void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String savedPaymentInfoId, String paymentMethodType) {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         if (currentWorldlineConfiguration.isApplySurcharge() &&
               StringUtils.equals( WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue(), paymentMethodType)) {
-
-            CalculateSurchargeResponse surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, token, cartModel);
+            CalculateSurchargeResponse surchargeResponse;
+            if (StringUtils.isNotEmpty(savedPaymentInfoId)) {
+                final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+                WorldlinePaymentInfoModel savedPaymentInfo = worldlineCustomerAccountService.getWorldlinePaymentInfoByCode(currentCustomer, savedPaymentInfoId);
+                surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, savedPaymentInfo.getToken(), cartModel);
+            } else {
+                surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, token, cartModel);
+            }
             AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
             worldlineTransactionService.savePaymentCost(cartModel, surcharge);
         }

@@ -25,7 +25,7 @@ public interface WorldlineUserFacade {
 
     void saveWorldlinePaymentInfo(WorldlineCheckoutTypesEnum checkoutType, TokenResponse tokenResponse, PaymentProduct paymentProduct);
 
-    void updateWorldlinePaymentInfo(WorldlinePaymentInfoModel paymentInfoModel, TokenResponse tokenResponse, String cronjobId);
+    void updateWorldlinePaymentInfo(WorldlinePaymentInfoModel paymentInfoModel, TokenResponse tokenResponse, String cronjobId, String storeId);
 
     void deleteSavedWorldlinePaymentInfo(String code);
 

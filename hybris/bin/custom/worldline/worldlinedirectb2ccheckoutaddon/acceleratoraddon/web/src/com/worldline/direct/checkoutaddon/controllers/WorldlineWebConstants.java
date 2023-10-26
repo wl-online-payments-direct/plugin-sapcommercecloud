@@ -65,4 +65,24 @@ public interface WorldlineWebConstants {
         }
     }
 
+    interface Views {
+
+        interface Pages {
+
+            interface Cart {
+                String CartPage = "pages/cart/cartPage";
+            }
+
+        }
+
+        interface Fragments {
+
+            interface Cart {
+                String ExpandGridInCart = "fragments/cart/expandGridInCart";
+            }
+
+        }
+
+    }
+
 }

@@ -1,8 +1,8 @@
 package com.worldline.direct.service.impl;
 
-import com.onlinepayments.Client;
 import com.onlinepayments.DeclinedPaymentException;
 import com.onlinepayments.domain.*;
+import com.onlinepayments.merchant.MerchantClient;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.order.data.BrowserData;
@@ -15,8 +15,6 @@ import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.site.BaseSiteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
@@ -31,7 +29,9 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
         validateParameterNotNullStandardMessage("browserData", browserData);
         validateParameterNotNull(cartToOrderCronJobModel, "cartToOrderCronJob cannot be null");
         validateParameterNotNull(cartToOrderCronJobModel.getCart(), "cartToOrderCronJob.cart cannot be null");
-        try (Client client = worldlineClientFactory.getClient()) {
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
             final CreateHostedCheckoutRequest params = worldlineHostedCheckoutParamConverter.convert(cartToOrderCronJobModel.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(browserData));
             params.getOrder().getReferences().setMerchantReference(cartToOrderCronJobModel.getCode());
@@ -40,16 +40,15 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
                 mandate.setCustomerReference(cartToOrderCronJobModel.getCode() + System.currentTimeMillis());
             }
-//            params.getOrder().getAmountOfMoney().setAmount(0L);
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
 
-            final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
+            final CreateHostedCheckoutResponse hostedCheckout = merchant.hostedCheckout().createHostedCheckout(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
 
             return hostedCheckout;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("[ WORLDLINE ] Errors during getting createHostedCheckout ", e);
             //TODO Throw Logical Exception
             return null;
@@ -61,7 +60,9 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
         validateParameterNotNullStandardMessage("browserData", browserData);
         validateParameterNotNull(orderModel, "orderModel cannot be null");
         validateParameterNotNull(orderModel.getSchedulingCronJob(), "cartToOrderCronJob cannot be null");
-        try (Client client = worldlineClientFactory.getClient()) {
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
             final CreateHostedCheckoutRequest params = worldlineHostedCheckoutParamConverter.convert(orderModel);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(browserData));
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
@@ -70,13 +71,13 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             }
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
 
-            final CreateHostedCheckoutResponse hostedCheckout = client.merchant(getMerchantId()).hostedCheckout().createHostedCheckout(params);
+            final CreateHostedCheckoutResponse hostedCheckout = merchant.hostedCheckout().createHostedCheckout(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
 
             return hostedCheckout;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("[ WORLDLINE ] Errors during getting createHostedCheckout ", e);
             //TODO Throw Logical Exception
             return null;
@@ -87,7 +88,8 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
     public CreatePaymentResponse createRecurringPaymentForImmediateReplenishmentHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(cartToOrderCronJob, "cartToOrderCronJob cannot be null");
         validateParameterNotNull(cartToOrderCronJob.getCart(), "cartToOrderCronJob.cart cannot be null");
-        try (Client client = worldlineClientFactory.getClient()) {
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
             final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
@@ -101,7 +103,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
 
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, "payment");
 
-            final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
+            final CreatePaymentResponse payment = merchant.payments().createPayment(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, payment);
 
@@ -109,7 +111,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
         } catch (DeclinedPaymentException e) {
             LOGGER.debug(String.format("[ WORLDLINE ] Errors during getting createPayment %s", e.getMessage()));
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
@@ -119,7 +121,8 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
     public CreatePaymentResponse createRecurringPaymentForScheduledReplenishmentHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(cartToOrderCronJob, "cartToOrderCronJob cannot be null");
         validateParameterNotNull(cartToOrderCronJob.getCart(), "cartToOrderCronJob.cart cannot be null");
-        try (Client client = worldlineClientFactory.getClient()) {
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
             final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
@@ -131,7 +134,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             }
 
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, "payment");
-            final CreatePaymentResponse payment = client.merchant(getMerchantId()).payments().createPayment(params);
+            final CreatePaymentResponse payment = merchant.payments().createPayment(params);
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, payment);
 
 
@@ -139,7 +142,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
         } catch (DeclinedPaymentException e) {
             LOGGER.debug(String.format("[ WORLDLINE ] Errors during getting createPayment %s", e.getMessage()));
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }

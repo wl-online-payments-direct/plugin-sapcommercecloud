@@ -58,7 +58,7 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
                         if (processParameterHelper.getProcessParameterByName(process, ATTEMPTS) == null || attemptSequence > 0) {
                             try {
                                 WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) placedOrder.getPaymentInfo();
-                                worldlineCheckoutFacade.calculateSurcharge(placedOrder, paymentInfoModel.getHostedTokenizationId(), paymentInfoModel.getWorldlineRecurringToken().getToken(), paymentInfoModel.getPaymentMethod());
+                                worldlineCheckoutFacade.calculateSurcharge(placedOrder, paymentInfoModel.getHostedTokenizationId(), paymentInfoModel.getWorldlineRecurringToken().getToken(), StringUtils.EMPTY, paymentInfoModel.getPaymentMethod());
 
 
                                 Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
