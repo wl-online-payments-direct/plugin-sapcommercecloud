@@ -11,6 +11,7 @@ import com.worldline.direct.service.WorldlineB2BPaymentService;
 import com.worldline.direct.util.WorldlineLogUtils;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
 import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.site.BaseSiteService;
 import org.slf4j.Logger;
@@ -127,6 +128,12 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
             params.getOrder().getReferences().setMerchantReference(cartToOrderCronJob.getCode());
+
+
+            WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cartToOrderCronJob.getCart().getPaymentInfo();
+            if (!worldlineConfigurationService.getWorldlineConfiguration(cartToOrderCronJob.getCart().getStore()).isFirstRecurringPayment()) {
+                params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, cartToOrderCronJob.getCart().getCurrency().getIsocode()));
+            }
 
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
                 CreateMandateWithReturnUrl mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
