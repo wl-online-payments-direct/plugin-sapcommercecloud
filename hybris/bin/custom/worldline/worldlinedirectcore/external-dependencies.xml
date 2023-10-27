@@ -6,7 +6,7 @@
 	<version>2011.4</version>
 
 	<properties>
-		<worldline.direct.version>4.6.0</worldline.direct.version>
+		<worldline.direct.version>4.14.0</worldline.direct.version>
 	</properties>
 
 	<packaging>jar</packaging>

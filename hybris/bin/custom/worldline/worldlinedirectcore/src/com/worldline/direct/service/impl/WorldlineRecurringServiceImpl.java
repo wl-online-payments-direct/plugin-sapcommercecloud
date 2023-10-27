@@ -2,7 +2,6 @@ package com.worldline.direct.service.impl;
 
 import com.onlinepayments.domain.CreatePaymentResponse;
 import com.onlinepayments.domain.GetMandateResponse;
-import com.onlinepayments.domain.TokenResponse;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.model.WorldlineMandateModel;
@@ -15,8 +14,6 @@ import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.model.ModelService;
-import javolution.io.Struct;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -109,7 +106,7 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                 case PAYMENT_METHOD_GROUP_CARDS: {
                     WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfoModel.getWorldlineRecurringToken();
 
-                    worldlinePaymentService.deleteToken(tokenModel.getToken(), tokenModel.getWorldlineConfiguration());
+                    worldlinePaymentService.deleteToken(tokenModel.getToken(), tokenModel.getStoreId());
                     tokenModel.setStatus(WorldlineRecurringPaymentStatus.REVOKED);
                     modelService.save(tokenModel);
 
