@@ -61,7 +61,7 @@ public class WorldlineManualPaymentReverseAuthAction extends CancelOrderAction i
             worldlineTransactionService.updatePaymentTransaction(paymentTransactionToCancel.getPaymentTransaction(),
                   paymentTransactionToCancel.getRequestId(),
                   cancelPaymentResponse.getPayment().getStatus(),
-                  cancelPaymentResponse.getPayment().getPaymentOutput().getAmountOfMoney(),
+                  order.getStore().getWorldlineConfiguration().isApplySurcharge() ? cancelPaymentResponse.getPayment().getPaymentOutput().getAcquiredAmount() : cancelPaymentResponse.getPayment().getPaymentOutput().getAmountOfMoney(),
                   PaymentTransactionType.CANCEL);
 
             final OrderCancelRequest orderCancelRequest = new OrderCancelRequest(order,

@@ -118,7 +118,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                     paymentTransaction,
                     webhooksEvent.getPayment().getId(),
                     webhooksEvent.getPayment().getStatus(),
-                    webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
+                    webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() != null ? webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() : webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
                     PaymentTransactionType.CAPTURE
             );
         }
@@ -141,7 +141,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                     paymentTransactionId,
                     paymentTransaction.getOrder(),
                     capture.getStatus(),
-                    capture.getCaptureOutput().getAmountOfMoney(),
+                    capture.getCaptureOutput().getAcquiredAmount() != null ? capture.getCaptureOutput().getAcquiredAmount() : capture.getCaptureOutput().getAmountOfMoney(),
                     PaymentTransactionType.CAPTURE
             );
         }
