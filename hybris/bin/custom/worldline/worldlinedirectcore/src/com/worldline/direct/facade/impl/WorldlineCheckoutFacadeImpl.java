@@ -465,10 +465,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         if (paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
             updatePaymentMode(paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput().getPaymentProductId().toString(), orderModel);
         }
-        AmountOfMoney transactionAmount = paymentResponse.getPaymentOutput().getAmountOfMoney();
+        AmountOfMoney transactionAmount = paymentResponse.getPaymentOutput().getAcquiredAmount() != null ? paymentResponse.getPaymentOutput().getAcquiredAmount() : paymentResponse.getPaymentOutput().getAmountOfMoney();
         if (paymentResponse.getPaymentOutput().getSurchargeSpecificOutput() != null) {
             SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
-            transactionAmount = paymentResponse.getPaymentOutput().getAcquiredAmount();
             worldlineTransactionService.savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
         }
 
