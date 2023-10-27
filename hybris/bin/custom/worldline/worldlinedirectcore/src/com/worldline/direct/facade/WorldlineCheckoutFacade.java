@@ -51,7 +51,7 @@ public interface WorldlineCheckoutFacade {
 
     boolean isTemporaryToken(String hostedtokenizationID);
 
-    void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String paymentMethodType);
+    void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String savedPaymentInfoId, String paymentMethodType);
 
     void saveReplenishmentData( boolean replenishmentOrder,
                                 Date replenishmentStartDate,

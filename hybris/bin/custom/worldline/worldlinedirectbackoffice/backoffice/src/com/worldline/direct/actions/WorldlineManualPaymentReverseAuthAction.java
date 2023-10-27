@@ -5,7 +5,6 @@ import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;
 import com.hybris.cockpitng.actions.CockpitAction;
 import com.onlinepayments.domain.CancelPaymentResponse;
-import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineTransactionService;
 import de.hybris.platform.basecommerce.enums.CancelReason;
@@ -22,7 +21,6 @@ import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.model.ModelService;
-import de.hybris.platform.store.BaseStoreModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zhtml.Messagebox;
@@ -52,9 +50,8 @@ public class WorldlineManualPaymentReverseAuthAction extends CancelOrderAction i
       OrderModel order = actionContext.getData();
 
       final PaymentTransactionEntryModel paymentTransactionToCancel = getPaymentTransactionToCancel(order);
-      final WorldlineConfigurationModel worldlineConfiguration = getWorldlineConfiguration(order);
 
-      CancelPaymentResponse cancelPaymentResponse = worldlinePaymentService.cancelPayment(worldlineConfiguration, paymentTransactionToCancel.getRequestId());
+      CancelPaymentResponse cancelPaymentResponse = worldlinePaymentService.cancelPayment(order.getStore().getUid(), paymentTransactionToCancel.getRequestId());
 
       ActionResult<OrderModel> result = null;
       String resultMessage = null;
@@ -64,7 +61,7 @@ public class WorldlineManualPaymentReverseAuthAction extends CancelOrderAction i
             worldlineTransactionService.updatePaymentTransaction(paymentTransactionToCancel.getPaymentTransaction(),
                   paymentTransactionToCancel.getRequestId(),
                   cancelPaymentResponse.getPayment().getStatus(),
-                  cancelPaymentResponse.getPayment().getPaymentOutput().getAmountOfMoney(),
+                  order.getStore().getWorldlineConfiguration().isApplySurcharge() ? cancelPaymentResponse.getPayment().getPaymentOutput().getAcquiredAmount() : cancelPaymentResponse.getPayment().getPaymentOutput().getAmountOfMoney(),
                   PaymentTransactionType.CANCEL);
 
             final OrderCancelRequest orderCancelRequest = new OrderCancelRequest(order,
@@ -99,11 +96,6 @@ public class WorldlineManualPaymentReverseAuthAction extends CancelOrderAction i
             .stream()
             .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()))
             .findFirst().orElse(null);
-   }
-
-   private WorldlineConfigurationModel getWorldlineConfiguration(OrderModel orderModel) {
-      final BaseStoreModel store = orderModel.getStore();
-      return store != null ? store.getWorldlineConfiguration() : null;
    }
 
    public Collection<OrderCancelEntry> createCancellationEntries(final OrderModel order)

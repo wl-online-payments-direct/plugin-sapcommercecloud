@@ -23,6 +23,7 @@ import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.user.data.AddressData;
+import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO;
@@ -77,6 +78,9 @@ public class WorldlineCartsController extends WorldlineBaseController {
 
     @Resource(name = "worldlineConfigurationService")
     private WorldlineConfigurationService worldlineConfigurationService;
+
+    @Resource(name = "checkoutCustomerStrategy")
+    private CheckoutCustomerStrategy checkoutCustomerStrategy;
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @GetMapping(value = "/{cartId}/paymentProducts")
@@ -201,11 +205,10 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @ApiBaseSiteIdUserIdAndCartIdParam
     public Boolean supportRecurringPayment(
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
-        if (!checkoutFacade.hasCheckoutCart()) {
-            throw new CartException("No cart found.", CartException.NOT_FOUND);
+        if (!checkoutCustomerStrategy.isAnonymousCheckout()) {
+            return Boolean.TRUE;
         }
-        final CartData cartData = cartFacade.getSessionCart();
-        return !CheckoutPaymentType.CARD.getCode().equals(cartData.getPaymentType().getCode()) || WorldlinePaymentProductUtils.isPaymentSupportingRecurring(cartData.getWorldlinePaymentInfo());
+        return Boolean.FALSE;
     }
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})

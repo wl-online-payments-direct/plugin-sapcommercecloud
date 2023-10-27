@@ -1,5 +1,6 @@
 package com.worldline.direct.checkoutaddon.controllers.pages;
 
+import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.checkoutaddon.forms.WorldlineReplenishmentForm;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineDirectCheckoutFacade;
@@ -40,8 +41,6 @@ import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.enumeration.EnumerationService;
 import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.util.Config;
-import de.hybris.platform.yacceleratorstorefront.controllers.ControllerConstants;
-import de.hybris.platform.yacceleratorstorefront.controllers.pages.CartPageController;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -81,7 +80,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
    private static final String REDIRECT_QUOTE_EDIT_URL = REDIRECT_PREFIX + "/quote/%s/edit/";
    private static final String REDIRECT_QUOTE_VIEW_URL = REDIRECT_PREFIX + "/my-account/my-quotes/%s/";
 
-   private static final Logger LOG = Logger.getLogger(CartPageController.class);
+   private static final Logger LOG = Logger.getLogger(WorldlineCartPageController.class);
 
    @Resource(name = "simpleBreadcrumbBuilder")
    private ResourceBreadcrumbBuilder resourceBreadcrumbBuilder;
@@ -142,7 +141,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
       {
          prepareDataForPage(model);
 
-         return ControllerConstants.Views.Pages.Cart.CartPage;
+         return WorldlineWebConstants.Views.Pages.Cart.CartPage;
       }
    }
 
@@ -243,7 +242,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
       model.addAttribute("product", productData);
       model.addAttribute("readOnly", Boolean.valueOf(readOnly));
 
-      return ControllerConstants.Views.Fragments.Cart.ExpandGridInCart;
+      return WorldlineWebConstants.Views.Fragments.Cart.ExpandGridInCart;
    }
 
    // This controller method is used to allow the site to force the visitor through a specified checkout flow.
