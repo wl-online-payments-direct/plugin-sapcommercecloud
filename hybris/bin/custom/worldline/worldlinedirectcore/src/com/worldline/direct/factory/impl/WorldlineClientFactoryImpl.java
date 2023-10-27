@@ -30,7 +30,7 @@ public class WorldlineClientFactoryImpl implements WorldlineClientFactory {
             openConnections = new HashMap<>();
         }
         if (!openConnections.containsKey(storeId)) {
-            Client client = (Client) Factory.createClient(getCommunicatorConfiguration());
+            Client client = (Client) Factory.createClient(getCommunicatorConfiguration(storeId));
             MerchantClient merchant = client.merchant(pspid);
             openConnections.put(storeId, new AbstractMap.SimpleEntry<>(client, merchant));
         }
@@ -43,6 +43,11 @@ public class WorldlineClientFactoryImpl implements WorldlineClientFactory {
 
     public Client getClient(WorldlineConfigurationModel worldlineConfigurationModel) {
         return (Client) Factory.createClient(getCommunicatorConfiguration(worldlineConfigurationModel));
+    }
+
+    private CommunicatorConfiguration getCommunicatorConfiguration(String storeId) {
+        final WorldlineConfigurationModel worldlineConfiguration = worldlineConfigurationService.getWorldlineConfiguration(storeId);
+        return getCommunicatorConfiguration(worldlineConfiguration);
     }
 
     private CommunicatorConfiguration getCommunicatorConfiguration() {

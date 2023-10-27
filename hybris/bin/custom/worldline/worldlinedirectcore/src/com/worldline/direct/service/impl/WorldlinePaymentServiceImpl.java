@@ -315,11 +315,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     }
 
     @Override
-    public void deleteToken(String tokenId, String storeIdl) {
+    public void deleteToken(String tokenId, String storeId) {
         validateParameterNotNullStandardMessage("tokenId", tokenId);
 
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
             merchant.tokens().deleteToken(tokenId);
             WorldlineLogUtils.logAction(LOGGER, "deleteToken", tokenId, "Token deleted!");
         } catch (Exception e) {
@@ -505,7 +505,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         validateParameterNotNull(paymentId, "paymentId cannot be null");
         try {
 
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
 
             final PaymentResponse payment = merchant.payments().getPayment(paymentId);
 
@@ -523,7 +523,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     public CapturesResponse getCaptures(String storeId, String paymentId) {
         validateParameterNotNull(paymentId, "paymentId cannot be null");
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
             final CapturesResponse captures = merchant.payments().getCaptures(paymentId);
 
             WorldlineLogUtils.logAction(LOGGER, "getCaptures", paymentId, captures);
@@ -540,7 +540,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     public CaptureResponse capturePayment(String storeId, String paymentId, BigDecimal amountToCapture, String currencyISOcode, Boolean isFinal) {
 
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
             CapturePaymentRequest capturePaymentRequest = new CapturePaymentRequest();
             capturePaymentRequest.setAmount(worldlineAmountUtils.createAmount(amountToCapture, currencyISOcode));
             capturePaymentRequest.setIsFinal(isFinal);
@@ -592,7 +592,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     @Override
     public CancelPaymentResponse cancelPayment(String storeId, String paymentId) {
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
             CancelPaymentResponse cancelPaymentResponse =
                     merchant.payments().cancelPayment(paymentId);
 
@@ -609,7 +609,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     @Override
     public RefundResponse refundPayment(String storeId, String paymentId, BigDecimal returnAmount, String currencyISOCode) {
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
             RefundRequest refundRequest = new RefundRequest();
             AmountOfMoney amountOfMoney = new AmountOfMoney();
             amountOfMoney.setCurrencyCode(currencyISOCode);
@@ -629,6 +629,10 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     protected String getMerchantId() {
         return worldlineConfigurationService.getCurrentMerchantId();
+    }
+
+    protected String getMerchantId(String storeId) {
+        return baseStoreService.getBaseStoreForUid(storeId).getWorldlineConfiguration().getMerchantID();
     }
 
     protected String getStoreId() {

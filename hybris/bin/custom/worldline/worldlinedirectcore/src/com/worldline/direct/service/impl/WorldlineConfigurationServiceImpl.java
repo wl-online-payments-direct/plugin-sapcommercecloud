@@ -40,6 +40,11 @@ public class WorldlineConfigurationServiceImpl implements WorldlineConfiguration
     }
 
     @Override
+    public WorldlineConfigurationModel getWorldlineConfiguration(String baseStoreId) {
+        return baseStoreService.getBaseStoreForUid(baseStoreId).getWorldlineConfiguration();
+    }
+
+    @Override
     public WorldlineConfigurationModel getCurrentWorldlineConfiguration() {
         return getWorldlineConfiguration(baseStoreService.getCurrentBaseStore());
     }
