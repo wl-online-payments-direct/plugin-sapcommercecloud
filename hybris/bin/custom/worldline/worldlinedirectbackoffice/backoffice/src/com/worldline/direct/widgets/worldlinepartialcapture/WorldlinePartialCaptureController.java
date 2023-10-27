@@ -168,7 +168,7 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
         worldlineTransactionService.updatePaymentTransaction(paymentTransactionToCapture.getPaymentTransaction(),
                 captureResponse.getId(),
                 captureResponse.getStatus(),
-                captureResponse.getCaptureOutput().getAmountOfMoney(),
+                orderModel.getStore().getWorldlineConfiguration().isApplySurcharge() ? captureResponse.getCaptureOutput().getAcquiredAmount() : captureResponse.getCaptureOutput().getAmountOfMoney(),
                 PaymentTransactionType.CAPTURE);
 
         worldlineBusinessProcessService.triggerOrderProcessEvent(this.orderModel, WORLDLINE_EVENT_PAYMENT);

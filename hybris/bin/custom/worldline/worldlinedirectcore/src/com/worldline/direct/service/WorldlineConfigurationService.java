@@ -12,6 +12,8 @@ public interface WorldlineConfigurationService {
 
     WorldlineConfigurationModel getWorldlineConfiguration(BaseStoreModel baseStoreModel);
 
+    WorldlineConfigurationModel getWorldlineConfiguration(String baseStoreId);
+
     WorldlineConfigurationModel getCurrentWorldlineConfiguration();
 
     String getMerchantId(BaseStoreModel baseStoreModel);
