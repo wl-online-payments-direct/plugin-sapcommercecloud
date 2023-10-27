@@ -21,6 +21,7 @@
         <property name="worldlineHostedCheckoutParamConverter" ref="worldlineHostedCheckoutParamConverter"/>
         <property name="worldlineHostedTokenizationParamConverter" ref="worldlineHostedTokenizationParamConverter"/>
         <property name="worldlineBrowserCustomerDeviceConverter" ref="worldlineBrowserCustomerDeviceConverter"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
     </bean>
 
     <bean id="worldlineB2BPaymentServiceImpl" class="com.worldline.direct.service.impl.WorldlineB2BPaymentServiceImpl"

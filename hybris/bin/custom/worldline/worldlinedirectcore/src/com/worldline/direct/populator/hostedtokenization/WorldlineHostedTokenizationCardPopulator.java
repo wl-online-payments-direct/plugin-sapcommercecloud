@@ -3,7 +3,6 @@ package com.worldline.direct.populator.hostedtokenization;
 import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
-import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentService;
@@ -22,7 +21,10 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
     private static final String ECOMMERCE = "ECOMMERCE";
     private static final String RECCURANCE = "recurring";
+    private static final String RECCURANCE_SUBSEQUENT = "subsequent";
     private static final String RECCURANCE_FIRST = "first";
+    private static final String CARDHOLDER_INITIAITED = "cardholderInitiated";
+    private static final String MERCHANT_INITIAITED = "merchantInitiated";
     public static final String CHALLENGE_REQUIRED = "challenge-required";
     public static final String LOW_VALUE = "low-value";
     private SessionService sessionService;
@@ -68,13 +70,17 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         cardPaymentMethodSpecificInput.setTokenize(false);
         cardPaymentMethodSpecificInput.setSkipAuthentication(false);
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
-        cardPaymentMethodSpecificInput.setIsRecurring(isRecurring);
+        //cardPaymentMethodSpecificInput.setIsRecurring(isRecurring);
 
 
         if (StringUtils.equals(RECCURANCE, recurrance)) {
             CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
+
+
+            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(MERCHANT_INITIAITED);
+            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileSequenceIndicator(RECCURANCE_SUBSEQUENT);
         } else {
             cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
             cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
@@ -96,6 +102,9 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
                 CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
                 cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
                 cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
+
+                cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(CARDHOLDER_INITIAITED);
+                cardPaymentMethodSpecificInput.setUnscheduledCardOnFileSequenceIndicator(RECCURANCE_FIRST);
             }
         }
 

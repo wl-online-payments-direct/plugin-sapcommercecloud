@@ -41,25 +41,25 @@ public interface WorldlinePaymentService {
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 
-    CaptureResponse capturePayment(WorldlineConfigurationModel worldlineConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode, Boolean isFinal);
+    CaptureResponse capturePayment(String storeId, String paymentId, BigDecimal plannedAmount, String currencyISOcode, Boolean isFinal);
 
-    PaymentResponse getPayment(WorldlineConfigurationModel worldlineConfigurationModel, String paymentId);
+    PaymentResponse getPayment(String storeId, String paymentId);
 
-    CapturesResponse getCaptures(WorldlineConfigurationModel worldlineConfigurationModel, String paymentId);
+    CapturesResponse getCaptures(String storeId, String paymentId);
 
-    Long getNonCapturedAmount(WorldlineConfigurationModel worldlineConfigurationModel, String paymentId, BigDecimal plannedAmount, String currencyISOcode);
+    Long getNonCapturedAmount(String storeId, String paymentId, BigDecimal plannedAmount, String currencyISOcode);
 
-    Long getNonCapturedAmount(WorldlineConfigurationModel worldlineConfigurationModel, String paymentId, CapturesResponse capturesResponse, BigDecimal plannedAmount, String currencyISOcode);
+    Long getNonCapturedAmount(String storeId, String paymentId, CapturesResponse capturesResponse, BigDecimal plannedAmount, String currencyISOcode);
 
-    CancelPaymentResponse cancelPayment(WorldlineConfigurationModel worldlineConfigurationModel, String paymentId);
+    CancelPaymentResponse cancelPayment(String storeId, String paymentId);
 
-    RefundResponse refundPayment(WorldlineConfigurationModel worldlineConfigurationModel, String paymentId, BigDecimal returnAmount, String currencyISOCode);
+    RefundResponse refundPayment(String storeId, String paymentId, BigDecimal returnAmount, String currencyISOCode);
 
     TokenResponse getToken(String tokenId);
 
     void deleteToken(String tokenId);
 
-    void deleteToken(String tokenId, WorldlineConfigurationModel worldlineConfigurationModel);
+    void deleteToken(String tokenId, String storeId);
 
     GetMandateResponse getMandate(String uniqueMandateReference);
 
