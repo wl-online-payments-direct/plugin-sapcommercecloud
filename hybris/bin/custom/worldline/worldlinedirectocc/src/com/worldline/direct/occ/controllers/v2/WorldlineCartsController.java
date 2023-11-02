@@ -7,6 +7,7 @@ import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
+import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
 import com.worldline.direct.occ.controllers.v2.validator.WorldlinePaymentDetailsWsDTOValidator;
@@ -19,9 +20,12 @@ import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.b2b.enums.CheckoutPaymentType;
+import de.hybris.platform.b2bwebservicescommons.dto.order.DayOfWeekWsDTO;
+import de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO;
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
+import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
@@ -29,6 +33,7 @@ import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsD
 import de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartAddressException;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartException;
+import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdUserIdAndCartIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
@@ -39,12 +44,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.worldline.direct.occ.controllers.v2.WorldlineB2BOrdersController.OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM;
 
 @Controller
 @RequestMapping(value = "/{baseSiteId}/users/{userId}/carts")
@@ -81,6 +92,15 @@ public class WorldlineCartsController extends WorldlineBaseController {
 
     @Resource(name = "checkoutCustomerStrategy")
     private CheckoutCustomerStrategy checkoutCustomerStrategy;
+
+    @Resource(name = "userFacade")
+    private UserFacade userFacade;
+
+    @Resource(name = "worldlineRecurringCheckoutFacade")
+    private WorldlineRecurringCheckoutFacade worldlineRecurringCheckoutFacade;
+
+    @Resource(name = "scheduleReplenishmentFormWsDTOValidator")
+    private Validator scheduleReplenishmentFormWsDTOValidator;
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @GetMapping(value = "/{cartId}/paymentProducts")
@@ -228,6 +248,46 @@ public class WorldlineCartsController extends WorldlineBaseController {
                worldlineCheckoutFacade.checkForCardPaymentMethods(availablePaymentMethods);
     }
 
+
+        @PostMapping(value = "/{cartId}/saveReplenishmentOrderData", consumes = {MediaType.APPLICATION_JSON_VALUE})
+        @ResponseBody
+        @ApiBaseSiteIdUserIdAndCartIdParam
+        @Operation(operationId = "saveReplenishmentOrderData", summary = "Save the Replenishment order data", description = "Save the Replenishment order data")
+        public void saveReplenishmentOrderData (
+              @Parameter(description = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true) @RequestBody final ScheduleReplenishmentFormWsDTO scheduleReplenishmentFormWsDTO,
+              final HttpServletRequest request)
+              throws InvalidCartException {
+
+            validateUser();
+
+            validateScheduleReplenishmentForm(scheduleReplenishmentFormWsDTO);
+            worldlineRecurringCheckoutFacade.saveReplenishmentData(Boolean.TRUE,
+                  scheduleReplenishmentFormWsDTO.getReplenishmentStartDate(),
+                  scheduleReplenishmentFormWsDTO.getReplenishmentEndDate(),
+                  scheduleReplenishmentFormWsDTO.getNumberOfDays(),
+                  scheduleReplenishmentFormWsDTO.getNumberOfWeeks(),
+                  scheduleReplenishmentFormWsDTO.getNumberOfMonths(),
+                  scheduleReplenishmentFormWsDTO.getNthDayOfMonth(),
+                  scheduleReplenishmentFormWsDTO.getDaysOfWeek().isEmpty() ? new ArrayList<>() : convertDTO(scheduleReplenishmentFormWsDTO.getDaysOfWeek()),
+                  scheduleReplenishmentFormWsDTO.getRecurrencePeriod());
+        }
+
+    private List<String> convertDTO(List<DayOfWeekWsDTO> daysOfWeek) {
+        List<String> stringDays = new ArrayList<>();
+        for (DayOfWeekWsDTO currentDay : daysOfWeek) {
+            stringDays.add(currentDay.name());
+        }
+        return stringDays;
+    }
+    protected void validateUser() {
+        if (userFacade.isAnonymousUser()) {
+            throw new AccessDeniedException("Access is denied");
+        }
+    }
+
+    protected void validateScheduleReplenishmentForm(ScheduleReplenishmentFormWsDTO scheduleReplenishmentForm) {
+        validate(scheduleReplenishmentForm, OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM, scheduleReplenishmentFormWsDTOValidator);
+    }
 
     public DataMapper getDataMapper() {
         return dataMapper;
