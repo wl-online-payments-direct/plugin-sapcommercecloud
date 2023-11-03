@@ -392,8 +392,14 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
-        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType()) && worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
-            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType())) {
+            if (cartModel.isWorldlineReplenishmentOrder()) {
+                if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
+                    calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
+                }
+            } else {
+                calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
+            }
         }
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
 
@@ -579,10 +585,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             abstractOrderModel.setPaymentMode(paymentMode);
             modelService.save(abstractOrderModel);
             if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge()) {
-                AmountOfMoney surcharge = new AmountOfMoney();
-                surcharge.setAmount(keepPaymentCost.longValue());
-                surcharge.setCurrencyCode(abstractOrderModel.getCurrency().getIsocode());
-                worldlineTransactionService.savePaymentCost(abstractOrderModel, surcharge);
+                worldlineTransactionService.savePaymentCost(abstractOrderModel, keepPaymentCost);
             }
         }
     }
