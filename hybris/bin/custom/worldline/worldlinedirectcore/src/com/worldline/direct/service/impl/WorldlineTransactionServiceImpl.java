@@ -167,16 +167,19 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
 
     @Override
     public void savePaymentCost(AbstractOrderModel orderModel, AmountOfMoney surchargeAmount) {
+        Double surcharge = worldlineAmountUtils.fromAmount(surchargeAmount.getAmount(), orderModel.getCurrency().getIsocode()).doubleValue();
+        savePaymentCost(orderModel, surcharge);
+    }
 
-            Double surcharge = worldlineAmountUtils.fromAmount(surchargeAmount.getAmount(), orderModel.getCurrency().getIsocode()).doubleValue();
-            orderModel.setPaymentCost(surcharge);
-            try {
-                calculationService.calculateTotals(orderModel, true);
-            } catch (CalculationException ex) {
-                LOGGER.error("[ WORLDLINE ] Error was thrown while recalculating totals of cart/order.", ex);
-            }
-            modelService.refresh(orderModel);
-
+    @Override
+    public void savePaymentCost(AbstractOrderModel orderModel, Double surcharge) {
+        orderModel.setPaymentCost(surcharge);
+        try {
+            calculationService.calculateTotals(orderModel, true);
+        } catch (CalculationException ex) {
+            LOGGER.error("[ WORLDLINE ] Error was thrown while recalculating totals of cart/order.", ex);
+        }
+        modelService.refresh(orderModel);
     }
 
     private PaymentTransactionModel createPaymentTransaction(

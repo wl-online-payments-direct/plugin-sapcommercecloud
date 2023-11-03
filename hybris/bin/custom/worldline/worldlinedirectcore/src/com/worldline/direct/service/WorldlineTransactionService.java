@@ -34,4 +34,6 @@ public interface WorldlineTransactionService {
 
     void savePaymentCost(AbstractOrderModel orderModel, AmountOfMoney surchargeAmount);
 
+    void savePaymentCost(AbstractOrderModel orderModel, Double surchargeAmount);
+
 }
