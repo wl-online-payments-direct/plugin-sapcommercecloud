@@ -215,8 +215,8 @@ public class WorldlineCartPageController extends AbstractCartPageController {
          @RequestParam("replenishmentRecurrence") final String replenishmentRecurrence) {
 
       worldlineCheckoutFacade.saveReplenishmentData(replenishmentOrder,
-            new Date(replenishmentStartDate),
-            new Date(replenishmentEndDate),
+            replenishmentStartDate,
+            replenishmentEndDate,
             nDays,
             nWeeks,
             nMonths,

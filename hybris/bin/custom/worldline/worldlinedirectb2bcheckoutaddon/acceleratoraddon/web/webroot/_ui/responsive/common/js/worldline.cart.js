@@ -135,6 +135,7 @@ ACC.worldlineCart = {
             return;
         }
 
+
         // replenishment schedule data not set to cart yet
         if (!placeOrderFormReplenishmentOrder) {
 
