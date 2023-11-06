@@ -373,6 +373,46 @@
 	</context>
 	<!-- WorldlineWebhooksEvent BO appearance END -->
 
+	<!-- Cart BO appearance START -->
+	<context merge-by="type" parent="GenericItem" type="Cart">
+		<context component="editor-area">
+			<ea:editorArea>
+				<ea:tab name="hmc.worldline">
+					<ea:section name="hmc.worldline.replenishmentData">
+						<ea:attribute qualifier="worldlineReplenishmentOrder" readonly="true"/>
+						<ea:attribute qualifier="worldlineNDays"/>
+						<ea:attribute qualifier="worldlineNWeeks"/>
+						<ea:attribute qualifier="worldlineNMonths"/>
+						<ea:attribute qualifier="worldlineNthDayOfMonth"/>
+						<ea:attribute qualifier="worldlineReplenishmentRecurrence"/>
+						<ea:attribute qualifier="worldlineReplenishmentStartDate" readonly="true"/>
+						<ea:attribute qualifier="worldlineReplenishmentEndDate"/>
+						<ea:attribute qualifier="worldlineNDaysOfWeek"/>
+					</ea:section>
+				</ea:tab>
+			</ea:editorArea>
+		</context>
+	</context>
+	<!-- Cart BO appearance END -->
+
+	<!-- Order BO appearance START -->
+	<context merge-by="type" parent="GenericItem" type="Order">
+		<context component="editor-area">
+			<ea:editorArea>
+				<ea:tab name="hmc.positions_and_prices">
+					<ea:section name="hmc.surcharge" position="3">
+						<ea:attribute qualifier="worldlineSurchargeProductTypeId" readonly="true"/>
+						<ea:attribute qualifier="worldlineSurchargeProductTypeVersion" readonly="true"/>
+						<ea:attribute qualifier="worldlineAdValoremRate" readonly="true"/>
+						<ea:attribute qualifier="worldlineSpecificRate" readonly="true"/>
+						<ea:attribute qualifier="worldlineSurchargeAmount" readonly="true"/>
+					</ea:section>
+				</ea:tab>
+			</ea:editorArea>
+		</context>
+	</context>
+	<!-- Order BO appearance END -->
+
 	<!-- CS Backoffice START -->
 	<context component="cseditorareaactions" type="Order" merge-by="type">
 		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">

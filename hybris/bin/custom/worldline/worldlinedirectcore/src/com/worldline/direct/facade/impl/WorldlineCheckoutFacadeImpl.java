@@ -392,8 +392,14 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
         parameter.setEnableHooks(Boolean.TRUE);
         parameter.setCart(cartModel);
-        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType()) && worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
-            calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType())) {
+            if (cartModel.isWorldlineReplenishmentOrder()) {
+                if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
+                    calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
+                }
+            } else {
+                calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
+            }
         }
         parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
 
@@ -469,7 +475,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         if (paymentResponse.getPaymentOutput().getSurchargeSpecificOutput() != null) {
             SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
             transactionAmount = paymentResponse.getPaymentOutput().getAcquiredAmount();
-            worldlineTransactionService.savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
+            worldlineTransactionService.saveSurchargeData(orderModel, surchargeSpecificOutput);
         }
 
 
@@ -501,20 +507,23 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     }
 
     @Override
-    public void saveReplenishmentData(boolean replenishmentOrder, Date replenishmentStartDate, Date replenishmentEndDate, String nDays, String nWeeks,
+    public void saveReplenishmentData(boolean replenishmentOrder, String replenishmentStartDate, String replenishmentEndDate, String nDays, String nWeeks,
           String nMonths, String nthDayOfMonth, List<String> nDaysOfWeek, String replenishmentRecurrence) {
         CartModel cartModel = getCart();
-        WorldlineReplenishmentOccurrenceEnum replenishmentOccurrenceEnum = WorldlineReplenishmentOccurrenceEnum.valueOf(replenishmentRecurrence);
-        cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
-
-        cartModel.setWorldlineReplenishmentStartDate(replenishmentStartDate);
-        cartModel.setWorldlineReplenishmentEndDate(replenishmentEndDate);
-        cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
-        cartModel.setWorldlineNDays(nDays);
-        cartModel.setWorldlineNWeeks(nWeeks);
-        cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
-        cartModel.setWorldlineNMonths(nMonths);
-        cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
+            cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
+        if (replenishmentOrder) {
+            WorldlineReplenishmentOccurrenceEnum replenishmentOccurrenceEnum = WorldlineReplenishmentOccurrenceEnum.valueOf(replenishmentRecurrence);
+            cartModel.setWorldlineReplenishmentStartDate(new Date(replenishmentStartDate));
+            if (StringUtils.isNotEmpty(replenishmentEndDate))  {
+                cartModel.setWorldlineReplenishmentEndDate(new Date(replenishmentEndDate));
+            }
+            cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
+            cartModel.setWorldlineNDays(nDays);
+            cartModel.setWorldlineNWeeks(nWeeks);
+            cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
+            cartModel.setWorldlineNMonths(nMonths);
+            cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
+        }
 
         modelService.save(cartModel);
     }
@@ -579,10 +588,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             abstractOrderModel.setPaymentMode(paymentMode);
             modelService.save(abstractOrderModel);
             if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge()) {
-                AmountOfMoney surcharge = new AmountOfMoney();
-                surcharge.setAmount(keepPaymentCost.longValue());
-                surcharge.setCurrencyCode(abstractOrderModel.getCurrency().getIsocode());
-                worldlineTransactionService.savePaymentCost(abstractOrderModel, surcharge);
+                worldlineTransactionService.savePaymentCost(abstractOrderModel, keepPaymentCost);
             }
         }
     }

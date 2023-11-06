@@ -74,9 +74,9 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
             CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(FIRST_RECCURANCE);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
-
-            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(CARD_HOLDER_INITIATED);
-            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileSequenceIndicator(FIRST_RECCURANCE);
+//
+//            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(CARD_HOLDER_INITIATED);
+//            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileSequenceIndicator(FIRST_RECCURANCE);
         } else {
             cardPaymentMethodSpecificInput.setTokenize(false);
         }

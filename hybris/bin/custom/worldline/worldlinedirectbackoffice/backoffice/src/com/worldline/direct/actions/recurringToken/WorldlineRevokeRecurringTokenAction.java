@@ -33,7 +33,7 @@ public class WorldlineRevokeRecurringTokenAction implements CockpitAction<Worldl
    @Override
    public ActionResult<Object> perform(ActionContext<WorldlineRecurringTokenModel> actionContext) {
       WorldlineRecurringTokenModel recurringTokenModel = actionContext.getData();
-      CartToOrderCronJobModel cronjob = b2BCustomerAccountService.getCartToOrderCronJobForCode(actionContext.getData().getSubscriptionID(), recurringTokenModel.getCustomer());
+      CartToOrderCronJobModel cronjob = b2BCustomerAccountService.getCartToOrderCronJobForCode(recurringTokenModel.getSubscriptionID(), recurringTokenModel.getCustomer());
       ActionResult<Object> result;
 
       try {
