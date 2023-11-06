@@ -8,11 +8,13 @@ ACC.worldlineCart = {
         var placeReplenishment = false;
         var formContainer = $(".replenishment-form-container");
         var replenishOrderCheckbox = $("#replenishmentForm #replenishmentOrder");
-        $(document).on("change", replenishOrderCheckbox, function(e) {
+        $(replenishOrderCheckbox).change(function(e) {
             e.preventDefault();
             if (replenishOrderCheckbox.is(':checked')) {
+                $('.scheduleformM').show();
                 formContainer.prop("style", "display: block");
-                $("#frequency").change(function () {
+                $("#frequency").change(function (event) {
+                    event.stopPropagation();
                     switch (this.value) {
                         case "DAILY":
                             $('.scheduleformD').show();
