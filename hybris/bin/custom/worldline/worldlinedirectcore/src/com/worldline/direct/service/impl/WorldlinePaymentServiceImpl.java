@@ -432,10 +432,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             CalculateSurchargeRequest request = new CalculateSurchargeRequest();
             request.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
             CardSource cardSource = new CardSource();
-            if (!StringUtils.EMPTY.equals(hostedTokenizationId)) {
+            if (!StringUtils.EMPTY.equals(token)) {
+                cardSource.setToken(token);
+            } else if (!StringUtils.EMPTY.equals(hostedTokenizationId)) {
                 cardSource.setHostedTokenizationId(hostedTokenizationId);
             }
-            cardSource.setToken(token);
 
             request.withCardSource(cardSource);
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());

@@ -42,7 +42,7 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
     private HostedCheckoutSpecificInput getHostedCheckoutSpecificInput(AbstractOrderModel abstractOrderModel) {
         WorldlineConfigurationModel worldlineConfiguration = abstractOrderModel.getStore().getWorldlineConfiguration();
         HostedCheckoutSpecificInput hostedCheckoutSpecificInput = new HostedCheckoutSpecificInput();
-        hostedCheckoutSpecificInput.setIsRecurring(Boolean.FALSE);
+        //hostedCheckoutSpecificInput.setIsRecurring(Boolean.FALSE);
         hostedCheckoutSpecificInput.setShowResultPage(Boolean.FALSE);
         hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();

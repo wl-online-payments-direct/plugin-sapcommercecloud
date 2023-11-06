@@ -147,7 +147,28 @@ ACC.checkout = {
                        }
                   }
 				} else {
-					ACC.checkout.bindStartCheckout(checkoutUrl);
+                //TODO update this on phase 3.1.
+				    var options = {
+				        'replenishmentOrder' : false,
+				        'replenishmentStartDate': "",
+                        'replenishmentEndDate': "",
+                        'nDays': "",
+                        'nWeeks': "",
+                        'nMonths': "",
+                        'nthDayOfMonth': "",
+                        'nDaysOfWeek': "",
+                        'replenishmentRecurrence': ""
+				    };
+
+                      $.ajax({
+                          url: form.attr('action'),
+                          type: 'POST',
+                          data: options,
+                          success: function () {
+                              //Continue to checkout
+                              ACC.checkout.bindStartCheckout(checkoutUrl);
+                          }
+                      });
 				}
 			}
 			return false;
