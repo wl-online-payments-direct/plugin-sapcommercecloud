@@ -72,7 +72,7 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
       return result;
    }
 
-   private BigDecimal calculateRefundAmount(ReturnRequestModel returnRequestModel, String storeId , String paymentId, BigDecimal plannedAmount, String currencyISOcode) {
+   private BigDecimal calculateRefundAmount(ReturnRequestModel returnRequestModel, String storeId, String paymentId, BigDecimal plannedAmount, String currencyISOcode) {
      Long nonCapturedAmount = worldlinePaymentService.getNonCapturedAmount(storeId, paymentId, plannedAmount, currencyISOcode);
      BigDecimal capturedAmount = plannedAmount.subtract(new BigDecimal(nonCapturedAmount));
      if (capturedAmount.compareTo(returnRequestModel.getSubtotal()) == 1

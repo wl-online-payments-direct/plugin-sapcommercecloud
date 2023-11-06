@@ -166,17 +166,31 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
     }
 
     @Override
+    public void saveSurchargeData(AbstractOrderModel orderModel, SurchargeSpecificOutput surchargeSpecificOutput) {
+        if (orderModel instanceof OrderModel) {
+//            ((OrderModel) orderModel).setWorldlineAdValoremRate(surchargeSpecificOutput.getSurchargeRate().getAdValoremRate());
+            ((OrderModel) orderModel).setWorldlineSpecificRate(surchargeSpecificOutput.getSurchargeRate().getSpecificRate());
+            ((OrderModel) orderModel).setWorldlineSurchargeProductTypeId(surchargeSpecificOutput.getSurchargeRate().getSurchargeProductTypeId());
+            ((OrderModel) orderModel).setWorldlineSurchargeProductTypeVersion(surchargeSpecificOutput.getSurchargeRate().getSurchargeProductTypeVersion());
+        }
+        savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
+    }
+
+    @Override
     public void savePaymentCost(AbstractOrderModel orderModel, AmountOfMoney surchargeAmount) {
+        Double surcharge = worldlineAmountUtils.fromAmount(surchargeAmount.getAmount(), orderModel.getCurrency().getIsocode()).doubleValue();
+        savePaymentCost(orderModel, surcharge);
+    }
 
-            Double surcharge = worldlineAmountUtils.fromAmount(surchargeAmount.getAmount(), orderModel.getCurrency().getIsocode()).doubleValue();
-            orderModel.setPaymentCost(surcharge);
-            try {
-                calculationService.calculateTotals(orderModel, true);
-            } catch (CalculationException ex) {
-                LOGGER.error("[ WORLDLINE ] Error was thrown while recalculating totals of cart/order.", ex);
-            }
-            modelService.refresh(orderModel);
-
+    @Override
+    public void savePaymentCost(AbstractOrderModel orderModel, Double surcharge) {
+        orderModel.setPaymentCost(surcharge);
+        try {
+            calculationService.calculateTotals(orderModel, true);
+        } catch (CalculationException ex) {
+            LOGGER.error("[ WORLDLINE ] Error was thrown while recalculating totals of cart/order.", ex);
+        }
+        modelService.refresh(orderModel);
     }
 
     private PaymentTransactionModel createPaymentTransaction(
@@ -191,6 +205,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         final String paymentId = getPaymentId(pspReference);
         paymentTransactionModel.setCode(paymentId);
         paymentTransactionModel.setRequestId(paymentId);
+        paymentTransactionModel.setWorldlineRawTransactionCode(pspReference);
         paymentTransactionModel.setRequestToken(merchantCode);
         paymentTransactionModel.setPaymentProvider(WorldlinedirectcoreConstants.PAYMENT_PROVIDER);
         paymentTransactionModel.setOrder(abstractOrderModel);
