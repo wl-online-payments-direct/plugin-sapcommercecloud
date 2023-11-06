@@ -475,7 +475,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         if (paymentResponse.getPaymentOutput().getSurchargeSpecificOutput() != null) {
             SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
             transactionAmount = paymentResponse.getPaymentOutput().getAcquiredAmount();
-            worldlineTransactionService.savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
+            worldlineTransactionService.saveSurchargeData(orderModel, surchargeSpecificOutput);
         }
 
 
@@ -507,20 +507,23 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     }
 
     @Override
-    public void saveReplenishmentData(boolean replenishmentOrder, Date replenishmentStartDate, Date replenishmentEndDate, String nDays, String nWeeks,
+    public void saveReplenishmentData(boolean replenishmentOrder, String replenishmentStartDate, String replenishmentEndDate, String nDays, String nWeeks,
           String nMonths, String nthDayOfMonth, List<String> nDaysOfWeek, String replenishmentRecurrence) {
         CartModel cartModel = getCart();
-        WorldlineReplenishmentOccurrenceEnum replenishmentOccurrenceEnum = WorldlineReplenishmentOccurrenceEnum.valueOf(replenishmentRecurrence);
-        cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
-
-        cartModel.setWorldlineReplenishmentStartDate(replenishmentStartDate);
-        cartModel.setWorldlineReplenishmentEndDate(replenishmentEndDate);
-        cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
-        cartModel.setWorldlineNDays(nDays);
-        cartModel.setWorldlineNWeeks(nWeeks);
-        cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
-        cartModel.setWorldlineNMonths(nMonths);
-        cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
+            cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
+        if (replenishmentOrder) {
+            WorldlineReplenishmentOccurrenceEnum replenishmentOccurrenceEnum = WorldlineReplenishmentOccurrenceEnum.valueOf(replenishmentRecurrence);
+            cartModel.setWorldlineReplenishmentStartDate(new Date(replenishmentStartDate));
+            if (StringUtils.isNotEmpty(replenishmentEndDate))  {
+                cartModel.setWorldlineReplenishmentEndDate(new Date(replenishmentEndDate));
+            }
+            cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
+            cartModel.setWorldlineNDays(nDays);
+            cartModel.setWorldlineNWeeks(nWeeks);
+            cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
+            cartModel.setWorldlineNMonths(nMonths);
+            cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
+        }
 
         modelService.save(cartModel);
     }

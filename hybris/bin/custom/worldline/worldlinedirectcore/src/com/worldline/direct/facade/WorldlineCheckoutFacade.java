@@ -54,8 +54,8 @@ public interface WorldlineCheckoutFacade {
     void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String savedPaymentInfoId, String paymentMethodType);
 
     void saveReplenishmentData( boolean replenishmentOrder,
-                                Date replenishmentStartDate,
-                                Date replenishmentEndDate,
+                                String replenishmentStartDate,
+                                String replenishmentEndDate,
                                 String nDays,
                                 String nWeeks,
                                 String nMonths,
