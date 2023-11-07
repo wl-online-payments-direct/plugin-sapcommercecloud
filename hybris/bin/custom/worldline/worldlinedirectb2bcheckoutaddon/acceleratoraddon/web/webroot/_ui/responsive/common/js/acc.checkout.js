@@ -1,4 +1,4 @@
-ACC.checkout = {
+ACC.checkoutsummary = {
 
 	_autoload: [
 		"bindCheckO",
@@ -14,12 +14,12 @@ ACC.checkout = {
 
 		$(document).on("click","#addressSubmit",function(e){
 			e.preventDefault();
-			$('#addressForm').submit();	
+			$('#addressForm').submit();
 		})
-		
+
 		$(document).on("click","#deliveryMethodSubmit",function(e){
 			e.preventDefault();
-			$('#selectDeliveryMethodForm').submit();	
+			$('#selectDeliveryMethodForm').submit();
 		})
 
 	},
@@ -48,17 +48,17 @@ ACC.checkout = {
 	bindCheckO: function ()
 	{
 		var cartEntriesError = false;
-		
+
 		// Alternative checkout flows options
 		$('.doFlowSelectedChange').change(function ()
 		{
 			if ('multistep-pci' == $('#selectAltCheckoutFlow').val())
 			{
-				$(ACC.checkout.selectPciOption).show();
+				$(ACC.checkoutsummary.selectPciOption).show();
 			}
 			else
 			{
-				$(ACC.checkout.selectPciOption).hide();
+				$(ACC.checkoutsummary.selectPciOption).hide();
 
 			}
 		});
@@ -70,7 +70,7 @@ ACC.checkout = {
 			var checkoutUrl = $(this).data("continueShoppingUrl");
 			window.location = checkoutUrl;
 		});
-		
+
 		$('.js-create-quote-button').click(function ()
 		{
 			$(this).prop("disabled", true);
@@ -78,24 +78,24 @@ ACC.checkout = {
 			window.location = createQuoteUrl;
 		});
 
-		
+
 		$('.expressCheckoutButton').click(function()
 				{
 					document.getElementById("expressCheckoutCheckbox").checked = true;
 		});
-		
+
 		$(document).on("input",".confirmGuestEmail,.guestEmail",function(){
-			  
+
 			  var orginalEmail = $(".guestEmail").val();
 			  var confirmationEmail = $(".confirmGuestEmail").val();
-			  
+
 			  if(orginalEmail === confirmationEmail){
 			    $(".guestCheckoutBtn").removeAttr("disabled");
 			  }else{
 			     $(".guestCheckoutBtn").attr("disabled","disabled");
 			  }
 		});
-		
+
 		$('.js-worldline-continue-checkout-button').click(function () {
 			var checkoutUrl = $(this).data("checkoutUrl");
 			cartEntriesError = ACC.pickupinstore.validatePickupinStoreCartEntires();
@@ -132,7 +132,7 @@ ACC.checkout = {
               data: options,
               success: function () {
                   //Continue to checkout
-                  ACC.checkout.bindStartCheckout(checkoutUrl);
+                  ACC.checkoutsummary.bindStartCheckout(checkoutUrl);
               }
           });
 
@@ -167,7 +167,7 @@ ACC.checkout = {
                           data: options,
                           success: function () {
                               //Continue to checkout
-                              ACC.checkout.bindStartCheckout(checkoutUrl);
+                              ACC.checkoutsummary.bindStartCheckout(checkoutUrl);
                           }
                       });
 				}
@@ -179,7 +179,7 @@ ACC.checkout = {
 
     bindPlaceOrder: function ()
 	{
-	    ACC.checkout.toggleActionButtons('.place-order-form');
+	    ACC.checkoutsummary.toggleActionButtons('.place-order-form');
 	},
 
 	toggleActionButtons: function (selector) {
@@ -238,7 +238,7 @@ ACC.checkout = {
 		       if ('multistep-pci' == flow) {
 		       	flow = 'multistep';
 		       }
-		       var pci = $(ACC.checkout.selectPciOption).val();
+		       var pci = $(ACC.checkoutsummary.selectPciOption).val();
 
 		       // Build up the redirect URL
 		       var redirectUrl = checkoutUrl + '/select-flow?flow=' + flow + '&pci=' + pci;
