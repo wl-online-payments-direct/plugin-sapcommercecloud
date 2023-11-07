@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <div class="column scheduleform scheduleformM" style="display: none;">
+            <div class="column scheduleform scheduleformM">
                 <div class="form-group">
                     <label class="control-label" for="nthDayOfMonth">
                         <spring:theme code="responsive.replenishmentScheduleForm.monthly.day"/>
@@ -127,7 +127,7 @@
                     </div>
                 </div>
             </div>
-            <div class="column scheduleform scheduleformM" style="display: none;">
+            <div class="column scheduleform scheduleformM">
                 <div class="form-group">
                     <label class="control-label" for="nMonths">
                         <spring:theme code="responsive.replenishmentScheduleForm.monthly.months"/>
