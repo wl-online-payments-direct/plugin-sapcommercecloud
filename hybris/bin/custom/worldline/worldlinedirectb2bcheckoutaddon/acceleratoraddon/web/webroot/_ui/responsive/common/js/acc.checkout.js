@@ -162,7 +162,7 @@ ACC.checkout = {
                     };
 
                       $.ajax({
-                          url: form.attr('action'),
+                          url: ACC.config.encodedContextPath + "/cart/savePlaceOrderData",
                           type: 'POST',
                           data: options,
                           success: function () {
