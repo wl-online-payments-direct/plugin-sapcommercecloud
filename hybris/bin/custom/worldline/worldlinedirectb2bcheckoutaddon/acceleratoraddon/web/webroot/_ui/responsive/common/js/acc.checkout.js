@@ -198,7 +198,7 @@ ACC.checkoutsummary = {
 
         checkBox.on('click', function () {
             var checked = $(this).prop('checked');
-            var rememberPaymentDetails = checkBoxRememberPaymentDetails.prop('checked');
+            var rememberPaymentDetails = checkBoxRememberPaymentDetails.length ? checkBoxRememberPaymentDetails.prop('checked') : true;
 
             if (checked && rememberPaymentDetails) {
                 checkoutBtn.prop('disabled', false);
