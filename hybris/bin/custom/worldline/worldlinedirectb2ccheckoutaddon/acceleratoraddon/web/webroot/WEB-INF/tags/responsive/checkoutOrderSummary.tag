@@ -41,7 +41,7 @@
 </div>
 
 <div class="visible-xs clearfix">
-    <form:form action="${placeOrderUrl}" id="worldlinePlaceOrderForm" modelAttribute="worldlinePlaceOrderForm" class="place-order-form col-xs-12">
+    <form:form action="${placeOrderUrl}" id="worldlinePlaceOrderForm" modelAttribute="worldlinePlaceOrderForm" class="place-order-form col-xs-12 js-worldlinePlaceOrderForm">
         <form:input type="hidden" path="screenHeight"/>
         <form:input type="hidden" path="screenWidth"/>
         <form:input type="hidden" path="navigatorJavaEnabled"/>
