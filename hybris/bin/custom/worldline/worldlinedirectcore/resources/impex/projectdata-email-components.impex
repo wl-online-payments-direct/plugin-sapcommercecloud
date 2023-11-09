@@ -1,6 +1,7 @@
 $contentCatalog=apparel-ukContentCatalog
 $contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]),CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
 $lang=en
+
 INSERT_UPDATE CMSParagraphComponent;$contentCV[unique=true];uid[unique=true];content[lang=$lang]
                                    ;;WorldlineOrderConfirmationEmailBody;"
 #macro( genHtmlBoldFont $text )
@@ -357,11 +358,11 @@ INSERT_UPDATE CMSParagraphComponent;$contentCV[unique=true];uid[unique=true];con
 								<td valign='top'>&nbsp;</td>
 								<td valign='top'><p style='margin: 0 0 10px 0'><font color='#666666' size='2' face='Arial, Helvetica, sans-serif'><b>#if(${ctx.order.deliveryCost.value} > 0) ${ctx.order.deliveryCost.formattedValue} #else ${ctx.messages.free} #end</b></font></p></td>
 							</tr>
-							#if (${ctx.order.paymentCost.value} > 0)
+							#if (${ctx.order.surcharge})
                                 <tr>
                                     <td valign='top'><p style='margin: 0'><font color='#414a4f' size='2' face='Arial, Helvetica, sans-serif'><b>${ctx.messages.surcharge}:</b></font></p></td>
                                     <td valign='top'>&nbsp;</td>
-                                    <td valign='top'><p style='margin: 0'><font color='#414a4f' size='2' face='Arial, Helvetica, sans-serif'><b>- ${ctx.order.paymentCost.formattedValue}</b></font></p></td>
+                                    <td valign='top'><p style='margin: 0'><font color='#414a4f' size='2' face='Arial, Helvetica, sans-serif'><b>${ctx.order.surcharge.formattedValue}</b></font></p></td>
                                 </tr>
 							#end
 							<tr>
@@ -400,6 +401,7 @@ INSERT_UPDATE CMSParagraphComponent;$contentCV[unique=true];uid[unique=true];con
 INSERT_UPDATE CMSParagraphComponent;$contentCV[unique=true];uid[unique=true];content[lang=$lang]
                                    ;;WorldlineReplenishmentOrderConfirmationEmailBody;"
 ## messageSource=classpath:/powertoolsstore/messages/email-replenishmentOrderConfirmation_$lang.properties
+## messageSource=classpath:/worldlinedirectcore/messages/orderConfirmationBody_$lang.properties
 #macro( genHtmlBoldFont $text )
 <font color='#414a4f' size='2' face='Arial, Helvetica, sans-serif'><b>$text</b></font>
 #end
