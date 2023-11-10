@@ -178,7 +178,7 @@ ACC.worldlineCart = {
                     break
             }
         }
-
+        var dateToday = new Date();
         $(".js-replenishment-datepicker").datepicker({
             dateFormat: dateForDatePicker,
             onClose: function () {
@@ -186,8 +186,8 @@ ACC.worldlineCart = {
                 {
                     ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(true);
                 }
-
-            }
+            },
+            minDate: dateToday
         });
 
     }
