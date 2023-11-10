@@ -4,7 +4,7 @@ $version = Staged
 $contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=$version])[default=$contentCatalog:$version]
 $lang = en
 $wideContent = CMSImageComponent, BannerComponent
-
+$emailResource=jar:com.worldline.direct.constants.WorldlinedirectcoreConstants&/worldlinedirectcore/import/email
 INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                                        ; name                                                     ; page                                                                                                                                  ; actions(uid, $contentCV); &componentRef
                                  ;                          ; WorldlineAccountOrderDetailsShippingComponent             ; Account Order Details Shipping Info Component            ; /WEB-INF/views/addons/worldlinedirectb2bcheckoutaddon/responsive/pages/replenishment/accountOrderDetailShippingInfo.jsp               ;                 ; WorldlineAccountOrderDetailsShippingComponent
                                  ;                          ; WorldlineAccountMyReplenishmentOrderDetailsItemsComponent ; Account Replenishment Order Details Items Info Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentOrderDetailItems.jsp ;                 ; WorldlineAccountMyReplenishmentOrderDetailsItemsComponent
@@ -83,6 +83,8 @@ $jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsS
 INSERT_UPDATE RendererTemplate; code[unique = true]                                           ; description[lang = $lang]                             ; templateScript[lang = $lang, translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]; contextClass; rendererType(code)[default = 'velocity']
                               ; $store_Name_Email_Replenishment_Cart_Non_Valid_Body    ; "Replenishment Cart Non Valid Email Body"    ; $jarEmailResource/email-replenishmentCartNonValidBody.vm                                                  ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
                               ; $store_Name_Email_Replenishment_Cart_Non_Valid_Subject ; "Replenishment Cart Non Valid Email Subject" ; $jarEmailResource/email-replenishmentCartNonValidSubject.vm                                               ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
+                              ; $store_Email_Replenishment_Order_Placed_Body          ; "Order Confirmation Email Subject" ; $emailResource/email-replenishmentOrderPlacedBody.vm
+                              ; $store_Email_Replenishment_Order_Confirmation_Body    ; ""                                 ; $emailResource/email-replenishmentOrderConfirmationBody.vm
 
 
 $jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
@@ -105,6 +107,8 @@ INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];po
 
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
                        ;;ReplenishmentCartNonValidEmail;Cart Non Valid Email;ReplenishmentCartNonValidEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+                       ;; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
+                       ;; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
 
 
 ##################################  Cart with replenishment form    ##################################
@@ -114,3 +118,13 @@ INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;
 INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents(uid, $contentCV)
                          ;;BottomContentSlot-cartPage;Worldline Bottom Content Slot for Cart Page;true;WorldlineCheckoutComponent,CartSuggestions
                          ;;TopContent-cartPage;Top content for Cart Slot;true;NextDayDeliveryBanner120,WorldlineCartComponent
+
+##################################  Order confirmation email  ##################################
+UPDATE RendererTemplate;code[unique=true];description[lang=$lang];templateScript[lang=$lang,translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                       ;powertools_Email_Order_Confirmation_Body;"Order Confirmation Body";$emailResource/email-orderConfirmationBody.vm
+UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];cmsComponents(uid,$contentCV)
+                  ;;OrderConfirmationEmailTopSlot;EmailBannerSaleNowOnImage,WorldlineOrderConfirmationEmailBody
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=de];fromName[lang=de]
+                       ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+

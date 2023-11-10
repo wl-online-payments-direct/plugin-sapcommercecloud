@@ -128,6 +128,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                           paymentResponse.getMerchantAction(),
                           WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
                 }
+                updatePaymentInfoIfNeeded(cartToOrderCronJob.getCart(), paymentResponse.getPayment());
                 saveSurchargeData(cartToOrderCronJob.getCart(), paymentResponse.getPayment());
                 savePaymentToken(cartToOrderCronJob.getCart(), paymentResponse.getPayment(), Boolean.TRUE, cartToOrderCronJob.getCode());
                 saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getUid(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), paymentResponse.getPayment());
