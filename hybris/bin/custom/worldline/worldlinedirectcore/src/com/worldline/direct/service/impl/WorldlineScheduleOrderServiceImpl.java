@@ -36,8 +36,8 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
         cartToOrderCronJob.setPaymentInfo(paymentInfo);
         cartToOrderCronJob.setJob(cronJobService.getJob(ACCELERATOR_CART_TO_ORDER_JOB));
         setCronJobToTrigger(cartToOrderCronJob, triggers);
-//        final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cart.getPaymentType().getCode());
-//        cartToOrderCronJob.setSubmitted(!cardPaymentType);
+        final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cart.getPaymentType().getCode());
+        cartToOrderCronJob.setSubmitted(!cardPaymentType);
         modelService.save(cartToOrderCronJob);
         return cartToOrderCronJob;
     }
