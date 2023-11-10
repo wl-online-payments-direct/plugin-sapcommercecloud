@@ -42,6 +42,9 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 mandate.setCustomerReference(cartToOrderCronJobModel.getCode() + System.currentTimeMillis());
             }
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
+            if (!worldlineConfigurationService.getWorldlineConfiguration(cartToOrderCronJobModel.getCart().getStore()).isFirstRecurringPayment()) {
+                params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, cartToOrderCronJobModel.getCart().getCurrency().getIsocode()));
+            }
 
             final CreateHostedCheckoutResponse hostedCheckout = merchant.hostedCheckout().createHostedCheckout(params);
 
@@ -140,7 +143,6 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
             }
 
-            WorldlineLogUtils.logAction(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, "payment");
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, payment);
 
