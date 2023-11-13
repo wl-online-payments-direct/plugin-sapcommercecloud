@@ -82,11 +82,7 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
                     break;
                 case SCHEDULE_REPLENISHMENT_ORDER:
                 default:
-                    if (currentWorldlineConfiguration.isFirstRecurringPayment()) {
-                        orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
-                    } else {
-                        orderDetails = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
-                    }
+                    orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
                     break;
             }
         } catch (final UnknownIdentifierException e) {
