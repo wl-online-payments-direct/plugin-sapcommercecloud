@@ -33,22 +33,9 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
     @Override
     public CreateHostedCheckoutResponse createReplenishmentHostedCheckout(AbstractOrderData abstractOrderData, BrowserData browserData, RecurringPaymentEnum recurringPaymentType) throws InvalidCartException {
         final CreateHostedCheckoutResponse hostedCheckout;
-        switch (recurringPaymentType) {
-            case IMMEDIATE:
-                OrderModel orderModel = customerAccountService.getOrderForCode(abstractOrderData.getCode(), baseStoreService.getCurrentBaseStore());
-                hostedCheckout = worldlineB2BPaymentService.createImmediateRecurringOrderHostedCheckout(orderModel, browserData);
-                storeReturnMac(orderModel, hostedCheckout.getRETURNMAC());
-
-                break;
-            case SCHEDULED:
-            default:
-                CartToOrderCronJobModel cartToOrderCronJob = worldlineCustomerAccountService.getCartToOrderCronJob(((ScheduledCartData)abstractOrderData).getJobCode());
-                CartModel cart = cartToOrderCronJob.getCart();
-                hostedCheckout = worldlineB2BPaymentService.createScheduledRecurringOrderHostedCheckout(cartToOrderCronJob, browserData);
-                storeReturnMac(cart, hostedCheckout.getRETURNMAC());
-
-                break;
-        }
+        OrderModel orderModel = customerAccountService.getOrderForCode(abstractOrderData.getCode(), baseStoreService.getCurrentBaseStore());
+        hostedCheckout = worldlineB2BPaymentService.createImmediateRecurringOrderHostedCheckout(orderModel, browserData);
+        storeReturnMac(orderModel, hostedCheckout.getRETURNMAC());
         hostedCheckout.setPartialRedirectUrl(WorldlineUrlUtils.buildFullURL(hostedCheckout.getPartialRedirectUrl()));
         return hostedCheckout;
     }
@@ -104,7 +91,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
         switch (recurringPaymentType) {
             case IMMEDIATE:
                 final OrderModel order = customerAccountService.getOrderForCode(code, baseStoreService.getCurrentBaseStore());
-                paymentResponse = worldlineB2BPaymentService.createRecurringPaymentForImmediateReplenishmentHostedTokenization(order.getSchedulingCronJob(), worldlineHostedTokenizationData);
+                paymentResponse = worldlineB2BPaymentService.createRecurringPaymentForImmediateReplenishmentHostedTokenization(order, worldlineHostedTokenizationData);
 
                 if (paymentResponse.getMerchantAction() != null) {
                     storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
@@ -118,21 +105,6 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
 
                 handlePaymentResponse(order, paymentResponse.getPayment());
                 scheduledCartData = prepareCronJob(code);
-                break;
-            case SCHEDULED:
-                CartToOrderCronJobModel cartToOrderCronJob = worldlineCustomerAccountService.getCartToOrderCronJob(code);
-                paymentResponse = worldlineB2BPaymentService.createRecurringPaymentForScheduledReplenishmentHostedTokenization(cartToOrderCronJob, worldlineHostedTokenizationData);
-                if (paymentResponse.getMerchantAction() != null) {
-                    storeReturnMac(cartToOrderCronJob.getCart(), paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
-                    throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
-                          paymentResponse.getMerchantAction(),
-                          WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
-                }
-                updatePaymentInfoIfNeeded(cartToOrderCronJob.getCart(), paymentResponse.getPayment());
-                saveSurchargeData(cartToOrderCronJob.getCart(), paymentResponse.getPayment());
-                savePaymentToken(cartToOrderCronJob.getCart(), paymentResponse.getPayment(), Boolean.TRUE, cartToOrderCronJob.getCode());
-                saveMandateIfNeeded(cartToOrderCronJob.getCart().getStore().getUid(), (WorldlinePaymentInfoModel) cartToOrderCronJob.getPaymentInfo(), paymentResponse.getPayment());
-                scheduledCartData = handlePaymentResponse(cartToOrderCronJob);
                 break;
             default:
 
