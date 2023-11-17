@@ -68,16 +68,7 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
         final AbstractOrderData orderDetails;
         WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         try {
-            switch (orderType) {
-                case PLACE_ORDER:
-                    orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
-                    break;
-                case SCHEDULE_REPLENISHMENT_ORDER:
-                default:
-                    orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
-                    break;
-            }
-
+            orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
         } catch (final UnknownIdentifierException e) {
             LOGGER.warn("[WORLDLIINE] Attempted to handle hosted Tokenization payment on an order that does not exist. Redirect to cart page.");
             return REDIRECT_PREFIX + "/cart";

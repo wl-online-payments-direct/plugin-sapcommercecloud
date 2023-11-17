@@ -577,7 +577,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
         final PaymentResponse paymentResponse = getPayment(storeId, paymentId);
         if (WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.valueOf(paymentResponse.getStatus()).equals(WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURED)) {
-            amountPaid = paymentResponse.getPaymentOutput().getAmountOfMoney().getAmount();
+            amountPaid = paymentResponse.getPaymentOutput().getAcquiredAmount().getAmount();
         }
 
         if (CollectionUtils.isEmpty(capturesResponse.getCaptures())) {
