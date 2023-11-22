@@ -92,6 +92,7 @@
     <extension name='customersupportbackoffice' />
     <extension name='webhookbackoffice' />
     <extension name='webhookservices' />
+    <extension name='ordermanagementfacades' />
     <extension name='b2bordermanagementfacades' />
     <extension name='b2bordermanagementwebservices' />
     <extension name='warehousing' />
