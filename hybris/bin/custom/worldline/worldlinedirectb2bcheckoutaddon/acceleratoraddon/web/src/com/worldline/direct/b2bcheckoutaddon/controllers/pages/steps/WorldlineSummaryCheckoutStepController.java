@@ -227,7 +227,7 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
                 if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder())) {
                     redirect = worldlinePlaceOrderUtils.submitReplenishmentOrder(abstractOrderData, browserData, redirectModel);
                 } else {
-                    redirect = worldlinePlaceOrderUtils.submiOrder(abstractOrderData, browserData, redirectModel);
+                    redirect = worldlinePlaceOrderUtils.submitOrder(abstractOrderData, browserData, redirectModel);
                 }
             }
 
