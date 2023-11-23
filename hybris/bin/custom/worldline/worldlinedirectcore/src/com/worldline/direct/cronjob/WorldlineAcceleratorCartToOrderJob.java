@@ -40,9 +40,8 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
             return new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED);
 
         }
-        if (WorldlineRecurringPaymentStatus.ACTIVE.equals(worldlineRecurringService.isRecurringPaymentEnable(cronJob))) {
 
-//            if (BooleanUtils.isTrue(cronJob.isSubmitted()) && WorldlineRecurringPaymentStatus.ACTIVE.equals(worldlineRecurringService.isRecurringPaymentEnable(cronJob))) {
+        if (BooleanUtils.isTrue(cronJob.isSubmitted()) && WorldlineRecurringPaymentStatus.ACTIVE.equals(worldlineRecurringService.isRecurringPaymentEnable(cronJob))) {
             final String replenishmentOrderProcessCode = "worldlineReplenishmentOrderProcess" + cronJob.getCode() + System.currentTimeMillis();
             final ReplenishmentProcessModel businessProcessModel = getBusinessProcessService()
                     .createProcess(replenishmentOrderProcessCode, "worldlineReplenishmentOrderProcess");

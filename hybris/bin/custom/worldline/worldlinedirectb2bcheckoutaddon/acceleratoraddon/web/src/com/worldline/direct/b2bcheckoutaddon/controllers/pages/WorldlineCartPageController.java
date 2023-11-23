@@ -378,7 +378,9 @@ public class WorldlineCartPageController extends AbstractCartPageController {
          // TODO: Make setting of default recurrence enum value backoffice driven rather hard coding in controller
          worldlineReplenishmentForm.setReplenishmentOrder(cart.isReplenishmentOrder());
          SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-         worldlineReplenishmentForm.setReplenishmentEndDate(dateFormat.format(cart.getReplenishmentEndDate()));
+         if (cart.getReplenishmentEndDate() != null) {
+            worldlineReplenishmentForm.setReplenishmentEndDate(dateFormat.format(cart.getReplenishmentEndDate()));
+         }
          worldlineReplenishmentForm.setReplenishmentStartDate(dateFormat.format(cart.getReplenishmentStartDate()));
          worldlineReplenishmentForm.setReplenishmentRecurrence(cart.getReplenishmentRecurrence());
 
@@ -402,7 +404,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
       } else if (!model.containsAttribute("replenishmentForm")) {
          final WorldlineReplenishmentForm worldlineReplenishmentForm = new WorldlineReplenishmentForm();
          // TODO: Make setting of default recurrence enum value backoffice driven rather hard coding in controller
-         worldlineReplenishmentForm.setReplenishmentRecurrence(B2BReplenishmentRecurrenceEnum.MONTHLY);
+         worldlineReplenishmentForm.setReplenishmentRecurrence(B2BReplenishmentRecurrenceEnum.DAILY);
          worldlineReplenishmentForm.setnDays("14");
          final List<DayOfWeek> daysOfWeek = new ArrayList();
          daysOfWeek.add(DayOfWeek.MONDAY);

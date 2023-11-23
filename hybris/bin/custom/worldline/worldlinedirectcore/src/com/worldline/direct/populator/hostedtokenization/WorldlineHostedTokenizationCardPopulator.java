@@ -78,9 +78,6 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
 
-
-//            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(MERCHANT_INITIAITED);
-//            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileSequenceIndicator(RECCURANCE_SUBSEQUENT);
         } else {
             cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
             cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
@@ -102,9 +99,6 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
                 CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
                 cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
                 cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
-
-                cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(CARDHOLDER_INITIAITED);
-                cardPaymentMethodSpecificInput.setUnscheduledCardOnFileSequenceIndicator(RECCURANCE_FIRST);
             }
         }
 

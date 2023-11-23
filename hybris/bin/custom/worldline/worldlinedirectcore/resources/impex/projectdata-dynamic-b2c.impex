@@ -11,7 +11,7 @@ $wideContent = CMSImageComponent, BannerComponent
 $jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
 $siteName = apparel-uk
 $store = apparel-uk
-$emailResource=jar:com.worldline.direct.core.setup.CoreSystemSetup&/worldlinedirectcore/import/emails
+$emailResource=jar:com.worldline.direct.constants.WorldlinedirectcoreConstants&/worldlinedirectcore/import/email
 $lang = en
 
 $emailPackageName = $config-emailContextPackageName
@@ -105,6 +105,22 @@ INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]        
                          ;                          ; BodyContent-my-replenishment-details ; Body Content Slot for My Replenishment Order Details ; true  ; AccountMyReplenishmentOrderDetailsHeadlineComponent,AccountMyReplenishmentOrderDetailsOverviewComponent,AccountMyReplenishmentOrderDetailsActionsComponent,WorldlineAccountMyReplenishmentOrderDetailsItemsComponent,WorldlineMandateDetailsComponent,WorldlineAccountOrderDetailsShippingComponent,WorldlineOrderDetailsOrderTotalsComponent,AccountReplenishmentOrderHistoryComponent ; ; ;
 
 ###### Account My Replenishment Order Details End ######
+
+# CMS components and Email velocity templates
+
+
+####### UPDATE order Confirmation Email to include surcharge START #######
+
+UPDATE RendererTemplate;code[unique=true];description[lang=$lang];templateScript[lang=$lang,translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                       ;apparel-uk_Email_Order_Confirmation_Body;"Order Confirmation Body";$emailResource/email-orderConfirmationBody.vm
+UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];cmsComponents(uid,$contentCV)
+                  ;;OrderConfirmationEmailTopSlot;EmailBannerSaleNowOnImage,WorldlineOrderConfirmationEmailBody
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=de];fromName[lang=de]
+                       ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+
+####### UPDATE order Confirmation Email to include surcharge END #######
+
 INSERT_UPDATE RendererTemplate; code[unique = true]                                      ; contextClass; rendererType(code)[default = 'velocity']
 
                               ; $siteName_Email_Replenishment_Order_Placed_Body          ; de.hybris.platform.b2bacceleratoraddon.proccess.email.context.OrderReplenishmentEmailContext
@@ -113,9 +129,9 @@ INSERT_UPDATE RendererTemplate; code[unique = true]                             
                               ; $siteName_Email_Replenishment_Order_Confirmation_Body    ; de.hybris.platform.yacceleratorfacades.process.email.context.OrderNotificationEmailContext
 
 UPDATE RendererTemplate; code[unique = true]                                      ; description[lang = $lang]          ; templateScript[lang = $lang, translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
-                       ; $siteName_Email_Replenishment_Order_Placed_Body          ; "Order Confirmation Email Subject" ; $jarEmailResource/email-replenishmentOrderPlacedBody.vm
+                       ; $siteName_Email_Replenishment_Order_Placed_Body          ; "Order Confirmation Email Subject" ; $emailResource/email-replenishmentOrderPlacedBody.vm
                        ; $siteName_Email_Replenishment_Order_Placed_Subject       ; "Order Confirmation Email Subject" ; $jarEmailResource/email-replenishmentOrderPlacedSubject.vm
-                       ; $siteName_Email_Replenishment_Order_Confirmation_Body    ; ""                                 ; $jarEmailResource/email-replenishmentOrderConfirmationBody.vm
+                       ; $siteName_Email_Replenishment_Order_Confirmation_Body    ; ""                                 ; $emailResource/email-replenishmentOrderConfirmationBody.vm
                        ; $siteName_Email_Replenishment_Order_Confirmation_Subject ; "Order Confirmation Email Subject" ; $jarEmailResource/email-replenishmentOrderConfirmationSubject.vm
 
 
@@ -154,8 +170,8 @@ INSERT_UPDATE ContentSlotForTemplate; $contentCV[unique = true]; uid[unique = tr
                                     ;                          ; BottomContent-ReplenishmentOrderConfirmationEmail ; BottomContent          ;                                                                                                      ; EmailBottomSlot                            ; true
 
 INSERT_UPDATE EmailPage; $contentCV[unique = true]; uid[unique = true]                  ; name                     ; masterTemplate(uid, $contentCV)             ; defaultPage; approvalStatus(code)[default = 'approved']; fromEmail[lang = $lang]     ; fromName[lang = $lang]
-                       ;                          ; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; customerservices@hybris.com ; Customer Services Team
-                       ;                          ; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; customerservices@hybris.com ; Customer Services Team
+                       ;                          ; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
+                       ;                          ; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
 
 
 
@@ -258,9 +274,5 @@ INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;c
 
 
 
-####### UPDATE order Confirmation Email to include surcharge #######
-UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];cmsComponents(uid,$contentCV)
-                  ;;OrderConfirmationEmailTopSlot;EmailBannerSaleNowOnImage,WorldlineOrderConfirmationEmailBody
 
-INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=de];fromName[lang=de]
-                       ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+

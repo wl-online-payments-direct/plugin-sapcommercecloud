@@ -75,9 +75,14 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
    private BigDecimal calculateRefundAmount(ReturnRequestModel returnRequestModel, String storeId, String paymentId, BigDecimal plannedAmount, String currencyISOcode) {
      Long nonCapturedAmount = worldlinePaymentService.getNonCapturedAmount(storeId, paymentId, plannedAmount, currencyISOcode);
      BigDecimal capturedAmount = plannedAmount.subtract(new BigDecimal(nonCapturedAmount));
-     if (capturedAmount.compareTo(returnRequestModel.getSubtotal()) == 1
-           || capturedAmount.compareTo(returnRequestModel.getSubtotal()) == 0) { // we have fully captured order or captured amount is greater than refund amount
-        return returnRequestModel.getSubtotal();
+     BigDecimal refundAmount = returnRequestModel.getSubtotal();
+     if (returnRequestModel.getRefundDeliveryCost()) {
+        BigDecimal deliveryCost = new BigDecimal(returnRequestModel.getOrder().getDeliveryCost());
+        refundAmount = returnRequestModel.getSubtotal().add(deliveryCost.setScale(refundAmount.scale(), BigDecimal.ROUND_HALF_EVEN));
+     }
+     if (capturedAmount.compareTo(refundAmount) == 1
+           || capturedAmount.compareTo(refundAmount) == 0) { // we have fully captured order or captured amount is greater than refund amount
+        return refundAmount;
      } else { // we have partly captured order and the return amount is gr than captured amount
         return new BigDecimal(0);
      }

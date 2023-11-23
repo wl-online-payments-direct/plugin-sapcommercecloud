@@ -16,7 +16,6 @@ import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
-import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.cronjob.model.TriggerModel;
 import de.hybris.platform.order.InvalidCartException;
@@ -85,10 +84,8 @@ public class DefaultWorldLineExtendedB2BCheckoutFacadeImpl extends DefaultB2BChe
                 worldlineScheduleOrderService.updateCartRecurringPaymentInfo(cartModel, placeOrderData.isCardDetailsCheck());
                 final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cartModel.getPaymentType().getCode());
 
-                if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment() && BooleanUtils.isTrue(cardPaymentType)) {
+                if (BooleanUtils.isTrue(cardPaymentType)) {
                     return (T) scheduleOrderAndPlaceOrder(triggerDataListData);
-                } else {
-                    return (T) scheduleOrder(triggerDataListData);
                 }
             }
 

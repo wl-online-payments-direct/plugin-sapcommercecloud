@@ -50,17 +50,15 @@ public class WorldlinePlaceOrderUtils {
     @Resource(name = "baseSiteService")
     private BaseSiteService baseSiteService;
 
-    public String submiOrder(AbstractOrderData abstractOrderData, BrowserData browserData, RedirectAttributes redirectAttributes) throws InvalidCartException {
+    public String submitOrder(AbstractOrderData abstractOrderData, BrowserData browserData, RedirectAttributes redirectAttributes) throws InvalidCartException {
         final CartData cartData = checkoutFacade.getCheckoutCart();
         switch (cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType()) {
             case HOSTED_CHECKOUT:
-
                 storeHOPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
                 CreateHostedCheckoutResponse hostedCheckoutResponse = worldlineCheckoutFacade.createHostedCheckout(abstractOrderData.getCode(), browserData);
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
                 try {
-
                     final String hostedTokenizationId = abstractOrderData.getWorldlinePaymentInfo().getHostedTokenizationId();
                     WorldlineHostedTokenizationData worldlineHostedTokenizationData = new WorldlineHostedTokenizationData();
                     worldlineHostedTokenizationData.setBrowserData(browserData);
@@ -93,8 +91,6 @@ public class WorldlinePlaceOrderUtils {
                 break;
         }
         return StringUtils.EMPTY;
-
-
     }
 
 
@@ -103,26 +99,14 @@ public class WorldlinePlaceOrderUtils {
         switch (cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType()) {
             case HOSTED_CHECKOUT:
                 CreateHostedCheckoutResponse hostedCheckoutResponse;
-                if (abstractOrderData instanceof ScheduledCartData)
-                {
-                    storeHOPReturnUrlInSession(((ScheduledCartData) abstractOrderData).getJobCode(), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
-                    hostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.SCHEDULED);
-                } else {
-                    storeHOPReturnUrlInSession(abstractOrderData.getCode(), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
-                    hostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.IMMEDIATE);
-                }
+                storeHOPReturnUrlInSession(abstractOrderData.getCode(), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+                hostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.IMMEDIATE);
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case HOSTED_TOKENIZATION:
-
                 try {
                     WorldlineHostedTokenizationData worldlineHostedTokenizationData = prepareHTPData(abstractOrderData, browserData);
-                    if (abstractOrderData instanceof ScheduledCartData) {
-                        storeHTPReturnUrlInSession(((ScheduledCartData) abstractOrderData).getJobCode(),  OrderType.SCHEDULE_REPLENISHMENT_ORDER);
-                        worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(((ScheduledCartData) abstractOrderData).getJobCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.SCHEDULED);
-                    } else {
-                        storeHTPReturnUrlInSession(getOrderCode(abstractOrderData),  OrderType.SCHEDULE_REPLENISHMENT_ORDER);
-                        abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.IMMEDIATE);
-                    }
+                    storeHTPReturnUrlInSession(getOrderCode(abstractOrderData),  OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+                    abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.IMMEDIATE);
                     return redirectToOrderConfirmationPage(abstractOrderData);
                 } catch (WorldlineNonAuthorizedPaymentException e) {
                     switch (e.getReason()) {

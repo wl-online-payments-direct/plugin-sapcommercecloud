@@ -168,10 +168,11 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
     @Override
     public void saveSurchargeData(AbstractOrderModel orderModel, SurchargeSpecificOutput surchargeSpecificOutput) {
         if (orderModel instanceof OrderModel) {
-//            ((OrderModel) orderModel).setWorldlineAdValoremRate(surchargeSpecificOutput.getSurchargeRate().getAdValoremRate());
+            ((OrderModel) orderModel).setWorldlineAdValoremRate(surchargeSpecificOutput.getSurchargeRate().getAdValoremRate());
             ((OrderModel) orderModel).setWorldlineSpecificRate(surchargeSpecificOutput.getSurchargeRate().getSpecificRate());
             ((OrderModel) orderModel).setWorldlineSurchargeProductTypeId(surchargeSpecificOutput.getSurchargeRate().getSurchargeProductTypeId());
             ((OrderModel) orderModel).setWorldlineSurchargeProductTypeVersion(surchargeSpecificOutput.getSurchargeRate().getSurchargeProductTypeVersion());
+            ((OrderModel) orderModel).setWorldlineSurchargeAmount(worldlineAmountUtils.fromAmount(surchargeSpecificOutput.getSurchargeAmount().getAmount(), orderModel.getCurrency().getIsocode()).doubleValue());
         }
         savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
     }

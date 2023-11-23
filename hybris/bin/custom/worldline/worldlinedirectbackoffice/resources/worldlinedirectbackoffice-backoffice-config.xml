@@ -400,7 +400,7 @@
 		<context component="editor-area">
 			<ea:editorArea>
 				<ea:tab name="hmc.positions_and_prices">
-					<ea:section name="hmc.surcharge" position="3">
+					<ea:section name="hmc.worldline.surcharge" position="2">
 						<ea:attribute qualifier="worldlineSurchargeProductTypeId" readonly="true"/>
 						<ea:attribute qualifier="worldlineSurchargeProductTypeVersion" readonly="true"/>
 						<ea:attribute qualifier="worldlineAdValoremRate" readonly="true"/>
