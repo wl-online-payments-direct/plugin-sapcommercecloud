@@ -29,7 +29,7 @@
 
         <!-- Frequency replenishment data -->
         <div class="column scheduleform  scheduleform_left scheduleform-container">
-            <div class="column scheduleform scheduleformD" style="display: none;">
+            <div class="column scheduleform scheduleformD">
                 <div class="form-group">
                     <label class="control-label" for="nDays">
                         <spring:theme code="responsive.replenishmentScheduleForm.daily.days"/>
@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <div class="column scheduleform scheduleformM">
+            <div class="column scheduleform scheduleformM" style="display: none;">
                 <div class="form-group">
                     <label class="control-label" for="nthDayOfMonth">
                         <spring:theme code="responsive.replenishmentScheduleForm.monthly.day"/>
@@ -127,7 +127,7 @@
                     </div>
                 </div>
             </div>
-            <div class="column scheduleform scheduleformM">
+            <div class="column scheduleform scheduleformM" style="display: none;">
                 <div class="form-group">
                     <label class="control-label" for="nMonths">
                         <spring:theme code="responsive.replenishmentScheduleForm.monthly.months"/>

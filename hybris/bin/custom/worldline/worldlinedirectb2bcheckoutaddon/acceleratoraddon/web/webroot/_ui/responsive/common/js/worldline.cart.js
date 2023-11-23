@@ -1,48 +1,26 @@
 ACC.worldlineCart = {
     _autoload: [
+        "replenishmentInit",
         "bindScheduleReplenishment",
-        "replenishmentInit"
 	],
     bindScheduleReplenishment: function (data) {
         var form = $('#replenishmentForm');
         var placeReplenishment = false;
         var formContainer = $(".replenishment-form-container");
         var replenishOrderCheckbox = $("#replenishmentForm #replenishmentOrder");
+        ACC.worldlineCart.showHideAdditionalFormParameters();
         $(replenishOrderCheckbox).change(function(e) {
             e.preventDefault();
             if (replenishOrderCheckbox.is(':checked')) {
-                $('.scheduleformM').show();
                 formContainer.prop("style", "display: block");
-                $("#frequency").change(function (event) {
-                    event.stopPropagation();
-                    switch (this.value) {
-                        case "DAILY":
-                            $('.scheduleformD').show();
-                            $('.scheduleformW').hide();
-                            $('.scheduleformM').hide();
-                            break;
-                        case "WEEKLY":
-                            $('.scheduleformD').hide();
-                            $('.scheduleformW').show();
-                            $('.scheduleformM').hide();
-                            break;
-                        case "MONTHLY":
-                            $('.scheduleformD').hide();
-                            $('.scheduleformW').hide();
-                            $('.scheduleformM').show();
-                            break
-                        default :
-                            $('.scheduleformD').hide();
-                            $('.scheduleformW').hide();
-                            $('.scheduleformM').hide();
-                            break;
-                    }
-                });
             } else {
                 formContainer.prop("style", "display: none");
             }
-
-        })
+        });
+        $("#frequency").bind("load change",function (event) {
+            event.stopPropagation();
+            ACC.worldlineCart.showHideAdditionalFormParameters();
+        });
 
         $(document).on("click", '#replenishmentSchedule .js-open-datepicker', function () {
             $(this).datepicker('show');
@@ -126,6 +104,31 @@ ACC.worldlineCart = {
         }
     },
 
+    showHideAdditionalFormParameters: function() {
+        switch ($("#frequency").val()) {
+            case "DAILY":
+                $('.scheduleformD').show();
+                $('.scheduleformW').hide();
+                $('.scheduleformM').hide();
+                break;
+            case "WEEKLY":
+                $('.scheduleformD').hide();
+                $('.scheduleformW').show();
+                $('.scheduleformM').hide();
+                break;
+            case "MONTHLY":
+                $('.scheduleformD').hide();
+                $('.scheduleformW').hide();
+                $('.scheduleformM').show();
+                break
+            default :
+                $('.scheduleformD').hide();
+                $('.scheduleformW').hide();
+                $('.scheduleformM').hide();
+                break;
+        }
+    },
+
     replenishmentInit: function () {
         var placeOrderFormReplenishmentOrder = $('#replenishmentSchedule').data("placeOrderFormReplenishmentOrder");
         var placeOrderFormReplenishmentRecurrence = $('#replenishmentSchedule').data("placeOrderFormReplenishmentRecurrence");
@@ -141,10 +144,8 @@ ACC.worldlineCart = {
         // replenishment schedule data not set to cart yet
         if (!placeOrderFormReplenishmentOrder) {
 
-             $("#frequency option[value=" + placeOrderFormReplenishmentRecurrence + "]").attr('selected', 'selected');
-            // default value for daily
-            //$("input:radio[name='replenishmentRecurrence'][value=DAILY]").prop('checked', false);
-            $('.scheduleformD').hide();
+            $("#frequency option[value=" + placeOrderFormReplenishmentRecurrence + "]").attr('selected', 'selected');
+
             $("#nDays option[value=" + placeOrderFormNDays + "]").attr('selected', 'selected');
 
             // default value for weekly
@@ -177,7 +178,8 @@ ACC.worldlineCart = {
                     break
             }
         }
-
+        var currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + 1);
         $(".js-replenishment-datepicker").datepicker({
             dateFormat: dateForDatePicker,
             onClose: function () {
@@ -185,8 +187,8 @@ ACC.worldlineCart = {
                 {
                     ACC.worldlineCart.toggleReplenishmentScheduleWrongDatesError(true);
                 }
-
-            }
+            },
+            minDate: currentDate
         });
 
     }

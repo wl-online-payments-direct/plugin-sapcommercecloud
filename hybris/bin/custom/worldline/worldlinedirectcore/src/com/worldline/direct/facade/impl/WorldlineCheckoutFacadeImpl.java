@@ -587,7 +587,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             PaymentModeModel paymentMode = paymentModeService.getPaymentModeForCode(paymentModeCode);
             abstractOrderModel.setPaymentMode(paymentMode);
             modelService.save(abstractOrderModel);
-            if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge()) {
+            if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge() || abstractOrderModel instanceof OrderModel) {
                 worldlineTransactionService.savePaymentCost(abstractOrderModel, keepPaymentCost);
             }
         }
