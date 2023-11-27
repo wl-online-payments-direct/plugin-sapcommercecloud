@@ -93,10 +93,8 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
             worldlineScheduleOrderService.updateCartRecurringPaymentInfo(cartModel, placeOrderData.isCardDetailsCheck());
             final boolean cardPaymentType = CheckoutPaymentType.CARD.getCode().equals(cartModel.getPaymentType().getCode());
 
-            if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment() && BooleanUtils.isTrue(cardPaymentType)) {
+            if (BooleanUtils.isTrue(cardPaymentType)) {
                 return (T) scheduleOrderAndPlaceOrder(triggerDataListData);
-            } else {
-                return (T) scheduleOrder(triggerDataListData);
             }
         }
 

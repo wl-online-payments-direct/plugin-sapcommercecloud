@@ -1,5 +1,5 @@
 const PAYMENT_METHOD_SELECTORS = {
-    PLACE_ORDER_FORM: '#worldlinePlaceOrderForm',
+    WORLDLINE_PLACE_ORDER_FORM: '.js-worldlinePlaceOrderForm',
     PAYMENT_METHOD_FORM: '#worldlineSelectPaymentForm',
     PAYMENT_METHOD_SUBMIT_BUTTON: '.submit_worldlineSelectPaymentForm',
     CARD_ROW_TABLE_ROW: '.card-row',
@@ -29,7 +29,7 @@ ACC.worldlinePaymentPost = {
         var json = ACC.worldlinePaymentPost.internalData();
         for (key in json) {
             if (json.hasOwnProperty(key))
-                $(PAYMENT_METHOD_SELECTORS.PLACE_ORDER_FORM + ' input[name=' + key + ']').val(json[key]);
+                $(PAYMENT_METHOD_SELECTORS.WORLDLINE_PLACE_ORDER_FORM + ' input[name=' + key + ']').val(json[key]);
         }
 
     },
@@ -104,7 +104,7 @@ ACC.worldlinePaymentPost = {
     },
 
     bindSubmitWorldlinePlaceOrderForm: function () {
-        $('#worldlinePlaceOrderForm').submit(function (e) {
+        $(PAYMENT_METHOD_SELECTORS.WORLDLINE_PLACE_ORDER_FORM).submit(function (e) {
             ACC.worldlinePaymentPost.fillInternalDataWorldlinePlaceOrderForm();
             return true;
         });
