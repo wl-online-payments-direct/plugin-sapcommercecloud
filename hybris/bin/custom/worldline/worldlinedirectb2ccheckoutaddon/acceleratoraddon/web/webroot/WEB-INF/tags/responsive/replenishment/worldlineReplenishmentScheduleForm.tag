@@ -29,7 +29,7 @@
 
         <!-- Frequency replenishment data -->
         <div class="column scheduleform  scheduleform_left scheduleform-container">
-            <div class="column scheduleform scheduleformD" style="display: none;">
+            <div class="column scheduleform scheduleformD">
                 <div class="form-group">
                     <label class="control-label" for="nDays">
                         <spring:theme code="responsive.replenishmentScheduleForm.daily.days"/>

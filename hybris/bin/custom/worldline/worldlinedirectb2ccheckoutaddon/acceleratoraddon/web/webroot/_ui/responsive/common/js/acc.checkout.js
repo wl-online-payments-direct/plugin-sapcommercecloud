@@ -3,7 +3,8 @@ ACC.checkout = {
 	_autoload: [
 		"bindCheckO",
 		"bindForms",
-		"bindSavedPayments"
+		"bindSavedPayments",
+		"bindPlaceOrder"
 	],
 
 	selectPciOption: "#selectPciOption",
@@ -147,7 +148,28 @@ ACC.checkout = {
                        }
                   }
 				} else {
-					ACC.checkout.bindStartCheckout(checkoutUrl);
+                //TODO update this on phase 3.1.
+				    var options = {
+				        'replenishmentOrder' : false,
+				        'replenishmentStartDate': "",
+                        'replenishmentEndDate': "",
+                        'nDays': "",
+                        'nWeeks': "",
+                        'nMonths': "",
+                        'nthDayOfMonth': "",
+                        'nDaysOfWeek': "",
+                        'replenishmentRecurrence': ""
+				    };
+
+                      $.ajax({
+                          url: ACC.config.encodedContextPath + "/cart/savePlaceOrderData",
+                          type: 'POST',
+                          data: options,
+                          success: function () {
+                              //Continue to checkout
+                              ACC.checkout.bindStartCheckout(checkoutUrl);
+                          }
+                      });
 				}
 			}
 			return false;
@@ -166,7 +188,6 @@ ACC.checkout = {
         var checkoutBtn = cssClass.find('.checkoutSummaryButton');
         var checkBox = cssClass.find('input[name=termsCheck]');
         var checkBoxRememberPaymentDetails = cssClass.find('input[name=cardDetailsCheck]');
-
         var checkedOnInit = $(this).prop('checked');
         if (checkBoxRememberPaymentDetails.length) {
             checkoutBtn.prop('disabled', !(checkedOnInit && checkBoxRememberPaymentDetails.prop('checked')));
@@ -176,8 +197,7 @@ ACC.checkout = {
 
         checkBox.on('click', function () {
             var checked = $(this).prop('checked');
-            var rememberPaymentDetails = checkBoxRememberPaymentDetails.prop('checked');
-
+            var rememberPaymentDetails = checkBoxRememberPaymentDetails.length ? checkBoxRememberPaymentDetails.prop('checked') : true;
             if (checked && rememberPaymentDetails) {
                 checkoutBtn.prop('disabled', false);
             } else {

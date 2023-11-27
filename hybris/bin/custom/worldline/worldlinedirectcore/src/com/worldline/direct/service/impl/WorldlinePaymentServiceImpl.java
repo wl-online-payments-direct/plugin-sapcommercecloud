@@ -432,10 +432,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             CalculateSurchargeRequest request = new CalculateSurchargeRequest();
             request.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
             CardSource cardSource = new CardSource();
-            if (!StringUtils.EMPTY.equals(hostedTokenizationId)) {
+            if (!StringUtils.EMPTY.equals(token)) {
+                cardSource.setToken(token);
+            } else if (!StringUtils.EMPTY.equals(hostedTokenizationId)) {
                 cardSource.setHostedTokenizationId(hostedTokenizationId);
             }
-            cardSource.setToken(token);
 
             request.withCardSource(cardSource);
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
@@ -453,7 +454,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         final AmountOfMoney amountOfMoney = new AmountOfMoney();
         final String currencyCode = abstractOrderModel.getCurrency().getIsocode();
         final long amount;
-        amount = worldlineAmountUtils.createAmount(abstractOrderModel.getTotalPrice(), abstractOrderModel.getCurrency().getIsocode());
+        Double priceToSend = abstractOrderModel.getTotalPrice();
+        if (abstractOrderModel.getPaymentCost() != 0.0d) {
+            priceToSend -= abstractOrderModel.getPaymentCost();
+        }
+        amount = worldlineAmountUtils.createAmount(priceToSend, abstractOrderModel.getCurrency().getIsocode());
         amountOfMoney.setAmount(amount);
         amountOfMoney.setCurrencyCode(currencyCode);
 
@@ -572,7 +577,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
         final PaymentResponse paymentResponse = getPayment(storeId, paymentId);
         if (WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.valueOf(paymentResponse.getStatus()).equals(WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.CAPTURED)) {
-            amountPaid = paymentResponse.getPaymentOutput().getAmountOfMoney().getAmount();
+            amountPaid = paymentResponse.getPaymentOutput().getAcquiredAmount().getAmount();
         }
 
         if (CollectionUtils.isEmpty(capturesResponse.getCaptures())) {
