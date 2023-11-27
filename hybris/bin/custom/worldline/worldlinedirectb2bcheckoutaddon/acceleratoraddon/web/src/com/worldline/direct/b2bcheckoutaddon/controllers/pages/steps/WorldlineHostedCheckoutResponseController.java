@@ -19,7 +19,6 @@ import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
-import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -69,21 +68,7 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
         AbstractOrderData orderDetails;
         WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         try {
-            switch (orderType) {
-                case PLACE_ORDER:
-                    orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
-                    break;
-                case SCHEDULE_REPLENISHMENT_ORDER:
-                default:
-                    if (currentWorldlineConfiguration.isFirstRecurringPayment())
-                    {
-                        orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
-                    }else {
-                        orderDetails = worldlineCustomerAccountFacade.getCartToOrderCronJob(orderCode);
-                    }
-                    break;
-            }
-
+            orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
         } catch (final UnknownIdentifierException e) {
             LOGGER.warn("[WORLDLINE] Attempted to handle hosted checkout payment on an order that does not exist. Redirect to cart page.");
             return REDIRECT_PREFIX + "/cart";
@@ -98,12 +83,7 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
                     }
                     break;
                 case SCHEDULE_REPLENISHMENT_ORDER:
-                    if (BooleanUtils.isFalse(currentWorldlineConfiguration.isFirstRecurringPayment()) && orderDetails instanceof ScheduledCartData && BooleanUtils.isFalse(((ScheduledCartData) orderDetails).getTriggerData().isActive())) {
-                        worldlineRecurringCheckoutFacade.authorisePaymentForSchudledReplenishmentHostedCheckout(((ScheduledCartData) orderDetails).getJobCode(), hostedCheckoutId);
-                    } else if (BooleanUtils.isTrue(currentWorldlineConfiguration.isFirstRecurringPayment()) && orderDetails instanceof OrderData)
-                    {
-                        orderDetails = worldlineRecurringCheckoutFacade.authorisePaymentForImmediateReplenishmentHostedCheckout(orderDetails.getCode(), hostedCheckoutId);
-                    }
+                    orderDetails = worldlineRecurringCheckoutFacade.authorisePaymentForImmediateReplenishmentHostedCheckout(orderDetails.getCode(), hostedCheckoutId);
                     break;
             }
 
