@@ -123,7 +123,8 @@ ACC.checkoutsummary = {
             'nMonths': $('.scheduleformM').is(":visible") ? formData.get('nMonths') : "",
             'nthDayOfMonth': $('.scheduleformM').is(":visible") ? formData.get('nthDayOfMonth') : "",
             'nDaysOfWeek': $('.scheduleformW').is(":visible") ? formData.getAll('nDaysOfWeek').join(",") : "",
-            'replenishmentRecurrence': formData.get('replenishmentRecurrence')
+            'replenishmentRecurrence': formData.get('replenishmentRecurrence'),
+            'worldlineReplenishmentForm': formData
           };
 
           $.ajax({
