@@ -72,6 +72,7 @@ import org.springframework.beans.factory.annotation.Required;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP;
 
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
@@ -98,6 +99,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     protected WorldlineUserFacade worldlineUserFacade;
     protected WorldlinePaymentService worldlinePaymentService;
     protected WorldlineTransactionService worldlineTransactionService;
+    protected WorldlineScheduleOrderService worldlineScheduleOrderService;
     protected WorldlineBusinessProcessService worldlineBusinessProcessService;
 
     protected WorldlineConfigurationService worldlineConfigurationService;
@@ -508,20 +510,37 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     @Override
     public void saveReplenishmentData(boolean replenishmentOrder, String replenishmentStartDate, String replenishmentEndDate, String nDays, String nWeeks,
           String nMonths, String nthDayOfMonth, List<String> nDaysOfWeek, String replenishmentRecurrence) {
+        saveReplenishmentData(replenishmentOrder,
+              StringUtils.isNotEmpty(replenishmentStartDate) ? new Date(replenishmentStartDate) : null,
+              StringUtils.isNotEmpty(replenishmentEndDate) ? new Date(replenishmentEndDate) : null,
+              nDays,
+              nWeeks,
+              nMonths,
+              nthDayOfMonth,
+              nDaysOfWeek,
+              replenishmentRecurrence);
+    }
+
+    @Override
+    public void saveReplenishmentData(boolean replenishmentOrder, Date replenishmentStartDate, Date replenishmentEndDate, String nDays, String nWeeks,
+          String nMonths, String nthDayOfMonth, List<String> nDaysOfWeek, String replenishmentRecurrence) {
         CartModel cartModel = getCart();
-            cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
+        cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
         if (replenishmentOrder) {
             WorldlineReplenishmentOccurrenceEnum replenishmentOccurrenceEnum = WorldlineReplenishmentOccurrenceEnum.valueOf(replenishmentRecurrence);
-            cartModel.setWorldlineReplenishmentStartDate(new Date(replenishmentStartDate));
-            if (StringUtils.isNotEmpty(replenishmentEndDate))  {
-                cartModel.setWorldlineReplenishmentEndDate(new Date(replenishmentEndDate));
-            }
+            cartModel.setWorldlineReplenishmentStartDate(replenishmentStartDate);
+            cartModel.setWorldlineReplenishmentEndDate(replenishmentEndDate);
             cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
             cartModel.setWorldlineNDays(nDays);
             cartModel.setWorldlineNWeeks(nWeeks);
             cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
             cartModel.setWorldlineNMonths(nMonths);
             cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
+        }
+        if (cartModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
+            WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cartModel.getPaymentInfo();
+            paymentInfo.setRecurringToken(replenishmentOrder);
+            modelService.save(paymentInfo);
         }
 
         modelService.save(cartModel);
@@ -596,7 +615,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         if (orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
             final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
             final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
-            if (paymentOutput.getCardPaymentMethodSpecificOutput() != null && paymentInfo.getId().equals(PAYMENT_METHOD_HTP)) {
+            if (paymentOutput.getCardPaymentMethodSpecificOutput() != null && (paymentInfo.getId().equals(PAYMENT_METHOD_HTP) || paymentInfo.getId().equals(PAYMENT_METHOD_GROUP_CARDS))) {
                 paymentInfo.setId(paymentOutput.getCardPaymentMethodSpecificOutput().getPaymentProductId());
                 if (paymentInfo.isRecurringToken()) {
                     // update cart so the recurring payments for subscription made by HTP to have valid payment method
@@ -839,4 +858,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         this.worldlineConfigurationService = worldlineConfigurationService;
     }
 
+    public void setWorldlineScheduleOrderService(WorldlineScheduleOrderService worldlineScheduleOrderService) {
+        this.worldlineScheduleOrderService = worldlineScheduleOrderService;
+    }
 }
