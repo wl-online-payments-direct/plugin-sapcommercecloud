@@ -62,9 +62,8 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
 
     @Override
     public void updateCartRecurringPaymentInfo(CartModel cartModel, boolean tokenizePayment) {
-        WorldlinePaymentInfoModel paymentInfo;
         if (cartModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
-            paymentInfo = (WorldlinePaymentInfoModel) cartModel.getPaymentInfo();
+            WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cartModel.getPaymentInfo();
             paymentInfo.setRecurringToken(tokenizePayment);
             modelService.save(paymentInfo);
             modelService.save(cartModel);
