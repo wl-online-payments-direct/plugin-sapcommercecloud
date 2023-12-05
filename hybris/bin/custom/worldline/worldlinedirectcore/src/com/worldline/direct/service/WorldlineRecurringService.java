@@ -9,7 +9,7 @@ import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import java.util.Optional;
 
 public interface WorldlineRecurringService {
-    Optional<CreatePaymentResponse> createRecurringPayment(AbstractOrderModel abstractOrderModel);
+    Optional<CreatePaymentResponse> createRecurringPayment(AbstractOrderModel abstractOrderModel) throws Exception;
 
     void cancelRecurringPayment(CartToOrderCronJobModel cronJobModel);
 
