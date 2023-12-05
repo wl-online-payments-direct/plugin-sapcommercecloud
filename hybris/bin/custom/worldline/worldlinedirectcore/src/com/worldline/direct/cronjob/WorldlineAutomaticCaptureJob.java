@@ -78,7 +78,7 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
                 }
 
                 final PaymentTransactionModel lastPaymentTransaction = getLastPaymentTransaction(orderModel);
-                final String paymentId = lastPaymentTransaction.getRequestId() + "_0";
+                final String paymentId = lastPaymentTransaction.getWorldlineRawTransactionCode() + "_0";
 
                 final CapturesResponse captures = worldlinePaymentService.getCaptures(orderModel.getStore().getUid(), paymentId);
 

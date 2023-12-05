@@ -1,12 +1,8 @@
 package com.worldline.direct.actions.replenishment;
 
-import com.onlinepayments.domain.AmountOfMoney;
-import com.onlinepayments.domain.CalculateSurchargeResponse;
 import com.onlinepayments.domain.CreatePaymentResponse;
-import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineRecurringService;
 import com.worldline.direct.service.WorldlineTransactionService;
@@ -23,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
-import javax.annotation.Resource;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;

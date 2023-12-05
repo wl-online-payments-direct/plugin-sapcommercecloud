@@ -33,6 +33,7 @@ import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsD
 import de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartAddressException;
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartException;
+import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdUserIdAndCartIdParam;
@@ -40,6 +41,7 @@ import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -248,11 +250,27 @@ public class WorldlineCartsController extends WorldlineBaseController {
                worldlineCheckoutFacade.checkForCardPaymentMethods(availablePaymentMethods);
     }
 
+    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
+    @GetMapping(value = "/{cartId}/isTokenTemporary")
+    @ResponseBody
+    @Operation(operationId = "isTokenTemporary", summary = "Check if payment details are going to be saved.", description =
+          "return True if the payment can be paid by card and if the payment details are marked to be saved.")
+    @ApiBaseSiteIdUserIdAndCartIdParam
+    public Boolean isTokenTemporary () {
+        if (!checkoutFacade.hasCheckoutCart()) {
+            throw new CartException("No cart found.", CartException.NOT_FOUND);
+        }
+        final CartData cartData = cartFacade.getSessionCart();
+        if (cartData.getWorldlinePaymentInfo() != null) {
+            return WorldlinePaymentProductUtils.isCreditCard(cartData.getWorldlinePaymentInfo()) && !worldlineCheckoutFacade.isTemporaryToken(cartData.getWorldlinePaymentInfo().getHostedTokenizationId());
+        }
+        return Boolean.FALSE;
+    }
 
-        @PostMapping(value = "/{cartId}/saveReplenishmentOrderData", consumes = {MediaType.APPLICATION_JSON_VALUE})
-        @ResponseBody
-        @ApiBaseSiteIdUserIdAndCartIdParam
-        @Operation(operationId = "saveReplenishmentOrderData", summary = "Save the Replenishment order data", description = "Save the Replenishment order data")
+    @PostMapping(value = "/{cartId}/saveReplenishmentOrderData", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    @ApiBaseSiteIdUserIdAndCartIdParam
+    @Operation(operationId = "saveReplenishmentOrderData", summary = "Save the Replenishment order data", description = "Save the Replenishment order data")
         public void saveReplenishmentOrderData (
               @Parameter(description = "Request body parameter that contains details. The DTO is in XML or .json format.", required = true) @RequestBody final ScheduleReplenishmentFormWsDTO scheduleReplenishmentFormWsDTO,
               final HttpServletRequest request)
@@ -271,6 +289,37 @@ public class WorldlineCartsController extends WorldlineBaseController {
                   scheduleReplenishmentFormWsDTO.getDaysOfWeek().isEmpty() ? new ArrayList<>() : convertDTO(scheduleReplenishmentFormWsDTO.getDaysOfWeek()),
                   scheduleReplenishmentFormWsDTO.getRecurrencePeriod());
         }
+
+    @GetMapping(value = "/{cartId}/getReplenishmentOrderData")
+    @ResponseBody
+    @ApiBaseSiteIdUserIdAndCartIdParam
+    @Operation(operationId = "getReplenishmentOrderData", summary = "Get the Replenishment order data", description = "Get the Replenishment order data")
+    public ScheduleReplenishmentFormWsDTO getReplenishmentData() {
+        final CartData cartData = cartFacade.getSessionCart();
+        ScheduleReplenishmentFormWsDTO replenishmentData = new ScheduleReplenishmentFormWsDTO();
+        if (cartData.isReplenishmentOrder()) {
+            replenishmentData.setIsReplenishmentOrder(cartData.isReplenishmentOrder());
+            replenishmentData.setDaysOfWeek(convertDayOfWeek(cartData.getNDaysOfWeek()));
+            replenishmentData.setNumberOfWeeks(cartData.getNWeeks());
+            replenishmentData.setNumberOfDays(cartData.getNDays());
+            replenishmentData.setRecurrencePeriod(cartData.getReplenishmentRecurrence().name());
+            replenishmentData.setNumberOfMonths(cartData.getNMonths());
+            replenishmentData.setReplenishmentEndDate(cartData.getReplenishmentEndDate());
+            replenishmentData.setReplenishmentStartDate(cartData.getReplenishmentStartDate());
+        }
+        return replenishmentData;
+    }
+
+    private List<DayOfWeekWsDTO> convertDayOfWeek(List<DayOfWeek> daysOfWeek) {
+        if (!daysOfWeek.isEmpty()) {
+            List<DayOfWeekWsDTO> resultList = new ArrayList<>();
+            for (DayOfWeek currentDay : daysOfWeek) {
+                resultList.add(DayOfWeekWsDTO.valueOf(currentDay.name()));
+            }
+            return resultList;
+        }
+        return null;
+    }
 
     private List<String> convertDTO(List<DayOfWeekWsDTO> daysOfWeek) {
         List<String> stringDays = new ArrayList<>();
