@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA;
 
 /**
  * Action for authorizing payments.
@@ -53,8 +54,10 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
                         if (processParameterHelper.getProcessParameterByName(process, ATTEMPTS) == null || attemptSequence > 0) {
                             try {
                                 WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) placedOrder.getPaymentInfo();
-                                worldlineCheckoutFacade.calculateSurcharge(placedOrder, paymentInfoModel.getHostedTokenizationId(), paymentInfoModel.getWorldlineRecurringToken().getToken(), StringUtils.EMPTY, paymentInfoModel.getPaymentMethod());
-
+                                if (!paymentInfoModel.getId().equals(PAYMENT_METHOD_SEPA)) {
+                                    worldlineCheckoutFacade.calculateSurcharge(placedOrder, paymentInfoModel.getHostedTokenizationId(),
+                                          paymentInfoModel.getWorldlineRecurringToken().getToken(), StringUtils.EMPTY, paymentInfoModel.getPaymentMethod());
+                                }
 
                                 Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
                                 if (recurringPayment.isPresent()) {
