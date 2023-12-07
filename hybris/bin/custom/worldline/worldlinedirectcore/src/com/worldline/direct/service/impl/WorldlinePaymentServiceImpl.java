@@ -371,7 +371,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     public GetMandateResponse revokeMandate(WorldlineMandateModel worldlineMandateModel) {
         validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId(worldlineMandateModel.getStoreId()));
             GetMandateResponse mandateResponse = merchant.mandates().revokeMandate(worldlineMandateModel.getUniqueMandateReference());
 
             WorldlineLogUtils.logAction(LOGGER, "revokeMandate", worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
@@ -390,7 +390,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     public GetMandateResponse blockMandate(WorldlineMandateModel worldlineMandateModel) {
         validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId(worldlineMandateModel.getStoreId()));
             GetMandateResponse mandateResponse = merchant.mandates().blockMandate(worldlineMandateModel.getUniqueMandateReference());
 
             WorldlineLogUtils.logAction(LOGGER, "blockMandate", worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
@@ -409,7 +409,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
 
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId(worldlineMandateModel.getStoreId()));
             GetMandateResponse mandateResponse = merchant.mandates().unblockMandate(worldlineMandateModel.getUniqueMandateReference());
 
             WorldlineLogUtils.logAction(LOGGER, "unBlockMandate", worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
