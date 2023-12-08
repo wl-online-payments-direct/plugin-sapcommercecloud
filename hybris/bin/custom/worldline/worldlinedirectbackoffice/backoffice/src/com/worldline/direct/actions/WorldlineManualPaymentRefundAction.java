@@ -37,12 +37,12 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
       ReturnRequestModel returnRequestModel = actionContext.getData();
       OrderModel order = returnRequestModel.getOrder();
 
-      final PaymentTransactionEntryModel paymentTransactionToRefund = getPaymentTransactionToRefund(order);
+      final PaymentTransactionModel paymentTransactionToRefund = getPaymentTransactionToRefund(order);
       //result
       ActionResult<ReturnRequestModel> result = null;
       String resultMessage = null;
 
-      BigDecimal refundAmount = calculateRefundAmount(returnRequestModel, order.getStore().getUid(), paymentTransactionToRefund.getRequestId(), paymentTransactionToRefund.getPaymentTransaction().getPlannedAmount(), paymentTransactionToRefund.getCurrency().getIsocode());
+      BigDecimal refundAmount = calculateRefundAmount(returnRequestModel, order.getStore().getUid(), paymentTransactionToRefund.getWorldlineRawTransactionCode(), paymentTransactionToRefund.getPlannedAmount(), paymentTransactionToRefund.getCurrency().getIsocode());
       if (refundAmount.compareTo(BigDecimal.ZERO) == 0) {
          result = new ActionResult<ReturnRequestModel>(ActionResult.ERROR, returnRequestModel);
          resultMessage = actionContext.getLabel("action.manualrefund.failure");
@@ -51,12 +51,12 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
          return result;
       }
 
-      RefundResponse refundResponse = worldlinePaymentService.refundPayment(order.getStore().getUid(), paymentTransactionToRefund.getRequestId(), refundAmount, paymentTransactionToRefund.getCurrency().getIsocode());
+      RefundResponse refundResponse = worldlinePaymentService.refundPayment(order.getStore().getUid(), paymentTransactionToRefund.getWorldlineRawTransactionCode(), refundAmount, paymentTransactionToRefund.getCurrency().getIsocode());
 
 
       if (REFUND_REQUESTED.getValue().equals(refundResponse.getStatus())) {
-         worldlineTransactionService.updatePaymentTransaction(paymentTransactionToRefund.getPaymentTransaction(),
-               paymentTransactionToRefund.getRequestId(),
+         worldlineTransactionService.updatePaymentTransaction(paymentTransactionToRefund,
+               paymentTransactionToRefund.getWorldlineRawTransactionCode(),
                refundResponse.getStatus(),
                refundResponse.getRefundOutput().getAmountOfMoney(),
                PaymentTransactionType.REFUND_FOLLOW_ON);
@@ -88,12 +88,12 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
      }
    }
 
-   private PaymentTransactionEntryModel getPaymentTransactionToRefund(final OrderModel order) {
-      final PaymentTransactionModel finalPaymentTransaction = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
-      return finalPaymentTransaction.getEntries()
-            .stream()
-            .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
-            .filter(entry -> WorldlinedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(entry.getTransactionStatus()))
-            .findFirst().orElse(null);
+   private PaymentTransactionModel getPaymentTransactionToRefund(final OrderModel order) {
+      return order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
+//      return finalPaymentTransaction.getEntries()
+//            .stream()
+//            .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
+//            .filter(entry -> WorldlinedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(entry.getTransactionStatus()))
+//            .findFirst().orElse(null);
    }
 }
