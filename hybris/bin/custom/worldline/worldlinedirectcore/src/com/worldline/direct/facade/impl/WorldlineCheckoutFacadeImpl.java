@@ -263,8 +263,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 }
                 saveSurchargeData(orderForCode.getSchedulingCronJob() != null ? orderForCode.getSchedulingCronJob().getCart() : orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 savePaymentToken(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment(), isRecurring, isRecurring ? orderForCode.getSchedulingCronJob().getCode() : StringUtils.EMPTY);
-                handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
                 saveMandateIfNeeded(orderForCode.getStore().getUid(),(WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(),hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
 
                 break;
             default:
@@ -374,6 +374,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 }
             }
         }
+        worldlineMandateModel.setCustomer(checkoutCustomerStrategy.getCurrentUserForCheckout());
         modelService.save(worldlineMandateModel);
         return worldlineMandateModel;
     }
