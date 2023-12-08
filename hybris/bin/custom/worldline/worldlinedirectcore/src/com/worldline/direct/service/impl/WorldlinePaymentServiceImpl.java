@@ -228,6 +228,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
             final CreateHostedCheckoutRequest params = worldlineHostedCheckoutParamConverter.convert(orderForCode);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(browserData));
+
             final CreateHostedCheckoutResponse hostedCheckout = merchant.hostedCheckout().createHostedCheckout(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);

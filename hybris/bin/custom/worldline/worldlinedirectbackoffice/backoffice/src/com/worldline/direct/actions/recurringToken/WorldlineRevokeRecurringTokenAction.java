@@ -53,4 +53,14 @@ public class WorldlineRevokeRecurringTokenAction implements CockpitAction<Worldl
 
    }
 
+   @Override
+   public boolean canPerform(ActionContext<WorldlineRecurringTokenModel> ctx) {
+      WorldlineRecurringTokenModel data = ctx.getData();
+
+      if (data == null) {
+         return Boolean.FALSE;
+      }
+      return !WorldlineRecurringPaymentStatus.REVOKED.equals(data.getStatus());
+   }
+
 }
