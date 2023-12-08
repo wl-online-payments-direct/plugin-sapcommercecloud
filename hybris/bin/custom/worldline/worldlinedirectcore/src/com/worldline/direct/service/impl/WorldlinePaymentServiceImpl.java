@@ -352,7 +352,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     public GetMandateResponse getMandate(WorldlineMandateModel worldlineMandateModel) {
         validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
         try {
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId());
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId(worldlineMandateModel.getStoreId()));
             GetMandateResponse mandateResponse = merchant.mandates().getMandate( worldlineMandateModel.getUniqueMandateReference());
 
             WorldlineLogUtils.logAction(LOGGER, "getMandate",  worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
