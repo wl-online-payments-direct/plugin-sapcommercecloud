@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <spring:url value="/my-account/worldline/my-replenishment/{/jobCode}" var="searchUrl" htmlEscape="false">
+    <spring:url value="/my-account/worldline/my-replenishment/{/jobCode}" var="searchUrl" htmlEscape="false" context="">
 	    <spring:param name="jobCode"  value="${orderData.jobCode}"/>
         <spring:param name="sort" value="${searchPageData.pagination.sort}" />
         <spring:param name="show" value="${param.show}" />
