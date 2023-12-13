@@ -26,6 +26,13 @@
         <property name="emailGenerationService" ref="emailGenerationService"/>
     </bean>
 
+    <bean id="generateReplenishmentCartNonValidMerchantEmail" class="de.hybris.platform.acceleratorservices.process.email.actions.GenerateEmailAction"  parent="abstractAction">
+        <property name="modelService" ref="modelService"/>
+        <property name="cmsEmailPageService" ref="cmsEmailPageService"/>
+        <property name="frontendTemplateName" value="ReplenishmentCartNonValidMerchantEmailTemplate"/>
+        <property name="contextResolutionStrategy" ref="processContextResolutionStrategy"/>
+        <property name="emailGenerationService" ref="emailGenerationService"/>
+    </bean>
 
 
     <!--Contexts-->
