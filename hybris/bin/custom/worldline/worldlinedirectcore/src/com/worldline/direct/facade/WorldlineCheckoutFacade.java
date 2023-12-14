@@ -63,6 +63,16 @@ public interface WorldlineCheckoutFacade {
                                 List<String> nDaysOfWeek,
                                 String replenishmentRecurrence);
 
+    void saveReplenishmentData( boolean replenishmentOrder,
+          Date replenishmentStartDate,
+          Date replenishmentEndDate,
+          String nDays,
+          String nWeeks,
+          String nMonths,
+          String nthDayOfMonth,
+          List<String> nDaysOfWeek,
+          String replenishmentRecurrence);
+
     PlaceOrderData prepareOrderPlacementData();
 
 

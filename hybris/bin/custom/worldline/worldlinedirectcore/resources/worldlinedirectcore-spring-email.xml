@@ -26,6 +26,13 @@
         <property name="emailGenerationService" ref="emailGenerationService"/>
     </bean>
 
+    <bean id="generateReplenishmentCartNonValidMerchantEmail" class="de.hybris.platform.acceleratorservices.process.email.actions.GenerateEmailAction"  parent="abstractAction">
+        <property name="modelService" ref="modelService"/>
+        <property name="cmsEmailPageService" ref="cmsEmailPageService"/>
+        <property name="frontendTemplateName" value="ReplenishmentCartNonValidMerchantEmailTemplate"/>
+        <property name="contextResolutionStrategy" ref="processContextResolutionStrategy"/>
+        <property name="emailGenerationService" ref="emailGenerationService"/>
+    </bean>
 
 
     <!--Contexts-->
@@ -37,6 +44,7 @@
     <bean id="WorldlineOrderReplenishmentCartNonValidContext" class="com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext" parent="abstractEmailContext" scope="prototype">
         <property name="processParameterHelper" ref="processParameterHelper"/>
         <property name="scheduledCartConverter" ref="scheduledCartConverter"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
 </beans>

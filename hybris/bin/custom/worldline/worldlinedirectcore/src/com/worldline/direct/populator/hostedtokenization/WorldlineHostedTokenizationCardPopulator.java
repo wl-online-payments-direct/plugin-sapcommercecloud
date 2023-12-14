@@ -83,9 +83,9 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
             cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
             cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
 
-            if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
-                cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
-            }
+//            if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
+//                cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
+//            }
             boolean isExemptionRequestLowValue = BooleanUtils.isTrue(currentWorldlineConfiguration.isExemptionRequest()) && abstractOrderModel.getCurrency().getIsocode().equals("EUR") && abstractOrderModel.getTotalPrice() < 30;
             boolean isChallengeRequired = BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired());
 

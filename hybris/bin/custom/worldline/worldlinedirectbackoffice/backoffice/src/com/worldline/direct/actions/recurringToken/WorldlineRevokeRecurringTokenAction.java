@@ -14,6 +14,7 @@ import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.b2bacceleratorservices.customer.B2BCustomerAccountService;
 import de.hybris.platform.cronjob.model.CronJobModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
+import de.hybris.platform.servicelayer.model.ModelService;
 
 import javax.annotation.Resource;
 
@@ -39,7 +40,6 @@ public class WorldlineRevokeRecurringTokenAction implements CockpitAction<Worldl
       try {
             worldlineRecurringService.cancelRecurringPayment(cronjob);
             cronjob.setActive(Boolean.FALSE);
-
             objectFacade.save(cronjob);
 
             result = new ActionResult<>(ActionResult.SUCCESS, "Token was blocked successfully");
@@ -51,6 +51,16 @@ public class WorldlineRevokeRecurringTokenAction implements CockpitAction<Worldl
       show(result.getData() + " (" + result.getResultCode() + ")");
       return result;
 
+   }
+
+   @Override
+   public boolean canPerform(ActionContext<WorldlineRecurringTokenModel> ctx) {
+      WorldlineRecurringTokenModel data = ctx.getData();
+
+      if (data == null) {
+         return Boolean.FALSE;
+      }
+      return !WorldlineRecurringPaymentStatus.REVOKED.equals(data.getStatus());
    }
 
 }

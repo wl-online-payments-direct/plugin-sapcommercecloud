@@ -42,7 +42,7 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
       ActionResult<ReturnRequestModel> result = null;
       String resultMessage = null;
 
-      BigDecimal refundAmount = calculateRefundAmount(returnRequestModel, order.getStore().getUid(), paymentTransactionToRefund.getRequestId(), paymentTransactionToRefund.getPaymentTransaction().getPlannedAmount(), paymentTransactionToRefund.getCurrency().getIsocode());
+      BigDecimal refundAmount = calculateRefundAmount(returnRequestModel, order.getStore().getUid(), paymentTransactionToRefund.getPaymentTransaction().getWorldlineRawTransactionCode(), paymentTransactionToRefund.getPaymentTransaction().getPlannedAmount(), paymentTransactionToRefund.getCurrency().getIsocode());
       if (refundAmount.compareTo(BigDecimal.ZERO) == 0) {
          result = new ActionResult<ReturnRequestModel>(ActionResult.ERROR, returnRequestModel);
          resultMessage = actionContext.getLabel("action.manualrefund.failure");

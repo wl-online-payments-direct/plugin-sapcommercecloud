@@ -61,7 +61,6 @@
     <extension name='commercewebservicescommons' />
     <extension name='yocc' />
     <extension name='ysapproductconfigaddon' />
-    <extension name='consignmenttrackingaddon' />
     <extension name='consignmenttrackingbackoffice' />
     <extension name='consignmenttrackingfacades' />
     <extension name='consignmenttrackingmock' />

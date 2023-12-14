@@ -117,7 +117,7 @@ UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];cmsComponents(uid,$c
                   ;;OrderConfirmationEmailTopSlot;EmailBannerSaleNowOnImage,WorldlineOrderConfirmationEmailBody
 
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=de];fromName[lang=de]
-                       ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+                       ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
 
 ####### UPDATE order Confirmation Email to include surcharge END #######
 
@@ -170,8 +170,8 @@ INSERT_UPDATE ContentSlotForTemplate; $contentCV[unique = true]; uid[unique = tr
                                     ;                          ; BottomContent-ReplenishmentOrderConfirmationEmail ; BottomContent          ;                                                                                                      ; EmailBottomSlot                            ; true
 
 INSERT_UPDATE EmailPage; $contentCV[unique = true]; uid[unique = true]                  ; name                     ; masterTemplate(uid, $contentCV)             ; defaultPage; approvalStatus(code)[default = 'approved']; fromEmail[lang = $lang]     ; fromName[lang = $lang]
-                       ;                          ; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
-                       ;                          ; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
+                       ;                          ; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; martinapenevaBB@gmail.com ; Customer Services Team
+                       ;                          ; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; martinapenevaBB@gmail.com ; Customer Services Team
 
 
 
@@ -223,8 +223,8 @@ INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];po
 
 
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
-                       ;;ReplenishmentPaymentFailedCustomerEmail;Payment Failed Customer Email;ReplenishmentPaymentFailedCustomerEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
-                       ;;ReplenishmentPaymentFailedMerchantEmail;Payment Failed Merchant Email;ReplenishmentPaymentFailedMerchantEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+                       ;;ReplenishmentPaymentFailedCustomerEmail;Payment Failed Customer Email;ReplenishmentPaymentFailedCustomerEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+                       ;;ReplenishmentPaymentFailedMerchantEmail;Payment Failed Merchant Email;ReplenishmentPaymentFailedMerchantEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
 
 ##################################  Cart Non Valid Notification    ##################################
 $jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/worldlinedirectcore/import/email
@@ -235,13 +235,15 @@ $jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsS
 INSERT_UPDATE RendererTemplate; code[unique = true]                                           ; description[lang = $lang]                             ; templateScript[lang = $lang, translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]; contextClass; rendererType(code)[default = 'velocity']
                               ; $store_Name_Email_Replenishment_Cart_Non_Valid_Body    ; "Replenishment Cart Non Valid Email Body"    ; $jarEmailResource/email-replenishmentCartNonValidBody.vm                                                  ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
                               ; $store_Name_Email_Replenishment_Cart_Non_Valid_Subject ; "Replenishment Cart Non Valid Email Subject" ; $jarEmailResource/email-replenishmentCartNonValidSubject.vm                                               ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
+                            ; $store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Body    ; "Replenishment Cart Non Valid Merchant Email Body"    ; $jarEmailResource/email-replenishmentCartNonValidMerchantBody.vm                                                  ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
+                            ; $store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Subject ; "Replenishment Cart Non Valid Merchant Email Subject" ; $jarEmailResource/email-replenishmentCartNonValidMerchantSubject.vm                                               ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
 
 
 $jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
 
 INSERT_UPDATE EmailPageTemplate;$contentCV[unique=true];uid[unique=true];name;active;frontendTemplateName;subject(code);htmlTemplate(code);restrictedPageTypes(code);velocityTemplate[translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
                                ;;ReplenishmentCartNonValidEmailTemplate;Replenishment Cart Non Valid Email Template;true;replenishmentCartNonValidEmail;$store_Name_Email_Replenishment_Cart_Non_Valid_Subject;$store_Name_Email_Replenishment_Cart_Non_Valid_Body;EmailPage;$jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
-
+                                ;;ReplenishmentCartNonValidMerchantEmailTemplate;Replenishment Cart Non Valid Merchant Email Template;true;replenishmentCartNonValidMerchantEmail;$store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Subject;$store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Body;EmailPage;$jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
 
 
 INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidEmailTemplate'];validComponentTypes(code);compTypeGroup(code)
@@ -256,7 +258,22 @@ INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];po
 
 
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
-                       ;;ReplenishmentCartNonValidEmail;Cart Non Valid Email;ReplenishmentCartNonValidEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+                       ;;ReplenishmentCartNonValidEmail;Cart Non Valid Email;ReplenishmentCartNonValidEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+
+INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidMerchantEmailTemplate'];validComponentTypes(code);compTypeGroup(code)
+                             ;SiteLogo;;;logo;email
+                             ;TopContent;;$wideContent;email
+                             ;BottomContent;;$wideContent;email
+
+INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];position[unique=true];pageTemplate(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidMerchantEmailTemplate'];contentSlot(uid,$contentCV)[unique=true];allowOverwrite
+                                    ;;SiteLogo-ReplenishmentCartNonValidMerchantEmail;SiteLogo;;SiteLogoSlot;true
+                                    ;;TopContent-ReplenishmentCartNonValidMerchantEmail;TopContent;;EmailTopSlot;true
+                                    ;;BottomContent-ReplenishmentCartNonValidMerchantEmail;BottomContent;;EmailBottomSlot;true
+
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
+                       ;;ReplenishmentCartNonValidMerchantEmail;Cart Non Valid Email;ReplenishmentCartNonValidMerchantEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+
 
 ####### UPDATE Order details totals block to include surcharge field #######
 
