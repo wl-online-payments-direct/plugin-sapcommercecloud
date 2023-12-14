@@ -1,12 +1,8 @@
 package com.worldline.direct.actions.replenishment;
 
-import com.onlinepayments.domain.AmountOfMoney;
-import com.onlinepayments.domain.CalculateSurchargeResponse;
 import com.onlinepayments.domain.CreatePaymentResponse;
-import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineRecurringService;
 import com.worldline.direct.service.WorldlineTransactionService;
@@ -23,11 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
-import javax.annotation.Resource;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA;
 
 /**
  * Action for authorizing payments.
@@ -58,8 +54,10 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
                         if (processParameterHelper.getProcessParameterByName(process, ATTEMPTS) == null || attemptSequence > 0) {
                             try {
                                 WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) placedOrder.getPaymentInfo();
-                                worldlineCheckoutFacade.calculateSurcharge(placedOrder, paymentInfoModel.getHostedTokenizationId(), paymentInfoModel.getWorldlineRecurringToken().getToken(), StringUtils.EMPTY, paymentInfoModel.getPaymentMethod());
-
+                                if (!paymentInfoModel.getId().equals(PAYMENT_METHOD_SEPA)) {
+                                    worldlineCheckoutFacade.calculateSurcharge(placedOrder, paymentInfoModel.getHostedTokenizationId(),
+                                          paymentInfoModel.getWorldlineRecurringToken().getToken(), StringUtils.EMPTY, paymentInfoModel.getPaymentMethod());
+                                }
 
                                 Optional<CreatePaymentResponse> recurringPayment = worldlineRecurringService.createRecurringPayment(placedOrder);
                                 if (recurringPayment.isPresent()) {

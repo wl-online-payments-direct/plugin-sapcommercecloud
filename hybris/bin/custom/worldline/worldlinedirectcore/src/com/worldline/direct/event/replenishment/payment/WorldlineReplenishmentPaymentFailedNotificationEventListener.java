@@ -30,6 +30,7 @@ public class WorldlineReplenishmentPaymentFailedNotificationEventListener extend
         paymentFailedMerchantNotificationProcess.setCurrency(cartToOrderCronJob.getCart().getCurrency());
         paymentFailedMerchantNotificationProcess.setLanguage(cartToOrderCronJob.getCart().getStore().getDefaultLanguage());
         paymentFailedMerchantNotificationProcess.setStore(cartToOrderCronJob.getCart().getStore());
+        paymentFailedMerchantNotificationProcess.setSite(cartToOrderCronJob.getCart().getSite());
         modelService.save(paymentFailedMerchantNotificationProcess);
         businessProcessService.startProcess(paymentFailedMerchantNotificationProcess);
 

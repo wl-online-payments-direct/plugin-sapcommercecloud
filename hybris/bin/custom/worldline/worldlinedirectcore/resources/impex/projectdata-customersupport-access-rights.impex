@@ -7,5 +7,7 @@ UserGroup;customersupportagentgroup;;;;;;;;
 
 ;;;;WorldlineMandate;+;+;-;-
 ;;;;WorldlineRecurringToken;+;+;-;-
+;;;;CronJob;+;+;-;-
+;;;;CronJobHistory;+;+;-;-
 
 $END_USERRIGHTS;;;;;

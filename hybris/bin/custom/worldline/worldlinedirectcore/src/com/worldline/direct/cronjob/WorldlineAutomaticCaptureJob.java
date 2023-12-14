@@ -2,6 +2,7 @@ package com.worldline.direct.cronjob;
 
 import com.onlinepayments.domain.CaptureResponse;
 import com.onlinepayments.domain.CapturesResponse;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.dao.WorldlineOrderDao;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
@@ -14,6 +15,7 @@ import de.hybris.platform.cronjob.enums.CronJobResult;
 import de.hybris.platform.cronjob.enums.CronJobStatus;
 import de.hybris.platform.cronjob.model.CronJobModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
+import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.cronjob.AbstractJobPerformable;
 import de.hybris.platform.servicelayer.cronjob.PerformResult;
@@ -78,40 +80,34 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
                 }
 
                 final PaymentTransactionModel lastPaymentTransaction = getLastPaymentTransaction(orderModel);
-                final String paymentId = lastPaymentTransaction.getRequestId() + "_0";
+                final String paymentId = lastPaymentTransaction.getWorldlineRawTransactionCode();
 
-                final CapturesResponse captures = worldlinePaymentService.getCaptures(orderModel.getStore().getUid(), paymentId);
+                if (!(BigDecimal.ZERO.compareTo(getPaymentTransactionEntry(lastPaymentTransaction).getAmount()) == 0)) {
+                    final CapturesResponse captures = worldlinePaymentService.getCaptures(orderModel.getStore().getUid(), paymentId);
 
-                if (CollectionUtils.isNotEmpty(captures.getCaptures())) {
-                    captures.getCaptures().forEach(capture -> worldlineTransactionService.processCapture(capture));
+                    if (CollectionUtils.isNotEmpty(captures.getCaptures())) {
+                        captures.getCaptures().forEach(capture -> worldlineTransactionService.processCapture(capture));
+                    }
+
+                    final Long nonCapturedAmount = worldlinePaymentService.getNonCapturedAmount(orderModel.getStore().getUid(), paymentId, captures,
+                          getPlannedAMount(orderModel, lastPaymentTransaction), orderModel.getCurrency().getIsocode());
+                    if (nonCapturedAmount > 0) {
+
+                        final BigDecimal amount = worldlineAmountUtils.fromAmount(nonCapturedAmount, orderModel.getCurrency().getIsocode());
+                        final CaptureResponse captureResponse =
+                              worldlinePaymentService.capturePayment(orderModel.getStore().getUid(), paymentId, amount, orderModel.getCurrency().getIsocode(),
+                                    Boolean.TRUE);
+                        worldlineTransactionService.updatePaymentTransaction(lastPaymentTransaction, captureResponse.getId(), captureResponse.getStatus(),
+                              orderModel.getStore().getWorldlineConfiguration().isApplySurcharge() ? captureResponse.getCaptureOutput().getAcquiredAmount() :
+                                    captureResponse.getCaptureOutput().getAmountOfMoney(), PaymentTransactionType.CAPTURE);
+                        LOGGER.info("[WORLDLINE] Order {}, remaining amount {} captured", orderModel.getCode(), amount);
+                    }
+
+                    worldlineBusinessProcessService.triggerOrderProcessEvent(orderModel, WORLDLINE_EVENT_PAYMENT);
+
+                    LOGGER.info("[WORLDLINE] Order {} has been processed", orderModel.getCode());
+
                 }
-
-                final Long nonCapturedAmount = worldlinePaymentService.getNonCapturedAmount(orderModel.getStore().getUid(),
-                        paymentId,
-                        captures,
-                        getPlannedAMount(orderModel, lastPaymentTransaction),
-                        orderModel.getCurrency().getIsocode());
-                if (nonCapturedAmount > 0) {
-
-                    final BigDecimal amount = worldlineAmountUtils.fromAmount(nonCapturedAmount, orderModel.getCurrency().getIsocode());
-                    final CaptureResponse captureResponse = worldlinePaymentService.capturePayment(orderModel.getStore().getUid(),
-                            paymentId,
-                            amount,
-                            orderModel.getCurrency().getIsocode(),
-                            Boolean.TRUE);
-                    worldlineTransactionService.updatePaymentTransaction(lastPaymentTransaction,
-                            captureResponse.getId(),
-                            captureResponse.getStatus(),
-                            orderModel.getStore().getWorldlineConfiguration().isApplySurcharge() ? captureResponse.getCaptureOutput().getAcquiredAmount() : captureResponse.getCaptureOutput().getAmountOfMoney(),
-                            PaymentTransactionType.CAPTURE);
-                    LOGGER.info("[WORLDLINE] Order {}, remaining amount {} captured", orderModel.getCode(), amount);
-                }
-
-                worldlineBusinessProcessService.triggerOrderProcessEvent(orderModel, WORLDLINE_EVENT_PAYMENT);
-
-                LOGGER.info("[WORLDLINE] Order {} has been processed", orderModel.getCode());
-
-
             } catch (Exception e) {
                 LOGGER.error("[WORLDLINE] Order {} ,unexpected error! {}", orderModel.getCode(), e);
                 fail++;
@@ -127,6 +123,14 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
 
     private PaymentTransactionModel getLastPaymentTransaction(AbstractOrderModel orderModel) {
         return orderModel.getPaymentTransactions().get(orderModel.getPaymentTransactions().size() - 1);
+    }
+
+    private PaymentTransactionEntryModel getPaymentTransactionEntry(final PaymentTransactionModel finalPaymentTransaction) {
+        return finalPaymentTransaction.getEntries()
+              .stream()
+              .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()))
+              .filter(entry -> WorldlinedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(entry.getTransactionStatus()))
+              .findFirst().orElse(null);
     }
 
     private WorldlineConfigurationModel getWorldlineConfiguration(AbstractOrderModel orderModel) {

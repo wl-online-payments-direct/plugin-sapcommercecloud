@@ -2,18 +2,18 @@
 <!--
  Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
 -->
-<action-definition id="com.worldline.direct.actions.recurringToken.revoke"
+<action-definition id="com.worldline.direct.action.mandate.revoke"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/action-definition.xsd">
 
     <name>Revoke</name>
-    <description>Action for Revoke a token</description>
+    <description>Action for Revoking a mandate</description>
     <author>worldline</author>
     <version>1.0</version>
 
-    <actionClassName>com.worldline.direct.actions.recurringToken.WorldlineRevokeRecurringTokenAction</actionClassName>
+    <actionClassName>com.worldline.direct.actions.mandate.WorldlineRevokeMandateAction</actionClassName>
 
-    <inputType>com.worldline.direct.model.WorldlineRecurringTokenModel</inputType>
+    <inputType>com.worldline.direct.model.WorldlineMandateModel</inputType>
     <outputType>java.lang.Object</outputType>
 
     <settings>

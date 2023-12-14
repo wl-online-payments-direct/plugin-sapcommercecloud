@@ -119,6 +119,9 @@
         <property name="tokenizePayment" type="boolean">
             <description>If recurring payment is paid by card the customer must accept to keep his payment details</description>
         </property>
+        <property name="isReplenishmentOrder" type="boolean">
+            <description>A switch to tell if an order is one-off or replenish</description>
+        </property>
     </bean>
 
 

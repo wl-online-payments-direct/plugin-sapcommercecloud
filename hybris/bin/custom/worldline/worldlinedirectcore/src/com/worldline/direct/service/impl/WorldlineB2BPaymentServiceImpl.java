@@ -39,7 +39,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
                 CreateMandateRequest mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
-                mandate.setCustomerReference(cartToOrderCronJobModel.getCode() + System.currentTimeMillis());
+                mandate.setCustomerReference(cartToOrderCronJobModel.getJob().getCode() + "_" + System.currentTimeMillis());
             }
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
             if (!worldlineConfigurationService.getWorldlineConfiguration(cartToOrderCronJobModel.getCart().getStore()).isFirstRecurringPayment()) {
@@ -72,6 +72,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
                 CreateMandateRequest mandate = params.getSepaDirectDebitPaymentMethodSpecificInput().getPaymentProduct771SpecificInput().getMandate();
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
+                mandate.setCustomerReference(orderModel.getSchedulingCronJob().getCode() + "_" + System.currentTimeMillis());
             }
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
             if (!orderModel.getStore().getWorldlineConfiguration().isFirstRecurringPayment()) {
