@@ -11,6 +11,7 @@ import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.processengine.helpers.ProcessParameterHelper;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
+import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 
 import java.util.List;
 
@@ -23,12 +24,16 @@ public class WorldlineOrderReplenishmentCartNonValidContext extends AbstractEmai
     private List<CartModificationData> cartModifications;
     private ScheduledCartData scheduledCartData;
 
+    private CommonI18NService commonI18NService;
+
     @Override
     public void init(ReplenishmentProcessModel businessProcessModel, EmailPageModel emailPageModel) {
         super.init(businessProcessModel, emailPageModel);
         cartModifications= (List<CartModificationData>) processParameterHelper.getProcessParameterByName(businessProcessModel, CART_MODIFICATIONS_PARAM).getValue();
         scheduledCartData = scheduledCartConverter.convert(businessProcessModel.getCartToOrderCronJob());
-
+        if (businessProcessModel.getCode().contains("merchant")) {
+            put(EMAIL, businessProcessModel.getCartToOrderCronJob().getCart().getStore().getMerchant(commonI18NService.getLocaleForLanguage(getEmailLanguage(businessProcessModel))));
+        }
     }
 
 
@@ -63,5 +68,13 @@ public class WorldlineOrderReplenishmentCartNonValidContext extends AbstractEmai
 
     public void setScheduledCartConverter(Converter<CartToOrderCronJobModel, ScheduledCartData> scheduledCartConverter) {
         this.scheduledCartConverter = scheduledCartConverter;
+    }
+
+    public CommonI18NService getCommonI18NService() {
+        return commonI18NService;
+    }
+
+    public void setCommonI18NService(CommonI18NService commonI18NService) {
+        this.commonI18NService = commonI18NService;
     }
 }

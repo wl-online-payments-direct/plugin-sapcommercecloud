@@ -44,6 +44,7 @@
     <bean id="WorldlineOrderReplenishmentCartNonValidContext" class="com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext" parent="abstractEmailContext" scope="prototype">
         <property name="processParameterHelper" ref="processParameterHelper"/>
         <property name="scheduledCartConverter" ref="scheduledCartConverter"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
 </beans>
