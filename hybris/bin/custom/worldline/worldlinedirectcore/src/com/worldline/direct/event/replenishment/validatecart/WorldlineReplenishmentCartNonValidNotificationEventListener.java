@@ -9,6 +9,7 @@ import de.hybris.platform.processengine.helpers.ProcessParameterHelper;
 import de.hybris.platform.servicelayer.event.impl.AbstractEventListener;
 import de.hybris.platform.servicelayer.model.ModelService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.worldline.direct.actions.replenishment.WorldlineValidateCartAction.CART_MODIFICATIONS_PARAM;
@@ -33,6 +34,18 @@ public class WorldlineReplenishmentCartNonValidNotificationEventListener extends
         CartNonValidNotificationProcess.setStore(cartToOrderCronJob.getCart().getStore());
         modelService.save(CartNonValidNotificationProcess);
         businessProcessService.startProcess(CartNonValidNotificationProcess);
+
+        ReplenishmentProcessModel CartNonValidMerchantNotificationProcess = businessProcessService.createProcess("worldline-replenishment-cart-non-valid-merchant-email-process" + "-" + cartToOrderCronJob.getCode() + "-" + System.currentTimeMillis(), "worldline-replenishment-cart-non-valid-merchant-email-process");
+        processParameterHelper.setProcessParameter(CartNonValidMerchantNotificationProcess,CART_MODIFICATIONS_PARAM,cartModifications);
+        CartNonValidMerchantNotificationProcess.setCartToOrderCronJob(cartToOrderCronJob);
+        CartNonValidMerchantNotificationProcess.setCustomer((CustomerModel) cartToOrderCronJob.getCart().getUser());
+        CartNonValidMerchantNotificationProcess.setCurrency(cartToOrderCronJob.getCart().getCurrency());
+        CartNonValidMerchantNotificationProcess.setLanguage(cartToOrderCronJob.getCart().getStore().getDefaultLanguage());
+        CartNonValidMerchantNotificationProcess.setStore(cartToOrderCronJob.getCart().getStore());
+        CartNonValidMerchantNotificationProcess.setSite(cartToOrderCronJob.getCart().getSite());
+        modelService.save(CartNonValidMerchantNotificationProcess);
+        businessProcessService.startProcess(CartNonValidMerchantNotificationProcess);
+
     }
 
     public void setBusinessProcessService(BusinessProcessService businessProcessService) {

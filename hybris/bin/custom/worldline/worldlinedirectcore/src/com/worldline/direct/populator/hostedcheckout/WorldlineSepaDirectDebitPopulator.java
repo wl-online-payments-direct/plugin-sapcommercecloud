@@ -28,7 +28,7 @@ public class WorldlineSepaDirectDebitPopulator implements Populator<AbstractOrde
             SepaDirectDebitPaymentProduct771SpecificInputBase specificInputBase = new SepaDirectDebitPaymentProduct771SpecificInputBase();
             CreateMandateRequest createMandateRequest = new CreateMandateRequest();
             createMandateRequest.setLanguage(commonI18NService.getCurrentLanguage().getIsocode());
-            createMandateRequest.setCustomerReference(abstractOrderModel.getCode() + System.currentTimeMillis());
+            createMandateRequest.setCustomerReference(abstractOrderModel.getCode() + "_" + System.currentTimeMillis());
             createMandateRequest.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.UNIQUE.getValue());
             createMandateRequest.setSignatureType(SMS);
             specificInputBase.setMandate(createMandateRequest);

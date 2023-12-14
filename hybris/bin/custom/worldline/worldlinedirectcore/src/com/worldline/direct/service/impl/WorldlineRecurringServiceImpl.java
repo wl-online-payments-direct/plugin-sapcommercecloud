@@ -30,7 +30,7 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
     private ModelService modelService;
 
     @Override
-    public Optional<CreatePaymentResponse> createRecurringPayment(AbstractOrderModel abstractOrderModel) {
+    public Optional<CreatePaymentResponse> createRecurringPayment(AbstractOrderModel abstractOrderModel) throws Exception {
         WorldlinePaymentInfoModel worldlinePaymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
 
         switch (worldlinePaymentInfo.getId()) {
@@ -54,7 +54,7 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
 
                 } catch (Exception e) {
                     LOG.error("something went wrong during payment creation", e);
-                    return Optional.empty();
+                    throw new Exception(e);
                 }
             }
             case PAYMENT_METHOD_AMERICAN_EXPRESS:
@@ -69,7 +69,7 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                         return Optional.of(createPaymentResponse);
                     } catch (Exception e) {
                         LOG.error("something went wrong during payment creation", e);
-                        return Optional.empty();
+                        throw new Exception(e);
                     }
                 } else {
                     LOG.info("No token id is saved against payment info: " + worldlinePaymentInfo.getCode());

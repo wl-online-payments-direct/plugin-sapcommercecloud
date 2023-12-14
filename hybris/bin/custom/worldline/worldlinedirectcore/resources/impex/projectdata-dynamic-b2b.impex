@@ -85,14 +85,15 @@ INSERT_UPDATE RendererTemplate; code[unique = true]                             
                               ; $store_Name_Email_Replenishment_Cart_Non_Valid_Subject ; "Replenishment Cart Non Valid Email Subject" ; $jarEmailResource/email-replenishmentCartNonValidSubject.vm                                               ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
                               ; $store_Email_Replenishment_Order_Placed_Body          ; "Order Confirmation Email Subject" ; $emailResource/email-replenishmentOrderPlacedBody.vm
                               ; $store_Email_Replenishment_Order_Confirmation_Body    ; ""                                 ; $emailResource/email-replenishmentOrderConfirmationBody.vm
+; $store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Body    ; "Replenishment Cart Non Valid Merchant Email Body"    ; $jarEmailResource/email-replenishmentCartNonValidMerchantBody.vm                                                  ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
+; $store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Subject ; "Replenishment Cart Non Valid Merchant Email Subject" ; $jarEmailResource/email-replenishmentCartNonValidMerchantSubject.vm                                               ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
 
 
 $jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
 
 INSERT_UPDATE EmailPageTemplate;$contentCV[unique=true];uid[unique=true];name;active;frontendTemplateName;subject(code);htmlTemplate(code);restrictedPageTypes(code);velocityTemplate[translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
                                ;;ReplenishmentCartNonValidEmailTemplate;Replenishment Cart Non Valid Email Template;true;replenishmentCartNonValidEmail;$store_Name_Email_Replenishment_Cart_Non_Valid_Subject;$store_Name_Email_Replenishment_Cart_Non_Valid_Body;EmailPage;$jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
-
-
+                                ;;ReplenishmentCartNonValidMerchantEmailTemplate;Replenishment Cart Non Valid Merchant Email Template;true;replenishmentCartNonValidMerchantEmail;$store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Subject;$store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Body;EmailPage;$jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
 
 INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidEmailTemplate'];validComponentTypes(code);compTypeGroup(code)
                              ;SiteLogo;;;logo;email
@@ -111,6 +112,22 @@ INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemp
                        ;; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
 
 
+INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidMerchantEmailTemplate'];validComponentTypes(code);compTypeGroup(code)
+                             ;SiteLogo;;;logo;email
+                             ;TopContent;;$wideContent;email
+                             ;BottomContent;;$wideContent;email
+
+INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];position[unique=true];pageTemplate(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidMerchantEmailTemplate'];contentSlot(uid,$contentCV)[unique=true];allowOverwrite
+                                    ;;SiteLogo-ReplenishmentCartNonValidMerchantEmail;SiteLogo;;SiteLogoSlot;true
+                                    ;;TopContent-ReplenishmentCartNonValidMerchantEmail;TopContent;;EmailTopSlot;true
+                                    ;;BottomContent-ReplenishmentCartNonValidMerchantEmail;BottomContent;;EmailBottomSlot;true
+
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
+                       ;;ReplenishmentCartNonValidMerchantEmail;Cart Non Valid Email;ReplenishmentCartNonValidMerchantEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+
+
+
 ##################################  Cart with replenishment form    ##################################
 INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;page;actions(uid,$contentCV);&componentRef
                                  ;;WorldlineCheckoutComponent;Worldline Checkout Display Component;/WEB-INF/views/addons/worldlinedirectb2bcheckoutaddon/responsive/cart/worldlineCheckoutDisplay.jsp;;WorldlineCheckoutComponent
@@ -126,5 +143,5 @@ UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];cmsComponents(uid,$c
                   ;;OrderConfirmationEmailTopSlot;EmailBannerSaleNowOnImage,WorldlineOrderConfirmationEmailBody
 
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=de];fromName[lang=de]
-                       ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+                       ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
 
