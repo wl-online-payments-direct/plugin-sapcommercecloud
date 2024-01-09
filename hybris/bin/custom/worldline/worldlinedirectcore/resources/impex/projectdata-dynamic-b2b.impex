@@ -71,8 +71,8 @@ INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];po
 
 
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
-                       ;;ReplenishmentPaymentFailedCustomerEmail;Payment Failed Customer Email;ReplenishmentPaymentFailedCustomerEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
-                       ;;ReplenishmentPaymentFailedMerchantEmail;Payment Failed Merchant Email;ReplenishmentPaymentFailedMerchantEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
+                       ;;ReplenishmentPaymentFailedCustomerEmail;Payment Failed Customer Email;ReplenishmentPaymentFailedCustomerEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+                       ;;ReplenishmentPaymentFailedMerchantEmail;Payment Failed Merchant Email;ReplenishmentPaymentFailedMerchantEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
 
 ##################################  Cart Non Valid Notification    ##################################
 $jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/worldlinedirectcore/import/email
@@ -107,9 +107,9 @@ INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];po
 
 
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
-                       ;;ReplenishmentCartNonValidEmail;Cart Non Valid Email;ReplenishmentCartNonValidEmailTemplate;true;;localgreenlight@gmail.com;Customer Services Team
-                       ;; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
-                       ;; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; localgreenlight@gmail.com ; Customer Services Team
+                       ;;ReplenishmentCartNonValidEmail;Cart Non Valid Email;ReplenishmentCartNonValidEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+                       ;; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; martinapenevaBB@gmail.com ; Customer Services Team
+                       ;; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; martinapenevaBB@gmail.com ; Customer Services Team
 
 
 INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidMerchantEmailTemplate'];validComponentTypes(code);compTypeGroup(code)

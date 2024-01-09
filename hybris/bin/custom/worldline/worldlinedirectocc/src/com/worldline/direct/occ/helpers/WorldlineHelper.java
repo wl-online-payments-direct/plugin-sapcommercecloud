@@ -78,7 +78,9 @@ public class WorldlineHelper {
     public String buildRecurringReturnURL(HttpServletRequest request, String key,OrderType orderType) {
         final String returnURL = Config.getParameter(key);
         final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        return String.format(returnURL, uriVars.get("baseSiteId"),orderType, uriVars.get("userId"), "_cartId_", request.getParameter("cartId"));
+//        return String.format(returnURL, uriVars.get("baseSiteId"), orderType, uriVars.get("userId"), "_orderCode_", request.getParameter("cartId"));
+
+        return String.format(returnURL, uriVars.get("baseSiteId"), uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
     }
 
 
