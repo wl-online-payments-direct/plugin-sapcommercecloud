@@ -22,4 +22,5 @@ public interface WorldlineRecurringCheckoutFacade extends WorldlineCheckoutFacad
     ScheduledCartData authorizeRecurringPaymentForHostedTokenization(
           String code, WorldlineHostedTokenizationData worldlineHostedTokenizationData, RecurringPaymentEnum recurringPaymentType) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
+    ScheduledCartData handleRecurring3DsHostedTokenizationPayment(String orderId, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 }
