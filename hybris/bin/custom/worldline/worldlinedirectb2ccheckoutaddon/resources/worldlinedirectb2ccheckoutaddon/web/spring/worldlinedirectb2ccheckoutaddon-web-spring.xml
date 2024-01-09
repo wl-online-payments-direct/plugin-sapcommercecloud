@@ -142,7 +142,7 @@
     </bean>
 
     <alias name="worldlineCartPageController" alias="cartPageController"/>
-    <bean name="worldlineCartPageController"
+    <bean id="worldlineCartPageController"
           class="com.worldline.direct.checkoutaddon.controllers.pages.WorldlineCartPageController"/>
 
 </beans>

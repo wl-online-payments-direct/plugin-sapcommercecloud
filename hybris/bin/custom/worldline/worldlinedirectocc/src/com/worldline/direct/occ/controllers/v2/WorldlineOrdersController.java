@@ -19,6 +19,7 @@ import com.worldline.direct.payment.dto.HostedCheckoutResponseWsDTO;
 import com.worldline.direct.payment.dto.RecurringDataWSDTO;
 import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
+import de.hybris.platform.b2bwebservicescommons.dto.order.ReplenishmentOrderWsDTO;
 import de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO;
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.OrderFacade;
@@ -148,17 +149,12 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         hostedTokenizationData.setBrowserData(browserData);
         hostedTokenizationData.setReturnUrl(sessionService.getAttribute(HOSTED_TOKENIZATION_RETURN_URL));
 
-        storeHTPReturnUrlInSession(orderData.getCode(), request);
+        storeHTPReturnUrlInSession(orderData.getCode(), request, OrderType.PLACE_ORDER);
 
         worldlineCheckoutFacade.authorisePaymentForHostedTokenization(orderData.getCode(), hostedTokenizationData);
         orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
 
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
-    }
-
-    private void storeHTPReturnUrlInSession(String code, HttpServletRequest request) {
-        final String returnURL = worldlineHelper.buildReturnURL(request, "worldline.occ.hostedTokenization.returnUrl");
-        sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL.replace("_orderCode_", code));
     }
 
     @PostMapping(value = "/{orderCode}/hostedTokenization/return")
@@ -219,7 +215,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
         OrderData orderData = extendedCheckoutFacade.placeOrder();
 
-        storeHOPReturnUrlInSession(orderData.getCode(), request,OrderType.PLACE_ORDER);
+        storeHOPReturnUrlInSession(orderData.getCode(), request, OrderType.PLACE_ORDER);
 
         final CreateHostedCheckoutResponse createHostedCheckoutResponse = worldlineCheckoutFacade.createHostedCheckout(orderData.getCode(), browserData);
         return getDataMapper().map(createHostedCheckoutResponse, HostedCheckoutResponseWsDTO.class, fields);
@@ -289,19 +285,17 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
     }
 
-    @PostMapping(value = "/recurringHostedTokenizationCheckout", consumes =
-          {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/recurringHostedTokenizationCheckout", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
     @ApiBaseSiteIdAndUserIdParam
-    @Operation(operationId = "placeReplenishmentOrderHostedCheckout", summary = "Place the Replenishment order with HostedCheckout", description = "Place the Replenishment order with HostedCheckout")
-    public HostedCheckoutResponseWsDTO placeReplenishmentOrderHostedTokenizationCheckout(
+    @Operation(operationId = "placeReplenishmentOrderHostedTokenizationCheckout", summary = "Place the Replenishment order with Hosted Tokenization", description = "Place the Replenishment order with HostedTokenizationCheckout")
+    public ReplenishmentOrderWsDTO placeReplenishmentOrderHostedTokenizationCheckout(
           @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true) @RequestParam(required = true) final String cartId,
           @Parameter(description = "Whether terms were accepted or not.", required = true) @RequestParam(required = true) final boolean termsChecked,
-          @Parameter(description = "Whether terms were accepted or not.", required = true) @RequestParam(required = true) final boolean cardDetailsChecked,
           @Parameter(description = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
           @RequestBody final BrowserDataWsDTO browserDataWsDTO,
           @ApiFieldsParam @RequestParam(required = false, defaultValue = FieldSetLevelHelper.DEFAULT_LEVEL) final String fields, final HttpServletRequest request)
-          throws InvalidCartException {
+          throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
 
         validateTerms(termsChecked);
         validateUser();
@@ -313,15 +307,21 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
         final PlaceOrderData placeOrderData = worldlineCheckoutFacade.prepareOrderPlacementData();
         placeOrderData.setTermsCheck(termsChecked);
-        placeOrderData.setCardDetailsCheck(cardDetailsChecked);
         AbstractOrderData abstractOrderData = extendedCheckoutFacade.placeOrder(placeOrderData);
 
-        storeHOPReturnUrlInSession(abstractOrderData.getCode(), request, OrderType.SCHEDULE_REPLENISHMENT_ORDER);
-        validate(browserDataWsDTO, "browserDataWsDTO", browserDataWsDTOValidator);
         final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);
-        final CreateHostedCheckoutResponse createHostedCheckoutResponse = worldlineRecurringCheckoutFacade.createReplenishmentHostedCheckout(abstractOrderData, browserData, RecurringPaymentEnum.IMMEDIATE);
+        fillBrowserData(request, browserData);
 
-        return dataMapper.map(createHostedCheckoutResponse, HostedCheckoutResponseWsDTO.class, fields);
+        final WorldlineHostedTokenizationData hostedTokenizationData = new WorldlineHostedTokenizationData();
+        hostedTokenizationData.setHostedTokenizationId(abstractOrderData.getWorldlinePaymentInfo().getHostedTokenizationId());
+        hostedTokenizationData.setBrowserData(browserData);
+
+//        abstractOrderData = orderFacade.getOrderDetailsForCodeWithoutUser(abstractOrderData.getCode());
+
+        storeHTPReturnUrlInSession(abstractOrderData.getCode(), request, OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+        abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(abstractOrderData.getCode(), hostedTokenizationData , RecurringPaymentEnum.IMMEDIATE);
+
+        return getDataMapper().map((ScheduledCartData)abstractOrderData, ReplenishmentOrderWsDTO.class, fields);
     }
 
 
@@ -359,7 +359,12 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
     private void storeHOPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType) {
         final String returnURL = worldlineHelper.buildRecurringReturnURL(request, "worldline.occ.hostedCheckout.returnUrl", orderType);
-        sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL.replace("_cartId_", code));
+        sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL.replace("_orderCode_", code));
+    }
+
+    private void storeHTPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType) {
+        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, "worldline.occ.hostedTokenization.returnUrl", orderType);
+        sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL.replace("_orderCode_", code));
     }
 
     public DataMapper getDataMapper() {
