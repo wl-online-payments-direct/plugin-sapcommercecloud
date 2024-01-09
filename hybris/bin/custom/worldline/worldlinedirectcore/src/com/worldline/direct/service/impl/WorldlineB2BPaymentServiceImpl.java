@@ -115,7 +115,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 params.getOrder().setShoppingCart(null);
             }
 
-            WorldlineLogUtils.logAction(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, "payment");
+            //WorldlineLogUtils.logAction(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, "payment");
 
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
 

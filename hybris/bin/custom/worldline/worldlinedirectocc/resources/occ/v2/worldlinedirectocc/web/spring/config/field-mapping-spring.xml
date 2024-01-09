@@ -19,16 +19,16 @@
             </map>
         </property>
     </bean>
-        <bean parent="fieldSetLevelMapping" id="worldlineCartWsDTOFieldSetLevelMapping">
-        <property name="dtoClass"
-                  value="de.hybris.platform.commercewebservicescommons.dto.order.CartWsDTO"/>
-        <property name="levelMapping">
-            <map>
-                <entry key="BASIC" value="worldlinePaymentInfo(BASIC),surcharge(FULL)"/>
-                <entry key="DEFAULT" value="worldlinePaymentInfo(DEFAULT),surcharge(FULL)"/>
-                <entry key="FULL" value="worldlinePaymentInfo(FULL),surcharge(FULL)"/>
-            </map>
-        </property>
+    <bean parent="fieldSetLevelMapping" id="worldlineCartWsDTOFieldSetLevelMapping">
+    <property name="dtoClass"
+              value="de.hybris.platform.commercewebservicescommons.dto.order.CartWsDTO"/>
+    <property name="levelMapping">
+        <map>
+            <entry key="BASIC" value="worldlinePaymentInfo(BASIC),surcharge(FULL),replenishmentOrder,nDays,nWeeks,nthDayOfMonth,nMonths,nYear,replenishmentRecurrence,replenishmentStartDate,replenishmentEndDate,nDaysOfWeek"/>
+            <entry key="DEFAULT" value="worldlinePaymentInfo(DEFAULT),surcharge(FULL),replenishmentOrder,nDays,nWeeks,nthDayOfMonth,nMonths,nYear,replenishmentRecurrence,replenishmentStartDate,replenishmentEndDate,nDaysOfWeek"/>
+            <entry key="FULL" value="worldlinePaymentInfo(FULL),surcharge(FULL),replenishmentOrder,nDays,nWeeks,nthDayOfMonth,nMonths,nYear,replenishmentRecurrence,replenishmentStartDate,replenishmentEndDate,nDaysOfWeek"/>
+        </map>
+    </property>
     </bean>
 
     <bean parent="fieldSetLevelMapping" id="worldlineReplenishmentOrderWsDTOFieldSetLevelMapping">

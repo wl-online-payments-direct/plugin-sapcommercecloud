@@ -412,7 +412,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     @Override
     public boolean isTemporaryToken(String hostedTokenizationID) {
         GetHostedTokenizationResponse hostedTokenizationResponse = worldlinePaymentService.getHostedTokenization(hostedTokenizationID);
-
         return hostedTokenizationResponse.getToken().getIsTemporary();
     }
 
