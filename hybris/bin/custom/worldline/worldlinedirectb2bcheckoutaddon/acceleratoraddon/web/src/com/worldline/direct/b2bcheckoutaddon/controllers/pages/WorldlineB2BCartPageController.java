@@ -65,7 +65,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping(value = "/cart")
-public class WorldlineCartPageController extends AbstractCartPageController {
+public class WorldlineB2BCartPageController extends AbstractCartPageController {
    public static final String SHOW_CHECKOUT_STRATEGY_OPTIONS = "storefront.show.checkout.flows";
    public static final String ERROR_MSG_TYPE = "errorMsg";
    public static final String SUCCESSFUL_MODIFICATION_CODE = "success";
@@ -79,7 +79,7 @@ public class WorldlineCartPageController extends AbstractCartPageController {
    private static final String REDIRECT_QUOTE_EDIT_URL = REDIRECT_PREFIX + "/quote/%s/edit/";
    private static final String REDIRECT_QUOTE_VIEW_URL = REDIRECT_PREFIX + "/my-account/my-quotes/%s/";
 
-   private static final Logger LOG = Logger.getLogger(WorldlineCartPageController.class);
+   private static final Logger LOG = Logger.getLogger(WorldlineB2BCartPageController.class);
 
    @Resource(name = "simpleBreadcrumbBuilder")
    private ResourceBreadcrumbBuilder resourceBreadcrumbBuilder;

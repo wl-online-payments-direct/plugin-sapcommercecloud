@@ -114,6 +114,12 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
         return scheduledCartData;
     }
 
+    @Override
+    public ScheduledCartData handleRecurring3DsHostedTokenizationPayment(String orderId, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+        handle3dsResponse(orderId, paymentId);
+        return prepareCronJob(orderId);
+    }
+
     protected ScheduledCartData handlePaymentResponse(CartToOrderCronJobModel cartToOrderCronJobModel) {
         worldlineCartToOrderService.enableCartToOrderJob(cartToOrderCronJobModel, true);
         cartService.removeSessionCart();

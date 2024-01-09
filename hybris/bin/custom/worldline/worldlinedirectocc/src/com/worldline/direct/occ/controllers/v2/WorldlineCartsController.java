@@ -19,7 +19,6 @@ import com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO;
 import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
-import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.b2bwebservicescommons.dto.order.DayOfWeekWsDTO;
 import de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO;
 import de.hybris.platform.commercefacades.order.CartFacade;
@@ -41,7 +40,6 @@ import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -262,7 +260,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
         }
         final CartData cartData = cartFacade.getSessionCart();
         if (cartData.getWorldlinePaymentInfo() != null) {
-            return WorldlinePaymentProductUtils.isCreditCard(cartData.getWorldlinePaymentInfo()) && !worldlineCheckoutFacade.isTemporaryToken(cartData.getWorldlinePaymentInfo().getHostedTokenizationId());
+            return WorldlinePaymentProductUtils.isCreditCard(cartData.getWorldlinePaymentInfo()) && worldlineCheckoutFacade.isTemporaryToken(cartData.getWorldlinePaymentInfo().getHostedTokenizationId());
         }
         return Boolean.FALSE;
     }
@@ -279,7 +277,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
             validateUser();
 
             validateScheduleReplenishmentForm(scheduleReplenishmentFormWsDTO);
-            worldlineRecurringCheckoutFacade.saveReplenishmentData(Boolean.TRUE,
+            worldlineRecurringCheckoutFacade.saveReplenishmentData(scheduleReplenishmentFormWsDTO.isIsReplenishmentOrder(),
                   scheduleReplenishmentFormWsDTO.getReplenishmentStartDate(),
                   scheduleReplenishmentFormWsDTO.getReplenishmentEndDate(),
                   scheduleReplenishmentFormWsDTO.getNumberOfDays(),
