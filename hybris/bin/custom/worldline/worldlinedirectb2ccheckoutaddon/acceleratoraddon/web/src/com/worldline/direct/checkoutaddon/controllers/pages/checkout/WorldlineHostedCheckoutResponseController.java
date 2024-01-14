@@ -6,10 +6,7 @@ import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
-import com.worldline.direct.facade.WorldlineCustomerAccountFacade;
 import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
-import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractCheckoutController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
@@ -51,15 +48,8 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
     @Resource(name = "checkoutCustomerStrategy")
     private CheckoutCustomerStrategy checkoutCustomerStrategy;
 
-    @Resource(name = "worldlineCustomerAccountFacade")
-    private WorldlineCustomerAccountFacade worldlineCustomerAccountFacade;
-
     @Resource(name = "worldlineRecurringCheckoutFacade")
     private WorldlineRecurringCheckoutFacade worldlineRecurringCheckoutFacade;
-
-    @Resource(name = "worldlineConfigurationService")
-    private WorldlineConfigurationService worldlineConfigurationService;
-
 
     @RequireHardLogIn
     @RequestMapping(value = ORDER_CONFIRMATION_PATH_VARIABLE + WorldlineWebConstants.URL.Checkout.Payment.HOP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = {RequestMethod.POST, RequestMethod.GET})
@@ -71,7 +61,6 @@ public class WorldlineHostedCheckoutResponseController extends AbstractCheckoutC
                                                       final RedirectAttributes redirectAttributes) throws InvalidCartException {
 
         AbstractOrderData orderDetails;
-        WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
 
         try {
             orderDetails = orderFacade.getOrderDetailsForCode(orderCode);

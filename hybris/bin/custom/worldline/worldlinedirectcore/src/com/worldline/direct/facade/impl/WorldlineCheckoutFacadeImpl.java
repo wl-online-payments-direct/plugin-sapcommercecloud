@@ -229,9 +229,15 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     }
 
 
-    public void handle3dsResponse(String orderCode, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+    public void handle3dsResponse(String orderCode, String paymentId, Boolean isRecurring) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         final PaymentResponse payment = worldlinePaymentService.getPayment(paymentId);
+
+        if (isRecurring) {
+            saveSurchargeData(orderForCode, payment);
+            savePaymentToken(orderForCode, payment, Boolean.TRUE, orderForCode.getSchedulingCronJob().getCode());
+            saveMandateIfNeeded(orderForCode.getStore().getUid(), (WorldlinePaymentInfoModel) orderForCode.getSchedulingCronJob().getPaymentInfo(), payment);
+        }
         handlePaymentResponse(orderForCode, payment);
     }
 

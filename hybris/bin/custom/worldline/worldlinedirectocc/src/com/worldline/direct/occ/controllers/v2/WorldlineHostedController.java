@@ -91,7 +91,7 @@ public class WorldlineHostedController extends WorldlineBaseController {
         switch (orderType) {
             case PLACE_ORDER: {
 
-                worldlineRecurringCheckoutFacade.handle3dsResponse(orderData.getCode(), paymentId);
+                worldlineRecurringCheckoutFacade.handle3dsResponse(orderData.getCode(), paymentId, Boolean.FALSE);
                 orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
                 return getDataMapper().map(orderData, OrderWsDTO.class, fields);
             }
