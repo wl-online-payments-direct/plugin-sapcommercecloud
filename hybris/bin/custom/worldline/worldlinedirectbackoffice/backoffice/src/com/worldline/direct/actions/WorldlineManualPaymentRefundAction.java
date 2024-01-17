@@ -19,6 +19,7 @@ import org.zkoss.zhtml.Messagebox;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUNDED;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUND_REQUESTED;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.WORLDLINE_EVENT_REFUND;
 
@@ -54,7 +55,7 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
       RefundResponse refundResponse = worldlinePaymentService.refundPayment(order.getStore().getUid(), paymentTransactionToRefund.getRequestId(), refundAmount, paymentTransactionToRefund.getCurrency().getIsocode());
 
 
-      if (REFUND_REQUESTED.getValue().equals(refundResponse.getStatus())) {
+      if (REFUND_REQUESTED.getValue().equals(refundResponse.getStatus()) || REFUNDED.getValue().equals(refundResponse.getStatus())) {
          worldlineTransactionService.updatePaymentTransaction(paymentTransactionToRefund.getPaymentTransaction(),
                paymentTransactionToRefund.getRequestId(),
                refundResponse.getStatus(),

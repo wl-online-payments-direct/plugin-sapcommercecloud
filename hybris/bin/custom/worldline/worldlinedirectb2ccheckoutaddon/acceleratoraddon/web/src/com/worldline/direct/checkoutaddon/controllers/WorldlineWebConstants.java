@@ -81,6 +81,13 @@ public interface WorldlineWebConstants {
                 String ExpandGridInCart = "fragments/cart/expandGridInCart";
             }
 
+            interface Checkout
+            {
+                String TermsAndConditionsPopup = "fragments/checkout/termsAndConditionsPopup";
+                String BillingAddressForm = "fragments/checkout/billingAddressForm";
+                String ReadOnlyExpandedOrderForm = "fragments/checkout/readOnlyExpandedOrderForm";
+            }
+
         }
 
     }

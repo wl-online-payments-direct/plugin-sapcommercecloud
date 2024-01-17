@@ -27,4 +27,8 @@
     <bean name="worldlineB2BCartPageController"
           class="com.worldline.direct.b2bcheckoutaddon.controllers.pages.WorldlineB2BCartPageController"/>
 
+    <alias name="worldlineB2BMultiStepCheckoutController" alias="multiStepCheckoutController"/>
+    <bean name="worldlineB2BMultiStepCheckoutController"
+          class="com.worldline.direct.b2bcheckoutaddon.controllers.pages.WorldlineB2BMultiStepCheckoutController"/>
+
 </beans>
