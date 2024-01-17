@@ -26,6 +26,8 @@ public interface WorldlineCheckoutConstants {
             interface Checkout {
                 String BillingAddressForm = ADDON_PREFIX + "fragments/billingAddressForm";
                 String CountryAddressForm = ADDON_PREFIX + "fragments/worldlineCountryAddressForm";
+                String TermsAndConditionsPopup = "fragments/checkout/termsAndConditionsPopup";
+                String ReadOnlyExpandedOrderForm = "fragments/checkout/readOnlyExpandedOrderForm";
 
             }
             interface Cart {
