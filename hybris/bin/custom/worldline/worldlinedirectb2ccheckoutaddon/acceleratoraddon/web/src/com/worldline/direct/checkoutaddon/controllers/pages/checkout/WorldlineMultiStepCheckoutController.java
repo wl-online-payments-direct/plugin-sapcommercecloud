@@ -9,7 +9,6 @@ import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLo
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.AbstractCheckoutStepController;
-import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.CheckoutStepController;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
@@ -120,8 +119,8 @@ public class WorldlineMultiStepCheckoutController extends AbstractCheckoutStepCo
             return REDIRECT_URL_CHOOSE_DELIVERY_METHOD;
 
          case ERROR_PAYMENT_INFO:
-            GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.ERROR_MESSAGES_HOLDER,
-                  "checkout.express.error.paymentInfo");
+//            GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.ERROR_MESSAGES_HOLDER,
+//                  "checkout.express.error.paymentInfo");
             return REDIRECT_URL_ADD_PAYMENT_METHOD;
 
          default:
