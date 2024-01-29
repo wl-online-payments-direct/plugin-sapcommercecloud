@@ -12,6 +12,8 @@ import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 
+import java.math.BigDecimal;
+
 public class WorldlineManualPaymentCaptureAction extends ManualPaymentCaptureAction implements CockpitAction<OrderModel, OrderModel> {
 
     @Override
@@ -37,7 +39,7 @@ public class WorldlineManualPaymentCaptureAction extends ManualPaymentCaptureAct
         final PaymentTransactionModel finalPaymentTransaction = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
         return finalPaymentTransaction.getEntries()
                 .stream()
-                .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()))
+                .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()) && !BigDecimal.ZERO.equals(entry.getAmount()))
                 .findFirst().orElse(null);
     }
 

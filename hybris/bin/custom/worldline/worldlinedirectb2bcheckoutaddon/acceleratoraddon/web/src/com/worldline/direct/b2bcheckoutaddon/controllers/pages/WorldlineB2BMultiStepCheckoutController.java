@@ -121,8 +121,8 @@ public class WorldlineB2BMultiStepCheckoutController extends AbstractCheckoutSte
             return REDIRECT_URL_CHOOSE_DELIVERY_METHOD;
 
          case ERROR_PAYMENT_INFO:
-            GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.ERROR_MESSAGES_HOLDER,
-                  "checkout.express.error.paymentInfo");
+//            GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.ERROR_MESSAGES_HOLDER,
+//                  "checkout.express.error.paymentInfo");
             return REDIRECT_URL_ADD_PAYMENT_METHOD;
 
          default:
