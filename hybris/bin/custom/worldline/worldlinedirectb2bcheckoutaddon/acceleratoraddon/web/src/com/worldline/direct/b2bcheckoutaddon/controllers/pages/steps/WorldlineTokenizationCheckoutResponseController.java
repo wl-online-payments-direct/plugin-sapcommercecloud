@@ -65,8 +65,7 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
                             @RequestParam(value = "RETURNMAC") final String returnMAC,
                             @RequestParam(value = "paymentId") final String paymentId,
                             final RedirectAttributes redirectAttributes) throws InvalidCartException {
-        final AbstractOrderData orderDetails;
-        WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        AbstractOrderData orderDetails;
         try {
             orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
         } catch (final UnknownIdentifierException e) {
@@ -76,7 +75,11 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
 
         try {
             worldlineCheckoutFacade.validateReturnMAC(orderDetails, returnMAC);
-            worldlineCheckoutFacade.handle3dsResponse(orderDetails.getCode(), paymentId);
+            if (orderType.equals(OrderType.PLACE_ORDER)) {
+                worldlineCheckoutFacade.handle3dsResponse(orderDetails.getCode(), paymentId, Boolean.FALSE);
+            } else {
+                orderDetails = worldlineRecurringCheckoutFacade.handleRecurring3DsHostedTokenizationPayment(orderCode, paymentId);
+            }
 
             return redirectToOrderConfirmationPage(orderDetails);
         } catch (WorldlineNonAuthorizedPaymentException e) {

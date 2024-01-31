@@ -79,10 +79,10 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, orderModel.getCurrency().getIsocode()));
                 params.getOrder().setShoppingCart(null);
             }
-            WorldlineLogUtils.logAction(LOGGER, "createImmediateRecurringOrderHostedCheckout", params, "RESULT");
+
             final CreateHostedCheckoutResponse hostedCheckout = merchant.hostedCheckout().createHostedCheckout(params);
 
-            WorldlineLogUtils.logAction(LOGGER, "createHostedCheckout", params, hostedCheckout);
+            WorldlineLogUtils.logAction(LOGGER, "createImmediateRecurringOrderHostedCheckout", params, hostedCheckout);
 
             return hostedCheckout;
 

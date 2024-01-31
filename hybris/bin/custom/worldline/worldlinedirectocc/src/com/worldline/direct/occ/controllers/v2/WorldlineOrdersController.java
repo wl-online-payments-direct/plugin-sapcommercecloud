@@ -180,7 +180,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         }
 
         worldlineCheckoutFacade.validateReturnMAC(orderData, returnMAC);
-        worldlineCheckoutFacade.handle3dsResponse(orderData.getCode(), paymentId);
+        worldlineCheckoutFacade.handle3dsResponse(orderData.getCode(), paymentId, Boolean.FALSE);
         orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderCode);
 
         return getDataMapper().map(orderData, OrderWsDTO.class, fields);
