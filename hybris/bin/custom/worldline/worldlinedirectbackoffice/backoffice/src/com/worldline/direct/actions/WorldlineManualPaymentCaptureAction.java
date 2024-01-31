@@ -39,7 +39,7 @@ public class WorldlineManualPaymentCaptureAction extends ManualPaymentCaptureAct
         final PaymentTransactionModel finalPaymentTransaction = order.getPaymentTransactions().get(order.getPaymentTransactions().size() - 1);
         return finalPaymentTransaction.getEntries()
                 .stream()
-                .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()) && !BigDecimal.ZERO.equals(entry.getAmount()))
+                .filter(entry -> (PaymentTransactionType.AUTHORIZATION.equals(entry.getType()) && !(BigDecimal.ZERO.compareTo(entry.getAmount()) == 0)))
                 .findFirst().orElse(null);
     }
 
