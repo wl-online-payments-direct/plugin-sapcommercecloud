@@ -145,4 +145,8 @@
     <bean id="worldlineCartPageController"
           class="com.worldline.direct.checkoutaddon.controllers.pages.WorldlineCartPageController"/>
 
+    <alias name="worldlineMultiStepCheckoutController" alias="multiStepCheckoutController"/>
+    <bean id="worldlineMultiStepCheckoutController"
+          class="com.worldline.direct.checkoutaddon.controllers.pages.checkout.WorldlineMultiStepCheckoutController"/>
+
 </beans>

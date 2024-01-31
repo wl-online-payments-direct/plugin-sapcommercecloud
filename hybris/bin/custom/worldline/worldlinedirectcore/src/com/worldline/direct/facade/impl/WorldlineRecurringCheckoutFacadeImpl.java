@@ -78,7 +78,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
         recurringPaymentInfo.setMandateDetail(orderPaymentInfo.getMandateDetail()); // if recurring payment should be done by SEPA DD
         recurringPaymentInfo.setWorldlineRecurringToken(orderPaymentInfo.getWorldlineRecurringToken()); // if recurring payment should be done by card
         modelService.save(recurringPaymentInfo);
-        worldlineCartToOrderService.enableCartToOrderJob(schedulingCronJob,false);
+        worldlineCartToOrderService.enableCartToOrderJob(schedulingCronJob, false);
         return scheduledCartConverter.convert(schedulingCronJob);
     }
 
@@ -116,7 +116,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
 
     @Override
     public ScheduledCartData handleRecurring3DsHostedTokenizationPayment(String orderId, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
-        handle3dsResponse(orderId, paymentId);
+        handle3dsResponse(orderId, paymentId, Boolean.TRUE);
         return prepareCronJob(orderId);
     }
 
