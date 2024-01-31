@@ -6,6 +6,7 @@ import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.exception.WorldlineNonValidReturnMACException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineCustomerAccountFacade;
+import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
@@ -62,6 +63,9 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
     @Resource(name = "worldlineCustomerAccountFacade")
     private WorldlineCustomerAccountFacade worldlineCustomerAccountFacade;
 
+    @Resource(name = "worldlineRecurringCheckoutFacade")
+    private WorldlineRecurringCheckoutFacade worldlineRecurringCheckoutFacade;
+
     @RequestMapping(value = ORDER_CONFIRMATION_PATH_VARIABLE + WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + ORDER_CODE_PATH_VARIABLE_PATTERN, method = RequestMethod.GET)
     @RequireHardLogIn
     public String handle3ds(@PathVariable(value = "orderCode") final String orderCode,
@@ -72,19 +76,20 @@ public class WorldlineTokenizationCheckoutResponseController extends AbstractChe
                             final Model model,
                             final HttpServletRequest request,
                             final RedirectAttributes redirectAttributes) throws CMSItemNotFoundException, CommerceCartModificationException, InvalidCartException {
-        final AbstractOrderData orderDetails;
-        WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
-
+        AbstractOrderData orderDetails;
         try {
             orderDetails = orderFacade.getOrderDetailsForCode(orderCode);
         } catch (final UnknownIdentifierException e) {
             LOGGER.warn("[WORLDLIINE] Attempted to handle hosted Tokenization payment on an order that does not exist. Redirect to cart page.");
             return REDIRECT_PREFIX + "/cart";
         }
-
         try {
             worldlineCheckoutFacade.validateReturnMAC(orderDetails, returnMAC);
-            worldlineCheckoutFacade.handle3dsResponse(orderDetails.getCode(), paymentId);
+            if (orderType.equals(OrderType.PLACE_ORDER)) {
+                worldlineCheckoutFacade.handle3dsResponse(orderDetails.getCode(), paymentId, Boolean.FALSE);
+            } else {
+                orderDetails = worldlineRecurringCheckoutFacade.handleRecurring3DsHostedTokenizationPayment(orderCode, paymentId);
+            }
 
             return redirectToOrderConfirmationPage(orderDetails);
         } catch (WorldlineNonAuthorizedPaymentException e) {
