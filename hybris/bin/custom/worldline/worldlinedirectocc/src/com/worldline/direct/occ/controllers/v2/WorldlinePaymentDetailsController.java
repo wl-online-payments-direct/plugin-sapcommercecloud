@@ -9,9 +9,9 @@ import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsD
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdAndUserIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -23,8 +23,8 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = "/{baseSiteId}/users/{userId}/worldlinepaymentdetails")
-@Api(tags = "Worldline PaymentDetails")
+@RequestMapping(value = "/{baseSiteId}/users/{userId}/worldlinePaymentDetails")
+@Tag(name = "Worldline PaymentDetails")
 public class WorldlinePaymentDetailsController extends WorldlineBaseController {
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlinePaymentDetailsController.class);
 
@@ -37,9 +37,9 @@ public class WorldlinePaymentDetailsController extends WorldlineBaseController {
     private WorldlineUserFacade worldlineUserFacade;
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_CUSTOMERMANAGERGROUP"})
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     @ResponseBody
-    @ApiOperation(nickname = "getSavedPaymentDetailsList", value = "Get saved customer's credit card payment details list.", notes = "Return saved customer's credit card payment details list.")
+    @Operation(operationId = "getSavedPaymentDetailsList", summary = "Get saved customer's credit card payment details list.", description = "Return saved customer's credit card payment details list.")
     @ApiBaseSiteIdAndUserIdParam
     public PaymentDetailsListWsDTO getSavedPaymentDetailsList(
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
@@ -53,21 +53,21 @@ public class WorldlinePaymentDetailsController extends WorldlineBaseController {
     }
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_CUSTOMERMANAGERGROUP"})
-    @RequestMapping(value = "/{paymentDetailsId}", method = RequestMethod.DELETE)
-    @ApiOperation(nickname = "removeSavedPaymentDetails", value = "Deletes saved customer's credit card payment details.", notes = "Deletes a saved customer's credit card payment details based on a specified paymentDetailsId.")
+    @DeleteMapping(value = "/{paymentDetailsId}")
+    @Operation(operationId = "removeSavedPaymentDetails", summary = "Deletes saved customer's credit card payment details.", description = "Deletes a saved customer's credit card payment details based on a specified paymentDetailsId.")
     @ApiBaseSiteIdAndUserIdParam
     @ResponseStatus(HttpStatus.OK)
     public void removePaymentDetails(
-            @ApiParam(value = "Payment details identifier.", required = true) @PathVariable final String paymentDetailsId) {
+            @Parameter(description = "Payment details identifier.", required = true) @PathVariable final String paymentDetailsId) {
         LOGGER.debug("[WORLDLINE] removePaymentDetails: id = {}", sanitize(paymentDetailsId));
         worldlineUserFacade.deleteSavedWorldlinePaymentInfo(paymentDetailsId);
     }
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
-    @RequestMapping(value = "/{paymentDetailsId}", method = RequestMethod.PATCH)
+    @PatchMapping(value = "/{paymentDetailsId}")
     @ApiBaseSiteIdAndUserIdParam
     @ResponseStatus(HttpStatus.OK)
-    public void updatePaymentDetails(@ApiParam(value = "Payment details identifier.", required = true) @PathVariable final String paymentDetailsId) {
+    public void updatePaymentDetails(@Parameter(description = "Payment details identifier.", required = true) @PathVariable final String paymentDetailsId) {
         LOGGER.debug("[WORLDLINE] updatePaymentDetails: id = {}", sanitize(paymentDetailsId));
         final WorldlinePaymentInfoData paymentInfoData = worldlineUserFacade.getWorldlinePaymentInfoByCode(paymentDetailsId);
         final boolean isAlreadyDefaultPaymentInfo = paymentInfoData.isDefaultPayment();

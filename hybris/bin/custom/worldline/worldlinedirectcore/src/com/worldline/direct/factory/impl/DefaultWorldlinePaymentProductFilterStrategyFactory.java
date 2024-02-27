@@ -1,9 +1,11 @@
 package com.worldline.direct.factory.impl;
 
-import com.ingenico.direct.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProduct;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
 import com.worldline.direct.strategy.WorldlinePaymentProductFilterStrategy;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.ArrayList;

@@ -21,12 +21,21 @@
         <property name="worldlineHostedCheckoutParamConverter" ref="worldlineHostedCheckoutParamConverter"/>
         <property name="worldlineHostedTokenizationParamConverter" ref="worldlineHostedTokenizationParamConverter"/>
         <property name="worldlineBrowserCustomerDeviceConverter" ref="worldlineBrowserCustomerDeviceConverter"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+    </bean>
+
+    <bean id="worldlineB2BPaymentServiceImpl" class="com.worldline.direct.service.impl.WorldlineB2BPaymentServiceImpl"
+          parent="worldlinePaymentService">
+        <property name="baseSiteService" ref="baseSiteService"/>
+        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
     </bean>
 
 
     <bean id="worldlineCustomerAccountService"
           class="com.worldline.direct.service.impl.WorldlineCustomerAccountServiceImpl">
         <property name="worldlineCustomerAccountDao" ref="worldlineCustomerAccountDao"/>
+        <property name="b2BCustomerAccountService" ref="b2bCustomerAccountService"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
     </bean>
 
     <bean id="worldlineBusinessProcessService"
@@ -39,6 +48,7 @@
         <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
         <property name="worldlineTransactionDao" ref="worldlineTransactionDao"/>
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+        <property name="calculationService" ref="calculationService"/>
         <property name="modelService" ref="modelService"/>
     </bean>
 
@@ -48,8 +58,55 @@
         <property name="modelService" ref="modelService"/>
     </bean>
 
-    <bean id="worldlinePaymentModeService" class="com.worldline.direct.service.impl.WorldlinePaymentModeServiceImpl" parent="defaultPaymentModeService">
+    <bean id="worldlinePaymentModeService" class="com.worldline.direct.service.impl.WorldlinePaymentModeServiceImpl"
+          parent="defaultPaymentModeService">
         <property name="worldlinePaymentModeDao" ref="worldlinePaymentModeDao"/>
     </bean>
+
+    <bean id="worldlineScheduleOrderService" class="com.worldline.direct.service.impl.WorldlineScheduleOrderServiceImpl">
+        <property name="typeService" ref="typeService"/>
+        <property name="cartService" ref="cartService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="cronJobService" ref="cronJobService"/>
+        <property name="keyGenerator" ref="orderCodeGenerator"/>
+    </bean>
+
+    <bean id="worldlineRecurringService" class="com.worldline.direct.service.impl.WorldlineRecurringServiceImpl">
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="modelService" ref="modelService"/>
+    </bean>
+
+
+    <alias name="worldlineB2CCartToOrderService" alias="worldlineCartToOrderService"/>
+    <bean id="worldlineB2CCartToOrderService" class="com.worldline.direct.service.impl.WorldlineCartToOrderServiceImpl ">
+        <property name="modelService" ref="modelService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="eventService" ref="eventService"/>
+        <property name="cronJobService" ref="cronJobService"/>
+    </bean>
+
+    <bean id="worldLineExtendedB2BCheckoutFacade"
+          class="com.worldline.direct.facade.impl.DefaultWorldLineExtendedB2BCheckoutFacadeImpl"
+          parent="b2bCheckoutFacade">
+        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+        <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+    </bean>
+
+    <bean id="worldlineExtendedCheckoutFacade"
+          class="com.worldline.direct.facade.impl.WorldLineExtendedB2CCheckoutFacadeImpl"
+          parent="defaultCheckoutFacade">
+        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+        <property name="i18NService" ref="i18NService"/>
+        <property name="scheduledCartConverter" ref="scheduledCartConverter"/>
+        <property name="triggerPopulator" ref="triggerReversePopulator"/>
+        <property name="triggerService" ref="triggerService"/>
+        <property name="baseSiteService" ref="baseSiteService"/>
+        <property name="b2bDaysOfWeekConverter" ref="b2bDaysOfWeekConverter"/>
+        <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+    </bean>
+
 
 </beans>

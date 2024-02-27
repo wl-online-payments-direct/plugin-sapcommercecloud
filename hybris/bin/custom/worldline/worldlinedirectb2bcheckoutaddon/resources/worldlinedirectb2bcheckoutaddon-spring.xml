@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+
+
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+    <import resource="worldlinedirectb2bcheckoutaddon-spring-process.xml"/>
+    <import resource="worldlinedirectb2bcheckoutaddon-spring-converter.xml"/>
+    <import resource="worldlinedirectb2bcheckoutaddon-spring-service.xml"/>
+    <import resource="worldlinedirectb2bcheckoutaddon-spring-dao.xml"/>
+
+    <bean id="worldlinedirectb2bcheckoutaddonCoreDataImportedEventListener" parent="abstractCoreDataImportedEventListener">
+        <property name="supportedChannels">
+            <list value-type="de.hybris.platform.commerceservices.enums.SiteChannel">
+                <value>B2B</value>
+            </list>
+        </property>
+        <property name="addonExtensionMetadata">
+            <bean class="de.hybris.platform.addonsupport.data.AddonExtensionMetadata">
+                <property name="suffixChannel" value="false"/>
+                <property name="baseExtensionName" value="worldlinedirectb2bcheckoutaddon"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="worldlineedirectb2bcheckoutaddonSampleDataEventListener" parent="abstractGenericAddOnSampleDataEventListener"  >
+        <property name="extensionName" value="worldlinedirectb2bcheckoutaddon" />
+    </bean>
+
+
+
+
+
+
+
+</beans>

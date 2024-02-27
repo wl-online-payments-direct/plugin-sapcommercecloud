@@ -24,4 +24,9 @@
 
     <bean id="worldlinePaymentModeDao" class="com.worldline.direct.dao.impl.WorldlinePaymentModeDaoImpl" parent="defaultPaymentModeDao"/>
 
+    <alias name="worldlineB2BAcceleratorCartToOrderCronJobModelDao" alias="b2bAcceleratorCartToOrderCronJobModelDao"/>
+    <bean id="worldlineB2BAcceleratorCartToOrderCronJobModelDao" class="com.worldline.direct.dao.impl.DefaultWorldlineB2BAcceleratorCartToOrderCronJobModelDao">
+        <property name="flexibleSearchService" ref="flexibleSearchService" />
+        <property name="pagedFlexibleSearchService" ref="pagedFlexibleSearchService" />
+    </bean>
 </beans>

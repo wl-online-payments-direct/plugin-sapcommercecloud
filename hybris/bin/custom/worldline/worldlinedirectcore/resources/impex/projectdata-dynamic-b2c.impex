@@ -1,0 +1,295 @@
+$contentCatalog = apparel-ukContentCatalog
+$version = Staged
+$contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=$version])[default=$contentCatalog:$version]
+$picture = media(code, $contentCV);
+$image = image(code, $contentCV);
+$media = media(code, $contentCV);
+$page = page(uid, $contentCV);
+$contentPage = contentPage(uid, $contentCV);
+$jarResourceCms = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/sampledata/cockpits/cmscockpit
+$wideContent = CMSImageComponent, BannerComponent
+$jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
+$siteName = apparel-uk
+$store = apparel-uk
+$emailResource=jar:com.worldline.direct.constants.WorldlinedirectcoreConstants&/worldlinedirectcore/import/email
+$lang = en
+
+$emailPackageName = $config-emailContextPackageName
+
+UPDATE BaseStore; uid[unique = true]; submitorderprocesscode  ; createReturnProcessCode  ; paymentProvider; checkoutFlowGroup
+                ; $store            ; worldline-order-process ; worldline-return-process ; WORLDLINE      ; worldlineB2CResponsiveCheckoutGroup
+
+
+###### Replenishment Confirmation Page Start ######
+INSERT_UPDATE ContentPage; $contentCV[unique = true]; uid[unique = true]            ; name                            ; masterTemplate(uid, $contentCV); label; defaultPage[default = 'true']; approvalStatus(code)[default = 'approved']; homepage[default = 'false']
+                         ;                          ; replenishmentConfirmationPage ; Replenishment Confirmation Page ; OrderConfirmationPageTemplate  ; /replenishment/confirmation
+
+
+INSERT_UPDATE Media; $contentCV[unique = true]; code[unique = true]                  ; mime     ; realfilename                      ; @media[translator = de.hybris.platform.impex.jalo.media.MediaDataTranslator][forceWrite = true]; folder(qualifier)[default = 'images']
+                   ;                          ; replenishmentConfirmationPagePreview ; text/png ; ReplenishmentConfirmationPage.png ; $jarResourceCms/preview-images/powertools/ReplenishmentConfirmationPage.png
+
+UPDATE ContentPage; $contentCV[unique = true]; uid[unique = true]            ; previewImage(code, $contentCV)
+                  ;                          ; replenishmentConfirmationPage ; replenishmentConfirmationPagePreview
+
+
+INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true]                    ; position[unique = true]; page(uid, $contentCV)[unique = true][default = 'replenishmentConfirmationPage']; contentSlot(uid, $contentCV)[unique = true]; ; ;
+                                ;                          ; SideContent-replenishmentConfirmation ; SideContent            ;                                                                                ; SideContent-replenishmentConfirmation      ; ; ;
+                                ;                          ; BodyContent-replenishmentConfirmation ; BodyContent            ;                                                                                ; BodyContent-replenishmentConfirmation      ; ; ;
+
+
+INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                        ; name                                         ; page                                                                                                           ; actions(uid, $contentCV); &componentRef
+                                ;                          ; ReplenishmentConfirmationMessageComponent ; Replenishment Confirmation Message Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/checkout/replenishmentCheckoutConfirmationMessage.jsp ;                         ; ReplenishmentConfirmationMessageComponent
+
+
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                    ; name                                             ; active; cmsComponents(uid, $contentCV)                                                                                                                                                                                                                                                                                   ; ; ;
+                         ;                          ; SideContent-replenishmentConfirmation ; Side Content Slot for Replenishment Confirmation ; true  ;                                                                                                                                                                                                                                                                                                                  ; ; ;
+                         ;                          ; BodyContent-replenishmentConfirmation ; Body Content Slot for Replenishment Confirmation ; true  ; ReplenishmentConfirmationMessageComponent,AccountMyReplenishmentOrderDetailsOverviewComponent,WorldlineAccountMyReplenishmentOrderDetailsItemsComponent,WorldlineMandateDetailsComponent,WorldlineAccountOrderDetailsShippingComponent,WorldlineOrderDetailsOrderTotalsComponent,OrderConfirmationContinueButtonComponent ; ; ;
+
+INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                                        ; name                                                      ; page                                                                                                                                     ; actions(uid, $contentCV); &componentRef
+                                 ;                          ; AccountMyReplenishmentOrderDetailsHeadlineComponent       ; Account My Replenishment Order Details Headline Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentOrderDetailHeadline.jsp ;                         ; AccountMyReplenishmentOrderDetailsHeadlineComponent
+                                 ;                          ; AccountMyReplenishmentOrderDetailsOverviewComponent       ; Account My Replenishment Order Details Overview Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentOrderDetailOverview.jsp ;                         ; AccountMyReplenishmentOrderDetailsOverviewComponent
+                                 ;                          ; AccountMyReplenishmentOrderDetailsActionsComponent        ; Account My Replenishment Order Details Actions Component  ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentOrderDetailActions.jsp  ;                         ; AccountMyReplenishmentOrderDetailsActionsComponent
+                                 ;                          ; WorldlineAccountMyReplenishmentOrderDetailsItemsComponent ; Account Replenishment Order Details Items Info Component  ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentOrderDetailItems.jsp    ;                         ; WorldlineAccountMyReplenishmentOrderDetailsItemsComponent
+                                 ;                          ; AccountReplenishmentOrderHistoryComponent                 ; Account Replenishment Order History Component             ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentOrderHistoryPage.jsp    ;                         ; AccountReplenishmentOrderHistoryComponent
+                                 ;                          ; WorldlineAccountOrderDetailsShippingComponent             ; Account Order Details Shipping Info Component             ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/replenishment/accountOrderDetailShippingInfo.jsp                  ;                         ; WorldlineAccountOrderDetailsShippingComponent
+                                 ;                          ; WorldlineMandateDetailsComponent                          ; Worldline Mandate Details Component                       ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/cms/mandate/worldlineMandateDetails.jsp                                 ;                         ; WorldlineMandateDetailsComponent
+
+
+
+
+
+###### Replenishment Confirmation Page End ######
+
+
+INSERT_UPDATE ContentPage; $contentCV[unique = true]; uid[unique = true]                   ; name                                      ; masterTemplate(uid, $contentCV); label; defaultPage[default = 'true']; approvalStatus(code)[default = 'approved']; homepage[default = 'false'];
+                         ;                          ; my-replenishment-orders              ; My Replenishment Orders Page              ; AccountPageTemplate            ; my-replenishment-orders
+                         ;                          ; my-replenishment-cancel-confirmation ; My Replenishemnt Cancel Confirmation Page ; AccountPageTemplate            ; my-replenishment-cancel-confirmation
+                         ;                          ; my-replenishment-details             ; My Replenishemnt Details Page             ; AccountPageTemplate            ; my-replenishment-details
+
+
+INSERT_UPDATE CMSNavigationNode; uid[unique = true]           ; $contentCV[unique = true]; name                    ; parent(uid, $contentCV); links(&linkRef); &nodeRef
+                               ; MyReplenishmentOrdersNavNode ;                          ; My Replenishment Orders ; MyAccountNavNode       ;                ; MyReplenishmentOrdersNavNode
+
+
+INSERT_UPDATE CMSNavigationEntry; uid[unique = true]                ; $contentCV[unique = true]; name                              ; navigationNode(&nodeRef)     ; item(&linkRef)            ;
+                                ; MyReplenishmentOrdersNavNodeEntry ;                          ; MyReplenishmentOrdersNavNodeEntry ; MyReplenishmentOrdersNavNode ; MyReplenishmentOrdersLink ;
+
+INSERT_UPDATE CMSLinkComponent; $contentCV[unique = true]; uid[unique = true]        ; name                      ; url                                    ; &linkRef                  ; target(code)[default = 'sameWindow']; linkName[lang = en]
+                              ;                          ; MyReplenishmentOrdersLink ; MyReplenishmentOrdersLink ; /my-account/worldline/my-replenishment ; MyReplenishmentOrdersLink ;                                     ; Replenishment Orders
+
+
+###### Account My Replenishment Orders Start ######
+INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true]                  ; position[unique = true]; page(uid, $contentCV)[unique = true][default = 'my-replenishment-orders']; contentSlot(uid, $contentCV)[unique = true]; ; ;
+                                ;                          ; SideContent-my-replenishment-orders ; SideContent            ;                                                                          ; SideContent-my-replenishment-orders        ; ; ;
+                                ;                          ; BodyContent-my-replenishment-orders ; BodyContent            ;                                                                          ; BodyContent-my-replenishment-orders        ; ; ;
+
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                  ; name                                                  ; active; cmsComponents(&componentRef)          ; ; ;
+                         ;                          ; SideContent-my-replenishment-orders ; Side Content Slot for My Account Replenishment Orders ; true  ;                                       ; ; ;
+                         ;                          ; BodyContent-my-replenishment-orders ; Body Content Slot for My Account Replenishment Orders ; true  ; AccountMyReplenishmentOrdersComponent ; ; ;
+
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]          ; name                                           ; active; cmsComponents(uid, $contentCV)                                                                                                                                                                                                                                    ;
+                         ;                          ; BodyContentSlot-orderdetail ; Body Content Slot for My Account Order Details ; true  ; AccountOrderDetailsHeadlineComponent,AccountOrderDetailsOverviewComponent,AccountOrderDetailsItemsComponent,WorldlineMandateDetailsComponent,WorldlineAccountOrderDetailsShippingComponent,WorldlineOrderDetailsOrderTotalsComponent,AccountOrderDetailsActionsComponent ;
+
+INSERT_UPDATE JspIncludeComponent; $contentCV[unique = true]; uid[unique = true]                    ; name                                      ; page                                                                                                                          ; actions(uid, $contentCV); &componentRef
+                                 ;                          ; AccountMyReplenishmentOrdersComponent ; Account My Replenishment Orders Component ; /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/replenishment/accountReplenishmentSchedule.jsp ;                         ; AccountMyReplenishmentOrdersComponent
+###### Account My Replenishment Orders End ######
+
+
+###### Account My Replenishment Order Details Start ######
+INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true]                   ; position[unique = true]; page(uid, $contentCV)[unique = true][default = 'my-replenishment-details']; contentSlot(uid, $contentCV)[unique = true]; ; ;
+                                ;                          ; SideContent-my-replenishment-details ; SideContent            ;                                                                           ; SideContent-my-replenishment-details       ; ; ;
+                                ;                          ; BodyContent-my-replenishment-details ; BodyContent            ;                                                                           ; BodyContent-my-replenishment-details       ; ; ;
+
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                   ; name                                                 ; active; cmsComponents(&componentRef)                                                                                                                                                                                                                                                                                                                                                                  ; ; ;
+                         ;                          ; SideContent-my-replenishment-details ; Side Content Slot for My Replenishment Order Details ; true  ;                                                                                                                                                                                                                                                                                                                                                                                               ; ; ;
+                         ;                          ; BodyContent-my-replenishment-details ; Body Content Slot for My Replenishment Order Details ; true  ; AccountMyReplenishmentOrderDetailsHeadlineComponent,AccountMyReplenishmentOrderDetailsOverviewComponent,AccountMyReplenishmentOrderDetailsActionsComponent,WorldlineAccountMyReplenishmentOrderDetailsItemsComponent,WorldlineMandateDetailsComponent,WorldlineAccountOrderDetailsShippingComponent,WorldlineOrderDetailsOrderTotalsComponent,AccountReplenishmentOrderHistoryComponent ; ; ;
+
+###### Account My Replenishment Order Details End ######
+
+# CMS components and Email velocity templates
+
+
+####### UPDATE order Confirmation Email to include surcharge START #######
+
+UPDATE RendererTemplate;code[unique=true];description[lang=$lang];templateScript[lang=$lang,translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                       ;apparel-uk_Email_Order_Confirmation_Body;"Order Confirmation Body";$emailResource/email-orderConfirmationBody.vm
+UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];cmsComponents(uid,$contentCV)
+                  ;;OrderConfirmationEmailTopSlot;EmailBannerSaleNowOnImage,WorldlineOrderConfirmationEmailBody
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=de];fromName[lang=de]
+                       ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+
+####### UPDATE order Confirmation Email to include surcharge END #######
+
+INSERT_UPDATE RendererTemplate; code[unique = true]                                      ; contextClass; rendererType(code)[default = 'velocity']
+
+                              ; $siteName_Email_Replenishment_Order_Placed_Body          ; de.hybris.platform.b2bacceleratoraddon.proccess.email.context.OrderReplenishmentEmailContext
+                              ; $siteName_Email_Replenishment_Order_Placed_Subject       ; de.hybris.platform.b2bacceleratoraddon.proccess.email.context.OrderReplenishmentEmailContext
+                              ; $siteName_Email_Replenishment_Order_Confirmation_Subject ; de.hybris.platform.yacceleratorfacades.process.email.context.OrderNotificationEmailContext
+                              ; $siteName_Email_Replenishment_Order_Confirmation_Body    ; de.hybris.platform.yacceleratorfacades.process.email.context.OrderNotificationEmailContext
+
+UPDATE RendererTemplate; code[unique = true]                                      ; description[lang = $lang]          ; templateScript[lang = $lang, translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                       ; $siteName_Email_Replenishment_Order_Placed_Body          ; "Order Confirmation Email Subject" ; $emailResource/email-replenishmentOrderPlacedBody.vm
+                       ; $siteName_Email_Replenishment_Order_Placed_Subject       ; "Order Confirmation Email Subject" ; $jarEmailResource/email-replenishmentOrderPlacedSubject.vm
+                       ; $siteName_Email_Replenishment_Order_Confirmation_Body    ; ""                                 ; $emailResource/email-replenishmentOrderConfirmationBody.vm
+                       ; $siteName_Email_Replenishment_Order_Confirmation_Subject ; "Order Confirmation Email Subject" ; $jarEmailResource/email-replenishmentOrderConfirmationSubject.vm
+
+
+INSERT_UPDATE EmailPageTemplate; $contentCV[unique = true]; uid[unique = true]                          ; name                                            ; active; frontendTemplateName                ; subject(code)                                            ; htmlTemplate(code)                                    ; restrictedPageTypes(code)
+                               ;                          ; ReplenishmentOrderPlacedEmailTemplate       ; Replenishment Order Placed Email Template       ; true  ; replenishmentOrderPlacedEmail       ; $siteName_Email_Replenishment_Order_Placed_Subject       ; $siteName_Email_Replenishment_Order_Placed_Body       ; EmailPage
+                               ;                          ; ReplenishmentOrderConfirmationEmailTemplate ; Replenishment Order Confirmation Email Template ; true  ; replenishmentOrderConfirmationEmail ; $siteName_Email_Replenishment_Order_Confirmation_Subject ; $siteName_Email_Replenishment_Order_Confirmation_Body ; EmailPage
+
+
+UPDATE EmailPageTemplate; $contentCV[unique = true]; uid[unique = true]                          ; velocityTemplate[translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                        ;                          ; ReplenishmentOrderPlacedEmailTemplate       ; $jarEmailResource/structure-view/structure_replenishmentOrderPlacedEmailTemplate.vm
+                        ;                          ; ReplenishmentOrderConfirmationEmailTemplate ; $jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
+
+INSERT_UPDATE ContentSlotName; name[unique = true]; template(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderPlacedEmailTemplate']; validComponentTypes(code); compTypeGroup(code)
+                             ; SiteLogo           ;                                                                                            ;                          ; logo ; email
+                             ; TopContent         ;                                                                                            ; $wideContent             ; email
+                             ; BottomContent      ;                                                                                            ; $wideContent             ; email
+INSERT_UPDATE ContentSlotName; name[unique = true]; template(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderConfirmationEmailTemplate']; validComponentTypes(code); compTypeGroup(code)
+                             ; SiteLogo           ;                                                                                                  ;                          ; logo ; email
+                             ; TopContent         ;                                                                                                  ; $wideContent             ; email
+                             ; BottomContent      ;                                                                                                  ; $wideContent             ; email
+
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]; name                      ; active
+                         ;                          ; EmailTopSlot      ; Default Email Top Slot    ; true
+                         ;                          ; EmailBottomSlot   ; Default Email Bottom Slot ; true
+                         ;                          ; EmailSiteLogoSlot ; Default Email Site Slot   ; true
+
+
+
+INSERT_UPDATE ContentSlotForTemplate; $contentCV[unique = true]; uid[unique = true]                          ; position[unique = true]; pageTemplate(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderPlacedEmailTemplate']; contentSlot(uid, $contentCV)[unique = true]; allowOverwrite
+                                    ;                          ; SiteLogo-ReplenishmentOrderPlacedEmail      ; SiteLogo               ;                                                                                                ; SiteLogoSlot                               ; true
+                                    ;                          ; TopContent-ReplenishmentOrderPlacedEmail    ; TopContent             ;                                                                                                ; EmailTopSlot                               ; true
+                                    ;                          ; BottomContent-ReplenishmentOrderPlacedEmail ; BottomContent          ;                                                                                                ; EmailBottomSlot                            ; true
+INSERT_UPDATE ContentSlotForTemplate; $contentCV[unique = true]; uid[unique = true]                                ; position[unique = true]; pageTemplate(uid, $contentCV)[unique = true][default = 'ReplenishmentOrderConfirmationEmailTemplate']; contentSlot(uid, $contentCV)[unique = true]; allowOverwrite
+                                    ;                          ; SiteLogo-ReplenishmentOrderConfirmationEmail      ; SiteLogo               ;                                                                                                      ; SiteLogoSlot                               ; true
+                                    ;                          ; TopContent-ReplenishmentOrderConfirmationEmail    ; TopContent             ;                                                                                                      ; EmailTopSlot                               ; true
+                                    ;                          ; BottomContent-ReplenishmentOrderConfirmationEmail ; BottomContent          ;                                                                                                      ; EmailBottomSlot                            ; true
+
+INSERT_UPDATE EmailPage; $contentCV[unique = true]; uid[unique = true]                  ; name                     ; masterTemplate(uid, $contentCV)             ; defaultPage; approvalStatus(code)[default = 'approved']; fromEmail[lang = $lang]     ; fromName[lang = $lang]
+                       ;                          ; ReplenishmentOrderPlacedEmail       ; Order Confirmation Email ; ReplenishmentOrderPlacedEmailTemplate       ; true       ;                                           ; martinapenevaBB@gmail.com ; Customer Services Team
+                       ;                          ; ReplenishmentOrderConfirmationEmail ; Order Confirmation Email ; ReplenishmentOrderConfirmationEmailTemplate ; true       ;                                           ; martinapenevaBB@gmail.com ; Customer Services Team
+
+
+
+
+
+##################################  Payment Failed Notification    ##################################
+
+
+
+
+$jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/worldlinedirectcore/import/email
+
+
+
+
+INSERT_UPDATE RendererTemplate; code[unique = true]                                      ; description[lang = $lang]          ; templateScript[lang = $lang, translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator];contextClass;rendererType(code)[default='velocity']
+                              ; $siteName_Email_Replenishment_Payment_Failed_Customer_Body          ; "Replenishment Payment Failed Customer Email Body" ; $jarEmailResource/email-replenishmentPaymentFailedCustomerBody.vm;de.hybris.platform.b2bacceleratoraddon.proccess.email.context.OrderReplenishmentEmailContext
+                              ; $siteName_Email_Replenishment_Payment_Failed_Customer_Subject       ; "Replenishment Payment Failed Customer Email Subject" ; $jarEmailResource/email-replenishmentPaymentFailedCustomerSubject.vm;de.hybris.platform.b2bacceleratoraddon.proccess.email.context.OrderReplenishmentEmailContext
+                              ; $siteName_Email_Replenishment_Payment_Failed_Merchant_Body          ; "Replenishment Payment Failed Merchant Email Body" ; $jarEmailResource/email-replenishmentPaymentFailedMerchantBody.vm;com.worldline.direct.email.context.WorldlineOrderReplenishmentMerchantContext
+                              ; $siteName_Email_Replenishment_Payment_Failed_Merchant_Subject       ; "Replenishment Payment Failed Merchant Email Subject" ; $jarEmailResource/email-replenishmentPaymentFailedMerchantSubject.vm;com.worldline.direct.email.context.WorldlineOrderReplenishmentMerchantContext
+
+$jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
+
+INSERT_UPDATE EmailPageTemplate;$contentCV[unique=true];uid[unique=true];name;active;frontendTemplateName;subject(code);htmlTemplate(code);restrictedPageTypes(code);velocityTemplate[translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                               ;;ReplenishmentPaymentFailedCustomerEmailTemplate;Replenishment Payment Failed Customer Email Template;true;replenishmentPaymentFailedEmail;$siteName_Email_Replenishment_Payment_Failed_Customer_Subject;$siteName_Email_Replenishment_Payment_Failed_Customer_Body;EmailPage;$jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
+                               ;;ReplenishmentPaymentFailedMerchantEmailTemplate;Replenishment Payment Failed Merchant Email Template;true;replenishmentPaymentFailedEmail;$siteName_Email_Replenishment_Payment_Failed_Merchant_Subject;$siteName_Email_Replenishment_Payment_Failed_Merchant_Body;EmailPage;$jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
+
+
+
+INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentPaymentFailedCustomerEmailTemplate'];validComponentTypes(code);compTypeGroup(code)
+                             ;SiteLogo;;;logo;email
+                             ;TopContent;;$wideContent;email
+                             ;BottomContent;;$wideContent;email
+
+INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];position[unique=true];pageTemplate(uid,$contentCV)[unique=true][default='ReplenishmentPaymentFailedCustomerEmailTemplate'];contentSlot(uid,$contentCV)[unique=true];allowOverwrite
+                                    ;;SiteLogo-ReplenishmentPaymentFailedCustomerEmail;SiteLogo;;SiteLogoSlot;true
+                                    ;;TopContent-ReplenishmentPaymentFailedCustomerEmail;TopContent;;EmailTopSlot;true
+                                    ;;BottomContent-ReplenishmentPaymentFailedCustomerEmail;BottomContent;;EmailBottomSlot;true
+
+INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentPaymentFailedMerchantEmailTemplate'];validComponentTypes(code);compTypeGroup(code)
+                             ;SiteLogo;;;logo;email
+                             ;TopContent;;$wideContent;email
+                             ;BottomContent;;$wideContent;email
+
+INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];position[unique=true];pageTemplate(uid,$contentCV)[unique=true][default='ReplenishmentPaymentFailedMerchantEmailTemplate'];contentSlot(uid,$contentCV)[unique=true];allowOverwrite
+                                    ;;SiteLogo-ReplenishmentPaymentFailedMerchantEmail;SiteLogo;;SiteLogoSlot;true
+                                    ;;TopContent-ReplenishmentPaymentFailedMerchantEmail;TopContent;;EmailTopSlot;true
+                                    ;;BottomContent-ReplenishmentPaymentFailedMerchantEmail;BottomContent;;EmailBottomSlot;true
+
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
+                       ;;ReplenishmentPaymentFailedCustomerEmail;Payment Failed Customer Email;ReplenishmentPaymentFailedCustomerEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+                       ;;ReplenishmentPaymentFailedMerchantEmail;Payment Failed Merchant Email;ReplenishmentPaymentFailedMerchantEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+
+##################################  Cart Non Valid Notification    ##################################
+$jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/worldlinedirectcore/import/email
+
+
+
+
+INSERT_UPDATE RendererTemplate; code[unique = true]                                           ; description[lang = $lang]                             ; templateScript[lang = $lang, translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]; contextClass; rendererType(code)[default = 'velocity']
+                              ; $store_Name_Email_Replenishment_Cart_Non_Valid_Body    ; "Replenishment Cart Non Valid Email Body"    ; $jarEmailResource/email-replenishmentCartNonValidBody.vm                                                  ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
+                              ; $store_Name_Email_Replenishment_Cart_Non_Valid_Subject ; "Replenishment Cart Non Valid Email Subject" ; $jarEmailResource/email-replenishmentCartNonValidSubject.vm                                               ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
+                            ; $store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Body    ; "Replenishment Cart Non Valid Merchant Email Body"    ; $jarEmailResource/email-replenishmentCartNonValidMerchantBody.vm                                                  ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
+                            ; $store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Subject ; "Replenishment Cart Non Valid Merchant Email Subject" ; $jarEmailResource/email-replenishmentCartNonValidMerchantSubject.vm                                               ; com.worldline.direct.email.context.WorldlineOrderReplenishmentCartNonValidContext
+
+
+$jarEmailResource = jar:de.hybris.platform.powertoolsstore.constants.PowertoolsStoreConstants&/powertoolsstore/import/coredata/contentCatalogs/powertoolsContentCatalog/emails
+
+INSERT_UPDATE EmailPageTemplate;$contentCV[unique=true];uid[unique=true];name;active;frontendTemplateName;subject(code);htmlTemplate(code);restrictedPageTypes(code);velocityTemplate[translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                               ;;ReplenishmentCartNonValidEmailTemplate;Replenishment Cart Non Valid Email Template;true;replenishmentCartNonValidEmail;$store_Name_Email_Replenishment_Cart_Non_Valid_Subject;$store_Name_Email_Replenishment_Cart_Non_Valid_Body;EmailPage;$jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
+                                ;;ReplenishmentCartNonValidMerchantEmailTemplate;Replenishment Cart Non Valid Merchant Email Template;true;replenishmentCartNonValidMerchantEmail;$store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Subject;$store_Name_Email_Replenishment_Cart_Non_Valid_Merchant_Body;EmailPage;$jarEmailResource/structure-view/structure_replenishmentOrderConfirmationEmailTemplate.vm
+
+
+INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidEmailTemplate'];validComponentTypes(code);compTypeGroup(code)
+                             ;SiteLogo;;;logo;email
+                             ;TopContent;;$wideContent;email
+                             ;BottomContent;;$wideContent;email
+
+INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];position[unique=true];pageTemplate(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidEmailTemplate'];contentSlot(uid,$contentCV)[unique=true];allowOverwrite
+                                    ;;SiteLogo-ReplenishmentCartNonValidEmail;SiteLogo;;SiteLogoSlot;true
+                                    ;;TopContent-ReplenishmentCartNonValidEmail;TopContent;;EmailTopSlot;true
+                                    ;;BottomContent-ReplenishmentCartNonValidEmail;BottomContent;;EmailBottomSlot;true
+
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
+                       ;;ReplenishmentCartNonValidEmail;Cart Non Valid Email;ReplenishmentCartNonValidEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+
+INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidMerchantEmailTemplate'];validComponentTypes(code);compTypeGroup(code)
+                             ;SiteLogo;;;logo;email
+                             ;TopContent;;$wideContent;email
+                             ;BottomContent;;$wideContent;email
+
+INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];position[unique=true];pageTemplate(uid,$contentCV)[unique=true][default='ReplenishmentCartNonValidMerchantEmailTemplate'];contentSlot(uid,$contentCV)[unique=true];allowOverwrite
+                                    ;;SiteLogo-ReplenishmentCartNonValidMerchantEmail;SiteLogo;;SiteLogoSlot;true
+                                    ;;TopContent-ReplenishmentCartNonValidMerchantEmail;TopContent;;EmailTopSlot;true
+                                    ;;BottomContent-ReplenishmentCartNonValidMerchantEmail;BottomContent;;EmailBottomSlot;true
+
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=$lang];fromName[lang=$lang]
+                       ;;ReplenishmentCartNonValidMerchantEmail;Cart Non Valid Email;ReplenishmentCartNonValidMerchantEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
+
+
+####### UPDATE Order details totals block to include surcharge field #######
+
+INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;page;actions(uid,$contentCV);&componentRef
+                                 ;;WorldlineOrderDetailsOrderTotalsComponent;Worldline Order Totals Component;/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/worldlineAccountOrderDetailOrderTotals.jsp;;WorldlineOrderDetailsOrderTotalsComponent
+
+
+####### UPDATE cart checkoutDisplay to include replenish form #######
+INSERT_UPDATE JspIncludeComponent;$contentCV[unique=true];uid[unique=true];name;page;actions(uid,$contentCV);&componentRef
+                                 ;;WorldlineCheckoutComponent;Worldline Checkout Display Component;/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/cart/worldlineCheckoutDisplay.jsp;;WorldlineCheckoutComponent
+                                 ;;WorldlineCartComponent;Worldline Cart Display Component;/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/cart/worldlineCartDisplay.jsp;;WorldlineCartComponent
+INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents(uid, $contentCV)
+                         ;;BottomContentSlot-cartPage;Worldline Bottom Content Slot for Cart Page;true;WorldlineCheckoutComponent,CartSuggestions
+                         ;;TopContentSlot-cartPage;Top content for Cart Slot;true;WorldlineCartComponent
+
+
+
+
+

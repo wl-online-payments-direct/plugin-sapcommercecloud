@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="com.worldline.direct.b2bcheckoutaddon"/>
+
+    <!-- Checkout Steps -->
+
+    <alias name="defaultWorldlineB2bMultiStepCheckout" alias="worldlineMultiStepCheckout"/>
+    <bean id="defaultWorldlineB2bMultiStepCheckout" parent="checkoutStep">
+        <property name="checkoutGroup" ref="worldlineB2bCheckoutGroup"/>
+        <property name="checkoutStepValidator" ref="defaultMultiStepCheckoutValidator"/>
+        <property name="transitions">
+            <map>
+                <entry key="previous" value-ref="REDIRECT_TO_CART"/>
+                <entry key="current" value-ref="REDIRECT_MULTI_STEP_CHECKOUT"/>
+                <entry key="next" value-ref="REDIRECT_TO_PAYMENT_TYPE"/>
+            </map>
+        </property>
+        <property name="progressBarId" value="multi"/>
+    </bean>
+
+    <alias name="defaultWorldlinePaymentTypeCheckoutStep" alias="worldlinePaymentTypeCheckoutStep"/>
+    <bean id="defaultWorldlinePaymentTypeCheckoutStep" parent="checkoutStep">
+        <property name="checkoutGroup" ref="worldlineB2bCheckoutGroup"/>
+        <property name="checkoutStepValidator" ref="defaultB2BPaymentTypeCheckoutStepValidator"/>
+        <property name="transitions">
+            <map merge="true">
+                <entry key="previous" value-ref="REDIRECT_TO_CART"/>
+                <entry key="current" value-ref="REDIRECT_TO_PAYMENT_TYPE"/>
+                <entry key="next" value-ref="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE"/>
+            </map>
+        </property>
+        <property name="progressBarId" value="paymentType"/>
+    </bean>
+
+    <alias name="defaultWorldlineB2bDeliveryAddressCheckoutStep" alias="worldlineDeliveryAddressCheckoutStep"/>
+    <bean id="defaultWorldlineB2bDeliveryAddressCheckoutStep" parent="checkoutStep">
+        <property name="checkoutGroup" ref="worldlineB2bCheckoutGroup"/>
+        <property name="checkoutStepValidator" ref="deliveryAddressCheckoutValidator"/>
+        <property name="transitions">
+            <map merge="true">
+                <entry key="previous" value-ref="REDIRECT_TO_PAYMENT_TYPE"/>
+                <entry key="current" value-ref="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE"/>
+                <entry key="next" value-ref="REDIRECT_TO_DELIVERY_METHOD"/>
+            </map>
+        </property>
+        <property name="progressBarId" value="deliveryAddress.noPickup"/>
+    </bean>
+
+    <alias name="defaultworldlineDeliveryMethodCheckoutStep" alias="worldlineDeliveryMethodCheckoutStep"/>
+    <bean id="defaultworldlineDeliveryMethodCheckoutStep" parent="checkoutStep">
+        <property name="checkoutGroup" ref="worldlineB2bCheckoutGroup"/>
+        <property name="checkoutStepValidator" ref="deliveryMethodCheckoutValidator"/>
+        <property name="transitions">
+            <map merge="true">
+                <entry key="previous" value-ref="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE"/>
+                <entry key="current" value-ref="REDIRECT_TO_DELIVERY_METHOD"/>
+                <entry key="next" value-ref="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE"/>
+            </map>
+        </property>
+        <property name="progressBarId" value="deliveryMethod"/>
+    </bean>
+
+    <alias name="defaultWorldlinePickupLocationCheckoutStep" alias="worldlinePickupLocationCheckoutStep"/>
+    <bean id="defaultWorldlinePickupLocationCheckoutStep" parent="checkoutStep">
+        <property name="checkoutGroup" ref="worldlineB2bCheckoutGroup"/>
+        <property name="checkoutStepValidator" ref="defaultPickupCheckoutValidator"/>
+        <property name="transitions">
+            <map merge="true">
+                <entry key="previous" value-ref="REDIRECT_TO_DELIVERY_METHOD"/>
+                <entry key="current" value-ref="REDIRECT_TO_PICKUP_LOCATION"/>
+                <entry key="next" value-ref="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE"/>
+            </map>
+        </property>
+        <property name="progressBarId" value="deliveryMethod"/>
+    </bean>
+
+
+    <alias name="defaultWorldlineB2bPaymentMethodCheckoutStep" alias="worldlinePaymentMethodCheckoutStep"/>
+    <bean id="defaultWorldlineB2bPaymentMethodCheckoutStep"
+          class="de.hybris.platform.b2bacceleratoraddon.checkout.steps.B2BPaymentMethodCheckoutStep"
+          parent="checkoutStep">
+        <property name="checkoutGroup" ref="worldlineB2bCheckoutGroup"/>
+        <property name="checkoutStepValidator" ref="defaultPaymentMethodCheckoutValidator"/>
+        <property name="checkoutFacade" ref="b2bCheckoutFacade"/>
+        <property name="transitions">
+            <map merge="true">
+                <entry key="previous" value-ref="REDIRECT_TO_DELIVERY_METHOD"/>
+                <entry key="current" value-ref="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE"/>
+                <entry key="next" value-ref="REDIRECT_TO_SUMMARY_WORLDLINE"/>
+            </map>
+        </property>
+        <property name="progressBarId" value="paymentMethod"/>
+    </bean>
+
+    <alias name="defaultWorldlineB2bSummaryCheckoutStep" alias="worldlineSummaryCheckoutStep"/>
+    <bean id="defaultWorldlineB2bSummaryCheckoutStep" parent="checkoutStep">
+        <property name="checkoutGroup" ref="worldlineB2bCheckoutGroup"/>
+        <property name="checkoutStepValidator" ref="defaultSummaryCheckoutValidator"/>
+        <property name="transitions">
+            <map merge="true">
+                <entry key="previous" value-ref="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE"/>
+                <entry key="current" value-ref="REDIRECT_TO_SUMMARY_WORLDLINE"/>
+                <entry key="next" value-ref="REDIRECT_TO_ORDER_CONFIRMATION_WORLDLINE"/>
+            </map>
+        </property>
+        <property name="progressBarId" value="confirmOrder"/>
+    </bean>
+
+    <!-- Checkout Steps -->
+
+    <!-- Default checkout group -->
+
+    <alias name="defaultWorldlineB2bMultiStepCheckoutGroup" alias="worldlineB2bCheckoutGroup"/>
+    <bean id="defaultWorldlineB2bMultiStepCheckoutGroup"
+          class="de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutGroup">
+        <property name="groupId" value="defaultGroup"/>
+        <property name="checkoutStepMap">
+            <map merge="true">
+                <entry key="multi" value-ref="worldlineMultiStepCheckout"/>
+                <entry key="payment-type" value-ref="worldlinePaymentTypeCheckoutStep"/>
+                <entry key="delivery-address" value-ref="worldlineDeliveryAddressCheckoutStep"/>
+                <entry key="delivery-method" value-ref="worldlineDeliveryMethodCheckoutStep"/>
+                <entry key="pickup-location" value-ref="worldlinePickupLocationCheckoutStep"/>
+                <entry key="payment-method" value-ref="worldlinePaymentMethodCheckoutStep"/>
+                <entry key="summary" value-ref="worldlineSummaryCheckoutStep"/>
+            </map>
+        </property>
+        <property name="validationResultsMap">
+            <map merge="true">
+                <entry key="FAILED" value-ref="REDIRECT_TO_CART"/>
+                <entry key="REDIRECT_TO_PAYMENT_TYPE" value-ref="REDIRECT_TO_PAYMENT_TYPE"/>
+                <entry key="REDIRECT_TO_DELIVERY_ADDRESS" value-ref="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE"/>
+                <entry key="REDIRECT_TO_PICKUP_LOCATION" value-ref="REDIRECT_TO_PICKUP_LOCATION"/>
+                <entry key="REDIRECT_TO_CART" value-ref="REDIRECT_TO_CART"/>
+                <entry key="REDIRECT_TO_PAYMENT_METHOD" value-ref="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE"/>
+                <entry key="REDIRECT_TO_DELIVERY_METHOD" value-ref="REDIRECT_TO_DELIVERY_METHOD"/>
+                <entry key="REDIRECT_TO_SUMMARY" value-ref="REDIRECT_TO_SUMMARY_WORLDLINE"/>
+            </map>
+        </property>
+        <property name="checkoutProgressBar">
+            <map merge="true">
+                <entry key="1" value-ref="worldlinePaymentTypeCheckoutStep"/>
+                <entry key="2" value-ref="worldlineDeliveryAddressCheckoutStep"/>
+                <entry key="3" value-ref="worldlineDeliveryMethodCheckoutStep"/>
+                <entry key="4" value-ref="worldlinePaymentMethodCheckoutStep"/>
+                <entry key="5" value-ref="worldlineSummaryCheckoutStep"/>
+            </map>
+        </property>
+    </bean>
+
+    <!---Default checkout group-->
+
+    <!-- Validation -->
+
+    <bean id="worldlineCheckoutFlowGroupResponsiveMapMergeDirective" parent="mapMergeDirective"
+          depends-on="checkoutFlowGroupMap">
+        <property name="key" value="worldlineB2BCheckoutGroup"/>
+        <property name="value" ref="worldlineB2bCheckoutGroup"/>
+    </bean>
+
+    <bean id="REDIRECT_TO_SUMMARY_WORLDLINE" class="java.lang.String">
+        <constructor-arg value="redirect:/checkout/multi/worldline/summary/view"/>
+    </bean>
+
+    <bean id="REDIRECT_TO_PAYMENT_METHOD_WORLDLINE" class="java.lang.String">
+        <constructor-arg value="redirect:/checkout/multi/worldline/payment/select-payment-method"/>
+    </bean>
+
+    <bean id="REDIRECT_TO_ORDER_CONFIRMATION_WORLDLINE" class="java.lang.String">
+        <constructor-arg value="redirect:/checkout/worldline/orderConfirmation/%s"/>
+    </bean>
+
+    <bean id="REDIRECT_TO_DELIVERY_ADDRESS_WORLDLINE" class="java.lang.String">
+        <constructor-arg value="redirect:/checkout/multi/worldline/delivery-address/add"/>
+    </bean>
+</beans>

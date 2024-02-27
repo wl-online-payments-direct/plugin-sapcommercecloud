@@ -23,6 +23,19 @@
             <value code="MAX_ATTEMPT_REACHED"/>
             <value code="PROCESSED"/>
         </enumtype>
+
+        <enumtype code="WorldlineRecurringPaymentStatus">
+            <value code="ACTIVE"/>
+            <value code="BLOCKED"/>
+            <value code="REVOKED"/>
+            <value code="UNKNOWN"/>
+        </enumtype>
+
+        <enumtype code="WorldlineRecurringType">
+            <value code="UNIQUE"/>
+            <value code="RECURRING"/>
+            <value code="UNKNOWN"/>
+        </enumtype>
         <enumtype code="PaymentStatus" autocreate="false" generate="true" dynamic="true">
             <value code="WORLDLINE_WAITING_AUTH" />
             <value code="WORLDLINE_AUTHORIZED" />
@@ -31,8 +44,13 @@
             <value code="WORLDLINE_WAITING_CAPTURE" />
             <value code="WORLDLINE_CAPTURED" />
         </enumtype>
+        <enumtype code="WorldlineReplenishmentOccurrenceEnum">
+            <value code="DAILY" />
+            <value code="WEEKLY" />
+            <value code="MONTHLY" />
+            <value code="YEARLY" />
+        </enumtype>
     </enumtypes>
-
     <itemtypes>
         <itemtype code="WorldlineConfiguration"
                   extends="GenericItem"
@@ -88,10 +106,54 @@
                     <defaultvalue>Boolean.FALSE</defaultvalue>
                     <persistence type="property"/>
                 </attribute>
+                <attribute qualifier="groupCards" type="java.lang.Boolean">
+                    <description>Group cards for Hosted Checkout Page.</description>
+                    <modifiers read="true" write="true" optional="false"/>
+                    <defaultvalue>Boolean.FALSE</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="groupCardsLogo" type="Media">
+                    <description>Group cards Logo for payment page</description>
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="replenishmentAttempts" type="java.lang.Integer">
+                    <description>Replenishment Process Number of retries on failure.</description>
+                    <modifiers read="true" write="true" />
+                    <persistence type="property"/>
+                </attribute>
                 <attribute qualifier="variant" type="java.lang.String">
                     <description>Template name for Tokenization form.</description>
                     <modifiers read="true" write="true"/>
                     <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="firstRecurringPayment" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Define if the first Recurring Payment is immediate or scheduled.</description>
+                </attribute>
+                <attribute qualifier="sessionTimout" type="java.lang.Integer">
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="exemptionRequest" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Request a SCA exemption for all transactions below 30 EUR.</description>
+                </attribute>
+                <attribute qualifier="challengeRequired" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Enforce SCA for all transactions.</description>
+                </attribute>
+                <attribute qualifier="applySurcharge" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Apply Surcharge for all transactions.</description>
                 </attribute>
             </attributes>
         </itemtype>
@@ -107,6 +169,25 @@
                     <modifiers read="true" write="true" optional="false"/>
                     <defaultvalue>em().getEnumerationValue("WorldlineCheckoutTypesEnum","HOSTED_CHECKOUT")</defaultvalue>
                     <persistence type="property"/>
+                </attribute>
+                <attribute
+                        qualifier="merchant"
+                        type="localized:java.lang.String">
+                    <description>Merchant Email</description>
+                    <persistence type="property"/>
+                    <modifiers read="true" write="true" />
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="CartToOrderCronJob" autocreate="false"
+                  generate="false" >
+            <attributes>
+                <attribute qualifier="submitted" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.TRUE</defaultvalue>
+                    <description>Define if the replenishment was successfully submitted.</description>
                 </attribute>
             </attributes>
         </itemtype>
@@ -169,6 +250,59 @@
                     <modifiers read="true" write="true" search="true" optional="true"/>
                     <persistence type="property"/>
                 </attribute>
+                <attribute qualifier="mandateDetail" type="WorldlineMandate">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="recurringToken" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Determines whether the token is used for recurring payment</description>
+                </attribute>
+                <attribute qualifier="worldlineRecurringToken" type="WorldlineRecurringToken">
+                    <persistence type="property" />
+                    <description>Token that is used for recurring payment</description>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="WorldlineRecurringToken" extends="GenericItem">
+            <deployment table="worldlineRecurringToken" typecode="15008"/>
+            <attributes>
+                <attribute qualifier="token" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="alias" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="cardholderName" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="expiryDate" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="status" type="WorldlineRecurringPaymentStatus">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineRecurringPaymentStatus","ACTIVE")</defaultvalue>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="subscriptionID" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers read="true" search="true"/>
+                </attribute>
+                <attribute qualifier="customer" type="Customer">
+                    <description>The customer who is using the token for recurring payments</description>
+                    <persistence type="property" />
+                </attribute>
+                <attribute qualifier="storeId" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -209,5 +343,165 @@
                 </attribute>
             </attributes>
         </itemtype>
+
+        <itemtype code="WorldlineMandate">
+            <deployment table="worldlineMandate" typecode="15007"/>
+            <attributes>
+                <attribute qualifier="uniqueMandateReference" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers unique="true" search="true"/>
+                </attribute>
+                <attribute qualifier="customer" type="Customer">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="storeId" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="status" type="WorldlineRecurringPaymentStatus">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineRecurringPaymentStatus","ACTIVE")</defaultvalue>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="recurrenceType" type="WorldlineRecurringType">
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("WorldlineRecurringPaymentStatus","UNIQUE")</defaultvalue>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="alias" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="customerReference" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="iban" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="companyName" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="emailAddress" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="firstName" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="lastName" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="title" type="Title">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="city" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="country" type="Country">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="houseNumber" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="street" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+                <attribute qualifier="zip" type="java.lang.String">
+                    <persistence type="property"/>
+                    <modifiers/>
+                </attribute>
+            </attributes>
+            <indexes>
+                <index name="worldlineMandateIdx" unique="true">
+                    <key attribute="uniqueMandateReference" />
+                </index>
+            </indexes>
+        </itemtype>
+        <itemtype code="Cart" autocreate="false" generate="false">
+            <description>Extending Cart type with additional attributes for future order occurrence functionality</description>
+            <attributes>
+                <attribute qualifier="worldlineReplenishmentOrder" type="boolean">
+                    <description>set if the order is recurring or not</description>
+                    <persistence type="property"/>
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                </attribute>
+                <attribute qualifier="worldlineNDays" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineNWeeks" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineNMonths" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineNthDayOfMonth" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineReplenishmentRecurrence" type="WorldlineReplenishmentOccurrenceEnum">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineReplenishmentStartDate" type="java.util.Date">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineReplenishmentEndDate" type="java.util.Date">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineNDaysOfWeek" type="DayOfWeekList">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="PaymentTransaction" autocreate="false"
+                  generate="false">
+            <attributes>
+                <attribute qualifier="worldlineRawTransactionCode" type="java.lang.String">
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"></persistence>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="Order" autocreate="false" generate="false">
+            <description>Extending AbstractOrder type with additional attributes for Surcharge functionality</description>
+            <attributes>
+                <attribute qualifier="worldlineSurchargeProductTypeId" type="java.lang.String">
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineSurchargeProductTypeVersion" type="java.lang.String">
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineAdValoremRate" type="java.lang.Float">
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineSpecificRate" type="java.lang.Integer">
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="worldlineSurchargeAmount" type="java.lang.Double">
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
     </itemtypes>
 </items>

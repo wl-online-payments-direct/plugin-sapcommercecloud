@@ -4,7 +4,6 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!-- Fieldset mapping -->
@@ -14,20 +13,44 @@
                   value="de.hybris.platform.commercewebservicescommons.dto.order.AbstractOrderWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="worldlinePaymentInfo(BASIC)"/>
-                <entry key="DEFAULT" value="worldlinePaymentInfo(DEFAULT)"/>
-                <entry key="FULL" value="worldlinePaymentInfo(FULL)"/>
+                <entry key="BASIC" value="worldlinePaymentInfo(BASIC),surcharge(FULL)"/>
+                <entry key="DEFAULT" value="worldlinePaymentInfo(DEFAULT),surcharge(FULL)"/>
+                <entry key="FULL" value="worldlinePaymentInfo(FULL),surcharge(FULL)"/>
             </map>
         </property>
     </bean>
     <bean parent="fieldSetLevelMapping" id="worldlineCartWsDTOFieldSetLevelMapping">
+    <property name="dtoClass"
+              value="de.hybris.platform.commercewebservicescommons.dto.order.CartWsDTO"/>
+    <property name="levelMapping">
+        <map>
+            <entry key="BASIC" value="worldlinePaymentInfo(BASIC),surcharge(FULL),replenishmentOrder,nDays,nWeeks,nthDayOfMonth,nMonths,nYear,replenishmentRecurrence,replenishmentStartDate,replenishmentEndDate,nDaysOfWeek"/>
+            <entry key="DEFAULT" value="worldlinePaymentInfo(DEFAULT),surcharge(FULL),replenishmentOrder,nDays,nWeeks,nthDayOfMonth,nMonths,nYear,replenishmentRecurrence,replenishmentStartDate,replenishmentEndDate,nDaysOfWeek"/>
+            <entry key="FULL" value="worldlinePaymentInfo(FULL),surcharge(FULL),replenishmentOrder,nDays,nWeeks,nthDayOfMonth,nMonths,nYear,replenishmentRecurrence,replenishmentStartDate,replenishmentEndDate,nDaysOfWeek"/>
+        </map>
+    </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="worldlineReplenishmentOrderWsDTOFieldSetLevelMapping">
         <property name="dtoClass"
-                  value="de.hybris.platform.commercewebservicescommons.dto.order.CartWsDTO"/>
+                  value="de.hybris.platform.b2bwebservicescommons.dto.order.ReplenishmentOrderWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="worldlinePaymentInfo(BASIC)"/>
-                <entry key="DEFAULT" value="worldlinePaymentInfo(DEFAULT)"/>
-                <entry key="FULL" value="worldlinePaymentInfo(FULL)"/>
+                <entry key="BASIC" value="purchaseOrderNumber,worldlinePaymentInfo(BASIC),surcharge(FULL)"/>
+                <entry key="DEFAULT" value="costCenter(DEFAULT),paymentType,purchaseOrderNumber,worldlinePaymentInfo(DEFAULT),surcharge(FULL)"/>
+                <entry key="FULL" value="costCenter(DEFAULT),paymentType,purchaseOrderNumber,worldlinePaymentInfo(FULL),surcharge(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="worldlineOrderWsDTOFieldSetLevelMapping">
+        <property name="dtoClass"
+                  value="de.hybris.platform.commercewebservicescommons.dto.order.OrderWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="worldlinePaymentInfo(BASIC),surcharge(FULL)"/>
+                <entry key="DEFAULT" value="worldlinePaymentInfo(DEFAULT),surcharge(FULL)"/>
+                <entry key="FULL" value="worldlinePaymentInfo(FULL),surcharge(FULL)"/>
             </map>
         </property>
     </bean>
@@ -36,9 +59,9 @@
         <property name="dtoClass" value="com.worldline.direct.payment.dto.WorldlinePaymentInfoWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="paymentProductId,paymentMethod,issuerId,worldlineCheckoutType"/>
-                <entry key="DEFAULT" value="BASIC,billingAddress(DEFAULT),worldlineCheckoutType"/>
-                <entry key="FULL" value="BASIC,billingAddress(FULL),worldlineCheckoutType"/>
+                <entry key="BASIC" value="paymentProductId,paymentMethod,issuerId,cardholderName,worldlineCheckoutType,mandateDetail(BASIC)"/>
+                <entry key="DEFAULT" value="BASIC,billingAddress(DEFAULT),mandateDetail(DEFAULT)"/>
+                <entry key="FULL" value="BASIC,billingAddress(FULL),mandateDetail(FULL)"/>
             </map>
         </property>
     </bean>
@@ -133,11 +156,56 @@
         </property>
     </bean>
 
+    <bean parent="fieldSetLevelMapping" id="worldlineMandateDetailWsDTOFieldSetLevelMapping">
+        <property name="dtoClass" value="com.worldline.direct.payment.dto.MandateDetailWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="alias,customerReference,recurrenceType,status,uniqueMandateReference,customer(BASIC)"/>
+                <entry key="DEFAULT" value="alias,customerReference,recurrenceType,status,uniqueMandateReference,customer(DEFAULT)"/>
+                <entry key="FULL" value="alias,customerReference,recurrenceType,status,uniqueMandateReference,customer(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="worldlineMandateCustomerWsDTOFieldSetLevelMapping">
+        <property name="dtoClass" value="com.worldline.direct.payment.dto.WorldlineMandateCustomerWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="iban,companyName,emailAddress,address(BASIC),personalInformation(BASIC)"/>
+                <entry key="DEFAULT" value="iban,companyName,emailAddress,address(BASIC),personalInformation(DEFAULT)"/>
+                <entry key="FULL" value="iban,companyName,emailAddress,address(BASIC),personalInformation(FULL)"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="worldlineMandateAddressWsDTOFieldSetLevelMapping">
+        <property name="dtoClass" value="com.worldline.direct.payment.dto.WorldlineMandateAddressWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="city,country,HouseNumber,street,zip"/>
+                <entry key="DEFAULT" value="city,country,HouseNumber,street,zip"/>
+                <entry key="FULL" value="city,country,HouseNumber,street,zip"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean parent="fieldSetLevelMapping" id="worldlineMandatePersonalInformationWsDTOFieldSetLevelMapping">
+        <property name="dtoClass" value="com.worldline.direct.payment.dto.WorldlinePersonalInformationWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="firstName,lastName,title"/>
+                <entry key="DEFAULT" value="firstName,lastName,title"/>
+                <entry key="FULL" value="firstName,lastName,title"/>
+            </map>
+        </property>
+    </bean>
+
+
     <!-- Field Mappings  -->
 
     <bean id="hostedTokenizationFieldMapper" parent="fieldMapper">
         <property name="sourceClass"
-                  value="com.ingenico.direct.domain.CreateHostedTokenizationResponse"/>
+                  value="com.onlinepayments.domain.CreateHostedTokenizationResponse"/>
         <property name="destClass"
                   value="com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO"/>
         <property name="fieldMapping">
@@ -149,7 +217,7 @@
 
     <bean id="hostedCheckoutFieldMapper" parent="fieldMapper">
         <property name="sourceClass"
-                  value="com.ingenico.direct.domain.CreateHostedCheckoutResponse"/>
+                  value="com.onlinepayments.domain.CreateHostedCheckoutResponse"/>
         <property name="destClass"
                   value="com.worldline.direct.payment.dto.HostedCheckoutResponseWsDTO"/>
         <property name="fieldMapping">
@@ -184,6 +252,7 @@
             </map>
         </property>
     </bean>
+
 
     <!-- CONVERTER -->
     <bean class="com.worldline.direct.occ.converter.WorldlineCheckoutTypeConverter"/>

@@ -1,7 +1,7 @@
 package com.worldline.direct.strategy.impl;
 
-import com.ingenico.direct.domain.PaymentProduct;
-import com.ingenico.direct.domain.PaymentProductDisplayHints;
+import com.onlinepayments.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProductDisplayHints;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.evaluate.WorldlinePaymentProductEvaluator;
@@ -48,7 +48,7 @@ public class WorldlinePaymentProductFilterByCheckoutStrategy implements Worldlin
                         .filter(paymentProduct -> worldlineHostedTokenizationPaymentProductsEvaluatorList.stream().anyMatch(pr -> pr.evaluate().test(paymentProduct)))
                         .collect(Collectors.toList());
 
-                if (isCardsPresent && paymentProducts.get(0).getId() != WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP) {
+                if (isCardsPresent && (paymentProducts.size() == 0 || paymentProducts.get(0).getId() != WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP)) {
                     paymentProducts.add(0, createHtpGroupedCardPaymentProduct());
                 }
                 break;

@@ -19,8 +19,9 @@
 		<formElement:formInputBox idKey="address.townCity" labelKey="address.townCity" path="billingAddress.townCity" inputCSS="text" mandatory="true" tabindex="${tabindex + 6}"/>
 		<formElement:formSelectBox idKey="address.region" labelKey="address.state" path="billingAddress.regionIso" mandatory="true" skipBlank="false" skipBlankMessageKey="address.selectState" items="${regions}" itemValue="isocodeShort" tabindex="${tabindex + 7}" selectCSSClass="form-control"/>
 		<formElement:formInputBox idKey="address.postcode" labelKey="address.postcode" path="billingAddress.postcode" inputCSS="text" mandatory="true" tabindex="${tabindex + 8}"/>
-		<formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone" inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
-	</c:when>
+		<formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone" inputCSS="text" mandatory="false" tabindex="${tabindex + 9}" />
+	    <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone" inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+    </c:when>
 	<c:when test="${country == 'CA'}">
 		<formElement:formSelectBoxDefaultEnabled idKey="address.title" labelKey="address.title" path="billingAddress.titleCode" mandatory="true" skipBlank="false" skipBlankMessageKey="address.title.none" items="${titles}" selectedValue="${addressForm.titleCode}" tabindex="${tabindex + 1}" selectCSSClass="form-control"/>
 		<formElement:formInputBox idKey="address.firstName" labelKey="address.firstName" path="billingAddress.firstName" inputCSS="text" mandatory="true" tabindex="${tabindex + 2}"/>
@@ -31,7 +32,8 @@
 		<formElement:formSelectBox idKey="address.region" labelKey="address.province" path="billingAddress.regionIso" mandatory="true" skipBlank="false" skipBlankMessageKey="address.selectProvince" items="${regions}" itemValue="isocodeShort" tabindex="${tabindex + 7}" selectCSSClass="form-control"/>
 		<formElement:formInputBox idKey="address.postcode" labelKey="address.postcode" path="billingAddress.postcode" inputCSS="text" mandatory="true" tabindex="${tabindex + 8}"/>
 		<formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone" inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
-	</c:when>
+	    <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone" inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+    </c:when>
 	<c:when test="${country == 'CN'}">
 		<formElement:formInputBox idKey="address.postcode" labelKey="address.postcode" path="billingAddress.postcode" inputCSS="text" mandatory="true" tabindex="${tabindex + 2}"/>
 		<formElement:formSelectBox idKey="address.region" labelKey="address.province" path="billingAddress.regionIso" mandatory="true" skipBlank="false" skipBlankMessageKey="address.selectProvince" items="${regions}" itemValue="isocodeShort" tabindex="${tabindex + 3}" selectCSSClass="form-control"/>
@@ -42,6 +44,7 @@
 		<formElement:formInputBox idKey="address.firstName" labelKey="address.firstName" path="billingAddress.firstName" inputCSS="text" mandatory="true" tabindex="${tabindex + 8}"/>
 		<formElement:formSelectBoxDefaultEnabled idKey="address.title" labelKey="address.title" path="billingAddress.titleCode" mandatory="true" skipBlank="false" skipBlankMessageKey="address.title.none" items="${titles}" selectedValue="${addressForm.titleCode}" tabindex="${tabindex + 1}" selectCSSClass="form-control"/>
 		<formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone" inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
+	    <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone" inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
 	</c:when>
 	<c:when test="${country == 'JP'}">
 		<formElement:formSelectBoxDefaultEnabled idKey="address.title" labelKey="address.title" path="billingAddress.titleCode" mandatory="true" skipBlank="false" skipBlankMessageKey="address.title.none" items="${titles}" selectedValue="${addressForm.titleCode}" tabindex="${tabindex + 1}" selectCSSClass="form-control"/>
@@ -53,7 +56,8 @@
 		<formElement:formInputBox idKey="address.line2" labelKey="address.subarea" path="billingAddress.line2" inputCSS="text" mandatory="true" tabindex="${tabindex + 7}"/>
 		<formElement:formInputBox idKey="address.line1" labelKey="address.furtherSubarea" path="billingAddress.line1" inputCSS="text" mandatory="true" tabindex="${tabindex + 8}"/>
 		<formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone" inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
-	</c:when>
+	    <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone" inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+    </c:when>
 	<c:otherwise>
 		<formElement:formSelectBoxDefaultEnabled idKey="address.title" labelKey="address.title" path="billingAddress.titleCode" mandatory="true" skipBlank="false" skipBlankMessageKey="address.title.none" items="${titles}" selectedValue="${addressForm.titleCode}" tabindex="${tabindex + 1}" selectCSSClass="form-control"/>
 		<formElement:formInputBox idKey="address.firstName" labelKey="address.firstName" path="billingAddress.firstName" inputCSS="text" mandatory="true" tabindex="${tabindex + 2}"/>
@@ -63,5 +67,6 @@
 		<formElement:formInputBox idKey="address.townCity" labelKey="address.townCity" path="billingAddress.townCity" inputCSS="text" mandatory="true" tabindex="${tabindex + 6}"/>
 		<formElement:formInputBox idKey="address.postcode" labelKey="address.postcode" path="billingAddress.postcode" inputCSS="text" mandatory="true" tabindex="${tabindex + 7}"/>
 		<formElement:formInputBox idKey="address.phone" labelKey="address.phone" path="billingAddress.phone" inputCSS="text" mandatory="false" tabindex="${tabindex + 9}"/>
-	</c:otherwise>
+	    <formElement:formInputBox idKey="address.cellphone" labelKey="address.cellphone" path="billingAddress.cellphone" inputCSS="text" mandatory="false" tabindex="${tabindex + 10}" />
+    </c:otherwise>
 </c:choose>

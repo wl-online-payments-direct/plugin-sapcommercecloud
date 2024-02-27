@@ -13,6 +13,7 @@
 <%@ taglib prefix="order" tagdir="/WEB-INF/tags/responsive/order" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive" %>
+<%@ taglib prefix="worldline-multi-checkout" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/checkout/multi" %>
 
 <spring:htmlEscape defaultHtmlEscape="true" />
 
@@ -35,24 +36,32 @@
         <worldline:worldlinePaymentInfo cartData="${cartData}" paymentInfo="${cartData.worldlinePaymentInfo}" paymentProduct="${paymentProduct}" showPaymentInfo="${showPaymentInfo}" />
 
 
-        <multi-checkout:orderTotals cartData="${cartData}" showTaxEstimate="${showTaxEstimate}" showTax="${showTax}" />
+        <worldline-multi-checkout:orderTotals cartData="${cartData}" showTaxEstimate="${showTaxEstimate}" showTax="${showTax}" />
     </ycommerce:testId>
 </div>
 
 <div class="visible-xs clearfix">
-    <form:form action="${placeOrderUrl}" id="worldlinePlaceOrderForm" modelAttribute="worldlinePlaceOrderForm" class="place-order-form col-xs-12">
+    <form:form action="${placeOrderUrl}" id="worldlinePlaceOrderForm" modelAttribute="worldlinePlaceOrderForm" class="place-order-form col-xs-12 js-worldlinePlaceOrderForm">
         <form:input type="hidden" path="screenHeight"/>
         <form:input type="hidden" path="screenWidth"/>
         <form:input type="hidden" path="navigatorJavaEnabled"/>
         <form:input type="hidden" path="navigatorJavaScriptEnabled"/>
         <form:input type="hidden" path="timezoneOffset"/>
         <form:input type="hidden" path="colorDepth"/>
+        <c:if test="${cartData.quoteData eq null && tokenizePayment eq true}">
+            <div class="checkbox">
+                <label> <form:checkbox id="saveCardDetails" path="cardDetailsCheck" />
+                    <spring:theme code="checkout.multi.order.saveCardDetails"/>
+                </label>
+            </div>
+        </c:if>
         <div class="checkbox">
             <label> <form:checkbox id="Terms1" path="termsCheck" />
                 <spring:theme var="termsAndConditionsHtml" code="checkout.summary.placeOrder.readTermsAndConditions" arguments="${fn:escapeXml(getTermsAndConditionsUrl)}" htmlEscape="false"/>
             	${ycommerce:sanitizeHTML(termsAndConditionsHtml)}
             </label>
         </div>
+
 
         <button id="placeOrder" type="submit" class="btn btn-primary btn-place-order btn-block">
             <spring:theme code="checkout.summary.placeOrder" />

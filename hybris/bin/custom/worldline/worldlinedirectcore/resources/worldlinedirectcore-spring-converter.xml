@@ -9,6 +9,8 @@
 
     <bean name="worldlinePaymentInfoPopulator" class="com.worldline.direct.populator.WorldlinePaymentInfoPopulator">
         <property name="addressConverter" ref="addressConverter"/>
+        <property name="worldlineMandateConverter" ref="worldlineMandateConverter"/>
+        <property name="worldlineRecurringTokenConverter" ref="worldlineRecurringTokenConverter"/>
     </bean>
 
     <bean id="worldlinePaymentInfoConverter" parent="abstractPopulatingConverter">
@@ -23,12 +25,12 @@
     <bean id="worldlineOrderRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineOrderRequestParamPopulator">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
-    <bean id="worldlineShoppingCartWithoutDiscountRequestParamPopulator"
+    <bean id="worldlineShoppingCartRequestParamPopulator"
           class="com.worldline.direct.populator.WorldlineShoppingCartRequestParamPopulator">
-            <property name="worldlineShoppingCartFactoriesConfiguration" ref="worldlineShoppingCartFactoriesConfiguration"/>
+        <property name="worldlineShoppingCartFactoriesConfiguration" ref="worldlineShoppingCartFactoriesConfiguration"/>
     </bean>
 
 
@@ -43,7 +45,7 @@
           class="com.worldline.direct.populator.WorldlineBrowserCustomerDevicePopulator"/>
 
     <bean id="worldlineBrowserCustomerDeviceConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CustomerDevice"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CustomerDevice"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineBrowserCustomerDevicePopulator"/>
@@ -51,11 +53,11 @@
         </property>
     </bean>
     <bean id="worldlineOrderParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.Order"/>
+        <property name="targetClass" value="com.onlinepayments.domain.Order"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineOrderRequestParamPopulator"/>
-                <ref bean="worldlineShoppingCartWithoutDiscountRequestParamPopulator"/>
+                <ref bean="worldlineShoppingCartRequestParamPopulator"/>
                 <ref bean="worldlineCustomerRequestParamPopulator"/>
             </list>
         </property>
@@ -71,7 +73,14 @@
 
     <bean id="worldlineHostedCheckoutCardPopulator"
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator">
-        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="salePaymentProduct" ref="worldlineSalePaymentProductList"/>
+    </bean>
+
+
+
+    <bean id="worldlineSepaDirectDebitPopulator"
+          class="com.worldline.direct.populator.hostedcheckout.WorldlineSepaDirectDebitPopulator">
+           <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
     <bean id="worldlineHostedCheckoutRedirectPopulator"
@@ -86,13 +95,14 @@
     </bean>
 
     <bean id="worldlineHostedCheckoutParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CreateHostedCheckoutRequest"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CreateHostedCheckoutRequest"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineHostedCheckoutBasicPopulator"/>
                 <ref bean="worldlineHostedCheckoutCardPopulator"/>
                 <ref bean="worldlineHostedCheckoutRedirectPopulator"/>
                 <ref bean="worldlineHostedCheckoutMobilePopulator"/>
+                <ref bean="worldlineSepaDirectDebitPopulator"/>
             </list>
         </property>
     </bean>
@@ -114,25 +124,30 @@
         <property name="sessionService" ref="sessionService"/>
     </bean>
 
+    <bean id="worldlineHostedTokenizationSepaPopulator"
+          class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationSepaPopulator"/>
+
     <bean id="worldlineHostedTokenizationMobilePopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationMobilePopulator">
     </bean>
 
 
     <bean id="worldlineHostedTokenizationParamConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.ingenico.direct.domain.CreatePaymentRequest"/>
+        <property name="targetClass" value="com.onlinepayments.domain.CreatePaymentRequest"/>
         <property name="populators">
             <list>
                 <ref bean="worldlineHostedTokenizationBasicPopulator"/>
                 <ref bean="worldlineHostedTokenizationCardPopulator"/>
                 <ref bean="worldlineHostedTokenizationMobilePopulator"/>
                 <ref bean="worldlineHostedTokenizationRedirectPopulator"/>
+                <ref bean="worldlineHostedTokenizationSepaPopulator"/>
             </list>
         </property>
     </bean>
 
     <bean name="worldlineCartPopulator" class="com.worldline.direct.populator.WorldlineCartPopulator">
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="priceDataFactory" ref="priceDataFactory"/>
     </bean>
 
     <bean parent="modifyPopulatorList">
@@ -145,8 +160,45 @@
         <property name="add" ref="worldlineCartPopulator"/>
     </bean>
 
+    <bean name="worldlineSchuduleOrderPopulator" class="com.worldline.direct.populator.WorldlineSchuduleOrderPopulator">
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="scheduledCartConverter"/>
+        <property name="add" ref="worldlineSchuduleOrderPopulator"/>
+    </bean>
+
+
     <bean name="worldlineOrderPopulator" class="com.worldline.direct.populator.WorldlineOrderPopulator">
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="priceDataFactory" ref="priceDataFactory"/>
+    </bean>
+
+    <bean name="worldlineMandatePopulator" class="com.worldline.direct.populator.WorldlineMandatePopulator">
+        <property name="enumerationService" ref="enumerationService"/>
+    </bean>
+
+    <bean id="worldlineMandateConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.worldline.direct.order.data.WorldlineMandateDetail"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineMandatePopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean name="worldlineRecurringTokenPopulator" class="com.worldline.direct.populator.WorldlineRecurringTokenPopulator">
+        <property name="enumerationService" ref="enumerationService"/>
+    </bean>
+
+    <bean id="worldlineRecurringTokenConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.worldline.direct.order.data.WorldlineRecurringTokenData"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineRecurringTokenPopulator"/>
+            </list>
+        </property>
     </bean>
 
     <bean parent="modifyPopulatorList">
@@ -154,21 +206,43 @@
         <property name="add" ref="worldlineOrderPopulator"/>
     </bean>
 
-    <bean name="worldlineShoppingCartFactoriesConfiguration" class="com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration" >
+    <bean name="worldlineShoppingCartFactoriesConfiguration"
+          class="com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration">
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="factoriesConfiguration" ref="shoppingCartfactoriesConfiguration"/>
     </bean>
-    <util:map id="shoppingCartfactoriesConfiguration" key-type="java.lang.String" value-type="com.worldline.direct.factory.WorldlineShoppingCartFactory" map-class="java.util.HashMap">
-        <entry key="INCLUDE_DISCOUNT" value-ref="shoppingCartWithDiscountFactory" />
-        <entry key="EXCLUDE_DISCOUNT" value-ref="shoppingCartWithoutDiscountFactory" />
+    <util:map id="shoppingCartfactoriesConfiguration" key-type="java.lang.String"
+              value-type="com.worldline.direct.factory.WorldlineShoppingCartFactory" map-class="java.util.HashMap">
+        <entry key="INCLUDE_DISCOUNT" value-ref="shoppingCartWithDiscountFactory"/>
+        <entry key="EXCLUDE_DISCOUNT" value-ref="shoppingCartWithoutDiscountFactory"/>
     </util:map>
-    <bean id="shoppingCartWithDiscountFactory" class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithDiscountFactory">
+    <bean id="shoppingCartWithDiscountFactory"
+          class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithDiscountFactory">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
     </bean>
 
-    <bean id="shoppingCartWithoutDiscountFactory" class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithoutDiscountFactory">
+    <bean id="shoppingCartWithoutDiscountFactory"
+          class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithoutDiscountFactory">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-        <property name="worldlinePaymentProductUtils" ref="worldlinePaymentProductUtils"/>
+    </bean>
+
+    <bean id="worldlineTriggerPopulator" class="com.worldline.direct.populator.WorldlineTriggerPopulator"/>
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="triggerConverter"/>
+        <property name="add" ref="worldlineTriggerPopulator"/>
+    </bean>
+
+    <alias name="worldlineTriggerReversePopulator" alias="triggerReversePopulator"/>
+    <bean id="worldlineTriggerReversePopulator" class="com.worldline.direct.populator.WorldlineTriggerReversePopulator"/>
+
+    <bean id="worldlinePlaceOrderPopulator" class="com.worldline.direct.populator.WorldlinePlaceOrderPopulator"/>
+
+    <bean id="worldlinePlaceOrderConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlinePlaceOrderPopulator"/>
+            </list>
+        </property>
     </bean>
 </beans>
