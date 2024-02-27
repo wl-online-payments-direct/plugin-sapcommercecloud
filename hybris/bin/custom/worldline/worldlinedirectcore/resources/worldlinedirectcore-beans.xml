@@ -9,6 +9,8 @@
         <property name="paymentMethodImageUrl" type="String"/>
         <property name="savedPayment" type="String"/>
         <property name="saved" type="boolean"/>
+        <property name="recurring" type="boolean"/>
+        <property name="recurringToken" type="com.worldline.direct.order.data.WorldlineRecurringTokenData"/>
         <property name="paymentProductDirectoryId" type="String"/>
         <property name="hostedTokenizationId" type="String"/>
         <property name="worldlineCheckoutType" type="com.worldline.direct.enums.WorldlineCheckoutTypesEnum"/>
@@ -24,14 +26,28 @@
         <property name="returnMAC" type="String"/>
         <property name="defaultPayment" type="boolean"/>
         <property name="cardType" type="de.hybris.platform.commercefacades.order.data.CardTypeData"/>
+        <property name="mandateDetail" type="com.worldline.direct.order.data.WorldlineMandateDetail"/>
+
     </bean>
 
     <bean class="de.hybris.platform.commercefacades.order.data.CartData">
         <property name="worldlinePaymentInfo" type="com.worldline.direct.order.data.WorldlinePaymentInfoData"/>
+        <property name="replenishmentOrder" type="boolean" />
+        <property name="replenishmentStartDate" type="java.util.Date" />
+        <property name="replenishmentRecurrence" type="de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum" />
+        <property name="nDaysOfWeek" type="java.util.List&lt;de.hybris.platform.cronjob.enums.DayOfWeek>"/>
+        <property name="nDays" type="String" />
+        <property name="nWeeks" type="String" />
+        <property name="nthDayOfMonth" type="String" />
+        <property name="nMonths" type="String"/>
+        <property name="nYear" type="String"/>
+        <property name="replenishmentEndDate" type="java.util.Date"/>
+
     </bean>
 
     <bean class="de.hybris.platform.commercefacades.order.data.AbstractOrderData">
         <property name="worldlinePaymentInfo" type="com.worldline.direct.order.data.WorldlinePaymentInfoData"/>
+        <property name="surcharge" type="de.hybris.platform.commercefacades.product.data.PriceData"/>
     </bean>
 
     <bean class="com.worldline.direct.order.data.WorldlineHostedTokenizationData">
@@ -51,6 +67,60 @@
         <property name="userAgent" type="String"/>
         <property name="locale" type="String"/>
         <property name="ipAddress" type="String"/>
+    </bean>
+
+    <bean class="de.hybris.platform.b2bacceleratorfacades.order.data.TriggerData">
+        <property name="active" type="boolean"/>
+        <property name="year" type="java.lang.Integer"/>
+        <property name="dateRange" type="de.hybris.platform.util.StandardDateRange"/>
+    </bean>
+    <bean class="de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData">
+        <property name="nMonths" type="String"/>
+        <property name="nYear" type="String"/>
+        <property name="replenishmentEndDate" type="java.util.Date"/>
+        <property name="cardDetailsCheck" type="boolean"/>
+    </bean>
+
+    <bean class="com.worldline.direct.order.data.WorldlineMandateDetail">
+        <property name="alias" type="String"/>
+        <property name="customerReference" type="String"/>
+        <property name="recurrenceType" type="String"/>
+        <property name="status" type="String"/>
+        <property name="uniqueMandateReference" type="String"/>
+        <property name="customer" type="com.worldline.direct.customer.data.WorldlineMandateCustomer"/>
+    </bean>
+
+    <bean class="com.worldline.direct.customer.data.WorldlineMandateCustomer">
+        <property name="iban" type="String"/>
+        <property name="companyName" type="String"/>
+        <property name="emailAddress" type="String"/>
+        <property name="address" type="com.worldline.direct.address.data.WorldlineMandateAddress"/>
+        <property name="personalInformation" type="com.worldline.direct.contact.data.WorldlinePersonalInformation"/>
+    </bean>
+    <bean class="com.worldline.direct.address.data.WorldlineMandateAddress">
+        <property name="city" type="String"/>
+        <property name="country" type="String"/>
+        <property name="HouseNumber" type="String"/>
+        <property name="street" type="String"/>
+        <property name="zip" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.direct.contact.data.WorldlinePersonalInformation">
+        <property name="firstName" type="String"/>
+        <property name="lastName" type="String"/>
+        <property name="title" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.direct.order.data.WorldlineRecurringTokenData">
+        <property name="recurringToken" type="String"/>
+        <property name="status" type="String"/>
+        <property name="subscriptionId" type="String"/>
+        <property name="alias" type="String"/>
+        <property name="cardholderName" type="String"/>
+        <property name="expiryDate" type="String"/>
+        <property name="expiryMonth" type="String"/>
+        <property name="expiryYear" type="String"/>
+        <property name="customer" type="de.hybris.platform.core.model.user.CustomerModel"/>
     </bean>
 
 </beans>

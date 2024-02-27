@@ -5,6 +5,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="ycommerce" uri="http://hybris.com/tld/ycommercetags" %>
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive" %>
+<%@ taglib prefix="worldlineOrderTotals" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/order" %>
 <%@ taglib prefix="order" tagdir="/WEB-INF/tags/responsive/order" %>
 
 <template:page pageTitle="${pageTitle}" hideHeaderLinks="true">
@@ -15,6 +16,8 @@
         <order:accountOrderDetailsOverview order="${orderData}"/>
 
         <jsp:include page="/WEB-INF/views/responsive/pages/account/accountOrderDetailItems.jsp" />
+
+        <jsp:include page="/WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/cms/mandate/worldlineMandateDetails.jsp"/>
 
         <%-- Add keep payment details button in this section --%>
         <div class="account-orderdetail well well-tertiary">
@@ -41,7 +44,7 @@
             </ycommerce:testId>
         </div>
 
-        <order:accountOrderDetailOrderTotals order="${orderData}"/>
+        <worldlineOrderTotals:accountOrderDetailOrderTotals order="${orderData}"/>
         <jsp:include page="/WEB-INF/views/responsive/pages/checkout/checkoutConfirmationContinueButton.jsp" />
         </div>
     </jsp:body>

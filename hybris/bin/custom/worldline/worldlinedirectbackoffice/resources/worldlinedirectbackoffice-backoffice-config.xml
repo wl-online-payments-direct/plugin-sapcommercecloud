@@ -24,6 +24,8 @@
 		<et:explorer-tree>
 			<et:navigation-node id="hmc.worldline">
 				<et:type-node code="WorldlineConfiguration" id="hmc.worldline.worldlineConfiguration"/>
+				<et:type-node code="worldlineMandate" id="hmc.worldline.worldlineMandate"/>
+				<et:type-node code="WorldlineRecurringToken" id="hmc.worldline.worldlineRecurringToken"/>
 			</et:navigation-node>
 		</et:explorer-tree>
 	</context>
@@ -73,14 +75,37 @@
 				<ea:section name="hmc.worldline.worldlineOperationCodeConfig">
 					<ea:attribute qualifier="defaultOperationCode"/>
 					<ea:attribute qualifier="captureTimeFrame"/>
+					<ea:attribute qualifier="sessionTimout"/>
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineTokenizationConfig">
 					<ea:attribute qualifier="askConsumerConsent"/>
-					<ea:attribute qualifier="submitOrderPromotion"/>
 					<ea:attribute qualifier="variant"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.settings.3ds">
+					<ea:attribute qualifier="challengeRequired"/>
+					<ea:attribute qualifier="exemptionRequest"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineGroupedCardsConfig">
+					<ea:attribute qualifier="groupCards"/>
+					<ea:attribute qualifier="groupCardsLogo"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineRecurringPaymentsConfig">
+					<ea:attribute qualifier="replenishmentAttempts"/>
+					<ea:attribute qualifier="firstRecurringPayment"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineUnboundConfig">
+					<ea:attribute qualifier="submitOrderPromotion"/>
+					<ea:attribute qualifier="applySurcharge"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
+	</context>
+
+
+	<context type="WorldlineConfiguration" component="editorAreaDynamicForms">
+		<df:dynamicForms xmlns:df="http://www.hybris.com/cockpitng/component/dynamicForms">
+			<df:attribute id="exemptionRequestVisiblity" triggeredOn="challengeRequired" qualifier="exemptionRequest" visibleIf="challengeRequired==false" />
+		</df:dynamicForms>
 	</context>
 
 	<!-- WorldlineConfiguration display name when viewing all attributes -->
@@ -115,6 +140,111 @@
 
 	<!-- WorldlineConfiguration BO appearance END -->
 
+	<!-- WorldlineMandate BO appearance START -->
+	<context merge-by="type" parent="GenericItem" type="WorldlineMandate" component="listview">
+		<lv:list-view>
+			<lv:column qualifier="customer"/>
+			<lv:column qualifier="customerReference"/>
+			<lv:column qualifier="recurrenceType"/>
+			<lv:column qualifier="status"/>
+		</lv:list-view>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineMandate" component="advanced-search">
+		<as:advanced-search>
+			<as:field-list>
+				<as:field name="customer" selected="true"/>
+				<as:field name="customerReference" selected="true"/>
+				<as:field name="recurrenceType" />
+				<as:field name="status" />
+				<as:field name="iban" />
+				<as:field name="companyName" />
+				<as:field name="uniqueMandateReference" />
+				<as:field name="customerReference" />
+			</as:field-list>
+		</as:advanced-search>
+	</context>
+
+	<context type="WorldlineMandate" component="base" merge-by="type" parent="GenericItem">
+		<y:base>
+			<y:labels>
+				<y:label>emailAddress + ' - ' + customerReference+ ' - ' +uniqueMandateReference</y:label>
+			</y:labels>
+		</y:base>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineMandate" component="editor-area">
+		<ea:editorArea name="">
+			<ea:essentials>
+				<ea:essentialSection name="hmc.essential">
+					<ea:attribute qualifier="customer" readonly="true"/>
+					<ea:attribute qualifier="customerReference" readonly="true"/>
+					<ea:attribute qualifier="alias"/>
+					<ea:attribute qualifier="uniqueMandateReference" readonly="true"/>
+					<ea:attribute qualifier="status" readonly="true"/>
+					<ea:attribute qualifier="recurrenceType" readonly="true"/>
+				</ea:essentialSection>
+			</ea:essentials>
+			<ea:tab name="hmc.worldline.organization">
+				<ea:section name="hmc.worldline.organization">
+					<ea:panel name="parameters" colspan="4">
+						<ea:attribute qualifier="iban" readonly="true"/>
+						<ea:attribute qualifier="companyName" readonly="true"/>
+						<ea:attribute qualifier="emailAddress" readonly="true"/>
+					</ea:panel>
+				</ea:section>
+			</ea:tab>
+			<ea:tab name="hmc.worldline.address">
+				<ea:section name="hmc.worldline.address.address">
+					<ea:panel name="parameters" colspan="4">
+						<ea:attribute qualifier="country" readonly="true"/>
+						<ea:attribute qualifier="city" readonly="true"/>
+						<ea:attribute qualifier="street" readonly="true"/>
+						<ea:attribute qualifier="houseNumber" readonly="true"/>
+						<ea:attribute qualifier="zip" readonly="true"/>
+					</ea:panel>
+				</ea:section>
+
+				<ea:section name="hmc.worldline.address.contact">
+					<ea:panel name="parameters" colspan="4">
+						<ea:attribute qualifier="title" readonly="true"/>
+						<ea:attribute qualifier="firstname" readonly="true"/>
+						<ea:attribute qualifier="lastName" readonly="true"/>
+					</ea:panel>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+
+	<!-- WorldlineMandate actions -->
+	<context merge-by="type" component="editorareaactions" type="WorldlineMandate">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common" merge-mode="append">
+				<y:label>worldline.common</y:label>
+				<y:action action-id="com.worldline.direct.actions.mandate.block" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.action.mandate.unblock" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.action.mandate.revoke" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+			</y:group>
+		</y:actions>
+	</context>
+
+	<!-- WorldlineMandate BO appearance END -->
+
 	<!-- BaseStore update BO appearance START -->
 	<context merge-by="type" parent="GenericItem" type="BaseStore" component="editor-area">
 		<ea:editorArea name="">
@@ -122,6 +252,7 @@
 				<ea:section name="hmc.worldline.worldlineConfiguration">
 					<ea:attribute qualifier="worldlineConfiguration"/>
 					<ea:attribute qualifier="worldlineCheckoutType"/>
+					<ea:attribute qualifier="merchant"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
@@ -187,6 +318,8 @@
 						<ea:attribute qualifier="cardholderName"/>
 						<ea:attribute qualifier="expiryDate"/>
 						<ea:attribute qualifier="usedSavedPayment"/>
+						<ea:attribute qualifier="recurringToken"/>
+						<ea:attribute qualifier="worldlineRecurringToken"/>
 					</ea:section>
 				</ea:tab>
 			</ea:editorArea>
@@ -246,6 +379,46 @@
 	</context>
 	<!-- WorldlineWebhooksEvent BO appearance END -->
 
+	<!-- Cart BO appearance START -->
+	<context merge-by="type" parent="GenericItem" type="Cart">
+		<context component="editor-area">
+			<ea:editorArea>
+				<ea:tab name="hmc.worldline">
+					<ea:section name="hmc.worldline.replenishmentData">
+						<ea:attribute qualifier="worldlineReplenishmentOrder" readonly="true"/>
+						<ea:attribute qualifier="worldlineNDays"/>
+						<ea:attribute qualifier="worldlineNWeeks"/>
+						<ea:attribute qualifier="worldlineNMonths"/>
+						<ea:attribute qualifier="worldlineNthDayOfMonth"/>
+						<ea:attribute qualifier="worldlineReplenishmentRecurrence"/>
+						<ea:attribute qualifier="worldlineReplenishmentStartDate" readonly="true"/>
+						<ea:attribute qualifier="worldlineReplenishmentEndDate"/>
+						<ea:attribute qualifier="worldlineNDaysOfWeek"/>
+					</ea:section>
+				</ea:tab>
+			</ea:editorArea>
+		</context>
+	</context>
+	<!-- Cart BO appearance END -->
+
+	<!-- Order BO appearance START -->
+	<context merge-by="type" parent="GenericItem" type="Order">
+		<context component="editor-area">
+			<ea:editorArea>
+				<ea:tab name="hmc.positions_and_prices">
+					<ea:section name="hmc.worldline.surcharge" position="2">
+						<ea:attribute qualifier="worldlineSurchargeProductTypeId" readonly="true"/>
+						<ea:attribute qualifier="worldlineSurchargeProductTypeVersion" readonly="true"/>
+						<ea:attribute qualifier="worldlineAdValoremRate" readonly="true"/>
+						<ea:attribute qualifier="worldlineSpecificRate" readonly="true"/>
+						<ea:attribute qualifier="worldlineSurchargeAmount" readonly="true"/>
+					</ea:section>
+				</ea:tab>
+			</ea:editorArea>
+		</context>
+	</context>
+	<!-- Order BO appearance END -->
+
 	<!-- CS Backoffice START -->
 	<context component="cseditorareaactions" type="Order" merge-by="type">
 		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
@@ -269,6 +442,305 @@
 			</y:group>
 		</y:actions>
 	</context>
+
+	<context merge-by="module" parent="auto" component="cs-explorer-tree" module="customersupportbackoffice"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<et:explorer-tree xmlns:et="http://www.hybris.com/cockpitng/config/explorertree" title="customer_support">
+			<et:type-node code="WorldlineMandate" id="customersupportbackoffice.worldline.worldlineMandate"/>
+			<et:type-node code="WorldlineRecurringToken" id="customersupportbackoffice.worldline.worldlineRecurringToken"/>
+		</et:explorer-tree>
+	</context>
+
+	<context component="cs-editor-area" merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" module="customersupportbackoffice"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<ea:editorArea name="">
+			<ea:essentials>
+				<ea:essentialSection name="hmc.essential">
+					<ea:attribute qualifier="token" readonly="true"/>
+					<ea:attribute qualifier="subscriptionID" readonly="true"/>
+					<ea:attribute qualifier="status" readonly="true"/>
+				</ea:essentialSection>
+			</ea:essentials>
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.worldlineRecurringPaymentInfo">
+					<ea:attribute qualifier="token" readonly="true"/>
+					<ea:attribute qualifier="alias"/>
+					<ea:attribute qualifier="cardholderName"/>
+					<ea:attribute qualifier="expiryDate"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineRecurringInfo">
+					<ea:attribute qualifier="subscriptionID" readonly="true"/>
+					<ea:attribute qualifier="status" readonly="true"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="cs-listview" module="customersupportbackoffice"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<lv:list-view>
+			<lv:column qualifier="token"/>
+			<lv:column qualifier="subscriptionID"/>
+			<lv:column qualifier="status"/>
+		</lv:list-view>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="advanced-search" module="customersupportbackoffice"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<as:advanced-search>
+			<as:field-list>
+				<as:field name="subscriptionID" selected="true"/>
+				<as:field name="status" />
+				<as:field name="customer" />
+			</as:field-list>
+		</as:advanced-search>
+	</context>
+
+	<context type="WorldlineRecurringToken" component="base" module="customersupportbackoffice"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<y:base>
+			<y:labels>
+				<y:label>subscriptionID + ' - ' + token</y:label>
+			</y:labels>
+		</y:base>
+	</context>
+
+	<!-- WorldlineRecurringToken actions -->
+	<context component="cseditorareaactions" type="WorldlineRecurringToken" module="customersupportbackoffice"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common" merge-mode="append">
+				<y:label>worldline.common</y:label>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.block" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.unblock" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.revoke" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+			</y:group>
+		</y:actions>
+	</context>
+
+	<!-- WorldlineMandate CSBO appearance START -->
+	<context merge-by="type" parent="GenericItem" type="WorldlineMandate" component="cs-listview"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<lv:list-view>
+			<lv:column qualifier="customer"/>
+			<lv:column qualifier="customerReference"/>
+			<lv:column qualifier="recurrenceType"/>
+			<lv:column qualifier="status"/>
+		</lv:list-view>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineMandate" component="advanced-search"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<as:advanced-search>
+			<as:field-list>
+				<as:field name="customer" selected="true"/>
+				<as:field name="customerReference" selected="true"/>
+				<as:field name="recurrenceType" />
+				<as:field name="status" />
+				<as:field name="iban" />
+				<as:field name="companyName" />
+				<as:field name="uniqueMandateReference" />
+				<as:field name="customerReference" />
+			</as:field-list>
+		</as:advanced-search>
+	</context>
+
+	<context type="WorldlineMandate" component="base" merge-by="type" parent="GenericItem"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<y:base>
+			<y:labels>
+				<y:label>emailAddress + ' - ' + customerReference+ ' - ' +uniqueMandateReference</y:label>
+			</y:labels>
+		</y:base>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineMandate" component="cs-editor-area"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<ea:editorArea name="">
+			<ea:essentials>
+				<ea:essentialSection name="hmc.essential">
+					<ea:attribute qualifier="customer" readonly="true"/>
+					<ea:attribute qualifier="customerReference" readonly="true"/>
+					<ea:attribute qualifier="alias"/>
+					<ea:attribute qualifier="uniqueMandateReference" readonly="true"/>
+					<ea:attribute qualifier="status" readonly="true"/>
+					<ea:attribute qualifier="recurrenceType" readonly="true"/>
+				</ea:essentialSection>
+			</ea:essentials>
+			<ea:tab name="hmc.worldline.organization">
+				<ea:section name="hmc.worldline.organization">
+					<ea:panel name="parameters" colspan="4">
+						<ea:attribute qualifier="iban" readonly="true"/>
+						<ea:attribute qualifier="companyName" readonly="true"/>
+						<ea:attribute qualifier="emailAddress" readonly="true"/>
+					</ea:panel>
+				</ea:section>
+			</ea:tab>
+			<ea:tab name="hmc.worldline.address">
+				<ea:section name="hmc.worldline.address.address">
+					<ea:panel name="parameters" colspan="4">
+						<ea:attribute qualifier="country" readonly="true"/>
+						<ea:attribute qualifier="city" readonly="true"/>
+						<ea:attribute qualifier="street" readonly="true"/>
+						<ea:attribute qualifier="houseNumber" readonly="true"/>
+						<ea:attribute qualifier="zip" readonly="true"/>
+					</ea:panel>
+				</ea:section>
+
+				<ea:section name="hmc.worldline.address.contact">
+					<ea:panel name="parameters" colspan="4">
+						<ea:attribute qualifier="title" readonly="true"/>
+						<ea:attribute qualifier="firstname" readonly="true"/>
+						<ea:attribute qualifier="lastName" readonly="true"/>
+					</ea:panel>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+
+	<!-- WorldlineMandate actions -->
+	<context merge-by="type" component="cseditorareaactions" type="WorldlineMandate"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common" merge-mode="append">
+				<y:label>worldline.common</y:label>
+				<y:action action-id="com.worldline.direct.actions.mandate.block" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.action.mandate.unblock" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.action.mandate.revoke" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+			</y:group>
+		</y:actions>
+	</context>
+
+	<!-- WorldlineMandate CSBO appearance END -->
+
 	<!-- CS Backoffice END -->
 
+	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="listview">
+		<lv:list-view>
+			<lv:column qualifier="token"/>
+			<lv:column qualifier="subscriptionID"/>
+			<lv:column qualifier="status"/>
+		</lv:list-view>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="advanced-search">
+		<as:advanced-search>
+			<as:field-list>
+				<as:field name="subscriptionID" selected="true"/>
+				<as:field name="status" />
+				<as:field name="customer" />
+			</as:field-list>
+		</as:advanced-search>
+	</context>
+
+	<context type="WorldlineRecurringToken" component="base" merge-by="type" parent="GenericItem">
+		<y:base>
+			<y:labels>
+				<y:label>subscriptionID + ' - ' + token</y:label>
+			</y:labels>
+		</y:base>
+	</context>
+
+	<context merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" component="editor-area">
+		<ea:editorArea name="">
+			<ea:essentials>
+				<ea:essentialSection name="hmc.essential">
+					<ea:attribute qualifier="token" readonly="true"/>
+					<ea:attribute qualifier="subscriptionID" readonly="true"/>
+					<ea:attribute qualifier="status" readonly="true"/>
+				</ea:essentialSection>
+			</ea:essentials>
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.worldlineRecurringPaymentInfo">
+					<ea:attribute qualifier="token" readonly="true"/>
+					<ea:attribute qualifier="alias"/>
+					<ea:attribute qualifier="cardholderName"/>
+					<ea:attribute qualifier="expiryDate"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineRecurringInfo">
+					<ea:attribute qualifier="subscriptionID" readonly="true"/>
+					<ea:attribute qualifier="status" readonly="true"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+
+	<!-- WorldlineRecurringToken actions -->
+	<context merge-by="type" component="editorareaactions" type="WorldlineRecurringToken">
+		<y:actions xmlns:y="http://www.hybris.com/cockpit/config/hybris">
+			<y:group qualifier="common" merge-mode="append">
+				<y:label>worldline.common</y:label>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.block" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.unblock" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+				<y:action action-id="com.worldline.direct.actions.recurringToken.revoke" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
+			</y:group>
+		</y:actions>
+	</context>
+
+	<!-- WorldlineRecurringToken BO appearance END -->
+
+	<!-- Worldline Recurring data in Cart START -->
+	<context merge-by="type" parent="AbstractOrder" type="Cart" component="editor-area">
+		<ea:editorArea name="">
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.replenishment.order.data">
+					<ea:attribute qualifier="worldlineReplenishmentOrder"/>
+					<ea:attribute qualifier="worldlineReplenishmentStartDate"/>
+					<ea:attribute qualifier="worldlineReplenishmentEndDate"/>
+					<ea:attribute qualifier="worldlineReplenishmentRecurrence"/>
+					<ea:attribute qualifier="worldlineNDays"/>
+					<ea:attribute qualifier="worldlineNWeeks"/>
+					<ea:attribute qualifier="worldlineNDaysOfWeek"/>
+					<ea:attribute qualifier="worldlineNMonths"/>
+					<ea:attribute qualifier="worldlineNthDayOfMonth"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+	<!-- Worldline Recurring data in Cart END -->
 </config>

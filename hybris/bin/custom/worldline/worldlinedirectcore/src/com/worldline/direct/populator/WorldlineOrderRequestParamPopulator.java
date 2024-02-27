@@ -1,6 +1,7 @@
 package com.worldline.direct.populator;
 
-import com.ingenico.direct.domain.*;
+import com.onlinepayments.domain.*;
+import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;
@@ -8,13 +9,17 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
+import org.apache.commons.lang.BooleanUtils;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ADDRESS_INDICATEUR.NEW;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ADDRESS_INDICATEUR.SAME_AS_BILLING;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
     private WorldlineAmountUtils worldlineAmountUtils;
-    private WorldlinePaymentProductUtils worldlinePaymentProductUtils;
+
+    private WorldlineConfigurationService worldlineConfigurationService;
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null!");
@@ -22,7 +27,10 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         order.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
         order.setShipping(getShipping(abstractOrderModel));
         order.setReferences(getReferences(abstractOrderModel));
-
+        if (BooleanUtils.isTrue(abstractOrderModel.getStore().getWorldlineConfiguration().isApplySurcharge()))
+        {
+            order.withSurchargeSpecificInput(new SurchargeSpecificInput()).getSurchargeSpecificInput().setMode("on-behalf-of");
+        }
     }
 
     private Shipping getShipping(AbstractOrderModel abstractOrderModel) {
@@ -51,10 +59,11 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         address.setName(personalName);
         shipping.setAddress(address);
         shipping.setEmailAddress(deliveryAddress.getEmail());
-        if (abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel && worldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getId()))
+        if (abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel && WorldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo())))
         {
             shipping.setShippingCost(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(),abstractOrderModel.getCurrency().getIsocode()));
         }
+        shipping.setAddressIndicator(BooleanUtils.isTrue(deliveryAddress.getShippingAddress()) ? SAME_AS_BILLING : NEW);
         return shipping;
     }
 
@@ -68,7 +77,12 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         final AmountOfMoney amountOfMoney = new AmountOfMoney();
         final String currencyCode = abstractOrderModel.getCurrency().getIsocode();
         final long amount;
-        amount = worldlineAmountUtils.createAmount(abstractOrderModel.getTotalPrice(), abstractOrderModel.getCurrency().getIsocode());
+        double totalAmountToSend = abstractOrderModel.getTotalPrice();
+        if (abstractOrderModel.getPaymentCost() > 0.0d) {// subtract the surcharge so the amount that is sent to WL is the one expected /HTP/ first transaction
+            totalAmountToSend -= abstractOrderModel.getPaymentCost();
+        }
+
+        amount = worldlineAmountUtils.createAmount(totalAmountToSend, abstractOrderModel.getCurrency().getIsocode());
         amountOfMoney.setAmount(amount);
         amountOfMoney.setCurrencyCode(currencyCode);
 
@@ -79,7 +93,7 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         this.worldlineAmountUtils = worldlineAmountUtils;
     }
 
-    public void setWorldlinePaymentProductUtils(WorldlinePaymentProductUtils worldlinePaymentProductUtils) {
-        this.worldlinePaymentProductUtils = worldlinePaymentProductUtils;
+    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
+        this.worldlineConfigurationService = worldlineConfigurationService;
     }
 }

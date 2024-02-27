@@ -7,10 +7,10 @@
     <extension abstractclassprefix="Generated" classprefix="Worldlinedirectocc" description="worldlinedirectocc extension" managername="WorldlinedirectoccManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="worldlinedirectocc">
 
         <!-- you should add all required extensions to this list, except platform extensions which are automatically required -->
-        
+        <requires-extension name="b2bocc"/>
         <requires-extension name="commercewebservices"/>
         <requires-extension name="worldlinedirectcore"/>
-        
+
         <coremodule generated="true" manager="com.worldline.direct.jalo.WorldlinedirectoccManager" packageroot="com.worldline.direct"/>
     </extension>
         

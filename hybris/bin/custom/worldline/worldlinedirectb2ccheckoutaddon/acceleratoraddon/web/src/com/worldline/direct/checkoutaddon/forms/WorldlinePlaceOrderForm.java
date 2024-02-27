@@ -1,6 +1,4 @@
-
 package com.worldline.direct.checkoutaddon.forms;
-
 
 public class WorldlinePlaceOrderForm {
 
@@ -11,6 +9,8 @@ public class WorldlinePlaceOrderForm {
     private String timezoneOffset;
     private Integer colorDepth;
     private boolean termsCheck;
+    private boolean cardDetailsCheck;
+    private String securityCode;
 
     public String getScreenHeight() {
         return screenHeight;
@@ -66,5 +66,21 @@ public class WorldlinePlaceOrderForm {
 
     public void setNavigatorJavaScriptEnabled(Boolean navigatorJavaScriptEnabled) {
         this.navigatorJavaScriptEnabled = navigatorJavaScriptEnabled;
+    }
+
+    public String getSecurityCode() {
+        return securityCode;
+    }
+
+    public void setSecurityCode(String securityCode) {
+        this.securityCode = securityCode;
+    }
+
+    public boolean isCardDetailsCheck() {
+        return cardDetailsCheck;
+    }
+
+    public void setCardDetailsCheck(boolean cardDetailsCheck) {
+        this.cardDetailsCheck = cardDetailsCheck;
     }
 }

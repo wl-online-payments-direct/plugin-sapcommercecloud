@@ -11,13 +11,24 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
 
     public static final int PAYMENT_METHOD_HTP = -1;
     public static final int PAYMENT_METHOD_HCP = -2;
+
+    public static final int PAYMENT_METHOD_GROUP_CARDS = -3;
+
     public static final int PAYMENT_METHOD_IDEAL = 809;
     public static final int PAYMENT_METHOD_PAYPAL = 840;
     public static final int PAYMENT_METHOD_APPLEPAY = 302;
     public static final int PAYMENT_METHOD_KLARNA_PAY_AFTER = 3302;
     public static final int PAYMENT_METHOD_KLARNA_PAY_NOW = 3301;
+    public static final int PAYMENT_METHOD_SEPA = 771;
     public static final int PAYMENT_METHOD_ILLICADO = 3112;
     public static final int PAYMENT_METHOD_BCC = 3012;
+
+    public static final int PAYMENT_METHOD_INTERSOLVE = 5700;
+    public static final int PAYMENT_METHOD_AMERICAN_EXPRESS = 2;
+    public static final int PAYMENT_METHOD_DINERS_CLUB = 132;
+    public static final int PAYMENT_METHOD_MASTERCARD = 3;
+    public static final int PAYMENT_METHOD_JCB = 125;
+    public static final int PAYMENT_METHOD_VISA = 1;
 
 
     public static final String PAYMENT_METHOD_IDEAL_COUNTRY = "NL";
@@ -30,7 +41,8 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public enum PAYMENT_METHOD_TYPE {
         CARD("card"),
         REDIRECT("redirect"),
-        MOBILE("mobile");
+        MOBILE("mobile"),
+        DIRECT_DEBIT("directDebit");
 
         private final String value;
 
@@ -63,6 +75,34 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
         private final String value;
 
         HOSTED_CHECKOUT_STATUS_ENUM(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public enum SEPA_MANDATE_STATUS {
+        ACTIVE("ACTIVE"),
+        REVOKED("REVOKED"),
+        BLOCKED("BLOCKED");
+        private final String value;
+
+        SEPA_MANDATE_STATUS(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public enum SEPA_RECURRING_TYPE {
+        UNIQUE("UNIQUE"), RECURRING("RECURRING");
+        private final String value;
+
+        SEPA_RECURRING_TYPE(String value) {
             this.value = value;
         }
 
@@ -131,6 +171,15 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
         }
     }
 
+    public interface ACCOUNT_TYPE {
+        String GUEST = "none";
+        String CUSTOMER = "existing";
+    }
+
+    public interface ADDRESS_INDICATEUR {
+        String SAME_AS_BILLING = "same-as-billing";
+        String NEW = "different-than-billing";
+    }
     public enum WEBHOOK_TYPE_ENUM {
         PAYMENT_CREATED("payment.created"),
         PAYMENT_REDIRECTED("payment.redirected"),

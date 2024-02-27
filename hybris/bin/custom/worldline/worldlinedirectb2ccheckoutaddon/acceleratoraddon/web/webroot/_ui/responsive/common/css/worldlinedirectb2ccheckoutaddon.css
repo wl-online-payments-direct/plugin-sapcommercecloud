@@ -24,3 +24,32 @@ tr .new-cart {
 .radio_image_row{
     margin-bottom: 5px !important;
 }
+
+.surchage {
+    padding: 5px 0;
+}
+.surcharge span{
+    float: right;
+    font-weight: 600;
+}
+
+.scheduleform-container {
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.replenishmentFrequency {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.replenishmentFrequency .controls{
+    margin-bottom: 15px;
+}
+
+.scheduleformD, .scheduleformW, .scheduleformM {
+    margin-inline-end: 1.8rem;
+}

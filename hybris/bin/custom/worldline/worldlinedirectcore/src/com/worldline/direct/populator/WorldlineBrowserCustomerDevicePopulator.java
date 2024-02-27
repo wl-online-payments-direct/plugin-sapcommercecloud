@@ -1,6 +1,6 @@
 package com.worldline.direct.populator;
 
-import com.ingenico.direct.domain.CustomerDevice;
+import com.onlinepayments.domain.CustomerDevice;
 import com.worldline.direct.order.data.BrowserData;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
@@ -8,7 +8,7 @@ import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 public class WorldlineBrowserCustomerDevicePopulator implements Populator<BrowserData, CustomerDevice> {
     @Override
     public void populate(BrowserData source, CustomerDevice target) throws ConversionException {
-        com.ingenico.direct.domain.BrowserData browserData = new com.ingenico.direct.domain.BrowserData();
+        com.onlinepayments.domain.BrowserData browserData = new com.onlinepayments.domain.BrowserData();
         browserData.setColorDepth(source.getColorDepth());
         browserData.setJavaEnabled(source.getNavigatorJavaEnabled());
         browserData.setJavaScriptEnabled(source.getNavigatorJavaScriptEnabled());

@@ -1,20 +1,18 @@
 package com.worldline.direct.widgets.worldlinepartialcapture;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT;
-
-import java.math.BigDecimal;
-
 import com.hybris.cockpitng.annotations.SocketEvent;
 import com.hybris.cockpitng.annotations.ViewEvent;
 import com.hybris.cockpitng.util.DefaultWidgetController;
+import com.onlinepayments.domain.CaptureResponse;
+import com.onlinepayments.domain.CapturesResponse;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
+import com.worldline.direct.service.WorldlinePaymentService;
+import com.worldline.direct.service.WorldlineTransactionService;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
-import de.hybris.platform.store.BaseStoreModel;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +25,9 @@ import org.zkoss.zul.Doublebox;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
-import com.ingenico.direct.domain.CaptureResponse;
-import com.ingenico.direct.domain.CapturesResponse;
-import com.worldline.direct.model.WorldlineConfigurationModel;
-import com.worldline.direct.service.WorldlinePaymentService;
-import com.worldline.direct.service.WorldlineTransactionService;
+import java.math.BigDecimal;
+
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT;
 
 public class WorldlinePartialCaptureController extends DefaultWidgetController {
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlinePartialCaptureController.class);
@@ -65,7 +61,6 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
 
     private OrderModel orderModel;
     private PaymentTransactionEntryModel paymentTransactionToCapture;
-    private WorldlineConfigurationModel worldlineConfigurationModel;
     private Long amountToCapture;
     private Long nonCapturedAmount;
 
@@ -118,18 +113,17 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
         if (Messagebox.Button.YES.event.equals(obj.getName())) {
             try {
                 setPaymentTransactionToCapture(getPaymentTransactionToCapture(this.orderModel));
-                setWorldlineConfiguration(getWorldlineConfiguration(this.orderModel));
 
-                final CapturesResponse captures = worldlinePaymentService.getCaptures(worldlineConfigurationModel, paymentTransactionToCapture.getRequestId());
+                final CapturesResponse captures = worldlinePaymentService.getCaptures(orderModel.getStore().getUid(), paymentTransactionToCapture.getRequestId());
 
                 if (CollectionUtils.isNotEmpty(captures.getCaptures())) {
                     captures.getCaptures().forEach(capture -> worldlineTransactionService.processCapture(capture));
                 }
 
-                setNonCapturedAmount(worldlinePaymentService.getNonCapturedAmount(worldlineConfigurationModel,
+                setNonCapturedAmount(worldlinePaymentService.getNonCapturedAmount(orderModel.getStore().getUid(),
                         paymentTransactionToCapture.getRequestId(),
                         captures,
-                        paymentTransactionToCapture.getPaymentTransaction().getPlannedAmount(),
+                        getPlannedAMount(),
                         paymentTransactionToCapture.getCurrency().getIsocode()));
                 final Long requestedAmount = worldlineAmountUtils.createAmount(amount.doubleValue(), paymentTransactionToCapture.getCurrency().getIsocode());
 
@@ -166,7 +160,7 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
 
     private void capture() {
 
-        final CaptureResponse captureResponse = worldlinePaymentService.capturePayment(worldlineConfigurationModel,
+        final CaptureResponse captureResponse = worldlinePaymentService.capturePayment(orderModel.getStore().getUid(),
                 paymentTransactionToCapture.getRequestId(),
                 worldlineAmountUtils.fromAmount(amountToCapture, paymentTransactionToCapture.getCurrency().getIsocode()),
                 paymentTransactionToCapture.getCurrency().getIsocode(),
@@ -174,15 +168,10 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
         worldlineTransactionService.updatePaymentTransaction(paymentTransactionToCapture.getPaymentTransaction(),
                 captureResponse.getId(),
                 captureResponse.getStatus(),
-                captureResponse.getCaptureOutput().getAmountOfMoney(),
+                orderModel.getStore().getWorldlineConfiguration().isApplySurcharge() ? captureResponse.getCaptureOutput().getAcquiredAmount() : captureResponse.getCaptureOutput().getAmountOfMoney(),
                 PaymentTransactionType.CAPTURE);
 
         worldlineBusinessProcessService.triggerOrderProcessEvent(this.orderModel, WORLDLINE_EVENT_PAYMENT);
-    }
-
-    private WorldlineConfigurationModel getWorldlineConfiguration(OrderModel orderModel) {
-        final BaseStoreModel store = orderModel.getStore();
-        return store != null ? store.getWorldlineConfiguration() : null;
     }
 
     private PaymentTransactionEntryModel getPaymentTransactionToCapture(final OrderModel order) {
@@ -236,12 +225,16 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
         this.paymentTransactionToCapture = paymentTransactionToCapture;
     }
 
-    public void setWorldlineConfiguration(WorldlineConfigurationModel worldlineConfigurationModel) {
-        this.worldlineConfigurationModel = worldlineConfigurationModel;
-    }
-
     public void setAmountToCapture(Long amountToCapture) {
         this.amountToCapture = amountToCapture;
+    }
+
+    private BigDecimal getPlannedAMount() {
+        BigDecimal plannedAmount = paymentTransactionToCapture.getPaymentTransaction().getPlannedAmount();
+        if (orderModel.getStore().getWorldlineConfiguration().isApplySurcharge()) {
+            plannedAmount = plannedAmount.subtract(new BigDecimal(orderModel.getPaymentCost()));
+        }
+        return plannedAmount;
     }
 
     public void setNonCapturedAmount(Long nonCapturedAmount) {

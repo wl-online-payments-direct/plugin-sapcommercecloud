@@ -1,0 +1,67 @@
+INSERT_UPDATE DynamicProcessDefinition; code[unique = true]                ; active; content;
+                                      ; worldlineReplenishmentOrderProcess ; true  ; "
+<process xmlns='http://www.hybris.de/xsd/processdefinition' start='cloneCartAction'
+		 name='worldlineReplenishmentOrderProcess'
+		 processClass='de.hybris.platform.b2bacceleratorservices.model.process.ReplenishmentProcessModel'
+		 onError='error'>
+
+	<action id='cloneCartAction' bean='cloneCartAction'>
+		<transition name='OK' to='validateCartAction'/>
+		<transition name='NOK' to='cleanUpClonedCartOnFailedAction'/>
+	</action>
+
+
+	<action id='validateCartAction' bean='worldlineValidateCartAction'>
+		<transition name='OK' to='placeOrderAction'/>
+		<transition name='NOK' to='sendCartNonValidEmailFailure'/>
+		<transition name='ERROR' to='cleanUpClonedCartOnFailedAction'/>
+	</action>
+
+
+
+	<action id='placeOrderAction' bean='worldlinePlaceOrderAction'>
+		<transition name='OK' to='cleanUpClonedCart'/>
+		<transition name='NOK' to='cleanUpClonedCartOnErrorAction'/>
+	</action>
+
+ 	<action id='cleanUpClonedCart' bean='cleanUpClonedCartAction'>
+	    <transition name='OK' to='worldlineRequestPaymentAction'/>
+	</action>
+
+	<action id='worldlineRequestPaymentAction' bean='worldlineRequestPaymentAction'>
+		<transition name='OK' to='confirmationAction'/>
+		<transition name='NOK' to='sendPaymentFailedNotifications'/>
+		<transition name='RETRY' to='waitBeforeNewAttempt'/>
+	</action>
+
+	<wait id='waitBeforeNewAttempt' then='worldlineRequestPaymentAction'>
+	<event>noEvent</event>
+        <timeout delay='PT6H' then='worldlineRequestPaymentAction'/>
+    </wait>
+
+    <action id='sendPaymentFailedNotifications' bean='worldlineSendPaymentFailedNotificationAction'>
+         <transition name='OK' to='cleanUpClonedCartOnErrorAction'/>
+    </action>
+
+    <action id='sendCartNonValidEmailFailure' bean='worldlineSendCartNonValidEmailFailure'>
+         <transition name='OK' to='cleanUpClonedCartOnErrorAction'/>
+    </action>
+
+
+	<action id='confirmationAction' bean='confirmationAction'>
+		<transition name='OK' to='success'/>
+		<transition name='NOK' to='error'/>
+	</action>
+
+	<action id='cleanUpClonedCartOnErrorAction' bean='cleanUpClonedCartAction'>
+		<transition name='OK' to='error'/>
+	</action>
+
+	<action id='cleanUpClonedCartOnFailedAction' bean='cleanUpClonedCartAction'>
+		<transition name='OK' to='failed'/>
+	</action>
+
+	<end id='error' state='ERROR'>Something went wrong.</end>
+	<end id='failed' state='FAILED'>Could not create a replenishment order.</end>
+	<end id='success' state='SUCCEEDED'>Created a replenishment order.</end>
+</process>"

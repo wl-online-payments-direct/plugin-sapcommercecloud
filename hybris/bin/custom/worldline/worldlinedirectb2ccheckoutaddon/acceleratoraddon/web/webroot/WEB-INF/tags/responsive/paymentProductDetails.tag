@@ -1,6 +1,6 @@
 <%@ tag body-content="empty" trimDirectiveWhitespaces="true" %>
 <%@ attribute name="tabindex" required="false" type="java.lang.Integer" %>
-<%@ attribute name="paymentProduct" required="true" type="com.ingenico.direct.domain.PaymentProduct" %>
+<%@ attribute name="paymentProduct" required="true" type="com.onlinepayments.domain.PaymentProduct" %>
 <%@ attribute name="isSelectedID" required="false" type="java.lang.Boolean" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
@@ -9,7 +9,9 @@
 <%@ taglib prefix="paymentproduct"
            tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/paymentproducts" %>
 <%@ attribute name="paymentInfo" required="false" type="com.worldline.direct.order.data.WorldlinePaymentInfoData" %>
+
 <c:set var="isSelectedStoredCard" value="${not empty paymentInfo.savedPayment}" />
+
 <c:choose>
     <c:when test="${paymentProduct.id==-1}">
         <div class="worldline_payment_product htp" style="margin-bottom:-7px" title="${groupedCardsLabel}">
