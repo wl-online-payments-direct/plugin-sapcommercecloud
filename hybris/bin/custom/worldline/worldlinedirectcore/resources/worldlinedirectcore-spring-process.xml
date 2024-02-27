@@ -23,5 +23,49 @@
           class="com.worldline.direct.actions.returns.WorldlineCaptureRefundPaymentAction" parent="abstractAction">
     </bean>
 
+    <bean id="worldlineRequestPaymentAction"
+          class="com.worldline.direct.actions.replenishment.WorldlineRequestPaymentAction" parent="abstractAction">
+        <property name="worldlineRecurringService" ref="worldlineRecurringService"/>
+        <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="impersonationService" ref="impersonationService"/>
+        <property name="worldlineCheckoutFacade" ref="worldlineCheckoutFacade"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlineTransactionService" ref="worldlineTransactionService"/>
+    </bean>
+
+    <bean name="worldlinePlaceOrderAction"
+          class="com.worldline.direct.actions.replenishment.WorldlinePlaceOrderAction"
+          parent="abstractAction" >
+        <property name="b2bCommerceCheckoutService" ref="b2bCommerceCheckoutService"/>
+        <property name="b2cCommerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="impersonationService" ref="impersonationService"/>
+    </bean>
+
+
+    <alias name="worldlineCheckPaymentInfoOrderAction" alias="checkCreditCardOrderAction"/>
+    <bean id="worldlineCheckPaymentInfoOrderAction"
+          class="com.worldline.direct.actions.approval.WorldlineCheckPaymentInfoOrderAction"
+          parent="abstractAction"
+    />
+
+
+    <bean id="worldlineSendPaymentFailedNotificationAction"
+          class="com.worldline.direct.actions.replenishment.WorldlineSendPaymentFailedNotifications"
+          parent="abstractAction">
+        <property name="eventService" ref="eventService"/>
+    </bean>
+
+    <bean id="worldlineSendCartNonValidEmailFailure"
+          class="com.worldline.direct.actions.replenishment.WorldlineSendCartNonValidEmailFailure"
+          parent="abstractAction">
+        <property name="eventService" ref="eventService"/>
+    </bean>
+    <bean id="worldlineValidateCartAction"
+          class="com.worldline.direct.actions.replenishment.WorldlineValidateCartAction"
+          parent="abstractAction">
+        <property name="cartService" ref="cartService"/>
+        <property name="cartFacade" ref="cartFacade"/>
+        <property name="impersonationService" ref="impersonationService"/>
+    </bean>
 
 </beans>

@@ -1,7 +1,7 @@
 package com.worldline.direct.exception;
 
-import com.ingenico.direct.domain.MerchantAction;
-import com.ingenico.direct.domain.PaymentResponse;
+import com.onlinepayments.domain.MerchantAction;
+import com.onlinepayments.domain.PaymentResponse;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 
 public class WorldlineNonAuthorizedPaymentException extends Exception {

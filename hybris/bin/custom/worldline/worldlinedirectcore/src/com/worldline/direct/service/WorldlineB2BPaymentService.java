@@ -1,0 +1,19 @@
+package com.worldline.direct.service;
+
+import com.onlinepayments.domain.CreateHostedCheckoutResponse;
+import com.onlinepayments.domain.CreatePaymentResponse;
+import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
+import com.worldline.direct.order.data.BrowserData;
+import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
+import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
+
+public interface WorldlineB2BPaymentService {
+    CreateHostedCheckoutResponse createScheduledRecurringOrderHostedCheckout(CartToOrderCronJobModel cartToOrderCronJobModel, BrowserData browserData);
+
+    CreateHostedCheckoutResponse createImmediateRecurringOrderHostedCheckout(OrderModel orderModel, BrowserData browserData);
+
+    CreatePaymentResponse createRecurringPaymentForImmediateReplenishmentHostedTokenization(OrderModel orderModel, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException;
+
+    CreatePaymentResponse createRecurringPaymentForScheduledReplenishmentHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException;
+}

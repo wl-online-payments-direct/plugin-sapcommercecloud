@@ -8,6 +8,7 @@
 
         <requires-extension name="backoffice"/>
         <requires-extension name="customersupportbackoffice" />
+        <requires-extension name="ordermanagementfacades"/>
         <requires-extension name="worldlinedirectcore"/>
         
         <coremodule generated="true" manager="com.worldline.direct.jalo.WorldlinedirectbackofficeManager" packageroot="com.worldline.direct"/>

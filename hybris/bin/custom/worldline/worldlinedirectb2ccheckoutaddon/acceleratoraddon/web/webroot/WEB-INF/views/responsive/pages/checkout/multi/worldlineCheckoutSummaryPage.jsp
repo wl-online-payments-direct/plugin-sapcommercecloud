@@ -6,7 +6,11 @@
 <%@ taglib prefix="ycommerce" uri="http://hybris.com/tld/ycommercetags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="worldline" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive" %>
+<%@ taglib prefix="replenishment" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/replenishment" %>
 <%@ taglib prefix="multi-checkout" tagdir="/WEB-INF/tags/responsive/checkout/multi" %>
+<%@ taglib prefix="worldline-multi-checkout" tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/checkout/multi" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
 <spring:url value="/checkout/multi/worldline/summary/placeOrder" var="placeOrderUrl" htmlEscape="false"/>
@@ -24,12 +28,13 @@
                     <ycommerce:testId code="checkoutStepFour">
                         <div class="checkout-review hidden-xs">
                             <div class="checkout-order-summary">
-                                <multi-checkout:orderTotals cartData="${cartData}" showTaxEstimate="${showTaxEstimate}"
+                                <worldline-multi-checkout:orderTotals cartData="${cartData}" showTaxEstimate="${showTaxEstimate}"
                                                             showTax="${showTax}" subtotalsCssClasses="dark"/>
                             </div>
                         </div>
                         <div class="place-order-form hidden-xs">
-                            <form:form action="${placeOrderUrl}" id="worldlinePlaceOrderForm"
+                            <form:form action="${placeOrderUrl}" id="placeOrderForm1"
+                                       cssClass="js-worldlinePlaceOrderForm"
                                        modelAttribute="worldlinePlaceOrderForm">
                                 <form:input type="hidden" path="screenHeight"/>
                                 <form:input type="hidden" path="screenWidth"/>
@@ -37,6 +42,13 @@
                                 <form:input type="hidden" path="navigatorJavaScriptEnabled"/>
                                 <form:input type="hidden" path="timezoneOffset"/>
                                 <form:input type="hidden" path="colorDepth"/>
+                                <c:if test="${cartData.quoteData eq null && tokenizePayment eq true}">
+                                    <div class="checkbox">
+                                        <label> <form:checkbox id="saveCardDetails" path="cardDetailsCheck" />
+                                            <spring:theme code="checkout.multi.order.saveCardDetails"/>
+                                        </label>
+                                    </div>
+                                </c:if>
                                 <div class="checkbox">
                                     <label> <form:checkbox id="Terms1" path="termsCheck"/>
                                         <spring:theme var="termsAndConditionsHtml"
@@ -48,7 +60,7 @@
                                 </div>
 
                                 <button id="placeOrder" type="submit"
-                                        class="btn btn-primary btn-place-order btn-block checkout-next">
+                                        class="btn btn-primary btn-place-order btn-block checkout-next checkoutSummaryButton">
                                     <spring:theme code="checkout.summary.placeOrder" text="Place Order"/>
                                 </button>
                             </form:form>
@@ -59,7 +71,7 @@
 
             <div class="col-sm-6">
                 <worldline:checkoutOrderSummary cartData="${cartData}" showDeliveryAddress="true" showPaymentInfo="true"
-                                               showTaxEstimate="true" showTax="true"/>
+                                                showTaxEstimate="true" showTax="true"/>
             </div>
 
             <div class="col-sm-12 col-lg-12">

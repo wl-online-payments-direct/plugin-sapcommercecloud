@@ -1,0 +1,13 @@
+$START_USERRIGHTS;;;;;;;;;
+Type;UID;MemberOfGroups;Password;Target;read;change;create;remove;change_perm
+UserGroup;customersupportagentgroup;;;;;;;;
+
+# Access Rights for Customer Support Agent;;;;;;;;;
+# Customer Support Agent can view and change all relevant objects except for Quotes, Employees, Principals
+
+;;;;WorldlineMandate;+;+;-;-
+;;;;WorldlineRecurringToken;+;+;-;-
+;;;;CronJob;+;+;-;-
+;;;;CronJobHistory;+;+;-;-
+
+$END_USERRIGHTS;;;;;

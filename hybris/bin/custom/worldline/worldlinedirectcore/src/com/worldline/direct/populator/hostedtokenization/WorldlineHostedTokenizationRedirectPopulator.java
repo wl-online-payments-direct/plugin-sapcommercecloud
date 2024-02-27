@@ -1,10 +1,10 @@
 package com.worldline.direct.populator.hostedtokenization;
 
 import com.google.common.base.Preconditions;
-import com.ingenico.direct.domain.CreatePaymentRequest;
-import com.ingenico.direct.domain.RedirectPaymentMethodSpecificInput;
-import com.ingenico.direct.domain.RedirectPaymentProduct809SpecificInput;
-import com.ingenico.direct.domain.RedirectionData;
+import com.onlinepayments.domain.CreatePaymentRequest;
+import com.onlinepayments.domain.RedirectPaymentMethodSpecificInput;
+import com.onlinepayments.domain.RedirectPaymentProduct809SpecificInput;
+import com.onlinepayments.domain.RedirectionData;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;

@@ -1,18 +1,25 @@
 package com.worldline.direct.service.impl;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
+import com.worldline.direct.dao.WorldlineCustomerAccountDao;
+import com.worldline.direct.service.WorldlineCustomerAccountService;
+import de.hybris.platform.b2bacceleratorservices.customer.B2BCustomerAccountService;
+import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
+import de.hybris.platform.core.model.user.CustomerModel;
+import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
+import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
+import org.springframework.beans.factory.annotation.Required;
 
 import java.util.List;
 
-import com.worldline.direct.dao.WorldlineCustomerAccountDao;
-import com.worldline.direct.service.WorldlineCustomerAccountService;
-import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
-import de.hybris.platform.core.model.user.CustomerModel;
-import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
 public class WorldlineCustomerAccountServiceImpl implements WorldlineCustomerAccountService {
 
     private WorldlineCustomerAccountDao worldlineCustomerAccountDao;
+    private CheckoutCustomerStrategy checkoutCustomerStrategy;
+    private B2BCustomerAccountService b2BCustomerAccountService;
 
     @Override
     public List<WorldlinePaymentInfoModel> getWorldlinePaymentInfos(CustomerModel customerModel, boolean saved) {
@@ -42,7 +49,23 @@ public class WorldlineCustomerAccountServiceImpl implements WorldlineCustomerAcc
         }
     }
 
+    @Override
+    public CartToOrderCronJobModel getCartToOrderCronJob(String jobCode) {
+        final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+        CartToOrderCronJobModel cartToOrderCronJob = b2BCustomerAccountService.getCartToOrderCronJobForCode(jobCode, currentCustomer);
+        return cartToOrderCronJob;
+    }
+    @Required
     public void setWorldlineCustomerAccountDao(WorldlineCustomerAccountDao worldlineCustomerAccountDao) {
         this.worldlineCustomerAccountDao = worldlineCustomerAccountDao;
+    }
+    @Required
+    public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
+        this.checkoutCustomerStrategy = checkoutCustomerStrategy;
+    }
+
+    @Required
+    public void setB2BCustomerAccountService(B2BCustomerAccountService b2BCustomerAccountService) {
+        this.b2BCustomerAccountService = b2BCustomerAccountService;
     }
 }

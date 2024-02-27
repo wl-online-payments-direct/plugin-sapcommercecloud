@@ -1,0 +1,2 @@
+## messageSource=classpath:/worldlinedirectcore/messages/replenishmentCartNonValid_$lang.properties
+${ctx.messages.emailSubject}

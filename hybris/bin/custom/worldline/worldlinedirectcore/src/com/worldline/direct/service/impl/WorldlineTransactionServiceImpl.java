@@ -1,11 +1,6 @@
 package com.worldline.direct.service.impl;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.dao.WorldlineTransactionDao;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
@@ -14,29 +9,38 @@ import com.worldline.direct.util.WorldlineAmountUtils;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.order.CalculationService;
+import de.hybris.platform.order.exceptions.CalculationException;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ingenico.direct.domain.AmountOfMoney;
-import com.ingenico.direct.domain.Capture;
-import com.ingenico.direct.domain.WebhooksEvent;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
 
 
 public class WorldlineTransactionServiceImpl implements WorldlineTransactionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineTransactionServiceImpl.class);
 
+    private static final int PAYMENT_ID_LENGTH = 10;
+
+    private static final int PAYMENT_ID_START_STRIP_LENGTH = 6;
+
     private WorldlineTransactionDao worldlineTransactionDao;
     private WorldlineBusinessProcessService worldlineBusinessProcessService;
     private WorldlineAmountUtils worldlineAmountUtils;
     private ModelService modelService;
+
+    private CalculationService calculationService;
 
 
     @Override
@@ -56,7 +60,6 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
 
         return paymentTransaction;
     }
-
 
     @Override
     public PaymentTransactionModel createAuthorizationPaymentTransaction(AbstractOrderModel abstractOrderModel,
@@ -110,13 +113,12 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 .filter(entry -> webhooksEvent.getPayment().getStatus().equals(entry.getTransactionStatusDetails()))
                 .anyMatch(entry -> entry.getRequestId().equals(paymentTransactionId));
 
-        final OrderModel order = (OrderModel) paymentTransaction.getOrder();
         if (!alreadyProcessed) {
             updatePaymentTransaction(
                     paymentTransaction,
                     webhooksEvent.getPayment().getId(),
                     webhooksEvent.getPayment().getStatus(),
-                    webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
+                    webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() != null ? webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() : webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
                     PaymentTransactionType.CAPTURE
             );
         }
@@ -139,7 +141,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                     paymentTransactionId,
                     paymentTransaction.getOrder(),
                     capture.getStatus(),
-                    capture.getCaptureOutput().getAmountOfMoney(),
+                    capture.getCaptureOutput().getAcquiredAmount() != null ? capture.getCaptureOutput().getAcquiredAmount() : capture.getCaptureOutput().getAmountOfMoney(),
                     PaymentTransactionType.CAPTURE
             );
         }
@@ -153,7 +155,6 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         validateParameterNotNullStandardMessage("webhooksEvent.refund", webhooksEvent.getRefund());
         LOGGER.debug("[WORLDLINE] PROCESS {} EVENT id :{}", webhooksEvent.getType(), webhooksEvent.getId());
         final PaymentTransactionModel paymentTransaction = worldlineTransactionDao.findPaymentTransaction(getPaymentId(webhooksEvent.getRefund().getId()));
-        final OrderModel order = (OrderModel) paymentTransaction.getOrder();
         updatePaymentTransaction(
                 paymentTransaction,
                 webhooksEvent.getRefund().getId(),
@@ -162,6 +163,35 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 PaymentTransactionType.REFUND_FOLLOW_ON
         );
 
+    }
+
+    @Override
+    public void saveSurchargeData(AbstractOrderModel orderModel, SurchargeSpecificOutput surchargeSpecificOutput) {
+        if (orderModel instanceof OrderModel) {
+            ((OrderModel) orderModel).setWorldlineAdValoremRate(surchargeSpecificOutput.getSurchargeRate().getAdValoremRate());
+            ((OrderModel) orderModel).setWorldlineSpecificRate(surchargeSpecificOutput.getSurchargeRate().getSpecificRate());
+            ((OrderModel) orderModel).setWorldlineSurchargeProductTypeId(surchargeSpecificOutput.getSurchargeRate().getSurchargeProductTypeId());
+            ((OrderModel) orderModel).setWorldlineSurchargeProductTypeVersion(surchargeSpecificOutput.getSurchargeRate().getSurchargeProductTypeVersion());
+            ((OrderModel) orderModel).setWorldlineSurchargeAmount(worldlineAmountUtils.fromAmount(surchargeSpecificOutput.getSurchargeAmount().getAmount(), orderModel.getCurrency().getIsocode()).doubleValue());
+        }
+        savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
+    }
+
+    @Override
+    public void savePaymentCost(AbstractOrderModel orderModel, AmountOfMoney surchargeAmount) {
+        Double surcharge = worldlineAmountUtils.fromAmount(surchargeAmount.getAmount(), orderModel.getCurrency().getIsocode()).doubleValue();
+        savePaymentCost(orderModel, surcharge);
+    }
+
+    @Override
+    public void savePaymentCost(AbstractOrderModel orderModel, Double surcharge) {
+        orderModel.setPaymentCost(surcharge);
+        try {
+            calculationService.calculateTotals(orderModel, true);
+        } catch (CalculationException ex) {
+            LOGGER.error("[ WORLDLINE ] Error was thrown while recalculating totals of cart/order.", ex);
+        }
+        modelService.refresh(orderModel);
     }
 
     private PaymentTransactionModel createPaymentTransaction(
@@ -176,6 +206,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         final String paymentId = getPaymentId(pspReference);
         paymentTransactionModel.setCode(paymentId);
         paymentTransactionModel.setRequestId(paymentId);
+        paymentTransactionModel.setWorldlineRawTransactionCode(pspReference);
         paymentTransactionModel.setRequestToken(merchantCode);
         paymentTransactionModel.setPaymentProvider(WorldlinedirectcoreConstants.PAYMENT_PROVIDER);
         paymentTransactionModel.setOrder(abstractOrderModel);
@@ -279,7 +310,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         switch (transactionType){
             case AUTHORIZATION:
             case CAPTURE:
-                worldlineBusinessProcessService.triggerOrderProcessEvent((OrderModel) order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
+                worldlineBusinessProcessService.triggerOrderProcessEvent(order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
                 break;
             case REFUND_FOLLOW_ON:
                 worldlineBusinessProcessService.triggerReturnProcessEvent((OrderModel) order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_REFUND);
@@ -312,8 +343,12 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         }
     }
 
-    private String getPaymentId(String paymentTransactionId) {
-        return StringUtils.split(paymentTransactionId, "_")[0];
+    private String getPaymentId(String rawPaymentTransactionId) {
+        String paymentTransactionId = StringUtils.split(rawPaymentTransactionId, "_")[0];
+        if (paymentTransactionId.length() > PAYMENT_ID_LENGTH) {
+            paymentTransactionId = paymentTransactionId.substring(PAYMENT_ID_START_STRIP_LENGTH, PAYMENT_ID_LENGTH + PAYMENT_ID_START_STRIP_LENGTH);
+        }
+        return paymentTransactionId;
     }
 
 
@@ -331,5 +366,9 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
 
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
+    }
+
+    public void setCalculationService(CalculationService calculationService) {
+        this.calculationService = calculationService;
     }
 }

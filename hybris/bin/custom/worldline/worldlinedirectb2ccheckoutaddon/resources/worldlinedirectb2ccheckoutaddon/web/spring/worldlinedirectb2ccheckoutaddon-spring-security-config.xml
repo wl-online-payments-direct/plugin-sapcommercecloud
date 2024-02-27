@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/util
+		http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <security:http disable-url-rewriting="true" request-matcher="regex" pattern="\/my-account\/worldline\/worldlineaddressform">
+        <security:session-management session-authentication-strategy-ref="fixation" invalid-session-url="/login" />
+
+        <!-- SSL / AUTHENTICATED pages Organization management pages -->
+        <security:intercept-url pattern="/my-account/worldline/worldlineaddressform" access="hasAnyRole('ROLE_ANONYMOUS','ROLE_CUSTOMERGROUP')" requires-channel="https"/>
+        <security:form-login
+                login-page="/login"
+                authentication-failure-handler-ref="loginAuthenticationFailureHandler"
+                authentication-success-handler-ref="loginGuidAuthenticationSuccessHandler"
+                username-parameter="j_username"
+                password-parameter="j_password"
+                login-processing-url="/j_spring_security_check"
+                authentication-failure-url="/login?login_error=1"
+        />
+        <security:logout logout-url="/logout" success-handler-ref="logoutSuccessHandler"/>
+
+        <security:port-mappings>
+            <security:port-mapping http="#{configurationService.configuration.getProperty('tomcat.http.port')}"
+                                   https="#{configurationService.configuration.getProperty('tomcat.ssl.port')}"/>
+            <security:port-mapping http="80" https="443"/>
+        </security:port-mappings>
+
+        <security:request-cache ref="httpSessionRequestCache"/>
+        <security:access-denied-handler ref="defaultAccessDeniedHandler"/>
+        <security:csrf token-repository-ref="csrfTokenRepository" request-matcher-ref="csrfProtectionMatcher" />
+
+        <security:headers>
+            <security:frame-options disabled="true"/>
+        </security:headers>
+    </security:http>
+
+    <!-- Add to the excludeUrlSet so that the main http element ignores and passes over the matching to the above secuirity:http configuration -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject">
+            <ref bean="excludeUrlSet"/>
+        </property>
+        <property name="targetMethod">
+            <value>addAll</value>
+        </property>
+        <property name="arguments">
+            <util:set>
+                <value>/my-account/worldline/worldlineaddressform</value>
+            </util:set>
+        </property>
+    </bean>
+</beans>

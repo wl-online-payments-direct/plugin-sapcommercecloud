@@ -13,6 +13,8 @@
     <import resource="worldlinedirectcore-spring-service.xml"/>
     <import resource="worldlinedirectcore-spring-converter.xml"/>
     <import resource="worldlinedirectcore-spring-process.xml"/>
+    <import resource="worldlinedirectcore-spring-event.xml"/>
+    <import resource="worldlinedirectcore-spring-email.xml"/>
 
 
     <bean id="worldlineClientFactory" class="com.worldline.direct.factory.impl.WorldlineClientFactoryImpl">
@@ -20,7 +22,7 @@
         <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
     </bean>
 
-    <bean id="communicatorConfiguration" class="com.ingenico.direct.CommunicatorConfiguration">
+    <bean id="communicatorConfiguration" class="com.onlinepayments.CommunicatorConfiguration">
         <property name="authorizationType" value="${worldline.direct.api.authorizationType}"/>
         <property name="connectTimeout" value="${worldline.direct.api.connectTimeout}"/>
         <property name="socketTimeout" value="${worldline.direct.api.socketTimeout}"/>
@@ -28,7 +30,7 @@
         <property name="integrator" value="${worldline.direct.api.integrator}"/>
         <property name="shoppingCartExtension" ref="worldlineShoppingCartExtension"/>
     </bean>
-    <bean id="worldlineShoppingCartExtension" class="com.ingenico.direct.domain.ShoppingCartExtension">
+    <bean id="worldlineShoppingCartExtension" class="com.onlinepayments.domain.ShoppingCartExtension">
         <constructor-arg name="creator" value="${worldline.direct.api.shoppingCartExtension.creator}"/>
         <constructor-arg name="name" value="${worldline.direct.api.shoppingCartExtension.name}"/>
         <constructor-arg name="version" value="${worldline.direct.api.shoppingCartExtension.version}"/>
@@ -41,8 +43,6 @@
         <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
-    <bean id="worldlinePaymentProductUtils" class="com.worldline.direct.util.WorldlinePaymentProductUtils"/>
-
     <!-- facades -->
     <alias name="worldlineUserFacade" alias="worldlineUserFacade"/>
     <bean id="worldlineUserFacade" class="com.worldline.direct.facade.impl.WorldlineUserFacadeImpl">
@@ -52,6 +52,8 @@
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
         <property name="customerAccountService" ref="customerAccountService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
     </bean>
 
     <bean id="worldlineCheckoutFacade" class="com.worldline.direct.facade.impl.WorldlineCheckoutFacadeImpl">
@@ -63,20 +65,32 @@
         <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
         <property name="addressReverseConverter" ref="addressReverseConverter"/>
         <property name="orderConverter" ref="orderConverter"/>
+        <property name="worldlinePlaceOrderConverter" ref="worldlinePlaceOrderConverter" />
         <property name="cartService" ref="cartService"/>
         <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
         <property name="modelService" ref="modelService"/>
         <property name="baseStoreService" ref="baseStoreService"/>
-        <property name="customerAccountService" ref="customerAccountService"/>
         <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
         <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
         <property name="paymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="userService" ref="userService"/>
+        <property name="virtualPaymentModes" ref="virtualPaymentModes"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
     </bean>
 
-    <bean id="worldlineExtendedCheckoutFacade"
-          class="com.worldline.direct.facade.impl.WorldLineExtendedCheckoutFacadeImpl"
-          parent="defaultCheckoutFacade">
-        <property name="guidKeyGenerator" ref="guidKeyGenerator"/>
+    <bean id="worldlineRecurringCheckoutFacade" parent="worldlineCheckoutFacade"
+          class="com.worldline.direct.facade.impl.WorldlineRecurringCheckoutFacadeImpl">
+        <property name="scheduledCartConverter" ref="scheduledCartConverter"/>
+        <property name="worldlineB2BPaymentService" ref="worldlineB2BPaymentServiceImpl"/>
+        <property name="worldlineCartToOrderService" ref="worldlineCartToOrderService"/>
+    </bean>
+
+    <bean id="worldlineCustomerAccountFacade"
+          class="com.worldline.direct.facade.impl.WorldlineCustomerAccountFacadeImpl">
+        <property name="scheduledCartDataConverter" ref="scheduledCartConverter"/>
+        <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
     </bean>
 
     <bean id="worldlineWebhookFacade" class="com.worldline.direct.facade.impl.WorldlineWebhookFacadeImpl">
@@ -101,10 +115,24 @@
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
     </bean>
 
+    <bean id="worldlineAcceleratorCartToOrderJob"
+          class="com.worldline.direct.cronjob.WorldlineAcceleratorCartToOrderJob" parent="abstractJobPerformable">
+        <property name="businessProcessService" ref="businessProcessService"/>
+        <property name="triggerService" ref="triggerService"/>
+        <property name="i18NService" ref="i18NService"/>
+        <property name="worldlineRecurringService" ref="worldlineRecurringService"/>
+    </bean>
+
+
     <!-- strategies -->
     <bean id="worldlinePaymentProductFilterByAvailabilityStrategy"
           class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByAvailabilityStrategy">
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+    </bean>
+
+    <bean id="worldlinePaymentProductFilterByGroupCardsStrategy" class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByGroupCardsStrategy">
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
     </bean>
     <bean id="worldlinePaymentProductFilterByCheckoutStrategy"
           class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByCheckoutStrategy">
@@ -121,6 +149,7 @@
               map-class="java.util.HashMap">
         <entry key="CHECKOUT_TYPE" value-ref="worldlinePaymentProductFilterByCheckoutStrategy"/>
         <entry key="ACTIVE_PAYMENTS" value-ref="worldlinePaymentProductFilterByAvailabilityStrategy"/>
+        <entry key="GROUP_CARDS" value-ref="worldlinePaymentProductFilterByGroupCardsStrategy"/>
     </util:map>
     <bean id="worldlinePaymentProductFilterStrategyFactory"
           class="com.worldline.direct.factory.impl.DefaultWorldlinePaymentProductFilterStrategyFactory">
@@ -132,13 +161,26 @@
           class="com.worldline.direct.evaluate.impl.WorldlineHostedCheckoutPaymentProductsEvaluator"/>
     <bean id="worldlineHostedTokenizationPaymentProductsEvaluator"
           class="com.worldline.direct.evaluate.impl.WorldlineHostedTokenizationPaymentProductsEvaluator"/>
+
+    <bean id="defaultWorldlinePaymentProductEvaluator" abstract="true"
+          class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator"/>
+
     <bean id="worldlineBcmcPaymentProductsEvaluator"
-          class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
+          parent="defaultWorldlinePaymentProductEvaluator">
         <property name="paymentProductId">
             <utils:constant
                     static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_BCC"/>
         </property>
     </bean>
+
+    <bean id="worldlineIntersolvePaymentProductsEvaluator"
+          parent="defaultWorldlinePaymentProductEvaluator">
+        <property name="paymentProductId">
+            <utils:constant
+                    static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE"/>
+        </property>
+    </bean>
+
     <bean id="worldlineApplePayPaymentProductsEvaluator"
           class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
         <property name="paymentProductId">
@@ -155,6 +197,22 @@
     <utils:list id="worldlineHostedTokenizationPaymentProductsEvaluatorList">
         <ref bean="worldlineHostedTokenizationPaymentProductsEvaluator"/>
         <ref bean="worldlineBcmcPaymentProductsEvaluator"/>
+        <ref bean="worldlineIntersolvePaymentProductsEvaluator"/>
+    </utils:list>
+
+    <utils:list id="virtualPaymentModes">
+        <utils:constant
+                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS"/>
+        <utils:constant
+                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP"/>
+        <utils:constant
+                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP"/>
+    </utils:list>
+
+    <utils:list id="worldlineSalePaymentProductList">
+        <utils:constant
+                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE"/>
+
     </utils:list>
 
 </beans>
