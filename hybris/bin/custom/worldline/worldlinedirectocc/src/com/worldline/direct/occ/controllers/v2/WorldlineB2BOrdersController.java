@@ -37,6 +37,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -171,6 +172,7 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
 
         final PlaceOrderData placeOrderData = worldlineCheckoutFacade.prepareOrderPlacementData();
         placeOrderData.setTermsCheck(termsChecked);
+        placeOrderData.setCardDetailsCheck(Boolean.TRUE);
         AbstractOrderData abstractOrderData = extendedCheckoutFacade.placeOrder(placeOrderData);
 
         final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);

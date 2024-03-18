@@ -307,6 +307,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
         final PlaceOrderData placeOrderData = worldlineCheckoutFacade.prepareOrderPlacementData();
         placeOrderData.setTermsCheck(termsChecked);
+        placeOrderData.setCardDetailsCheck(Boolean.TRUE);
         AbstractOrderData abstractOrderData = extendedCheckoutFacade.placeOrder(placeOrderData);
 
         final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);
