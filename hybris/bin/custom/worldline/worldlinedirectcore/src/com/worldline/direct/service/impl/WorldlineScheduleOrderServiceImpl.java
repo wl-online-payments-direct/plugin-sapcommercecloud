@@ -31,6 +31,9 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
     public CartToOrderCronJobModel createOrderFromCartCronJob(CartModel cart, AddressModel deliveryAddress, AddressModel paymentAddress, PaymentInfoModel paymentInfo, List<TriggerModel> triggers) {
         final CartToOrderCronJobModel cartToOrderCronJob = modelService.create(CartToOrderCronJobModel.class);
         cartToOrderCronJob.setCart(cloneCart(cart, deliveryAddress, paymentAddress, paymentInfo));
+        if (cart.getPaymentCost() > 0.0d) {
+            cartToOrderCronJob.getCart().setPaymentCost(cart.getPaymentCost());
+        }
         cartToOrderCronJob.setDeliveryAddress(deliveryAddress);
         cartToOrderCronJob.setPaymentAddress(paymentAddress);
         cartToOrderCronJob.setPaymentInfo(paymentInfo);
