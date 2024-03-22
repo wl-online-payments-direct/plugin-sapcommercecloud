@@ -51,6 +51,9 @@ public class WorldlineHelper {
     @Resource(name = "baseStoreService")
     private BaseStoreService baseStoreService;
 
+    private static final String HOP_URL = "hostedcheckout";
+    private static final String HTP_URL = "hostedtokenization-3ds";
+
     private int getIdealIndex(List<PaymentProduct> availablePaymentMethods) {
         return Iterables.indexOf(availablePaymentMethods, paymentProduct -> PAYMENT_METHOD_IDEAL == paymentProduct.getId());
     }
@@ -88,10 +91,10 @@ public class WorldlineHelper {
         final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
         switch (currentBasestore.getWorldlineCheckoutType()) {
             case HOSTED_CHECKOUT:
-                return String.format(returnURL, uriVars.get("baseSiteId"), "hostedcheckout" , uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
+                return String.format(returnURL, uriVars.get("baseSiteId"), HOP_URL, uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
             case HOSTED_TOKENIZATION:
             default:
-                return String.format(returnURL, uriVars.get("baseSiteId"), "hostedtokenization-3ds" , uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
+                return String.format(returnURL, uriVars.get("baseSiteId"), HTP_URL, uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
         }
     }
 
