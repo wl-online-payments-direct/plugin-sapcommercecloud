@@ -177,6 +177,13 @@
                     <persistence type="property"/>
                     <modifiers read="true" write="true" />
                 </attribute>
+                <attribute
+                        qualifier="retrunUrl"
+                        type="java.lang.String">
+                    <description>Return url in case customer was redirected from plugin to Worldline and needs to come back to storefront</description>
+                    <persistence type="property"/>
+                    <modifiers read="true" write="true" />
+                </attribute>
             </attributes>
         </itemtype>
 

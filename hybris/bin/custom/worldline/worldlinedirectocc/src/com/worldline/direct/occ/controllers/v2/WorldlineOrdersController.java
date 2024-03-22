@@ -69,7 +69,6 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
     private static final String HTP_MAPPING = "hostedTokenizationId,browserData(screenHeight,screenWidth,navigatorJavaEnabled,navigatorJavaScriptEnabled,timezoneOffsetUtcMinutes,colorDepth)";
 
-
     @Resource(name = "dataMapper")
     private DataMapper dataMapper;
 
@@ -359,12 +358,12 @@ public class WorldlineOrdersController extends WorldlineBaseController {
     }
 
     private void storeHOPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType) {
-        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, "worldline.occ.hostedCheckout.returnUrl", orderType);
+        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, orderType);
         sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL.replace("_orderCode_", code));
     }
 
     private void storeHTPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType) {
-        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, "worldline.occ.hostedTokenization.returnUrl", orderType);
+        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, orderType);
         sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL.replace("_orderCode_", code));
     }
 
