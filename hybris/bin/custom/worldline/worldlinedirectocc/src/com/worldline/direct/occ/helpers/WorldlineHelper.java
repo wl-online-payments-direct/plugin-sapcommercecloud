@@ -5,6 +5,7 @@ import com.onlinepayments.domain.DirectoryEntry;
 import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.constants.WorldlinedirectoccWebConstants;
 import com.worldline.direct.enums.OrderType;
+import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
@@ -16,6 +17,9 @@ import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
 import com.worldline.direct.payment.dto.ProductDirectoryWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
+import de.hybris.platform.store.BaseStore;
+import de.hybris.platform.store.BaseStoreModel;
+import de.hybris.platform.store.services.BaseStoreService;
 import de.hybris.platform.util.Config;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import org.apache.commons.collections.CollectionUtils;
@@ -43,6 +47,9 @@ public class WorldlineHelper {
 
     @Resource(name = "worldlinePaymentProductFilterStrategyFactory")
     private WorldlinePaymentProductFilterStrategyFactory worldlinePaymentProductFilterStrategyFactory;
+
+    @Resource(name = "baseStoreService")
+    private BaseStoreService baseStoreService;
 
     private int getIdealIndex(List<PaymentProduct> availablePaymentMethods) {
         return Iterables.indexOf(availablePaymentMethods, paymentProduct -> PAYMENT_METHOD_IDEAL == paymentProduct.getId());
@@ -75,12 +82,17 @@ public class WorldlineHelper {
         final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
         return String.format(returnURL, uriVars.get("baseSiteId"), uriVars.get("userId"), "_orderCode_", request.getParameter("cartId"));
     }
-    public String buildRecurringReturnURL(HttpServletRequest request, String key,OrderType orderType) {
-        final String returnURL = Config.getParameter(key);
+    public String buildRecurringReturnURL(HttpServletRequest request, OrderType orderType) {
+        final BaseStoreModel currentBasestore = baseStoreService.getCurrentBaseStore();
+        final String returnURL = currentBasestore.getRetrunUrl();
         final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-//        return String.format(returnURL, uriVars.get("baseSiteId"), orderType, uriVars.get("userId"), "_orderCode_", request.getParameter("cartId"));
-
-        return String.format(returnURL, uriVars.get("baseSiteId"), uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
+        switch (currentBasestore.getWorldlineCheckoutType()) {
+            case HOSTED_CHECKOUT:
+                return String.format(returnURL, uriVars.get("baseSiteId"), "hostedcheckout" , uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
+            case HOSTED_TOKENIZATION:
+            default:
+                return String.format(returnURL, uriVars.get("baseSiteId"), "hostedtokenization-3ds" , uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
+        }
     }
 
 
