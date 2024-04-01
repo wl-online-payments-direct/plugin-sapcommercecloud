@@ -25,7 +25,7 @@ public class WorldlineSchuduleOrderPopulator implements Populator<CartToOrderCro
         if (source.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
 
             WorldlinePaymentInfoModel worldlinePaymentInfoModel = (WorldlinePaymentInfoModel) source.getPaymentInfo();
-            if (source.getOrders().iterator().next().getWorldlineSurchargeAmount() != 0d) {
+            if (source.getOrders().iterator().next().getWorldlineSurchargeAmount() != null) {
                 target.setSurcharge(priceDataFactory.create(PriceDataType.BUY, new BigDecimal(source.getOrders().iterator().next().getWorldlineSurchargeAmount()), source.getOrders().iterator().next().getCurrency()));
             }
             target.setWorldlinePaymentInfo(worldlinePaymentInfoConverter.convert(worldlinePaymentInfoModel));
