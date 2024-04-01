@@ -252,7 +252,7 @@
 				<ea:section name="hmc.worldline.worldlineConfiguration">
 					<ea:attribute qualifier="worldlineConfiguration"/>
 					<ea:attribute qualifier="worldlineCheckoutType"/>
-					<ea:attribute qualifier="retrunUrl"/>
+					<ea:attribute qualifier="returnUrl"/>
 					<ea:attribute qualifier="merchant"/>
 				</ea:section>
 			</ea:tab>
