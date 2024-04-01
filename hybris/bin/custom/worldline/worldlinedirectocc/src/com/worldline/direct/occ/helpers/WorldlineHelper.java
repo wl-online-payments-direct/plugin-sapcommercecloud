@@ -87,7 +87,7 @@ public class WorldlineHelper {
     }
     public String buildRecurringReturnURL(HttpServletRequest request, OrderType orderType) {
         final BaseStoreModel currentBasestore = baseStoreService.getCurrentBaseStore();
-        final String returnURL = currentBasestore.getRetrunUrl();
+        final String returnURL = currentBasestore.getReturnUrl();
         final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
         switch (currentBasestore.getWorldlineCheckoutType()) {
             case HOSTED_CHECKOUT:
