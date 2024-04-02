@@ -1,12 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Project: Groupe Seb E-Commerce
-  ~ Copyright 2022 Groupe Seb
-  ~  Client: Groupe Seb
-  ~
-  ~ Created by mbettioui
-  ~ Updated 4/12/22, 10:10 PM
-  -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
