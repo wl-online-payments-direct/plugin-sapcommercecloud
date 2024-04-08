@@ -85,11 +85,11 @@ public class WorldlineHelper {
         final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
         return String.format(returnURL, uriVars.get("baseSiteId"), uriVars.get("userId"), "_orderCode_", request.getParameter("cartId"));
     }
-    public String buildRecurringReturnURL(HttpServletRequest request, OrderType orderType) {
+    public String buildRecurringReturnURL(HttpServletRequest request, OrderType orderType, WorldlineCheckoutTypesEnum checkoutType) {
         final BaseStoreModel currentBasestore = baseStoreService.getCurrentBaseStore();
         final String returnURL = currentBasestore.getReturnUrl();
         final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        switch (currentBasestore.getWorldlineCheckoutType()) {
+        switch (checkoutType) {
             case HOSTED_CHECKOUT:
                 return String.format(returnURL, uriVars.get("baseSiteId"), HOP_URL, uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
             case HOSTED_TOKENIZATION:
