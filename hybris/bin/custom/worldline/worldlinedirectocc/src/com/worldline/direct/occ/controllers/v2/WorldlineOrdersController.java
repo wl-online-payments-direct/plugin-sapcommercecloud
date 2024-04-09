@@ -16,11 +16,9 @@ import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.payment.dto.BrowserDataWsDTO;
 import com.worldline.direct.payment.dto.HostedCheckoutResponseWsDTO;
-import com.worldline.direct.payment.dto.RecurringDataWSDTO;
 import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.b2bwebservicescommons.dto.order.ReplenishmentOrderWsDTO;
-import de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO;
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.OrderFacade;
 import de.hybris.platform.commercefacades.order.data.*;
@@ -57,7 +55,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.worldline.direct.occ.controllers.v2.WorldlineB2BOrdersController.CART_CHECKOUT_TERM_UNCHECKED;
-import static com.worldline.direct.occ.controllers.v2.WorldlineB2BOrdersController.OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM;
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 import static de.hybris.platform.util.localization.Localization.getLocalizedString;
 
@@ -362,16 +359,6 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         final String returnURL = worldlineHelper.buildRecurringReturnURL(request, orderType, checkoutType);
         sessionService.setAttribute(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT.equals(checkoutType) ? HOP_SESSION_RETURN_PARAM : HTP_SESSION_RETURN_PARAM, returnURL.replace("_orderCode_", code));
     }
-
-//    private void storeHOPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType, WorldlineCheckoutTypesEnum checkoutType) {
-//        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, orderType, checkoutType);
-//        sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL.replace("_orderCode_", code));
-//    }
-//
-//    private void storeHTPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType) {
-//        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, orderType);
-//        sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL.replace("_orderCode_", code));
-//    }
 
     public DataMapper getDataMapper() {
         return dataMapper;
