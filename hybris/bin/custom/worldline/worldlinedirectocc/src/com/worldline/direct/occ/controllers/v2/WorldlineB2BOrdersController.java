@@ -37,7 +37,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -294,16 +293,6 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
             throw new InvalidCartException(e);
         }
     }
-
-//    private void storeHOPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType) {
-//        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, orderType);
-//        sessionService.setAttribute("hostedCheckoutReturnUrl", returnURL.replace("_orderCode_", code));
-//    }
-//
-//    private void storeHTPReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType) {
-//        final String returnURL = worldlineHelper.buildRecurringReturnURL(request, orderType);
-//        sessionService.setAttribute("hostedTokenizationReturnUrl", returnURL.replace("_orderCode_", code));
-//    }
 
     private void storeReturnUrlInSession(String code, HttpServletRequest request, OrderType orderType, WorldlineCheckoutTypesEnum checkoutType) {
         final String returnURL = worldlineHelper.buildRecurringReturnURL(request, orderType, checkoutType);
