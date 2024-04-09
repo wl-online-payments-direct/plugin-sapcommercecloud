@@ -61,7 +61,7 @@ public class WorldlineHostedController extends WorldlineBaseController {
     private CartService cartService;
 
 
-    @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+    //@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @PostMapping(value = "/{orderCode}/hostedTokenization/return")
     @ResponseBody
     @Operation(operationId = "Handle return for hostedTokenization", summary = "handle return for hostedTokenization.")
@@ -105,7 +105,7 @@ public class WorldlineHostedController extends WorldlineBaseController {
     }
 
 
-    @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+    //@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
     @PostMapping(value = "/{orderCode}/hostedCheckout/return")
     @ResponseBody
     @Operation(operationId = "Handle return for HostedCheckout", summary = "Handle return for HostedCheckout.",

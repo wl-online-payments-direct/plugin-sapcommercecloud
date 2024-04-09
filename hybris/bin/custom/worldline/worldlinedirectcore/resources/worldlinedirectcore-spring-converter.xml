@@ -162,6 +162,7 @@
 
     <bean name="worldlineSchuduleOrderPopulator" class="com.worldline.direct.populator.WorldlineSchuduleOrderPopulator">
         <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="priceDataFactory" ref="priceDataFactory"/>
     </bean>
 
     <bean parent="modifyPopulatorList">
