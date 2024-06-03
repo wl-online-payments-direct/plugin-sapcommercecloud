@@ -37,9 +37,7 @@ public class WorldlineHostedTokenizationRedirectPopulator implements Populator<A
 
     private RedirectPaymentMethodSpecificInput getRedirectPaymentMethodSpecificInput(AbstractOrderModel orderModel) {
         RedirectPaymentMethodSpecificInput input = new RedirectPaymentMethodSpecificInput();
-        input.setPaymentProductId(PAYMENT_METHOD_IDEAL);
-        input.setPaymentProduct809SpecificInput(new RedirectPaymentProduct809SpecificInput());
-        input.getPaymentProduct809SpecificInput().setIssuerId(((WorldlinePaymentInfoModel) orderModel.getPaymentInfo()).getPaymentProductDirectoryId());
+//        input.setPaymentProductId(PAYMENT_METHOD_IDEAL);
         input.setRedirectionData(new RedirectionData());
         input.getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
         return input;

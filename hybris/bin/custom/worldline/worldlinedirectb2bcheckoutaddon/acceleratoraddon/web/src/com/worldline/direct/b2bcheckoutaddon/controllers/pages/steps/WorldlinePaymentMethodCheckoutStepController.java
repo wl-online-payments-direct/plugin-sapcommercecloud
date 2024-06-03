@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_APPLEPAY;
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 
@@ -102,11 +101,6 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
         return PAYMENT_METHOD_APPLEPAY;
     }
 
-    @ModelAttribute("idealID")
-    int getIdealId() {
-        return PAYMENT_METHOD_IDEAL;
-    }
-
     @Override
     @RequestMapping(value = WorldlineWebConstants.URL.Checkout.Payment.select, method = GET)
     @RequireHardLogIn
@@ -120,7 +114,6 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
         List<PaymentProduct> filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS).get();
 
         model.addAttribute("paymentProducts", filteredPaymentProducts);
-        model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));
         model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
         model.addAttribute("isCardPaymentMethodExisting", worldlineCheckoutFacade.checkForCardPaymentMethods(filteredPaymentProducts));
 
@@ -158,7 +151,6 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
             worldlineCheckoutFacade.fillWorldlinePaymentInfoData(worldlinePaymentInfoData,
                     worldlinePaymentDetailsForm.getSavedCardCode(),
                     worldlinePaymentDetailsForm.getPaymentProductId(),
-                    worldlinePaymentDetailsForm.getIssuerId(),
                     worldlinePaymentDetailsForm.getHostedTokenizationId());
         } catch (WorldlineNonValidPaymentProductException e) {
             GlobalMessages.addErrorMessage(model, "checkout.error.paymentproduct.invalid");

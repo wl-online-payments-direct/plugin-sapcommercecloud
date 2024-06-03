@@ -43,11 +43,6 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
         redirectionData.setReturnUrl(getHostedCheckoutReturnUrl());
         redirectPaymentMethodSpecificInput.setRedirectionData(redirectionData);
         switch (paymentInfo.getId()) {
-            case WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL:
-                RedirectPaymentProduct809SpecificInput iDealSpecificInfo = new RedirectPaymentProduct809SpecificInput();
-                iDealSpecificInfo.setIssuerId(paymentInfo.getPaymentProductDirectoryId());
-                redirectPaymentMethodSpecificInput.setPaymentProduct809SpecificInput(iDealSpecificInfo);
-                break;
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_PAYPAL:
                 RedirectPaymentProduct840SpecificInput redirectPaymentProduct840SpecificInput = new RedirectPaymentProduct840SpecificInput();
                 redirectPaymentProduct840SpecificInput.setAddressSelectionAtPayPal(Boolean.FALSE);

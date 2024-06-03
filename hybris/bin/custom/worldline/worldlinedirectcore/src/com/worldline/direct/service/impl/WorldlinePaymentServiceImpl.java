@@ -6,7 +6,6 @@ import com.onlinepayments.domain.*;
 import com.onlinepayments.merchant.MerchantClient;
 import com.onlinepayments.merchant.products.GetPaymentProductParams;
 import com.onlinepayments.merchant.products.GetPaymentProductsParams;
-import com.onlinepayments.merchant.products.GetProductDirectoryParams;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.factory.WorldlineClientFactory;
@@ -111,39 +110,6 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             //TODO Throw Logical Exception
             return null;
         }
-    }
-
-    @Override
-    @Cacheable(value = "productDirectory", key = "T(com.worldline.direct.cache.WorldlineCacheKeyGenerator).generateKey(true,'directory',#id,#currency,#countryCode)")
-    public ProductDirectory getProductDirectory(Integer id, String currency, String countryCode) {
-        validateParameterNotNull(id, "id cannot be null");
-        validateParameterNotNull(currency, "currency cannot be null");
-        validateParameterNotNull(countryCode, "countryCode cannot be null");
-
-        try {
-
-            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
-
-            final GetProductDirectoryParams params = new GetProductDirectoryParams();
-            params.setCurrencyCode(currency);
-            params.setCountryCode(countryCode);
-
-            final ProductDirectory productDirectory = merchant.products().getProductDirectory(id, params);
-
-            WorldlineLogUtils.logAction(LOGGER, "getProductDirectory", params, productDirectory);
-
-            return productDirectory;
-        } catch (Exception e) {
-            LOGGER.error("[ WORLDLINE ] Errors during getting productDirectory ", e);
-            //TODO Throw Logical Exception
-            return null;
-        }
-    }
-
-    @Override
-    @Cacheable(value = "productDirectory", key = "T(com.worldline.direct.cache.WorldlineCacheKeyGenerator).generateKey(true,'entry',#id,#currency,#countryCode)")
-    public List<DirectoryEntry> getProductDirectoryEntries(Integer id, String currency, String countryCode) {
-        return getProductDirectory(id, currency, countryCode).getEntries();
     }
 
     @Override

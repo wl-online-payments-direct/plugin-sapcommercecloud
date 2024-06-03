@@ -82,9 +82,9 @@
         <property name="dtoClass" value="com.worldline.direct.payment.dto.PaymentProductWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="id,paymentMethod,displayHints,productDirectory"/>
-                <entry key="DEFAULT" value="id,paymentMethod,displayHints(DEFAULT),productDirectory(DEFAULT)"/>
-                <entry key="FULL" value="id,paymentMethod,displayHints(FULL),productDirectory(FULL)"/>
+                <entry key="BASIC" value="id,paymentMethod,displayHints"/>
+                <entry key="DEFAULT" value="id,paymentMethod,displayHints(DEFAULT)"/>
+                <entry key="FULL" value="id,paymentMethod,displayHints(FULL)"/>
             </map>
         </property>
     </bean>
@@ -123,27 +123,27 @@
         </property>
     </bean>
 
-    <bean parent="fieldSetLevelMapping" id="directoryEntryFieldSetLevelMapping">
-        <property name="dtoClass" value="com.worldline.direct.payment.dto.DirectoryEntryWsDTO"/>
-        <property name="levelMapping">
-            <map>
-                <entry key="BASIC" value="issuerId,issuerList,entries"/>
-                <entry key="DEFAULT" value="BASIC"/>
-                <entry key="FULL" value="DEFAULT"/>
-            </map>
-        </property>
-    </bean>
+<!--    <bean parent="fieldSetLevelMapping" id="directoryEntryFieldSetLevelMapping">-->
+<!--        <property name="dtoClass" value="com.worldline.direct.payment.dto.DirectoryEntryWsDTO"/>-->
+<!--        <property name="levelMapping">-->
+<!--            <map>-->
+<!--                <entry key="BASIC" value="issuerId,issuerList,entries"/>-->
+<!--                <entry key="DEFAULT" value="BASIC"/>-->
+<!--                <entry key="FULL" value="DEFAULT"/>-->
+<!--            </map>-->
+<!--        </property>-->
+<!--    </bean>-->
 
-    <bean parent="fieldSetLevelMapping" id="productDirectoryFieldSetLevelMapping">
-        <property name="dtoClass" value="com.worldline.direct.payment.dto.ProductDirectoryWsDTO"/>
-        <property name="levelMapping">
-            <map>
-                <entry key="BASIC" value="entries"/>
-                <entry key="DEFAULT" value="entries(DEFAULT)"/>
-                <entry key="FULL" value="entries(FULL)"/>
-            </map>
-        </property>
-    </bean>
+<!--    <bean parent="fieldSetLevelMapping" id="productDirectoryFieldSetLevelMapping">-->
+<!--        <property name="dtoClass" value="com.worldline.direct.payment.dto.ProductDirectoryWsDTO"/>-->
+<!--        <property name="levelMapping">-->
+<!--            <map>-->
+<!--                <entry key="BASIC" value="entries"/>-->
+<!--                <entry key="DEFAULT" value="entries(DEFAULT)"/>-->
+<!--                <entry key="FULL" value="entries(FULL)"/>-->
+<!--            </map>-->
+<!--        </property>-->
+<!--    </bean>-->
 
     <bean parent="fieldSetLevelMapping" id="hostedCheckoutResponseFieldSetLevelMapping">
         <property name="dtoClass" value="com.worldline.direct.payment.dto.HostedCheckoutResponseWsDTO"/>

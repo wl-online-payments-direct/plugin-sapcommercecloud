@@ -29,7 +29,6 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         worldlinePaymentInfoData.setCode(worldlinePaymentInfoModel.getCode());
         worldlinePaymentInfoData.setId(worldlinePaymentInfoModel.getId());
         worldlinePaymentInfoData.setPaymentMethod(worldlinePaymentInfoModel.getPaymentMethod());
-        worldlinePaymentInfoData.setPaymentProductDirectoryId(worldlinePaymentInfoModel.getPaymentProductDirectoryId());
         worldlinePaymentInfoData.setHostedTokenizationId(worldlinePaymentInfoModel.getHostedTokenizationId());
         worldlinePaymentInfoData.setWorldlineCheckoutType(worldlinePaymentInfoModel.getWorldlineCheckoutType());
         worldlinePaymentInfoData.setAlias(formattedAlias(worldlinePaymentInfoModel.getAlias()));

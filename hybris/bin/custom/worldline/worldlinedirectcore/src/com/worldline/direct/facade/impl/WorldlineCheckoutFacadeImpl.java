@@ -165,26 +165,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     }
 
     @Override
-    public List<DirectoryEntry> getIdealIssuers(List<PaymentProduct> paymentProducts) {
-        final boolean isIdealPresent = paymentProducts.stream()
-                .anyMatch(paymentProduct -> WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL == paymentProduct.getId());
-
-        if (isIdealPresent) {
-            final CartData cartData = checkoutFacade.getCheckoutCart();
-            try {
-                return worldlinePaymentService.getProductDirectoryEntries(WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL, cartData.getTotalPrice().getCurrencyIso(), WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL_COUNTRY);
-            } catch (ApiException e) {
-                LOGGER.info("[ WORLDLINE ] No ProductDirectory found! reason : {}", e.getResponseBody());
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    @Override
     public void fillWorldlinePaymentInfoData(final WorldlinePaymentInfoData worldlinePaymentInfoData,
                                              String savedPaymentCode,
                                              Integer paymentId,
-                                             String paymentDirId,
                                              String hostedTokenizationId) throws WorldlineNonValidPaymentProductException {
 
         final PaymentProduct paymentProduct = getPaymentMethodById(paymentId);
@@ -195,14 +178,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             if (paymentId == PAYMENT_METHOD_HTP) {
                 worldlinePaymentInfoData.setHostedTokenizationId(hostedTokenizationId);
                 worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
-                worldlinePaymentInfoData.setPaymentProductDirectoryId(StringUtils.EMPTY);
-            } else if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL) {
-                worldlinePaymentInfoData.setPaymentProductDirectoryId(paymentDirId);
-                worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
-                worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
             } else {
                 worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
-                worldlinePaymentInfoData.setPaymentProductDirectoryId(StringUtils.EMPTY);
                 worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT);
             }
         } else {
@@ -578,7 +555,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             paymentInfo.setSaved(false);
         }
             paymentInfo.setPaymentMethod(worldlinePaymentInfoData.getPaymentMethod());
-            paymentInfo.setPaymentProductDirectoryId(worldlinePaymentInfoData.getPaymentProductDirectoryId());
             paymentInfo.setHostedTokenizationId(worldlinePaymentInfoData.getHostedTokenizationId());
             paymentInfo.setWorldlineCheckoutType(worldlinePaymentInfoData.getWorldlineCheckoutType());
             AddressModel billingAddress = convertToAddressModel(worldlinePaymentInfoData.getBillingAddress());

@@ -290,7 +290,6 @@
 					<as:field name="paymentMethod" operator="contains" selected="true"/>
 					<as:field name="worldlineCheckoutType" operator="equals" selected="true"/>
 					<as:field name="creationTime" operator="greaterOrEquals"/>
-					<as:field name="paymentProductDirectoryId" operator="contains"/>
 					<as:field name="hostedTokenizationId" operator="contains"/>
 					<as:field name="returnMAC" operator="contains"/>
 					<as:field name="token" operator="contains"/>
@@ -307,7 +306,6 @@
 					<ea:section name="hmc.worldline.worldlinePaymentInfo">
 						<ea:attribute qualifier="id"/>
 						<ea:attribute qualifier="paymentMethod"/>
-						<ea:attribute qualifier="paymentProductDirectoryId"/>
 						<ea:attribute qualifier="hostedTokenizationId"/>
 						<ea:attribute qualifier="returnMAC"/>
 						<ea:attribute qualifier="type"/>

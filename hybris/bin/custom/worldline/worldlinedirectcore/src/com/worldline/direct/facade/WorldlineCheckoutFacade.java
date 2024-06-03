@@ -31,11 +31,9 @@ public interface WorldlineCheckoutFacade {
 
     CreateHostedTokenizationResponse createHostedTokenization();
 
-    List<DirectoryEntry> getIdealIssuers(List<PaymentProduct> paymentProducts);
-
     void handlePaymentInfo(WorldlinePaymentInfoData paymentInfoData);
 
-    void fillWorldlinePaymentInfoData(WorldlinePaymentInfoData paymentInfoData, String savedPaymentCode, Integer paymentId, String paymentDirId, String hostedTokenizationId) throws WorldlineNonValidPaymentProductException;
+    void fillWorldlinePaymentInfoData(WorldlinePaymentInfoData paymentInfoData, String savedPaymentCode, Integer paymentId, String hostedTokenizationId) throws WorldlineNonValidPaymentProductException;
 
     void authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData hostedTokenizationId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 

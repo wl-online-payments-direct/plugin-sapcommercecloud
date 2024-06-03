@@ -21,10 +21,6 @@ public interface WorldlinePaymentService {
 
     PaymentProduct getPaymentProduct(Integer id, BigDecimal amount, String currency, String countryCode, String shopperLocale);
 
-    ProductDirectory getProductDirectory(Integer id, String currency, String countryCode);
-
-    List<DirectoryEntry> getProductDirectoryEntries(Integer id, String currency, String countryCode);
-
     CreateHostedTokenizationResponse createHostedTokenization(String shopperLocale, List<String> savedTokens, Boolean isAnonymousUser);
 
     GetHostedTokenizationResponse getHostedTokenization(String hostedTokenizationId);
