@@ -6,6 +6,8 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="paymentproduct"
+           tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/paymentproducts" %>
 
 <%@ attribute name="paymentInfo" required="false" type="com.worldline.direct.order.data.WorldlinePaymentInfoData" %>
 
