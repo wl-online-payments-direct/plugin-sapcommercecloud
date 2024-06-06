@@ -59,7 +59,7 @@
         <property name="dtoClass" value="com.worldline.direct.payment.dto.WorldlinePaymentInfoWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="paymentProductId,paymentMethod,issuerId,cardholderName,worldlineCheckoutType,mandateDetail(BASIC)"/>
+                <entry key="BASIC" value="paymentProductId,paymentMethod,cardholderName,worldlineCheckoutType,mandateDetail(BASIC)"/>
                 <entry key="DEFAULT" value="BASIC,billingAddress(DEFAULT),mandateDetail(DEFAULT)"/>
                 <entry key="FULL" value="BASIC,billingAddress(FULL),mandateDetail(FULL)"/>
             </map>
@@ -122,28 +122,6 @@
             </map>
         </property>
     </bean>
-
-<!--    <bean parent="fieldSetLevelMapping" id="directoryEntryFieldSetLevelMapping">-->
-<!--        <property name="dtoClass" value="com.worldline.direct.payment.dto.DirectoryEntryWsDTO"/>-->
-<!--        <property name="levelMapping">-->
-<!--            <map>-->
-<!--                <entry key="BASIC" value="issuerId,issuerList,entries"/>-->
-<!--                <entry key="DEFAULT" value="BASIC"/>-->
-<!--                <entry key="FULL" value="DEFAULT"/>-->
-<!--            </map>-->
-<!--        </property>-->
-<!--    </bean>-->
-
-<!--    <bean parent="fieldSetLevelMapping" id="productDirectoryFieldSetLevelMapping">-->
-<!--        <property name="dtoClass" value="com.worldline.direct.payment.dto.ProductDirectoryWsDTO"/>-->
-<!--        <property name="levelMapping">-->
-<!--            <map>-->
-<!--                <entry key="BASIC" value="entries"/>-->
-<!--                <entry key="DEFAULT" value="entries(DEFAULT)"/>-->
-<!--                <entry key="FULL" value="entries(FULL)"/>-->
-<!--            </map>-->
-<!--        </property>-->
-<!--    </bean>-->
 
     <bean parent="fieldSetLevelMapping" id="hostedCheckoutResponseFieldSetLevelMapping">
         <property name="dtoClass" value="com.worldline.direct.payment.dto.HostedCheckoutResponseWsDTO"/>
@@ -235,7 +213,6 @@
         <property name="fieldMapping">
             <map>
                 <entry key="id" value="paymentProductId"/>
-                <entry key="paymentProductDirectoryId" value="issuerId"/>
             </map>
         </property>
     </bean>

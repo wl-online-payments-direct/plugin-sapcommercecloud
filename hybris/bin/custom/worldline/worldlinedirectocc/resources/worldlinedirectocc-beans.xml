@@ -48,7 +48,6 @@
         <property name="id" type="String"/>
         <property name="paymentMethod" type="String"/>
         <property name="displayHints" type="com.worldline.direct.payment.dto.PaymentProductDisplayHintsWsDTO"/>
-<!--        <property name="productDirectory" type="com.worldline.direct.payment.dto.ProductDirectoryWsDTO"/>-->
     </bean>
 
 
@@ -138,28 +137,6 @@
         </property>
     </bean>
 
-
-
-<!--    <bean class="com.worldline.direct.payment.dto.DirectoryEntryWsDTO">-->
-<!--        <description>Directory Entry</description>-->
-<!--        <hints>-->
-<!--            <hint name="wsRelated"/>-->
-<!--            <hint name="alias">DirectoryEntry</hint>-->
-<!--        </hints>-->
-<!--        <property name="issuerId" type="String"/>-->
-<!--        <property name="issuerList" type="String"/>-->
-<!--        <property name="entries" type="String"/>-->
-<!--    </bean>-->
-
-<!--    <bean class="com.worldline.direct.payment.dto.ProductDirectoryWsDTO">-->
-<!--        <description>Product Directory</description>-->
-<!--        <hints>-->
-<!--            <hint name="wsRelated"/>-->
-<!--            <hint name="alias">ProductDirectory</hint>-->
-<!--        </hints>-->
-<!--        <property name="entries" type="java.util.List&lt;com.worldline.direct.payment.dto.DirectoryEntryWsDTO>"/>-->
-<!--    </bean>-->
-
     <bean class="com.worldline.direct.payment.dto.RedirectDataWsDTO">
         <description>Redirect Data</description>
         <hints>
@@ -208,7 +185,6 @@
         </hints>
         <property name="paymentProductId" type="Integer"/>
         <property name="paymentMethod" type="String"/>
-        <property name="issuerId" type="String"/>
         <property name="hostedTokenizationId" type="String"/>
         <property name="savedCardCode" type="String"/>
         <property name="useDeliveryAddress" type="boolean"/>

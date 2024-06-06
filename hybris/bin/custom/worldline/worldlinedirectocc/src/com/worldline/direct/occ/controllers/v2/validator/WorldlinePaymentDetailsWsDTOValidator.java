@@ -30,9 +30,7 @@ public class WorldlinePaymentDetailsWsDTOValidator implements Validator {
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "paymentProductId", "field.required", new Object[]{"paymentProductId"});
         if (wsDTO.getPaymentProductId() != null) {
-            if (WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL == wsDTO.getPaymentProductId()) {
-                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "issuerId", "field.required", new Object[]{"issuerId"});
-            } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP == wsDTO.getPaymentProductId()) {
+            if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP == wsDTO.getPaymentProductId()) {
                 ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedTokenizationId", "field.required", new Object[]{"hostedTokenizationId"});
             }
         }
