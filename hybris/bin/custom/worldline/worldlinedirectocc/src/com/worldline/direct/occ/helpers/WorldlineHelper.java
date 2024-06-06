@@ -1,5 +1,6 @@
 package com.worldline.direct.occ.helpers;
 
+import com.google.common.collect.Iterables;
 import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.enums.OrderType;
 import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
@@ -23,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
+
 @Component("worldlineHelper")
 public class WorldlineHelper {
     @Resource(name = "dataMapper")
@@ -42,6 +45,10 @@ public class WorldlineHelper {
 
     private static final String HOP_URL = "hostedcheckout";
     private static final String HTP_URL = "hostedtokenization-3ds";
+
+    private int getIdealIndex(List<PaymentProduct> availablePaymentMethods) {
+        return Iterables.indexOf(availablePaymentMethods, paymentProduct -> PAYMENT_METHOD_IDEAL == paymentProduct.getId());
+    }
 
     public void fillSavedPaymentDetails(HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO, String fields) {
         final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS).get();

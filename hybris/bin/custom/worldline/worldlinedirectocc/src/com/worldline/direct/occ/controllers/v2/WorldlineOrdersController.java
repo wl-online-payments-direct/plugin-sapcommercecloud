@@ -134,10 +134,6 @@ public class WorldlineOrdersController extends WorldlineBaseController {
             throw new CartException("Invalid Worldline HostedTokenizationId.", CartException.INVALID);
         }
 
-//        else if (StringUtils.isBlank(cartData.getWorldlinePaymentInfo().getHostedTokenizationId()) && StringUtils.isBlank(cartData.getWorldlinePaymentInfo().getPaymentProductDirectoryId())) {
-//            throw new CartException("Invalid Worldline HostedTokenizationId.", CartException.INVALID);
-//        }
-
         validate(browserDataWsDTO, "browserDataWsDTO", browserDataWsDTOValidator);
 
         final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);

@@ -117,7 +117,6 @@ public class WorldlineCartsController extends WorldlineBaseController {
         productsResponse.setPaymentProducts(availablePaymentMethods);
         final PaymentProductListWsDTO paymentProductListWsDTO = getDataMapper()
                 .map(productsResponse, PaymentProductListWsDTO.class, fields);
-
         return paymentProductListWsDTO;
     }
 

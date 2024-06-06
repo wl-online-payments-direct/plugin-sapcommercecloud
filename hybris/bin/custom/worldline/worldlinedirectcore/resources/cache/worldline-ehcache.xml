@@ -5,13 +5,13 @@
 
     <diskStore path="java.io.tmpdir/custom_cache"/>
 
-    <cache name="productDirectory"
-           maxElementsInMemory="100"
-           eternal="false"
-           overflowToDisk="false"
-           diskPersistent="false"
-           timeToIdleSeconds="100"
-           timeToLiveSeconds="300"
-           memoryStoreEvictionPolicy="LRU"/>
+<!--    <cache name="productDirectory"-->
+<!--           maxElementsInMemory="100"-->
+<!--           eternal="false"-->
+<!--           overflowToDisk="false"-->
+<!--           diskPersistent="false"-->
+<!--           timeToIdleSeconds="100"-->
+<!--           timeToLiveSeconds="300"-->
+<!--           memoryStoreEvictionPolicy="LRU"/>-->
 
 </ehcache>
