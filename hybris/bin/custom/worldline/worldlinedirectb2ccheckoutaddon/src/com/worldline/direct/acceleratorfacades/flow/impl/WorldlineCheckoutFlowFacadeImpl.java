@@ -8,8 +8,6 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.function.Predicate;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
-
 public class WorldlineCheckoutFlowFacadeImpl extends DefaultCheckoutFlowFacade {
     private static final String WORLDLINE_PROVIDER = "WORLDLINE";
     private CommercePaymentProviderStrategy commercePaymentProviderStrategy;
@@ -29,9 +27,7 @@ public class WorldlineCheckoutFlowFacadeImpl extends DefaultCheckoutFlowFacade {
         return worldlinePaymentInfoData -> {
             switch (worldlinePaymentInfoData.getWorldlineCheckoutType()) {
                 case HOSTED_TOKENIZATION:
-                    return (PAYMENT_METHOD_IDEAL == worldlinePaymentInfoData.getId() && StringUtils.isNotEmpty(worldlinePaymentInfoData.getPaymentProductDirectoryId()))
-                                    || StringUtils.isNotBlank(worldlinePaymentInfoData.getHostedTokenizationId());
-
+                    return StringUtils.isNotBlank(worldlinePaymentInfoData.getHostedTokenizationId());
                 case HOSTED_CHECKOUT:
                 default:
                     return true;

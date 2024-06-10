@@ -10,8 +10,6 @@ public class WorldlinePaymentDetailsForm {
 
     private String savedCardCode;
 
-    private String issuerId;
-
     private boolean useDeliveryAddress;
 
     private boolean newBillingAddress;
@@ -24,14 +22,6 @@ public class WorldlinePaymentDetailsForm {
 
     public void setHostedTokenizationId(String hostedTokenizationId) {
         this.hostedTokenizationId = hostedTokenizationId;
-    }
-
-    public String getIssuerId() {
-        return issuerId;
-    }
-
-    public void setIssuerId(String issuerId) {
-        this.issuerId = issuerId;
     }
 
     public boolean isUseDeliveryAddress() {

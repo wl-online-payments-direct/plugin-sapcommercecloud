@@ -217,10 +217,6 @@
                     <modifiers read="true" write="true" search="true"/>
                     <persistence type="property"/>
                 </attribute>
-                <attribute qualifier="paymentProductDirectoryId" type="java.lang.String">
-                    <modifiers read="true" write="true" search="true"/>
-                    <persistence type="property"/>
-                </attribute>
                 <attribute qualifier="hostedTokenizationId" type="java.lang.String">
                     <modifiers read="true" write="true" search="true"/>
                     <persistence type="property"/>

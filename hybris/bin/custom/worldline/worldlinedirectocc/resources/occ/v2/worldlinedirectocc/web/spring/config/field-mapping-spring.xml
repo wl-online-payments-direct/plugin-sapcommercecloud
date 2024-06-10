@@ -59,7 +59,7 @@
         <property name="dtoClass" value="com.worldline.direct.payment.dto.WorldlinePaymentInfoWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="paymentProductId,paymentMethod,issuerId,cardholderName,worldlineCheckoutType,mandateDetail(BASIC)"/>
+                <entry key="BASIC" value="paymentProductId,paymentMethod,cardholderName,worldlineCheckoutType,mandateDetail(BASIC)"/>
                 <entry key="DEFAULT" value="BASIC,billingAddress(DEFAULT),mandateDetail(DEFAULT)"/>
                 <entry key="FULL" value="BASIC,billingAddress(FULL),mandateDetail(FULL)"/>
             </map>
@@ -82,9 +82,9 @@
         <property name="dtoClass" value="com.worldline.direct.payment.dto.PaymentProductWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="id,paymentMethod,displayHints,productDirectory"/>
-                <entry key="DEFAULT" value="id,paymentMethod,displayHints(DEFAULT),productDirectory(DEFAULT)"/>
-                <entry key="FULL" value="id,paymentMethod,displayHints(FULL),productDirectory(FULL)"/>
+                <entry key="BASIC" value="id,paymentMethod,displayHints"/>
+                <entry key="DEFAULT" value="id,paymentMethod,displayHints(DEFAULT)"/>
+                <entry key="FULL" value="id,paymentMethod,displayHints(FULL)"/>
             </map>
         </property>
     </bean>
@@ -119,28 +119,6 @@
                 <entry key="BASIC" value="cardBrand,token,paymentMethodImageUrl,alias"/>
                 <entry key="DEFAULT" value="cardBrand,token,paymentMethodImageUrl,alias"/>
                 <entry key="FULL" value="cardBrand,token,paymentMethodImageUrl,alias"/>
-            </map>
-        </property>
-    </bean>
-
-    <bean parent="fieldSetLevelMapping" id="directoryEntryFieldSetLevelMapping">
-        <property name="dtoClass" value="com.worldline.direct.payment.dto.DirectoryEntryWsDTO"/>
-        <property name="levelMapping">
-            <map>
-                <entry key="BASIC" value="issuerId,issuerList,entries"/>
-                <entry key="DEFAULT" value="BASIC"/>
-                <entry key="FULL" value="DEFAULT"/>
-            </map>
-        </property>
-    </bean>
-
-    <bean parent="fieldSetLevelMapping" id="productDirectoryFieldSetLevelMapping">
-        <property name="dtoClass" value="com.worldline.direct.payment.dto.ProductDirectoryWsDTO"/>
-        <property name="levelMapping">
-            <map>
-                <entry key="BASIC" value="entries"/>
-                <entry key="DEFAULT" value="entries(DEFAULT)"/>
-                <entry key="FULL" value="entries(FULL)"/>
             </map>
         </property>
     </bean>
@@ -235,7 +213,6 @@
         <property name="fieldMapping">
             <map>
                 <entry key="id" value="paymentProductId"/>
-                <entry key="paymentProductDirectoryId" value="issuerId"/>
             </map>
         </property>
     </bean>
