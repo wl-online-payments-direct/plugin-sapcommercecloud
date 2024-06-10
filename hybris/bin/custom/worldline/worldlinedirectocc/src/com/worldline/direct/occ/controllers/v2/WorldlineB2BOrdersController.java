@@ -125,7 +125,7 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
             throw new CartException("No Worldline Payment Info found.", CartException.INVALID);
         } else if (!WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType())) {
             throw new CartException("Invalid Worldline Checkout Type.", CartException.INVALID);
-        } else if (StringUtils.isBlank(cartData.getWorldlinePaymentInfo().getHostedTokenizationId()) && StringUtils.isBlank(cartData.getWorldlinePaymentInfo().getPaymentProductDirectoryId())) {
+        } else if (StringUtils.isBlank(cartData.getWorldlinePaymentInfo().getHostedTokenizationId())) {
             throw new CartException("Invalid Worldline HostedTokenizationId.", CartException.INVALID);
         }
 

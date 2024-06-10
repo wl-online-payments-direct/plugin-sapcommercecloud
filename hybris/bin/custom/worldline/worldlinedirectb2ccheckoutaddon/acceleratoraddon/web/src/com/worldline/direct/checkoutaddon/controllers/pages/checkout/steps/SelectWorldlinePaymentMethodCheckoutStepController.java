@@ -45,7 +45,6 @@ import javax.validation.Valid;
 import java.util.List;
 
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_APPLEPAY;
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
@@ -100,8 +99,6 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         model.addAttribute("paymentProducts", filteredPaymentProducts);
         model.addAttribute("isCardPaymentMethodExisting", worldlineCheckoutFacade.checkForCardPaymentMethods(filteredPaymentProducts));
 
-        model.addAttribute("idealID", PAYMENT_METHOD_IDEAL);
-        model.addAttribute("idealIssuers", worldlineCheckoutFacade.getIdealIssuers(availablePaymentMethods));
         final CartData cartData = getCheckoutFacade().getCheckoutCart();
 
         if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutFacade.getWorldlineCheckoutType())) {
@@ -135,7 +132,6 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
             worldlineCheckoutFacade.fillWorldlinePaymentInfoData(worldlinePaymentInfoData,
                     worldlinePaymentDetailsForm.getSavedCardCode(),
                     worldlinePaymentDetailsForm.getPaymentProductId(),
-                    worldlinePaymentDetailsForm.getIssuerId(),
                     worldlinePaymentDetailsForm.getHostedTokenizationId());
         } catch (WorldlineNonValidPaymentProductException e) {
             GlobalMessages.addErrorMessage(model, "checkout.error.paymentproduct.invalid");

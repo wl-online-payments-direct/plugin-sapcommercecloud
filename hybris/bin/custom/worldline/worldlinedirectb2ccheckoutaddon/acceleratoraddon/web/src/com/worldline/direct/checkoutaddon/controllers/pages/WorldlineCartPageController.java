@@ -201,7 +201,6 @@ public class WorldlineCartPageController extends AbstractCartPageController {
    @ResponseBody
    @RequestMapping(value = "/savePlaceOrderData", method = RequestMethod.POST)
    public ResponseEntity<String> savePlaceOrderData(
-         //@RequestBody() final WorldlineReplenishmentForm worldlineReplenishmentForm,
          @RequestParam("replenishmentStartDate") final String replenishmentStartDate,
          @RequestParam("replenishmentEndDate") final String replenishmentEndDate,
          @RequestParam("replenishmentOrder") final boolean replenishmentOrder,

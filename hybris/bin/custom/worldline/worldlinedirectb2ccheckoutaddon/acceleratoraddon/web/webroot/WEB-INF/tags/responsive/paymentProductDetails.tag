@@ -8,6 +8,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="paymentproduct"
            tagdir="/WEB-INF/tags/addons/worldlinedirectb2ccheckoutaddon/responsive/paymentproducts" %>
+
 <%@ attribute name="paymentInfo" required="false" type="com.worldline.direct.order.data.WorldlinePaymentInfoData" %>
 
 <c:set var="isSelectedStoredCard" value="${not empty paymentInfo.savedPayment}" />
@@ -42,9 +43,6 @@
                 </c:if>
                 ${paymentProduct.displayHints.label}
             </span>
-                <c:if test="${idealID eq paymentProduct.id}">
-                    <paymentproduct:idealDetail idealIssuers="${idealIssuers}"/>
-                </c:if>
             </div>
 
         </div>

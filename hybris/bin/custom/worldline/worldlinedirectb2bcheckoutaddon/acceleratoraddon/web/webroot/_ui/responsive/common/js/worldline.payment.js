@@ -4,7 +4,6 @@ const PAYMENT_METHOD_SELECTORS = {
     PAYMENT_METHOD_SUBMIT_BUTTON: '.submit_worldlineSelectPaymentForm',
     CARD_ROW_TABLE_ROW: '.card-row',
     PAYMENT_PRODUCT_ROW: '.js-worldline_payment_product',
-    PAYMENT_PRODUCT_IDEAL_ROW: '.worldline_payment_product_detail',
     PAYMENT_METHOD_CONTAINER: '.worldline_payment_products',
     SAVED_CARD_CODE_PARAM: 'savedCardCode',
     TOKENIZATION_FORM_TABLE_ROW: '.js-hostedTokenization',
@@ -85,22 +84,6 @@ ACC.worldlinePaymentPost = {
         $(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_ROW).click(function () {
             $(this).find('input:radio').prop('checked', true).change();
         })
-    },
-
-    bindSelectWorldlinePaymentProduct: function () {
-        var $paymentProduct = $(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_ROW + ' .payment_product');
-        $paymentProduct.on('change', function () {
-            var paymentProduct = $(this);
-            if (paymentProduct.is(':checked')) {
-                $(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_IDEAL_ROW).addClass('display-none');
-                paymentProduct.siblings(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_IDEAL_ROW).removeClass('display-none');
-            }
-        });
-        $paymentProduct.each(function () {
-            if ($(this).is(':checked')) {
-                $(this).siblings(PAYMENT_METHOD_SELECTORS.PAYMENT_PRODUCT_IDEAL_ROW).removeClass('display-none');
-            }
-        });
     },
 
     bindSubmitWorldlinePlaceOrderForm: function () {
@@ -213,7 +196,6 @@ ACC.worldlinePaymentPost = {
 
 $(document).ready(function () {
     ACC.worldlinePaymentPost.bindSubmitWorldlineSelectPaymentForm();
-    ACC.worldlinePaymentPost.bindSelectWorldlinePaymentProduct();
     ACC.worldlinePaymentPost.bindSubmitWorldlinePlaceOrderForm();
     ACC.worldlinePaymentPost.bindWorldlineSavedPayments();
     ACC.worldlinePaymentPost.checkApplePayAvailability();

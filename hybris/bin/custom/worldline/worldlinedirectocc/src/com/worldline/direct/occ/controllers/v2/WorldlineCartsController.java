@@ -117,9 +117,6 @@ public class WorldlineCartsController extends WorldlineBaseController {
         productsResponse.setPaymentProducts(availablePaymentMethods);
         final PaymentProductListWsDTO paymentProductListWsDTO = getDataMapper()
                 .map(productsResponse, PaymentProductListWsDTO.class, fields);
-
-        worldlineHelper.fillIdealIssuers(paymentProductListWsDTO, availablePaymentMethods, fields);
-
         return paymentProductListWsDTO;
     }
 
@@ -157,7 +154,6 @@ public class WorldlineCartsController extends WorldlineBaseController {
         worldlineCheckoutFacade.fillWorldlinePaymentInfoData(worldlinePaymentInfoData,
                 worldlinePaymentDetailsWsDTO.getSavedCardCode(),
                 worldlinePaymentDetailsWsDTO.getPaymentProductId(),
-                worldlinePaymentDetailsWsDTO.getIssuerId(),
                 worldlinePaymentDetailsWsDTO.getHostedTokenizationId());
 
         final AddressData addressData;

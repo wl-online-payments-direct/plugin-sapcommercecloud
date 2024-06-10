@@ -11,7 +11,6 @@
         <property name="saved" type="boolean"/>
         <property name="recurring" type="boolean"/>
         <property name="recurringToken" type="com.worldline.direct.order.data.WorldlineRecurringTokenData"/>
-        <property name="paymentProductDirectoryId" type="String"/>
         <property name="hostedTokenizationId" type="String"/>
         <property name="worldlineCheckoutType" type="com.worldline.direct.enums.WorldlineCheckoutTypesEnum"/>
         <property name="token" type="String"/>
