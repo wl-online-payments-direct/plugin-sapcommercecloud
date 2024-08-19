@@ -54,6 +54,7 @@ README
 **/hybris/config/orbeon
 **/hybris/config/solr/
 **/hybris/config/backup/
+**/hybris/config/licence
 
 # Filename patterns to ignore
 Generated*.java
