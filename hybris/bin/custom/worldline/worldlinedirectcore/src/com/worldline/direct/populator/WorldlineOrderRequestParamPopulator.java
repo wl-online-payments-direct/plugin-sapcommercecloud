@@ -1,6 +1,7 @@
 package com.worldline.direct.populator;
 
 import com.onlinepayments.domain.*;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
@@ -18,8 +19,8 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
     private WorldlineAmountUtils worldlineAmountUtils;
-
     private WorldlineConfigurationService worldlineConfigurationService;
+
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null!");
@@ -64,6 +65,8 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
             shipping.setShippingCost(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(),abstractOrderModel.getCurrency().getIsocode()));
         }
         shipping.setAddressIndicator(BooleanUtils.isTrue(deliveryAddress.getShippingAddress()) ? SAME_AS_BILLING : NEW);
+        shipping.setShippingCost(getShippingCostsForOrder(abstractOrderModel));
+        shipping.setShippingCostTax(WorldlinedirectcoreConstants.DEFAULT_SHIPPING_TAX);
         return shipping;
     }
 
@@ -87,6 +90,10 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         amountOfMoney.setCurrencyCode(currencyCode);
 
         return amountOfMoney;
+    }
+
+    private long getShippingCostsForOrder(AbstractOrderModel order) {
+        return worldlineAmountUtils.createAmount(order.getDeliveryCost(), order.getCurrency().getIsocode());
     }
 
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {

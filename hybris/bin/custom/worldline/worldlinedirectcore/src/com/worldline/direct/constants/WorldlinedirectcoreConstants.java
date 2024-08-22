@@ -37,6 +37,8 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final String WORLDLINE_EVENT_PAYMENT = "worldline_payment_received";
     public static final String WORLDLINE_EVENT_REFUND = "worldline_refund_received";
 
+    public static final long DEFAULT_SHIPPING_TAX = 0L;
+
 
     public enum PAYMENT_METHOD_TYPE {
         CARD("card"),
