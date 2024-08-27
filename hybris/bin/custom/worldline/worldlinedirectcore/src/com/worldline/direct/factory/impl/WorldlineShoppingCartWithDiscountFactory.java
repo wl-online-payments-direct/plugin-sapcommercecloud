@@ -4,14 +4,11 @@ import com.onlinepayments.domain.AmountOfMoney;
 import com.onlinepayments.domain.LineItem;
 import com.onlinepayments.domain.OrderLineDetails;
 import com.onlinepayments.domain.ShoppingCart;
-import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.factory.WorldlineShoppingCartFactory;
 import com.worldline.direct.populator.WorldlineOrderRequestParamPopulator;
 import com.worldline.direct.util.WorldlineAmountUtils;
-import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
-import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.math.BigDecimal;
