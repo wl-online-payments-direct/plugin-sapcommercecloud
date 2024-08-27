@@ -19,7 +19,6 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
     private WorldlineAmountUtils worldlineAmountUtils;
-    private WorldlineConfigurationService worldlineConfigurationService;
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, Order order) throws ConversionException {
@@ -98,9 +97,5 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
 
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
-    }
-
-    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
-        this.worldlineConfigurationService = worldlineConfigurationService;
     }
 }
