@@ -25,3 +25,4 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]       ; 
                                  ; 840                ; Paypal                ; Paypal                ; true  ; WorldlinePaymentInfo
                                  ; 771                ; SEPA Direct Debit     ; SEPA Direct Debit     ; true  ; WorldlinePaymentInfo
                                  ; 863                ; WeChat Pay            ; WeChat Pay            ; true  ; WorldlinePaymentInfo
+                                 ; 5408               ; Bank Transfer         ; Bank Transfer         ; true  ; WorldlinePaymentInfo
