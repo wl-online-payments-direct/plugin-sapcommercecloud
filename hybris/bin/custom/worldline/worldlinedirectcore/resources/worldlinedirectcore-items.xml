@@ -127,6 +127,12 @@
                     <modifiers read="true" write="true"/>
                     <persistence type="property"/>
                 </attribute>
+                <attribute qualifier="hostedCheckoutVariant" type="java.lang.String">
+                    <description>Template name for Hosted Checkout form.</description>
+                    <defaultvalue>"SimplifiedCustomPaymentPage"</defaultvalue>
+                    <modifiers read="true" write="true"/>
+                    <persistence type="property"/>
+                </attribute>
                 <attribute qualifier="firstRecurringPayment" type="boolean">
                     <persistence type="property" />
                     <modifiers optional="false" />
