@@ -26,3 +26,4 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]       ; 
                                  ; 771                ; SEPA Direct Debit     ; SEPA Direct Debit     ; true  ; WorldlinePaymentInfo
                                  ; 863                ; WeChat Pay            ; WeChat Pay            ; true  ; WorldlinePaymentInfo
                                  ; 5407               ; Twint                 ; Twint                 ; true  ; WorldlinePaymentInfo
+                                 ; 3203               ; PostFinance Pay       ; PostFinancePay        ; true  ; WorldlinePaymentInfo
