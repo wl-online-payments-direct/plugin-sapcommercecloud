@@ -3,10 +3,12 @@ package com.worldline.direct.populator.hostedtokenization;
 import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.converters.Populator;
+import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
@@ -31,6 +33,10 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentService worldlinePaymentService;
 
+    public static final String CARTES_BANCAIRES_SINGLE_SALE = "single-amount";
+    public static final String CARTES_BANCAIRES_SINGLE_AUTH = "payment-upon-shipment";
+    public static final String CARTES_BANCAIRES_RECURRING = "other-recurring-payments";
+
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreatePaymentRequest createPaymentRequest) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "abstractOrderModel cannot be null!");
@@ -41,7 +47,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(paymentInfo.getPaymentMethod())) {
             if (paymentInfo.getWorldlineRecurringToken() != null) {
-                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, RECCURANCE, abstractOrderModel));
+                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(Boolean.TRUE, paymentInfo, RECCURANCE, abstractOrderModel));
                 createPaymentRequest.getCardPaymentMethodSpecificInput().setToken(paymentInfo.getWorldlineRecurringToken().getToken());
 
                 createPaymentRequest.getCardPaymentMethodSpecificInput().setPaymentProductId(paymentInfo.getId());
@@ -49,7 +55,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
                 final GetHostedTokenizationResponse hostedTokenization = worldlinePaymentService.getHostedTokenization(paymentInfo.getHostedTokenizationId());
                 validateParameterNotNull(hostedTokenization, "tokenizationResponse cannot be null");
 
-                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(paymentInfo.isRecurringToken(), paymentInfo.isRecurringToken() ? RECCURANCE_FIRST : StringUtils.EMPTY, abstractOrderModel));
+                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(paymentInfo.isRecurringToken(), paymentInfo, paymentInfo.isRecurringToken() ? RECCURANCE_FIRST : StringUtils.EMPTY, abstractOrderModel));
                 createPaymentRequest.getCardPaymentMethodSpecificInput()
                       .setToken(hostedTokenization.getToken().getId());
                 createPaymentRequest.getCardPaymentMethodSpecificInput()
@@ -60,12 +66,13 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
     }
 
-    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring, String recurrance, AbstractOrderModel abstractOrderModel) {
+    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring, WorldlinePaymentInfoModel paymentInfo, String recurrance, AbstractOrderModel abstractOrderModel) {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
-
+        boolean isSale = false;
         CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
         if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
             cardPaymentMethodSpecificInput.setAuthorizationMode(currentWorldlineConfiguration.getDefaultOperationCode().getCode());
+            isSale = OperationCodesEnum.SALE.equals(currentWorldlineConfiguration.getDefaultOperationCode());
         }
         cardPaymentMethodSpecificInput.setTokenize(false);
         cardPaymentMethodSpecificInput.setSkipAuthentication(false);
@@ -101,8 +108,43 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
                 cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
             }
         }
+        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS == paymentInfo.getId()) {
+            PaymentProduct130SpecificInput paymentProduct130SpecificInput = getPaymentProduct130SpecificInput(abstractOrderModel, paymentInfo, isSale);
+            cardPaymentMethodSpecificInput.setPaymentProduct130SpecificInput(paymentProduct130SpecificInput);
+        }
 
         return cardPaymentMethodSpecificInput;
+    }
+
+    /**
+     * Generates a PaymentProduct130SpecificInput for Cartes Bancaires. Provides numberOfItems which will represtent the
+     * number of items in the AbstractOrder but is capped to 99, and populates the 3DSecure use case.
+     * @param abstractOrderModel Used to find the total items being ordered.
+     * @param paymentInfo Used to find whether this is a recurring payment.
+     * @param isSale Used to populate 3DSecure use case if not a recurring payment.
+     *
+     * @return A PaymentProduct130SpecificInput for the provided AbstractOrderModel based on whether the order is recurring
+     * and whether the current payment mode is SALE or AUTH.
+     */
+    private static PaymentProduct130SpecificInput getPaymentProduct130SpecificInput(AbstractOrderModel abstractOrderModel, WorldlinePaymentInfoModel paymentInfo, boolean isSale) {
+        PaymentProduct130SpecificInput paymentProduct130SpecificInput = new PaymentProduct130SpecificInput();
+        PaymentProduct130SpecificThreeDSecure threeDSecure = new PaymentProduct130SpecificThreeDSecure();
+        int numberOfItems = 0;
+        for (AbstractOrderEntryModel entry : abstractOrderModel.getEntries()) {
+            numberOfItems += entry.getQuantity();
+        }
+        threeDSecure.setNumberOfItems(Math.min(numberOfItems, 99));
+
+        if (paymentInfo.isRecurringToken()) {
+            threeDSecure.setUsecase(CARTES_BANCAIRES_RECURRING);
+        } else if (isSale) {
+            threeDSecure.setUsecase(CARTES_BANCAIRES_SINGLE_SALE);
+        } else {
+            threeDSecure.setUsecase(CARTES_BANCAIRES_SINGLE_AUTH);
+        }
+        paymentProduct130SpecificInput.setThreeDSecure(threeDSecure);
+
+        return paymentProduct130SpecificInput;
     }
 
     private String getHostedTokenizationReturnUrl() {
