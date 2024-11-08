@@ -28,3 +28,4 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 5407               ; Twint                         ; Twint                         ; true  ; WorldlinePaymentInfo
                                  ; 130                ; Cartes Bancaires Frictionless ; Cartes Bancaires Frictionless ; true  ; WorldlinePaymentInfo
                                  ; 3203               ; PostFinance Pay               ; PostFinancePay                ; true  ; WorldlinePaymentInfo
+                                 ; 5408               ; Bank Transfer                 ; Bank Transfer                 ; true  ; WorldlinePaymentInfo

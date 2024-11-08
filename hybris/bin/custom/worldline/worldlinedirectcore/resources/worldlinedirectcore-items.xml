@@ -161,6 +161,12 @@
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                     <description>Apply Surcharge for all transactions.</description>
                 </attribute>
+                <attribute qualifier="instantBankTransfers" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Only allow instant bank transfers.</description>
+                </attribute>
             </attributes>
         </itemtype>
 

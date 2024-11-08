@@ -48,6 +48,11 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 redirectPaymentProduct840SpecificInput.setAddressSelectionAtPayPal(Boolean.FALSE);
                 redirectPaymentMethodSpecificInput.setPaymentProduct840SpecificInput(redirectPaymentProduct840SpecificInput);
                 break;
+            case WorldlinedirectcoreConstants.PAYMENT_METHOD_BANK_TRANSFER:
+                Boolean instantPaymentOnly = worldlineConfigurationService.getCurrentWorldlineConfiguration().isInstantBankTransfers();
+                RedirectPaymentProduct5408SpecificInput redirectPaymentProduct5408SpecificInput = new RedirectPaymentProduct5408SpecificInput();
+                redirectPaymentProduct5408SpecificInput.setInstantPaymentOnly(instantPaymentOnly);
+                redirectPaymentMethodSpecificInput.setPaymentProduct5408SpecificInput(redirectPaymentProduct5408SpecificInput);
             default:
                 // No Specific parameter needed for this paymentMethod
                 break;

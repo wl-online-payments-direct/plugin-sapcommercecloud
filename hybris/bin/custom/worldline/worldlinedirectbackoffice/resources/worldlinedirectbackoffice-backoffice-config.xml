@@ -100,6 +100,9 @@
 					<ea:attribute qualifier="submitOrderPromotion"/>
 					<ea:attribute qualifier="applySurcharge"/>
 				</ea:section>
+				<ea:section name="hmc.worldline.worldlineBankTransferConfig">
+					<ea:attribute qualifier="instantBankTransfers"/>
+				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
 	</context>
