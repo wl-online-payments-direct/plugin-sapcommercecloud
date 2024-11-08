@@ -30,6 +30,7 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final int PAYMENT_METHOD_JCB = 125;
     public static final int PAYMENT_METHOD_VISA = 1;
     public static final int PAYMENT_METHOD_TWINT = 5407;
+    public static final int PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS = 130;
 
     public static final String PAYMENT_METHOD_IDEAL_COUNTRY = "NL";
 
