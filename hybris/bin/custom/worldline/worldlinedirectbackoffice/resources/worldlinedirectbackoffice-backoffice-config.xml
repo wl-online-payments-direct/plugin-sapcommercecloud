@@ -81,6 +81,9 @@
 					<ea:attribute qualifier="askConsumerConsent"/>
 					<ea:attribute qualifier="variant"/>
 				</ea:section>
+				<ea:section name="hmc.worldline.worldlineHostecCheckoutConfig">
+					<ea:attribute qualifier="hostedCheckoutVariant"/>
+				</ea:section>
 				<ea:section name="hmc.worldline.settings.3ds">
 					<ea:attribute qualifier="challengeRequired"/>
 					<ea:attribute qualifier="exemptionRequest"/>

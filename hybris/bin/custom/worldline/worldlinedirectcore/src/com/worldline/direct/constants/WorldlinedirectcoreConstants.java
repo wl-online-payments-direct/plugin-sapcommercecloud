@@ -30,13 +30,16 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final int PAYMENT_METHOD_MASTERCARD = 3;
     public static final int PAYMENT_METHOD_JCB = 125;
     public static final int PAYMENT_METHOD_VISA = 1;
-
+    public static final int PAYMENT_METHOD_TWINT = 5407;
+    public static final int PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS = 130;
 
     public static final String PAYMENT_METHOD_IDEAL_COUNTRY = "NL";
 
     public static final String PAYMENT_PROVIDER = "WORLDLINE";
     public static final String WORLDLINE_EVENT_PAYMENT = "worldline_payment_received";
     public static final String WORLDLINE_EVENT_REFUND = "worldline_refund_received";
+
+    public static final long DEFAULT_SHIPPING_TAX = 0L;
 
 
     public enum PAYMENT_METHOD_TYPE {

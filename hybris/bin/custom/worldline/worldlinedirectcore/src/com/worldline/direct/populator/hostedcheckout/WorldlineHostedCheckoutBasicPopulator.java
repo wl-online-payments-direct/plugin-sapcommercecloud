@@ -49,7 +49,6 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         if (!paymentInfo.isRecurringToken()) {
             hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
         }
-
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS == paymentInfo.getId()) {
             hostedCheckoutSpecificInput.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInputForHostedCheckout());
             hostedCheckoutSpecificInput.setPaymentProductFilters(getPaymentProductFiltersForHostedCheckout());
@@ -59,7 +58,9 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         if (worldlineConfiguration.getSessionTimout() != null) {
             hostedCheckoutSpecificInput.setSessionTimeout(worldlineConfiguration.getSessionTimout());
         }
-
+        if (StringUtils.isNotBlank(worldlineConfiguration.getHostedCheckoutVariant())) {
+            hostedCheckoutSpecificInput.setVariant(worldlineConfiguration.getHostedCheckoutVariant());
+        }
         return hostedCheckoutSpecificInput;
     }
 

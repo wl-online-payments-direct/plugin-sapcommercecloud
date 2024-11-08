@@ -5,11 +5,10 @@ import com.onlinepayments.domain.LineItem;
 import com.onlinepayments.domain.OrderLineDetails;
 import com.onlinepayments.domain.ShoppingCart;
 import com.worldline.direct.factory.WorldlineShoppingCartFactory;
+import com.worldline.direct.populator.WorldlineOrderRequestParamPopulator;
 import com.worldline.direct.util.WorldlineAmountUtils;
-import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
-import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.math.BigDecimal;
@@ -38,9 +37,7 @@ public class WorldlineShoppingCartWithoutDiscountFactory implements WorldlineSho
             item.setOrderLineDetails(createOrderLineDetails(orderEntry, currencyISOCode));
             lineItems.add(item);
         }
-        if (!WorldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel)abstractOrderModel.getPaymentInfo()))) {
-            lineItems.add(setShippingAsProduct(abstractOrderModel, currencyISOCode));
-        }
+
         cart.setItems(lineItems);
 
         return cart;
@@ -59,6 +56,15 @@ public class WorldlineShoppingCartWithoutDiscountFactory implements WorldlineSho
         return orderLineDetails;
     }
 
+    /**
+     * Generates a Worldline LineItem representing delivery costs for an AbstractOrder.
+     *
+     * @param abstractOrderModel
+     * @param currencyISOCode
+     * @return
+     * @see WorldlineOrderRequestParamPopulator
+     * @deprecated Delivery costs are now sent as a separate field rather than a fake line item so this method is no longer used.
+     */
     private LineItem setShippingAsProduct(AbstractOrderModel abstractOrderModel, String currencyISOCode) {
         LineItem shipping = new LineItem();
         AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
