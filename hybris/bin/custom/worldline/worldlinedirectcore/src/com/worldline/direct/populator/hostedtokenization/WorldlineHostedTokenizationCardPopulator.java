@@ -54,8 +54,8 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
             } else {
                 final GetHostedTokenizationResponse hostedTokenization = worldlinePaymentService.getHostedTokenization(paymentInfo.getHostedTokenizationId());
                 validateParameterNotNull(hostedTokenization, "tokenizationResponse cannot be null");
-
-                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(paymentInfo.isRecurringToken(), paymentInfo, paymentInfo.isRecurringToken() ? RECCURANCE_FIRST : StringUtils.EMPTY, abstractOrderModel));
+                validateParameterNotNull(hostedTokenization.getToken(), "Token cannot be null");
+                createPaymentRequest.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInput(paymentInfo.isRecurringToken(), paymentInfo, paymentInfo.isRecurringToken() ? RECCURANCE_FIRST : StringUtils.EMPTY, abstractOrderModel, hostedTokenization));
                 createPaymentRequest.getCardPaymentMethodSpecificInput()
                       .setToken(hostedTokenization.getToken().getId());
                 createPaymentRequest.getCardPaymentMethodSpecificInput()
@@ -66,14 +66,25 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
     }
 
-    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring, WorldlinePaymentInfoModel paymentInfo, String recurrance, AbstractOrderModel abstractOrderModel) {
+    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring, WorldlinePaymentInfoModel paymentInfo, String recurrance, AbstractOrderModel abstractOrderModel, GetHostedTokenizationResponse hostedTokenization) {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = getCardPaymentMethodSpecificInput(isRecurring, paymentInfo, recurrance, abstractOrderModel);
         boolean isSale = false;
-        CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
         if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
             cardPaymentMethodSpecificInput.setAuthorizationMode(currentWorldlineConfiguration.getDefaultOperationCode().getCode());
             isSale = OperationCodesEnum.SALE.equals(currentWorldlineConfiguration.getDefaultOperationCode());
         }
+
+        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS == hostedTokenization.getToken().getPaymentProductId()) {
+            PaymentProduct130SpecificInput paymentProduct130SpecificInput = getPaymentProduct130SpecificInput(abstractOrderModel, paymentInfo, isSale);
+            cardPaymentMethodSpecificInput.setPaymentProduct130SpecificInput(paymentProduct130SpecificInput);
+        }
+        return cardPaymentMethodSpecificInput;
+    }
+
+    private CardPaymentMethodSpecificInput getCardPaymentMethodSpecificInput(Boolean isRecurring, WorldlinePaymentInfoModel paymentInfo, String recurrance, AbstractOrderModel abstractOrderModel) {
+        final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
         cardPaymentMethodSpecificInput.setTokenize(false);
         cardPaymentMethodSpecificInput.setSkipAuthentication(false);
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
@@ -107,10 +118,6 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
                 cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(recurrance);
                 cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
             }
-        }
-        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS == paymentInfo.getId()) {
-            PaymentProduct130SpecificInput paymentProduct130SpecificInput = getPaymentProduct130SpecificInput(abstractOrderModel, paymentInfo, isSale);
-            cardPaymentMethodSpecificInput.setPaymentProduct130SpecificInput(paymentProduct130SpecificInput);
         }
 
         return cardPaymentMethodSpecificInput;
