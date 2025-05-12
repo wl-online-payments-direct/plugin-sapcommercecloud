@@ -208,21 +208,14 @@
 
     <bean name="worldlineShoppingCartFactoriesConfiguration"
           class="com.worldline.direct.factory.impl.WorldlineShoppingCartFactoriesConfiguration">
-        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="factoriesConfiguration" ref="shoppingCartfactoriesConfiguration"/>
     </bean>
     <util:map id="shoppingCartfactoriesConfiguration" key-type="java.lang.String"
               value-type="com.worldline.direct.factory.WorldlineShoppingCartFactory" map-class="java.util.HashMap">
-        <entry key="INCLUDE_DISCOUNT" value-ref="shoppingCartWithDiscountFactory"/>
-        <entry key="EXCLUDE_DISCOUNT" value-ref="shoppingCartWithoutDiscountFactory"/>
+        <entry key="DEFAULT" value-ref="defaultShoppingCartFactory"/>
     </util:map>
-    <bean id="shoppingCartWithDiscountFactory"
-          class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithDiscountFactory">
-        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
-    </bean>
 
-    <bean id="shoppingCartWithoutDiscountFactory"
-          class="com.worldline.direct.factory.impl.WorldlineShoppingCartWithoutDiscountFactory">
+    <bean id="defaultShoppingCartFactory" class="com.worldline.direct.factory.impl.DefaultWorldlineShoppingCartFactory">
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
     </bean>
 
