@@ -2,10 +2,10 @@ package com.worldline.direct.populator;
 
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
-import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;
+import de.hybris.platform.core.model.c2l.CurrencyModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
@@ -27,8 +27,8 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         order.setAmountOfMoney(getAmoutOfMoney(abstractOrderModel));
         order.setShipping(getShipping(abstractOrderModel));
         order.setReferences(getReferences(abstractOrderModel));
-        if (BooleanUtils.isTrue(abstractOrderModel.getStore().getWorldlineConfiguration().isApplySurcharge()))
-        {
+        order.setDiscount(getOrderLevelDiscount(abstractOrderModel));
+        if (BooleanUtils.isTrue(abstractOrderModel.getStore().getWorldlineConfiguration().isApplySurcharge())) {
             order.withSurchargeSpecificInput(new SurchargeSpecificInput()).getSurchargeSpecificInput().setMode("on-behalf-of");
         }
     }
@@ -59,9 +59,8 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         address.setName(personalName);
         shipping.setAddress(address);
         shipping.setEmailAddress(deliveryAddress.getEmail());
-        if (abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel && WorldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo())))
-        {
-            shipping.setShippingCost(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(),abstractOrderModel.getCurrency().getIsocode()));
+        if (abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel && WorldlinePaymentProductUtils.isPaymentByKlarna(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()))) {
+            shipping.setShippingCost(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(), abstractOrderModel.getCurrency().getIsocode()));
         }
         shipping.setAddressIndicator(BooleanUtils.isTrue(deliveryAddress.getShippingAddress()) ? SAME_AS_BILLING : NEW);
         shipping.setShippingCost(getShippingCostsForOrder(abstractOrderModel));
@@ -97,5 +96,16 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
 
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
+    }
+
+    private Discount getOrderLevelDiscount(AbstractOrderModel order) {
+        Discount discount = new Discount();
+        CurrencyModel currency = order.getCurrency();
+
+        if (currency == null) {
+            throw new UnsupportedOperationException("Cannot calculate discount on Order with no Currency assigned.");
+        }
+        discount.setAmount(worldlineAmountUtils.createAmount(order.getTotalDiscounts(), currency.getIsocode()));
+        return discount;
     }
 }
