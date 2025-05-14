@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class WorldlineShoppingCartWithDiscountFactory implements WorldlineShoppingCartFactory {
 
     private static final String ENTRY_PRICE = "entryPrice";

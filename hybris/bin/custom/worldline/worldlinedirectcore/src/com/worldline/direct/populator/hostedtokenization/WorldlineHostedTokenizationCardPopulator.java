@@ -124,7 +124,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
     }
 
     /**
-     * Generates a PaymentProduct130SpecificInput for Cartes Bancaires. Provides numberOfItems which will represtent the
+     * Generates a PaymentProduct130SpecificInput for Cartes Bancaires. Provides numberOfItems which will represent the
      * number of items in the AbstractOrder but is capped to 99, and populates the 3DSecure use case.
      * @param abstractOrderModel Used to find the total items being ordered.
      * @param paymentInfo Used to find whether this is a recurring payment.
