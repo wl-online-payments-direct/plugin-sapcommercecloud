@@ -518,5 +518,21 @@
             </attributes>
         </itemtype>
 
+        <itemtype code="Language" autocreate="false" generate="false">
+            <description>Extending Language to support specific Worldline scenarios.</description>
+            <attributes>
+                <attribute qualifier="localeCode" type="java.lang.String">
+                    <description>
+                        Will be sent as the locale to Hosted Checkout / Tokenization requests so that Worldline
+                        can display these in the correct languages, allowing for distinctions such as of fr_fr (French
+                        spoken in France) vs fr_be (French spoken in Belgium). If not provided, Language.isoCode
+                        will be used instead.
+                    </description>
+                    <persistence type="property"/>
+                    <modifiers optional="true" />
+                </attribute>
+            </attributes>
+        </itemtype>
+
     </itemtypes>
 </items>
