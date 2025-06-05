@@ -140,6 +140,12 @@
 						<y:value>label</y:value>
 					</y:parameter>
 				</y:action>
+				<y:action action-id="com.worldline.direct.backoffice.action.featurerequest" property="currentObject">
+					<y:parameter>
+						<y:name>actionName</y:name>
+						<y:value>label</y:value>
+					</y:parameter>
+				</y:action>
 			</y:group>
 		</y:actions>
 	</context>
@@ -729,4 +735,31 @@
 	</context>
 
 	<!-- WorldlineRecurringToken BO appearance END -->
+
+	<!-- Custom Wizards -->
+	<context component="create-wizard" type="WorldlineFeatureRequestWizard" merge-by="type">
+		<wz:flow id="featureRequestWizardFlow" title="worldline.direct.backoffice.featurerequestwizard.title">
+			<wz:prepare id="featureRequestFormPrepare">
+				<wz:initialize property="featureRequestFormBean" type="com.worldline.direct.dto.FeatureRequestFormBean"/>
+			</wz:prepare>
+			<wz:handler handlerBean="featureRequestWizardDoneHandler" handlerId="featureRequestWizardDoneHandler">
+				<wz:additionalParams/>
+			</wz:handler>
+			<wz:step id="composeStep" label="worldline.direct.backoffice.featurerequestwizard.steplabel" sublabel="worldline.direct.backoffice.featurerequestwizard.sublabel">
+				<wz:content id="composeStepContent">
+					<wz:property-list root="featureRequestFormBean">
+						<wz:property qualifier="companyName" type="java.lang.String" editor="com.hybris.cockpitng.editor.defaulttext" />
+						<wz:property qualifier="request" type="java.lang.String" editor="com.hybris.cockpitng.editor.defaulttext" />
+					</wz:property-list>
+				</wz:content>
+				<wz:navigation id="composeStepNavigation">
+					<wz:cancel/>
+					<wz:custom visible="!#empty(featureRequestFormBean.companyName) and !#empty(featureRequestFormBean.request)" handler="worldlineFeatureRequestWizardFlowActionHandler" label="Submit" />
+				</wz:navigation>
+			</wz:step>
+		</wz:flow>
+	</context>
+
+
+	<!-- Custom Wizards END -->
 </config>
