@@ -31,3 +31,4 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 5408               ; Bank Transfer                 ; Bank Transfer                 ; true  ; WorldlinePaymentInfo
                                  ; 5405               ; Alipay+                       ; Alipay+                       ; true  ; WorldlinePaymentInfo
                                  ; 5406               ; EPS                           ; EPS                           ; true  ; WorldlinePaymentInfo
+                                 ; 5404               ; WeChat Pay                    ; WeChatPay                     ; true  ; WorldlinePaymentInfo
