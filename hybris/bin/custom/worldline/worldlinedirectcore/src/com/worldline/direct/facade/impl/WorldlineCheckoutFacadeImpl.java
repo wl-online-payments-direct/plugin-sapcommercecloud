@@ -112,7 +112,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         List<PaymentProduct> paymentProducts = worldlinePaymentService.getPaymentProducts(totalPrice.getValue(),
                 totalPrice.getCurrencyIso(),
                 getCountryCode(cartData),
-                getShopperLocale(),
+                getShopperLocale(false),
                 cartData.isReplenishmentOrder());
 
         return paymentProducts;
@@ -145,14 +145,14 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 totalPrice.getValue(),
                 totalPrice.getCurrencyIso(),
                 getCountryCode(cartData),
-                getShopperLocale());
+                getShopperLocale(false));
     }
 
     @Override
     public CreateHostedTokenizationResponse createHostedTokenization() {
         final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfos(true);
         final List<String> savedTokens = worldlinePaymentInfos.stream().map(WorldlinePaymentInfoData::getToken).collect(Collectors.toList());
-        final CreateHostedTokenizationResponse hostedTokenization = worldlinePaymentService.createHostedTokenization(getShopperLocale(), savedTokens, userService.isAnonymousUser(userService.getCurrentUser()));
+        final CreateHostedTokenizationResponse hostedTokenization = worldlinePaymentService.createHostedTokenization(getShopperLocale(true), savedTokens, userService.isAnonymousUser(userService.getCurrentUser()));
         hostedTokenization.setPartialRedirectUrl(WorldlineUrlUtils.buildFullURL(hostedTokenization.getPartialRedirectUrl()));
         if (CollectionUtils.isNotEmpty(hostedTokenization.getInvalidTokens())) {
             LOGGER.warn("[ WORLDLINE ] invalid tokens : {}", hostedTokenization.getInvalidTokens());
@@ -622,9 +622,12 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return cartModel.getCode() + "|" + UUID.randomUUID();
     }
 
-    protected String getShopperLocale() {
+    protected String getShopperLocale(boolean useLocaleCodeIfAvailable) {
         final LanguageModel currentLanguage = commonI18NService.getCurrentLanguage();
         if (currentLanguage != null) {
+            if(useLocaleCodeIfAvailable && StringUtils.isNotBlank(currentLanguage.getLocaleCode())) {
+                return currentLanguage.getLocaleCode();
+            }
             return commonI18NService.getLocaleForLanguage(currentLanguage).toString();
         }
         return Locale.ENGLISH.toString();
