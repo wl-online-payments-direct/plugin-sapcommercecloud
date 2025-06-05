@@ -31,4 +31,8 @@
     <!-- Action widget connection -->
     <widget-connection sourceWidgetId="STUB_com.worldline.direct.actions.worldlinemanualpaymentcaptureaction" outputId="capturePaymentContext" targetWidgetId="omsWorldlinePartialCapturePopup" inputId="inputObject"/>
 
+    <widget-connection sourceWidgetId="STUB_com.worldline.direct.backoffice.action.featurerequest"
+                       outputId="featureRequestWizardContext"
+                       targetWidgetId="configurableFlow"
+                       inputId="context" />
 </widgets>
