@@ -14,4 +14,8 @@
   		<property name="name" value="labels"/>
   	</bean>
 
+	<bean id="worldlineFeatureRequestWizardFlowActionHandler" class="com.worldline.direct.wizard.WorldlineFeatureRequestWizardFlowActionHandler">
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+
 </beans>

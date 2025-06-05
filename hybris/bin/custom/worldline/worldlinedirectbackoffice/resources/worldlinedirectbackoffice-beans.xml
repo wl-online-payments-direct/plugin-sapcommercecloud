@@ -15,5 +15,9 @@
             <property name="flag" type="boolean"/>
         </bean>
     -->
+    <bean class="com.worldline.direct.dto.FeatureRequestFormBean">
+        <property name="companyName" type="String" />
+        <property name="request" type="String" />
+    </bean>
 
 </beans>

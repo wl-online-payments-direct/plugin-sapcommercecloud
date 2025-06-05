@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<action-definition id="com.worldline.direct.backoffice.action.featurerequest"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/action-definition.xsd"
+                   >
+
+    <name>Request a New Feature</name>
+    <description>Allows the user to generate an email to Worldline requesting a new feature.</description>
+    <author>Worldline</author>
+    <version>1.0</version>
+
+    <actionClassName>com.worldline.direct.actions.WorldlineFeatureRequestAction</actionClassName>
+
+    <inputType>com.worldline.direct.model.WorldlineConfigurationModel</inputType>
+    <outputType>java.lang.Object</outputType>
+
+    <sockets>
+        <!--<output id="openFeatureRequestWizard" type="java.lang.String" />-->
+        <output id="featureRequestWizardContext" type="java.util.Map" />
+    </sockets>
+
+    <settings>
+        <setting key="viewMode" default-value="textOnly"/>
+    </settings>
+</action-definition>
