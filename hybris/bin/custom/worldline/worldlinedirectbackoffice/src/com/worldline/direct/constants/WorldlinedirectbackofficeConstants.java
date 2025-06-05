@@ -12,6 +12,8 @@ public final class WorldlinedirectbackofficeConstants extends GeneratedWorldline
 {
 	public static final String EXTENSIONNAME = "worldlinedirectbackoffice";
 
+	public static final String WORLDLINE_CONFIG_WIZARD_CONTEXT = "wlConfig";
+
 	private WorldlinedirectbackofficeConstants()
 	{
 		//empty to avoid instantiating this constant class
