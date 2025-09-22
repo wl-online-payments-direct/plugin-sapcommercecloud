@@ -2,6 +2,7 @@ package com.worldline.direct.service.impl;
 
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.dao.WorldlineOrderDao;
 import com.worldline.direct.dao.WorldlineTransactionDao;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
 import com.worldline.direct.service.WorldlineTransactionService;
@@ -39,6 +40,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
     private WorldlineBusinessProcessService worldlineBusinessProcessService;
     private WorldlineAmountUtils worldlineAmountUtils;
     private ModelService modelService;
+    private WorldlineOrderDao worldlineOrderDao;
 
     private CalculationService calculationService;
 
@@ -181,6 +183,43 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
     public void savePaymentCost(AbstractOrderModel orderModel, AmountOfMoney surchargeAmount) {
         Double surcharge = worldlineAmountUtils.fromAmount(surchargeAmount.getAmount(), orderModel.getCurrency().getIsocode()).doubleValue();
         savePaymentCost(orderModel, surcharge);
+    }
+
+    @Override
+    public void processAuthorisedEvent(WebhooksEvent webhooksEvent) {
+        validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
+        LOGGER.debug("[WORLDLINE] Process {} EVENT id : {}", webhooksEvent.getType(), webhooksEvent.getId());
+        String paymentTransactionId = getPaymentId(webhooksEvent.getPayment().getId());
+
+        PaymentTransactionModel paymentTransaction;
+        try {
+            // Try to find an existing payment transaction first.
+            paymentTransaction = worldlineTransactionDao.findPaymentTransaction(paymentTransactionId);
+
+            // If found, check whether we need to update it and act accordingly:
+            final boolean alreadyProcessed = paymentTransaction.getEntries().stream()
+                    .filter(entry -> PaymentTransactionType.AUTHORIZATION.equals(entry.getType()))
+                    .filter(entry -> webhooksEvent.getPayment().getStatus().equals(entry.getTransactionStatusDetails()))
+                    .anyMatch(entry -> entry.getRequestId().equals(paymentTransactionId)); // might need to look at this!! TODO
+
+            if (!alreadyProcessed) {
+                updatePaymentTransaction(
+                        paymentTransaction,
+                        webhooksEvent.getPayment().getId(),
+                        webhooksEvent.getPayment().getStatus(),
+                        webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() != null ? webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() : webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
+                        PaymentTransactionType.AUTHORIZATION
+                );
+            }
+        } catch (ModelNotFoundException e) {
+            // If it doesn't exist (which it should), we create the PaymentTransaction now.
+            String merchantReference = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
+            AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(merchantReference);
+            String status = webhooksEvent.getPayment().getStatus();
+            paymentTransaction = createAuthorizationPaymentTransaction(order, merchantReference, paymentTransactionId, status, webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney());
+        }
+
+
     }
 
     @Override
@@ -370,5 +409,9 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
 
     public void setCalculationService(CalculationService calculationService) {
         this.calculationService = calculationService;
+    }
+
+    public void setWorldlineOrderDao(WorldlineOrderDao worldlineOrderDao) {
+        this.worldlineOrderDao = worldlineOrderDao;
     }
 }
