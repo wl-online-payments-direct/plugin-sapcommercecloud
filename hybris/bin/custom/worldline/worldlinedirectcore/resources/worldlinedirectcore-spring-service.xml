@@ -50,6 +50,7 @@
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
         <property name="calculationService" ref="calculationService"/>
         <property name="modelService" ref="modelService"/>
+        <property name="worldlineOrderDao" ref="worldlineOrderDao"/>
     </bean>
 
     <bean id="worldlineWebhookService" class="com.worldline.direct.service.impl.WorldlineWebhookServiceImpl">

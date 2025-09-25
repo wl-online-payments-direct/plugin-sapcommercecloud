@@ -69,7 +69,10 @@ public class WorldlineWebhookServiceImpl implements WorldlineWebhookService {
             case PAYMENT_AUTH_REQUESTED:
             case PAYMENT_PENDING_APPROVAL:
             case PAYMENT_PENDING_COMPLETION:
+                break;
             case PAYMENT_PENDING_CAPTURE:
+                worldlineTransactionService.processAuthorisedEvent(webhooksEvent);
+                break;
             case PAYMENT_CANCELLED:
             case PAYMENT_REJECTED:
             case PAYMENT_CAPTURE_REQUEST:
