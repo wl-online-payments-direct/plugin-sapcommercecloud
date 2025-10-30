@@ -5,6 +5,7 @@ import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.service.WorldlinePaymentModeService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
@@ -31,6 +32,8 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
     public static final String CARTES_BANCAIRES_SINGLE_SALE = "single-amount";
     public static final String CARTES_BANCAIRES_SINGLE_AUTH = "payment-upon-shipment";
     public static final String CARTES_BANCAIRES_RECURRING = "other-recurring-payments";
+
+    private WorldlinePaymentModeService worldlinePaymentModeService;
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
@@ -67,7 +70,7 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
             cardPaymentMethodSpecificInput.setThreeDSecure(threeDSecureBase);
         }
         boolean isSale = false;
-        if (salePaymentProduct.contains(paymentInfo.getId().toString())) {
+        if (worldlinePaymentModeService.isIntersolve(String.valueOf(paymentInfo.getId()))) {
             cardPaymentMethodSpecificInput.setAuthorizationMode(OperationCodesEnum.SALE.getCode());
             isSale = true;
         } else if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
@@ -80,9 +83,6 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
             CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(FIRST_RECCURANCE);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
-//
-//            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileRequestor(CARD_HOLDER_INITIATED);
-//            cardPaymentMethodSpecificInput.setUnscheduledCardOnFileSequenceIndicator(FIRST_RECCURANCE);
         } else {
             cardPaymentMethodSpecificInput.setTokenize(false);
         }
@@ -125,7 +125,7 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         return paymentProduct130SpecificInput;
     }
 
-    public void setSalePaymentProduct(List<String> salePaymentProduct) {
-        this.salePaymentProduct = salePaymentProduct;
+    public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
+        this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 }
