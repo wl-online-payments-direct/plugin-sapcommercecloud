@@ -174,11 +174,9 @@
     </bean>
 
     <bean id="worldlineIntersolvePaymentProductsEvaluator"
-          parent="defaultWorldlinePaymentProductEvaluator">
-        <property name="paymentProductId">
-            <utils:constant
-                    static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE"/>
-        </property>
+          parent="defaultWorldlinePaymentProductEvaluator"
+          class="com.worldline.direct.evaluate.impl.IntersolveWorldlinePaymentProductEvaluator">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
     </bean>
 
     <bean id="worldlineApplePayPaymentProductsEvaluator"
@@ -207,12 +205,6 @@
                 static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP"/>
         <utils:constant
                 static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP"/>
-    </utils:list>
-
-    <utils:list id="worldlineSalePaymentProductList">
-        <utils:constant
-                static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_INTERSOLVE"/>
-
     </utils:list>
 
 </beans>

@@ -32,6 +32,11 @@ public class WorldlineManualPaymentCaptureAction extends ManualPaymentCaptureAct
     public boolean canPerform(ActionContext<OrderModel> ctx) {
         OrderModel order = ctx.getData();
 
+        // Added as NPE was noted in Customer Support Backoffice.
+        if(order == null) {
+            return false;
+        }
+
         if (getPaymentTransactionToCapture(order) == null) { // if payment is directly captured
             return false;
         }

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface WorldlinePaymentModeService extends PaymentModeService {
     List<PaymentModeModel>  getActivePaymentModes();
+
+    boolean isIntersolve(String paymentModeId);
 }

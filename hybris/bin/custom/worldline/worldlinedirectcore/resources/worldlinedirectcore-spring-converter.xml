@@ -68,11 +68,12 @@
         <property name="i18NService" ref="i18NService"/>
         <property name="worldlineUserFacade" ref="worldlineUserFacade"/>
         <property name="worldlineOrderParamConverter" ref="worldlineOrderParamConverter"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
     </bean>
 
     <bean id="worldlineHostedCheckoutCardPopulator"
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator">
-        <property name="salePaymentProduct" ref="worldlineSalePaymentProductList"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
     </bean>
 
 
