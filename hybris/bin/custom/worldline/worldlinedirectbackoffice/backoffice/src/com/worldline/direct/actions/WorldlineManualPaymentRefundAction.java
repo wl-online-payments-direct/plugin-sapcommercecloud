@@ -6,18 +6,24 @@ import com.hybris.cockpitng.actions.CockpitAction;
 import com.onlinepayments.domain.RefundResponse;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
+import com.worldline.direct.service.WorldlinePaymentModeService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.service.WorldlineTransactionService;
 import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.omsbackoffice.actions.returns.ManualRefundAction;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.returns.model.ReturnRequestModel;
+import de.hybris.platform.servicelayer.time.TimeService;
 import org.zkoss.zhtml.Messagebox;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUNDED;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUND_REQUESTED;
@@ -34,12 +40,17 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
    @Resource
    private WorldlineBusinessProcessService worldlineBusinessProcessService;
 
+   @Resource
+   private WorldlinePaymentModeService worldlinePaymentModeService;
+
+   @Resource
+   private TimeService timeService;
+
    @Override public ActionResult<ReturnRequestModel> perform(ActionContext<ReturnRequestModel> actionContext) {
       ReturnRequestModel returnRequestModel = actionContext.getData();
       OrderModel order = returnRequestModel.getOrder();
 
       final PaymentTransactionEntryModel paymentTransactionToRefund = getPaymentTransactionToRefund(order);
-      //result
       ActionResult<ReturnRequestModel> result = null;
       String resultMessage = null;
 
@@ -52,8 +63,32 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
          return result;
       }
 
-      RefundResponse refundResponse = worldlinePaymentService.refundPayment(order.getStore().getUid(), paymentTransactionToRefund.getRequestId(), refundAmount, paymentTransactionToRefund.getCurrency().getIsocode());
+      // Check whether the payment was made with Intersolve:
+      if(paymentTransactionToRefund != null && paymentTransactionToRefund.getPaymentTransaction() != null && paymentTransactionToRefund.getPaymentTransaction().getInfo() instanceof WorldlinePaymentInfoModel) {
+         WorldlinePaymentInfoModel worldlinePaymentInfo = (WorldlinePaymentInfoModel) paymentTransactionToRefund.getPaymentTransaction().getInfo();
+         if (worldlinePaymentModeService.isIntersolve(String.valueOf(worldlinePaymentInfo.getId()))) {
+             // Intersolve payment detected. Must be within 14 days and a full refund:
+             Instant now = timeService.getCurrentTime().toInstant();
+             Instant cutoff = now.minus(14, ChronoUnit.DAYS);
+             Instant tx = paymentTransactionToRefund.getCreationtime().toInstant();
 
+             if (!tx.isAfter(cutoff)) {
+                 result = new ActionResult<>(ActionResult.ERROR, returnRequestModel);
+                 resultMessage = actionContext.getLabel("worldline.direct.action.manualrefund.failure.intersolve.date");
+                 Messagebox.show(resultMessage);
+                 return result;
+             }
+            if (refundAmount.compareTo(paymentTransactionToRefund.getPaymentTransaction().getPlannedAmount()) != 0) {
+               result = new ActionResult<ReturnRequestModel>(ActionResult.ERROR, returnRequestModel);
+               resultMessage = actionContext.getLabel("worldline.direct.action.manualrefund.failure.intersolve.partial");
+               Messagebox.show(resultMessage);
+
+               return result;
+            }
+         }
+      }
+
+      RefundResponse refundResponse = worldlinePaymentService.refundPayment(order.getStore().getUid(), paymentTransactionToRefund.getRequestId(), refundAmount, paymentTransactionToRefund.getCurrency().getIsocode());
 
       if (REFUND_REQUESTED.getValue().equals(refundResponse.getStatus()) || REFUNDED.getValue().equals(refundResponse.getStatus())) {
          worldlineTransactionService.updatePaymentTransaction(paymentTransactionToRefund.getPaymentTransaction(),
