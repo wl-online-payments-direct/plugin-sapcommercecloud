@@ -4,6 +4,7 @@ import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.service.WorldlinePaymentModeService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -31,6 +32,7 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
 
     private WorldlineUserFacade worldlineUserFacade;
     private Converter<AbstractOrderModel, Order> worldlineOrderParamConverter;
+    private WorldlinePaymentModeService worldlinePaymentModeService;
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
@@ -42,10 +44,20 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
     private HostedCheckoutSpecificInput getHostedCheckoutSpecificInput(AbstractOrderModel abstractOrderModel) {
         WorldlineConfigurationModel worldlineConfiguration = abstractOrderModel.getStore().getWorldlineConfiguration();
         HostedCheckoutSpecificInput hostedCheckoutSpecificInput = new HostedCheckoutSpecificInput();
-        //hostedCheckoutSpecificInput.setIsRecurring(Boolean.FALSE);
-        hostedCheckoutSpecificInput.setShowResultPage(Boolean.FALSE);
-        hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+        boolean isIntersolve = worldlinePaymentModeService.isIntersolve(abstractOrderModel.getPaymentMode().getCode());
+        /* As per WL5SAP-10, we MUST show the result page if Intersolve is being used (else we never show it, as per
+           previous logic): */
+        hostedCheckoutSpecificInput.setShowResultPage(isIntersolve);
+
+        if(isIntersolve) {
+            int intersolveTimeout = worldlineConfiguration.getIntersolveTimeout();
+            if(intersolveTimeout > 0) {
+                hostedCheckoutSpecificInput.setSessionTimeout(intersolveTimeout);
+            }
+        }
+
+        hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
         if (!paymentInfo.isRecurringToken()) {
             hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
         }
@@ -108,5 +120,9 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
 
     public void setWorldlineOrderParamConverter(Converter<AbstractOrderModel, Order> worldlineOrderParamConverter) {
         this.worldlineOrderParamConverter = worldlineOrderParamConverter;
+    }
+
+    public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
+        this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 }

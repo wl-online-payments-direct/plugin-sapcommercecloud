@@ -5,7 +5,6 @@
 
 <items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="items.xsd">
-
     <enumtypes>
         <enumtype generate="true" code="WorldlineCheckoutTypesEnum" autocreate="true">
             <description>Checkout types for card payments</description>
@@ -51,6 +50,7 @@
             <value code="YEARLY" />
         </enumtype>
     </enumtypes>
+
     <itemtypes>
         <itemtype code="WorldlineConfiguration"
                   extends="GenericItem"
@@ -166,6 +166,11 @@
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                     <description>Only allow instant bank transfers.</description>
+                </attribute>
+                <attribute qualifier="intersolveTimeout" type="java.lang.Integer">
+                    <description>The timeout to send to Worldline if an Intersolve payment is used.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
                 </attribute>
             </attributes>
         </itemtype>
@@ -534,5 +539,19 @@
             </attributes>
         </itemtype>
 
+        <itemtype code="PaymentMode" autocreate="false" generate="false">
+            <description>Extending PaymentMode to support specific Worldline scenarios.</description>
+            <attributes>
+                <attribute qualifier="intersolve" type="java.lang.Boolean">
+                    <description>
+                        Whether or not to treat this PaymentMode as an Intersolve payment. This will affect the
+                        parameters which are sent to Worldline for a new payment and the rules for refunds/cancellations.
+                    </description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                </attribute>
+            </attributes>
+        </itemtype>
     </itemtypes>
 </items>
