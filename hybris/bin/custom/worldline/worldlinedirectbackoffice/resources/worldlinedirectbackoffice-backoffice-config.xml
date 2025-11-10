@@ -103,6 +103,9 @@
 				<ea:section name="hmc.worldline.worldlineBankTransferConfig">
 					<ea:attribute qualifier="instantBankTransfers"/>
 				</ea:section>
+				<ea:section name="hmc.worldline.worldlineIntersolveConfig">
+					<ea:attribute qualifier="intersolveTimeout"/>
+				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
 	</context>
@@ -272,6 +275,19 @@
 		</ea:editorArea>
 	</context>
 	<!-- BaseStore update BO appearance END -->
+
+	<!-- PaymentMode update BO appearance START -->
+	<context merge-by="type" parent="GenericItem" type="PaymentMode" component="editor-area">
+		<ea:editorArea name="">
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.worldlineSpecificPaymentConfigurations">
+					<ea:attribute qualifier="intersolve"/>
+					<ea:attribute qualifier="floapay"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+	<!-- PaymentMode update BO appearance END -->
 
 	<!-- WorldlinePaymentInfo BO appearance -->
 	<context merge-by="type" parent="PaymentInfo" type="WorldlinePaymentInfo">

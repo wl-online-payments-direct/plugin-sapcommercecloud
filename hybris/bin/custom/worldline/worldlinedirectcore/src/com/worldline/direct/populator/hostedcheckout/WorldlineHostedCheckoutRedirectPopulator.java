@@ -6,6 +6,7 @@ import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
+import com.worldline.direct.service.WorldlinePaymentModeService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
@@ -19,6 +20,7 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
 
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
+    private WorldlinePaymentModeService worldlinePaymentModeService;
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
@@ -37,7 +39,7 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
     private RedirectPaymentMethodSpecificInput getRedirectPaymentMethodSpecificInput(WorldlinePaymentInfoModel paymentInfo) {
         final RedirectPaymentMethodSpecificInput redirectPaymentMethodSpecificInput = new RedirectPaymentMethodSpecificInput();
         redirectPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
-        redirectPaymentMethodSpecificInput.setRequiresApproval(requiresApproval());
+        redirectPaymentMethodSpecificInput.setRequiresApproval(requiresApproval(String.valueOf(paymentInfo.getId())));
         redirectPaymentMethodSpecificInput.setTokenize(Boolean.FALSE);
         RedirectionData redirectionData = new RedirectionData();
         redirectionData.setReturnUrl(getHostedCheckoutReturnUrl());
@@ -62,7 +64,12 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
         return redirectPaymentMethodSpecificInput;
     }
 
-    private Boolean requiresApproval() {
+    private Boolean requiresApproval(String paymentModeId) {
+        // Find out if this payment mode is 'sale only' (e.g. does not support auth)
+        if (worldlinePaymentModeService.isSaleOnly(paymentModeId)) {
+            return Boolean.FALSE;
+        }
+        // It's not, so return the current configured value.
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         OperationCodesEnum defaultOperationCode = currentWorldlineConfiguration.getDefaultOperationCode();
         return !OperationCodesEnum.SALE.equals(defaultOperationCode);
@@ -78,5 +85,9 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
 
     public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
         this.worldlineConfigurationService = worldlineConfigurationService;
+    }
+
+    public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
+        this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 }

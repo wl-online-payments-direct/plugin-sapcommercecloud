@@ -70,7 +70,7 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
             cardPaymentMethodSpecificInput.setThreeDSecure(threeDSecureBase);
         }
         boolean isSale = false;
-        if (worldlinePaymentModeService.isIntersolve(String.valueOf(paymentInfo.getId()))) {
+        if (worldlinePaymentModeService.isSaleOnly(String.valueOf(paymentInfo.getId()))) {
             cardPaymentMethodSpecificInput.setAuthorizationMode(OperationCodesEnum.SALE.getCode());
             isSale = true;
         } else if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
