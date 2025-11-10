@@ -35,6 +35,7 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 56                 ; Union Pay International       ; Union Pay International       ; true  ; false     ; false  ; WorldlinePaymentInfo
                                  ; 5127               ; Oney Card                     ; Oney Card                     ; true  ; false     ; false  ; WorldlinePaymentInfo
                                  ; 5128               ; Oney Branded Card             ; Oney Branded Card             ; false ; false     ; false  ; WorldlinePaymentInfo
+                                 ; 3124               ; Przelewy24                    ; Przelewy24                    ; true  ; false     ; false  ; WorldlinePaymentInfo
                                  ; 5138               ; Floa 1x                       ; Floa 1x                       ; true  ; false     ; true   ; WorldlinePaymentInfo
                                  ; 5139               ; Floa 3x                       ; Floa 3x                       ; true  ; false     ; true   ; WorldlinePaymentInfo
                                  ; 5140               ; Floa 4x                       ; Floa 4x                       ; true  ; false     ; true   ; WorldlinePaymentInfo
