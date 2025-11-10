@@ -16,10 +16,35 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
         return worldlinePaymentModeDao.getActivePaymentModes();
     }
 
+    @Override
     public boolean isIntersolve(String paymentModeId) {
         PaymentModeModel paymentMode = getPaymentModeForCode(paymentModeId);
         if(paymentMode != null) {
             return paymentMode.getIntersolve();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isFloa(String paymentModeId) {
+        PaymentModeModel paymentMode = getPaymentModeForCode(paymentModeId);
+        if(paymentMode != null) {
+            return paymentMode.getFloapay();
+        }
+        return false;
+    }
+
+    /**
+     * Returns a boolean representing whether the payment mode is SALE only (e.g. cannot be preauthed).
+     * TODO: If more Payment Modes require this, look into making a more generic way of handling this.
+     * @param paymentModeId A String representing the code of a PaymentMode.
+     * @return true if the Payment Mode MUST be used with the Authorization Mode SALE.
+     */
+    @Override
+    public boolean isSaleOnly(String paymentModeId) {
+        PaymentModeModel paymentMode = getPaymentModeForCode(paymentModeId);
+        if(paymentMode != null) {
+            return paymentMode.getFloapay() || paymentMode.getIntersolve();
         }
         return false;
     }
