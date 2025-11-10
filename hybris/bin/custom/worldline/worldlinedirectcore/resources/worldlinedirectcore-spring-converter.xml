@@ -87,7 +87,7 @@
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutRedirectPopulator">
         <property name="sessionService" ref="sessionService"/>
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
-
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
     </bean>
 
     <bean id="worldlineHostedCheckoutMobilePopulator"
