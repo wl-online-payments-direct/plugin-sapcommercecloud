@@ -118,6 +118,7 @@
         <property name="sessionService" ref="sessionService"/>
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
     </bean>
     <bean id="worldlineHostedTokenizationRedirectPopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationRedirectPopulator">

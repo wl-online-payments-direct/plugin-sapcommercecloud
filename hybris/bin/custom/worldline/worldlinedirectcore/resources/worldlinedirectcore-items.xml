@@ -560,6 +560,15 @@
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                 </attribute>
+                <attribute qualifier="saleOnly" type="java.lang.Boolean">
+                    <description>
+                        If selected, this will force the payment mode to always send
+                        requiresApproval=false or operation code SALE when requesting payment.
+                    </description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Booelean.FALSE</defaultvalue>
+                </attribute>
             </attributes>
         </itemtype>
     </itemtypes>

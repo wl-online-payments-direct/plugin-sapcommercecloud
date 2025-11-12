@@ -36,7 +36,6 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
 
     /**
      * Returns a boolean representing whether the payment mode is SALE only (e.g. cannot be preauthed).
-     * TODO: If more Payment Modes require this, look into making a more generic way of handling this.
      * @param paymentModeId A String representing the code of a PaymentMode.
      * @return true if the Payment Mode MUST be used with the Authorization Mode SALE.
      */
@@ -44,7 +43,7 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
     public boolean isSaleOnly(String paymentModeId) {
         PaymentModeModel paymentMode = getPaymentModeForCode(paymentModeId);
         if(paymentMode != null) {
-            return paymentMode.getFloapay() || paymentMode.getIntersolve();
+            return paymentMode.getSaleOnly();
         }
         return false;
     }

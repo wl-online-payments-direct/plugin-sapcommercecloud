@@ -6,6 +6,7 @@ import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
+import com.worldline.direct.service.WorldlinePaymentModeService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
@@ -32,6 +33,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentService worldlinePaymentService;
+    private WorldlinePaymentModeService worldlinePaymentModeService;
 
     public static final String CARTES_BANCAIRES_SINGLE_SALE = "single-amount";
     public static final String CARTES_BANCAIRES_SINGLE_AUTH = "payment-upon-shipment";
@@ -70,7 +72,10 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = getCardPaymentMethodSpecificInput(isRecurring, paymentInfo, recurrance, abstractOrderModel);
         boolean isSale = false;
-        if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
+        if (worldlinePaymentModeService.isSaleOnly(String.valueOf(paymentInfo.getId()))) {
+            cardPaymentMethodSpecificInput.setAuthorizationMode(OperationCodesEnum.SALE.getCode());
+            isSale = true;
+        } else if (currentWorldlineConfiguration.getDefaultOperationCode() != null) {
             cardPaymentMethodSpecificInput.setAuthorizationMode(currentWorldlineConfiguration.getDefaultOperationCode().getCode());
             isSale = OperationCodesEnum.SALE.equals(currentWorldlineConfiguration.getDefaultOperationCode());
         }
@@ -169,5 +174,9 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
     public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
         this.worldlinePaymentService = worldlinePaymentService;
+    }
+
+    public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
+        this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 }
