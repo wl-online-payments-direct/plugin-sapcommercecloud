@@ -139,7 +139,7 @@
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                     <description>Define if the first Recurring Payment is immediate or scheduled.</description>
                 </attribute>
-                <attribute qualifier="sessionTimout" type="java.lang.Integer">
+                <attribute qualifier="sessionTimeout" type="java.lang.Integer">
                     <modifiers read="true" write="true"/>
                     <persistence type="property"/>
                 </attribute>

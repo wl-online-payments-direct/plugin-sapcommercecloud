@@ -67,8 +67,8 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         }
 
         hostedCheckoutSpecificInput.setReturnUrl(getReturnUrlFromSession());
-        if (worldlineConfiguration.getSessionTimout() != null) {
-            hostedCheckoutSpecificInput.setSessionTimeout(worldlineConfiguration.getSessionTimout());
+        if (worldlineConfiguration.getSessionTimeout() != null) {
+            hostedCheckoutSpecificInput.setSessionTimeout(worldlineConfiguration.getSessionTimeout());
         }
         if (StringUtils.isNotBlank(worldlineConfiguration.getHostedCheckoutVariant())) {
             hostedCheckoutSpecificInput.setVariant(worldlineConfiguration.getHostedCheckoutVariant());

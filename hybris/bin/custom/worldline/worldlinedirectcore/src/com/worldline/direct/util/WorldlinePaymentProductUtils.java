@@ -23,13 +23,13 @@ public class WorldlinePaymentProductUtils {
     public static boolean isPaymentSupportingRecurring(WorldlinePaymentInfoModel worldlinePaymentInfoModel) {
         WorldlinePaymentModeService worldlinePaymentModeService = Registry.getApplicationContext().getBean(WorldlinePaymentModeService.class);
         return (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoModel.getPaymentMethod()) &&
-                worldlinePaymentModeService.isIntersolve(String.valueOf(worldlinePaymentInfoModel.getId())) ||
-                WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoModel.getId());
+                !worldlinePaymentModeService.isIntersolve(String.valueOf(worldlinePaymentInfoModel.getId()))) ||
+                WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoModel.getId();
     }
 
     public static boolean isCreditCard(WorldlinePaymentInfoData worldlinePaymentInfoData) {
         WorldlinePaymentModeService worldlinePaymentModeService = Registry.getApplicationContext().getBean(WorldlinePaymentModeService.class);
         return WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoData.getPaymentMethod()) &&
-                worldlinePaymentModeService.isIntersolve(String.valueOf(worldlinePaymentInfoData.getId()));
+                !worldlinePaymentModeService.isIntersolve(String.valueOf(worldlinePaymentInfoData.getId()));
     }
 }
