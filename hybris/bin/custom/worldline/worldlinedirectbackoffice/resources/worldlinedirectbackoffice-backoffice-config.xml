@@ -283,6 +283,7 @@
 				<ea:section name="hmc.worldline.worldlineSpecificPaymentConfigurations">
 					<ea:attribute qualifier="intersolve"/>
 					<ea:attribute qualifier="floapay"/>
+					<ea:attribute qualifier="saleOnly"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
