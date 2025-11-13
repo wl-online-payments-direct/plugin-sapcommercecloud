@@ -5,6 +5,7 @@ import com.worldline.direct.service.WorldlinePaymentModeService;
 import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.order.PaymentModeService;
 import de.hybris.platform.order.impl.DefaultPaymentModeService;
+import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 
 import java.util.List;
 
@@ -41,7 +42,12 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
      */
     @Override
     public boolean isSaleOnly(String paymentModeId) {
-        PaymentModeModel paymentMode = getPaymentModeForCode(paymentModeId);
+        PaymentModeModel paymentMode;
+        try {
+            paymentMode = getPaymentModeForCode(paymentModeId);
+        } catch (UnknownIdentifierException e) {
+            return false;
+        }
         if(paymentMode != null) {
             return paymentMode.getSaleOnly();
         }
