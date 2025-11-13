@@ -2,8 +2,6 @@ package com.worldline.direct.util;
 
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
-import com.worldline.direct.service.WorldlinePaymentModeService;
-import de.hybris.platform.core.Registry;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 
 
@@ -21,15 +19,11 @@ public class WorldlinePaymentProductUtils {
     }
 
     public static boolean isPaymentSupportingRecurring(WorldlinePaymentInfoModel worldlinePaymentInfoModel) {
-        WorldlinePaymentModeService worldlinePaymentModeService = Registry.getApplicationContext().getBean(WorldlinePaymentModeService.class);
-        return (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoModel.getPaymentMethod()) &&
-                worldlinePaymentModeService.isIntersolve(String.valueOf(worldlinePaymentInfoModel.getId())) ||
+        return (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoModel.getPaymentMethod()) ||
                 WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoModel.getId());
     }
 
     public static boolean isCreditCard(WorldlinePaymentInfoData worldlinePaymentInfoData) {
-        WorldlinePaymentModeService worldlinePaymentModeService = Registry.getApplicationContext().getBean(WorldlinePaymentModeService.class);
-        return WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoData.getPaymentMethod()) &&
-                worldlinePaymentModeService.isIntersolve(String.valueOf(worldlinePaymentInfoData.getId()));
+        return WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoData.getPaymentMethod());
     }
 }
