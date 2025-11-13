@@ -9,6 +9,9 @@ import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 
 import java.util.List;
 
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateIfSingleResult;
+import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNullStandardMessage;
+
 public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService implements WorldlinePaymentModeService {
     private WorldlinePaymentModeDao worldlinePaymentModeDao;
 
@@ -42,12 +45,8 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
      */
     @Override
     public boolean isSaleOnly(String paymentModeId) {
-        PaymentModeModel paymentMode;
-        try {
-            paymentMode = getPaymentModeForCode(paymentModeId);
-        } catch (UnknownIdentifierException e) {
-            return false;
-        }
+        PaymentModeModel paymentMode = getPaymentModeForCode(paymentModeId);
+
         if(paymentMode != null) {
             return paymentMode.getSaleOnly();
         }
@@ -56,5 +55,15 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
 
     public void setWorldlinePaymentModeDao(WorldlinePaymentModeDao worldlinePaymentModeDao) {
         this.worldlinePaymentModeDao = worldlinePaymentModeDao;
+    }
+
+    @Override
+    public PaymentModeModel getPaymentModeForCode(final String code)
+    {
+        try {
+            return super.getPaymentModeForCode(code);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
