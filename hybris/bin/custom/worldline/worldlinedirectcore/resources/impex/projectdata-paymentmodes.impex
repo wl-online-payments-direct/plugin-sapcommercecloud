@@ -40,3 +40,4 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 5139               ; Floa 3x                       ; Floa 3x                       ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
                                  ; 5140               ; Floa 4x                       ; Floa 4x                       ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
                                  ; 5144               ; Floa 10x                      ; Floa 10x                      ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
+                                 ; 128                ; Discover                      ; Discover                      ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
