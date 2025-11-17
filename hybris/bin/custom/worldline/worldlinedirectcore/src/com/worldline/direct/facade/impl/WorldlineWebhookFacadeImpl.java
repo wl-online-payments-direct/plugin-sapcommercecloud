@@ -2,7 +2,7 @@ package com.worldline.direct.facade.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onlinepayments.RequestHeader;
+import com.onlinepayments.communication.RequestHeader;
 import com.onlinepayments.domain.WebhooksEvent;
 import com.worldline.direct.dao.WorldlineOrderDao;
 import com.worldline.direct.exception.WorldlineNonValidWebhooksEventException;
