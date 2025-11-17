@@ -41,3 +41,4 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 5140               ; Floa 4x                       ; Floa 4x                       ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
                                  ; 5144               ; Floa 10x                      ; Floa 10x                      ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
                                  ; 128                ; Discover                      ; Discover                      ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
+                                 ; 5403               ; Chèques Vacance Connect       ; Chèques Vacance Connect       ; true  ; false     ; false  ; true    ; WorldlinePaymentInfo
