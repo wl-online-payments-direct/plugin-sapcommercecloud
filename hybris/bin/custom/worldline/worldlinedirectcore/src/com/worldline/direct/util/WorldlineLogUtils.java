@@ -1,17 +1,25 @@
 package com.worldline.direct.util;
 
-import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 
-public class WorldlineLogUtils {
+import java.time.LocalDate;
 
-    private static final GsonJsonProvider gsonJsonProvider = new GsonJsonProvider();
+public class WorldlineLogUtils {
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, new LocalDateTypeAdapter())
+            .create();
 
     public static void logAction(final Logger LOGGER, final String action, final Object params, final Object result) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("[ WORLDLINE ] Action : {}", action);
-            LOGGER.debug("[ WORLDLINE ] Parameters : {}", gsonJsonProvider.toJson(params));
-            LOGGER.debug("[ WORLDLINE ] Result : {}", gsonJsonProvider.toJson(result));
+            try {
+                LOGGER.debug("[ WORLDLINE ] Action : {}", action);
+                LOGGER.debug("[ WORLDLINE ] Parameters : {}", gson.toJson(params));
+                LOGGER.debug("[ WORLDLINE ] Result : {}", gson.toJson(result));
+            } catch (Exception e) {
+                // Don't do anything - we just failed to log.
+            }
         }
 
     }

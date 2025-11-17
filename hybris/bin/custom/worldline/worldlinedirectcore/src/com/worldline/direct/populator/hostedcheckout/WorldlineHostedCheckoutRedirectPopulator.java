@@ -55,6 +55,10 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 RedirectPaymentProduct5408SpecificInput redirectPaymentProduct5408SpecificInput = new RedirectPaymentProduct5408SpecificInput();
                 redirectPaymentProduct5408SpecificInput.setInstantPaymentOnly(instantPaymentOnly);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5408SpecificInput(redirectPaymentProduct5408SpecificInput);
+            case WorldlinedirectcoreConstants.PAYMENT_METHOD_CHEQUES_VACANCE_CONNECT:
+                RedirectPaymentProduct5403SpecificInput redirectPaymentProduct5403SpecificInput = new RedirectPaymentProduct5403SpecificInput();
+                redirectPaymentProduct5403SpecificInput.setCompleteRemainingPaymentAmount(true);
+                redirectPaymentMethodSpecificInput.setPaymentProduct5403SpecificInput(redirectPaymentProduct5403SpecificInput);
             default:
                 // No Specific parameter needed for this paymentMethod
                 break;

@@ -511,7 +511,7 @@
                 <attribute qualifier="worldlineSurchargeProductTypeVersion" type="java.lang.String">
                     <persistence type="property"/>
                 </attribute>
-                <attribute qualifier="worldlineAdValoremRate" type="java.lang.Float">
+                <attribute qualifier="worldlineAdValoremRate" type="java.math.BigDecimal">
                     <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="worldlineSpecificRate" type="java.lang.Integer">

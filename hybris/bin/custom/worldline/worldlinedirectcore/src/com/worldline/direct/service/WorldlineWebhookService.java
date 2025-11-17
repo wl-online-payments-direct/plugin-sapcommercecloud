@@ -1,6 +1,6 @@
 package com.worldline.direct.service;
 
-import com.onlinepayments.RequestHeader;
+import com.onlinepayments.communication.RequestHeader;
 import com.onlinepayments.domain.WebhooksEvent;
 import com.onlinepayments.webhooks.WebhooksHelper;
 

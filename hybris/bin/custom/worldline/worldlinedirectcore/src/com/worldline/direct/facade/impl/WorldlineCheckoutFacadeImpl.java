@@ -284,7 +284,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             GetMandateResponse mandate = worldlinePaymentService.getMandate(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference());
             if (mandate != null) {
                 worldlinePaymentInfoModel.setMandateDetail(createMandate(mandate.getMandate(),storeId));
-                MandatePersonalName personalName = mandate.getMandate().getCustomer().getPersonalInformation().getName();
+                MandatePersonalNameResponse personalName = mandate.getMandate().getCustomer().getPersonalInformation().getName();
                 worldlinePaymentInfoModel.setCardholderName(personalName.getFirstName() + " " + personalName.getSurname());
                 modelService.save(worldlinePaymentInfoModel);
             }
@@ -316,7 +316,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         } catch (IllegalArgumentException e) {
             worldlineMandateModel.setRecurrenceType(WorldlineRecurringType.UNKNOWN);
         }
-        MandateCustomer customer = mandateResponse.getCustomer();
+        MandateCustomerResponse customer = mandateResponse.getCustomer();
         if (customer != null) {
             worldlineMandateModel.setCompanyName(customer.getCompanyName());
             if (customer.getPersonalInformation() != null) {
@@ -342,7 +342,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 worldlineMandateModel.setEmailAddress(customer.getContactDetails().getEmailAddress());
             }
             if (customer.getMandateAddress() != null) {
-                MandateAddress mandateAddress = customer.getMandateAddress();
+                MandateAddressResponse mandateAddress = customer.getMandateAddress();
                 worldlineMandateModel.setCity(mandateAddress.getCity());
                 worldlineMandateModel.setStreet(mandateAddress.getStreet());
                 worldlineMandateModel.setZip(mandateAddress.getZip());
@@ -730,7 +730,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.groupedCards"));
         WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         if (configuration.getGroupCardsLogo() != null) {
-            paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getUrl());
+            paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getURL());
         }
         return paymentProduct;
     }
