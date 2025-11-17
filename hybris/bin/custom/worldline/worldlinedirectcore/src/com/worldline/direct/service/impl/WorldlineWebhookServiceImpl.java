@@ -1,9 +1,9 @@
 package com.worldline.direct.service.impl;
 
-import com.onlinepayments.RequestHeader;
+import com.onlinepayments.communication.RequestHeader;
 import com.onlinepayments.domain.WebhooksEvent;
+import com.onlinepayments.json.DefaultMarshaller;
 import com.onlinepayments.webhooks.InMemorySecretKeyStore;
-import com.onlinepayments.webhooks.Webhooks;
 import com.onlinepayments.webhooks.WebhooksHelper;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.model.WorldlineConfigurationModel;
@@ -36,7 +36,7 @@ public class WorldlineWebhookServiceImpl implements WorldlineWebhookService {
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getWorldlineConfigurationByWebhookKey(keyId);
 
         secretKeyStore.storeSecretKey(currentWorldlineConfiguration.getWebhookKeyId(), currentWorldlineConfiguration.getWebhookSecret());
-        return Webhooks.createHelper(secretKeyStore);
+        return new WebhooksHelper(DefaultMarshaller.INSTANCE, InMemorySecretKeyStore.INSTANCE);
     }
 
     @Override

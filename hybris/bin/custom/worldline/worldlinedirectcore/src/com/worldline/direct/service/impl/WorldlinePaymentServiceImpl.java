@@ -339,7 +339,10 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         validateParameterNotNullStandardMessage("uniqueMandateReference", worldlineMandateModel.getUniqueMandateReference());
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(worldlineMandateModel.getStoreId(), getMerchantId(worldlineMandateModel.getStoreId()));
-            GetMandateResponse mandateResponse = merchant.mandates().revokeMandate(worldlineMandateModel.getUniqueMandateReference());
+            RevokeMandateRequest revokeMandateRequest = new RevokeMandateRequest();
+            // TODO: This may need populating correctly:
+            revokeMandateRequest.setRevocationReason(worldlineMandateModel.getCustomerReference());
+            GetMandateResponse mandateResponse = merchant.mandates().revokeMandate(worldlineMandateModel.getUniqueMandateReference(), revokeMandateRequest);
 
             WorldlineLogUtils.logAction(LOGGER, "revokeMandate", worldlineMandateModel.getUniqueMandateReference(), mandateResponse);
 
@@ -496,10 +499,8 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         validateParameterNotNull(paymentId, "paymentId cannot be null");
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
-            final CapturesResponse captures = merchant.payments().getCaptures(paymentId);
-
+            final CapturesResponse captures = merchant.captures().getCaptures(paymentId);
             WorldlineLogUtils.logAction(LOGGER, "getCaptures", paymentId, captures);
-
             return captures;
         } catch (Exception e) {
             LOGGER.error("[ WORLDLINE ] Errors during getting getPayment", e);
@@ -565,8 +566,10 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     public CancelPaymentResponse cancelPayment(String storeId, String paymentId) {
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
+            CancelPaymentRequest cancelPaymentRequest = new CancelPaymentRequest();
+            //TODO: See if this needs populating
             CancelPaymentResponse cancelPaymentResponse =
-                    merchant.payments().cancelPayment(paymentId);
+                    merchant.payments().cancelPayment(paymentId, cancelPaymentRequest);
 
             WorldlineLogUtils.logAction(LOGGER, "cancelPayment", paymentId, cancelPaymentResponse);
 
