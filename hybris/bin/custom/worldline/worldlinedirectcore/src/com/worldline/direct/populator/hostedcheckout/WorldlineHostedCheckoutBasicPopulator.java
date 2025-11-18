@@ -45,26 +45,33 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         WorldlineConfigurationModel worldlineConfiguration = abstractOrderModel.getStore().getWorldlineConfiguration();
         HostedCheckoutSpecificInput hostedCheckoutSpecificInput = new HostedCheckoutSpecificInput();
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
-        boolean isIntersolve = worldlinePaymentModeService.isIntersolve(abstractOrderModel.getPaymentMode().getCode());
-        /* As per WL5SAP-10, we MUST show the result page if Intersolve is being used (else we never show it, as per
-           previous logic): */
-        hostedCheckoutSpecificInput.setShowResultPage(isIntersolve);
-
-        if(isIntersolve) {
-            int intersolveTimeout = worldlineConfiguration.getIntersolveTimeout();
-            if(intersolveTimeout > 0) {
-                hostedCheckoutSpecificInput.setSessionTimeout(intersolveTimeout);
-            }
-        }
 
         hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
         if (!paymentInfo.isRecurringToken()) {
             hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
         }
+
+        boolean isIntersolve = false;
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS == paymentInfo.getId()) {
             hostedCheckoutSpecificInput.setCardPaymentMethodSpecificInput(getCardPaymentMethodSpecificInputForHostedCheckout());
             hostedCheckoutSpecificInput.setPaymentProductFilters(getPaymentProductFiltersForHostedCheckout());
+        } else {
+            // We can only work out if the payment mode is Intersolve if group cards was not the selected payment mode.
+            // And let's have a null check here just in case.
+            if(abstractOrderModel.getPaymentMode() != null) {
+                isIntersolve = worldlinePaymentModeService.isIntersolve(abstractOrderModel.getPaymentMode().getCode());
+            }
+
+            if (isIntersolve) {
+                int intersolveTimeout = worldlineConfiguration.getIntersolveTimeout();
+                if (intersolveTimeout > 0) {
+                    hostedCheckoutSpecificInput.setSessionTimeout(intersolveTimeout);
+                }
+            }
         }
+        /*  As per WL5SAP-10, we MUST show the result page if Intersolve is being used (else we never show it, as per
+            previous logic): */
+        hostedCheckoutSpecificInput.setShowResultPage(isIntersolve);
 
         hostedCheckoutSpecificInput.setReturnUrl(getReturnUrlFromSession());
         if (worldlineConfiguration.getSessionTimeout() != null) {
