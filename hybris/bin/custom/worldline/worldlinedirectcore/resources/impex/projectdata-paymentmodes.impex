@@ -43,3 +43,4 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 128                ; Discover                      ; Discover                      ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
                                  ; 5403               ; Chèques Vacance Connect       ; Chèques Vacance Connect       ; true  ; false     ; false  ; true    ; WorldlinePaymentInfo
                                  ; 3204               ; BLIK                          ; BLIK                          ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
+                                 ; 5003               ; Linxo Connect                 ; Linxo Connect                 ; true  ; false     ; false  ; true    ; WorldlinePaymentInfo
