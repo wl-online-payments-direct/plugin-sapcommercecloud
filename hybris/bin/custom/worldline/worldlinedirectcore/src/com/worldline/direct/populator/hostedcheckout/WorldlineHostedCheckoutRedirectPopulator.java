@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
+import com.worldline.direct.enums.WeroCaptureTrigger;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentModeService;
@@ -12,6 +13,9 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator.HOSTED_CHECKOUT_RETURN_URL;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
@@ -21,6 +25,8 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentModeService worldlinePaymentModeService;
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(WorldlineHostedCheckoutRedirectPopulator.class);
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
@@ -59,6 +65,10 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 RedirectPaymentProduct5403SpecificInput redirectPaymentProduct5403SpecificInput = new RedirectPaymentProduct5403SpecificInput();
                 redirectPaymentProduct5403SpecificInput.setCompleteRemainingPaymentAmount(true);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5403SpecificInput(redirectPaymentProduct5403SpecificInput);
+            case WorldlinedirectcoreConstants.PAYMENT_METHOD_WERO:
+                //RedirectPaymentProduct900SpecificInput redirectPaymentProduct900SpecificInput = new RedirectPaymentProduct900SpecificInput();
+                //redirectPaymentProduct900SpecificInput.setCaptureTrigger(getWeroCaptureTrigger());
+
             default:
                 // No Specific parameter needed for this paymentMethod
                 break;
@@ -68,6 +78,19 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
         return redirectPaymentMethodSpecificInput;
     }
 
+    private String getWeroCaptureTrigger() {
+        WorldlineConfigurationModel worldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (worldlineConfiguration == null) {
+            return StringUtils.EMPTY;
+        }
+        WeroCaptureTrigger weroCaptureTrigger = worldlineConfiguration.getWeroCaptureTrigger();
+        if (weroCaptureTrigger == null) {
+            LOGGER.warn("No Wero capture trigger set, but Wero is being used. Please set this against your" +
+                    "WorldlineConfiguration! Blank value will be sent for this transaction.");
+            return StringUtils.EMPTY;
+        }
+        return weroCaptureTrigger.getCode();
+    }
     private Boolean requiresApproval(String paymentModeId) {
         // Find out if this payment mode is 'sale only' (e.g. does not support auth)
         if (worldlinePaymentModeService.isSaleOnly(paymentModeId)) {

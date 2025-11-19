@@ -49,6 +49,20 @@
             <value code="MONTHLY" />
             <value code="YEARLY" />
         </enumtype>
+        <enumtype code="WeroCaptureTrigger">
+            <value code="SHIPPING" />
+            <value code="DELIVERY" />
+            <value code="AVAILABILITY" />
+            <value code="SERVICEFULFILMENT" />
+            <value code="OTHER" />
+        </enumtype>
+        <enumtype code="WeroRefundReason">
+            <value code="WrongAmountCorrection" />
+            <value code="PreDisputeRefund" />
+            <value code="SubscriptionRefund" />
+            <value code="ServiceLateCancellation" />
+            <value code="Other" />
+        </enumtype>
     </enumtypes>
 
     <itemtypes>
@@ -169,6 +183,18 @@
                 </attribute>
                 <attribute qualifier="intersolveTimeout" type="java.lang.Integer">
                     <description>The timeout to send to Worldline if an Intersolve payment is used.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="merchantName" type="java.lang.String">
+                    <description>The name of the merchant, sent in order.references.descriptor.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="weroCaptureTrigger" type="WeroCaptureTrigger">
+                    <description>The Capture Trigger this merchant will use. Note that this attribute does not control
+                    the actual capturing of orders, it is expected that the merchant will implement this according
+                    to their own requirements.</description>
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
@@ -568,6 +594,15 @@
                     <persistence type="property" />
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Booelean.FALSE</defaultvalue>
+                </attribute>
+            </attributes>
+        </itemtype>
+        <itemtype code="RefundEntry" autocreate="false" generate="false">
+            <attributes>
+                <attribute qualifier="weroRefundReason" type="WeroRefundReason">
+                    <description> The reason for the refund if paying by Wero.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
                 </attribute>
             </attributes>
         </itemtype>

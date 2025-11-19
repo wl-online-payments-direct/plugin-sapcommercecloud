@@ -3,7 +3,6 @@ package com.worldline.direct.populator;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import de.hybris.platform.commercefacades.order.data.OrderData;
 import de.hybris.platform.commercefacades.product.PriceDataFactory;
-import de.hybris.platform.commercefacades.product.data.PriceData;
 import de.hybris.platform.commercefacades.product.data.PriceDataType;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.OrderModel;

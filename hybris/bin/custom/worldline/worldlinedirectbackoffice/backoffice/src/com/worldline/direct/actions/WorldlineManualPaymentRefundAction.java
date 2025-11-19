@@ -85,6 +85,8 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
 
                return result;
             }
+         } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_WERO == worldlinePaymentInfo.getId().intValue()) {
+
          }
       }
 

@@ -2,6 +2,7 @@ package com.worldline.direct.populator;
 
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;
@@ -11,6 +12,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ADDRESS_INDICATEUR.NEW;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ADDRESS_INDICATEUR.SAME_AS_BILLING;
@@ -71,6 +73,20 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
     private OrderReferences getReferences(AbstractOrderModel abstractOrderModel) {
         final OrderReferences orderReferences = new OrderReferences();
         orderReferences.setMerchantReference(abstractOrderModel.getCode());
+
+        WorldlineConfigurationModel worldlineConfiguration = abstractOrderModel.getStore().getWorldlineConfiguration();
+        if (worldlineConfiguration != null) {
+            String merchantDescriptor;
+            if (!StringUtils.isBlank(worldlineConfiguration.getMerchantName())) {
+                merchantDescriptor = worldlineConfiguration.getMerchantName();
+            } else {
+                merchantDescriptor = worldlineConfiguration.getMerchantID();
+            }
+            if (merchantDescriptor != null && merchantDescriptor.length() > 15) {
+                merchantDescriptor = merchantDescriptor.substring(0, 14);
+            }
+            orderReferences.setDescriptor(merchantDescriptor);
+        }
         return orderReferences;
     }
 
