@@ -10,7 +10,5 @@ public interface WorldlinePaymentModeService extends PaymentModeService {
 
     boolean isIntersolve(String paymentModeId);
 
-    boolean isFloa(String paymentModeId);
-
     boolean isSaleOnly(String paymentModeId);
 }
