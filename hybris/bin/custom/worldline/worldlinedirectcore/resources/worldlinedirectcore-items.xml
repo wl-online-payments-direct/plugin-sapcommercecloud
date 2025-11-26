@@ -172,6 +172,14 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
+                <attribute qualifier="hostedTokenizationNewCardLabel" type="localized:java.lang.String">
+                    <description>The text shown against the "New Card" section of the payment method selection during
+                    checkout if hosted tokenization is enabled. If left blank, will fall back to previously configured
+                    localization property.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+
             </attributes>
         </itemtype>
 
@@ -551,15 +559,6 @@
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                 </attribute>
-                <attribute qualifier="floapay" type="java.lang.Boolean">
-                    <description>
-                        Whether or not to treat this PaymentMode as a FloaPay payment. This will affect the parameters
-                        which are sent to Worldline for a new payment.
-                    </description>
-                    <persistence type="property" />
-                    <modifiers optional="false" />
-                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
-                </attribute>
                 <attribute qualifier="saleOnly" type="java.lang.Boolean">
                     <description>
                         If selected, this will force the payment mode to always send
@@ -568,6 +567,13 @@
                     <persistence type="property" />
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Booelean.FALSE</defaultvalue>
+                </attribute>
+                <attribute qualifier="overrideName" type="java.lang.Boolean">
+                    <description>Whether the name on this PaymentMode should override the name returned by Worldline
+                    during the checkout flow.</description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                 </attribute>
             </attributes>
         </itemtype>
