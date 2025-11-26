@@ -29,15 +29,6 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
         return false;
     }
 
-    @Override
-    public boolean isFloa(String paymentModeId) {
-        PaymentModeModel paymentMode = getPaymentModeForCode(paymentModeId);
-        if(paymentMode != null) {
-            return paymentMode.getFloapay();
-        }
-        return false;
-    }
-
     /**
      * Returns a boolean representing whether the payment mode is SALE only (e.g. cannot be preauthed).
      * @param paymentModeId A String representing the code of a PaymentMode.

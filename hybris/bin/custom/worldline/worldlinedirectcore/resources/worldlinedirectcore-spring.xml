@@ -142,6 +142,9 @@
         <property name="worldlineHostedTokenizationPaymentProductsEvaluatorList"
                   ref="worldlineHostedTokenizationPaymentProductsEvaluatorList"/>
     </bean>
+    <bean id="worldlinePaymentProductFilterNamesStrategy" class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterNamesStrategy">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
+    </bean>
 
     <util:map id="worldlinePaymentProductFilterStrategyMap"
               key-type="com.worldline.direct.enums.WorldlinePaymentProductFilterEnum"
@@ -150,6 +153,7 @@
         <entry key="CHECKOUT_TYPE" value-ref="worldlinePaymentProductFilterByCheckoutStrategy"/>
         <entry key="ACTIVE_PAYMENTS" value-ref="worldlinePaymentProductFilterByAvailabilityStrategy"/>
         <entry key="GROUP_CARDS" value-ref="worldlinePaymentProductFilterByGroupCardsStrategy"/>
+        <entry key="NAMES" value-ref="worldlinePaymentProductFilterNamesStrategy" />
     </util:map>
     <bean id="worldlinePaymentProductFilterStrategyFactory"
           class="com.worldline.direct.factory.impl.DefaultWorldlinePaymentProductFilterStrategyFactory">
