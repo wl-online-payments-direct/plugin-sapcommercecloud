@@ -63,8 +63,13 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
             }
 
             if (isIntersolve) {
-                int intersolveTimeout = worldlineConfiguration.getIntersolveTimeout();
-                if (intersolveTimeout > 0) {
+                int intersolveTimeout;
+                if(worldlineConfiguration.getIntersolveTimeout() == null) {
+                    intersolveTimeout = WorldlinedirectcoreConstants.DEFAULT_INTERSOLVE_TIMEOUT;
+                } else {
+                    intersolveTimeout = worldlineConfiguration.getIntersolveTimeout();
+                }
+                if (intersolveTimeout > 0 && intersolveTimeout <= 1440) {
                     hostedCheckoutSpecificInput.setSessionTimeout(intersolveTimeout);
                 }
             }
