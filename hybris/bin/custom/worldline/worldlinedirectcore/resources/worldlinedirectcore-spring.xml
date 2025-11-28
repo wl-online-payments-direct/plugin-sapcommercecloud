@@ -145,6 +145,9 @@
     <bean id="worldlinePaymentProductFilterNamesStrategy" class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterNamesStrategy">
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
     </bean>
+    <bean id="worldlinePaymentProductSortStrategy" class="com.worldline.direct.strategy.impl.WorldlinePaymentProductSortStrategy">
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService" />
+    </bean>
 
     <util:map id="worldlinePaymentProductFilterStrategyMap"
               key-type="com.worldline.direct.enums.WorldlinePaymentProductFilterEnum"
@@ -154,6 +157,7 @@
         <entry key="ACTIVE_PAYMENTS" value-ref="worldlinePaymentProductFilterByAvailabilityStrategy"/>
         <entry key="GROUP_CARDS" value-ref="worldlinePaymentProductFilterByGroupCardsStrategy"/>
         <entry key="NAMES" value-ref="worldlinePaymentProductFilterNamesStrategy" />
+        <entry key="SORT" value-ref="worldlinePaymentProductSortStrategy" />
     </util:map>
     <bean id="worldlinePaymentProductFilterStrategyFactory"
           class="com.worldline.direct.factory.impl.DefaultWorldlinePaymentProductFilterStrategyFactory">

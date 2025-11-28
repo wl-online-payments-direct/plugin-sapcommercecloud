@@ -5,6 +5,11 @@
 
 <items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="items.xsd">
+    <collectiontypes>
+        <collectiontype code="WorldlinePaymentModeList" elementtype="PaymentMode"
+                        type="list" />
+    </collectiontypes>
+
     <enumtypes>
         <enumtype generate="true" code="WorldlineCheckoutTypesEnum" autocreate="true">
             <description>Checkout types for card payments</description>
@@ -172,10 +177,11 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
-                <attribute qualifier="hostedTokenizationNewCardLabel" type="localized:java.lang.String">
-                    <description>The text shown against the "New Card" section of the payment method selection during
-                    checkout if hosted tokenization is enabled. If left blank, will fall back to previously configured
-                    localization property.</description>
+                <attribute qualifier="paymentModeSort" type="WorldlinePaymentModeList">
+                    <description>A list of Payment Modes. If this list is present, ONLY these PaymentModes will be
+                    shown to customers. Payment Modes which are flagged as active and returned by Worldline will be
+                    shown in the order defined within this list. If the list is not present or is empty, the default
+                    order will be used.</description>
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
