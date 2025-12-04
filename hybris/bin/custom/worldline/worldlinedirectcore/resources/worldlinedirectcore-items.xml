@@ -54,6 +54,11 @@
             <value code="MONTHLY" />
             <value code="YEARLY" />
         </enumtype>
+        <enumtype code="WorldlineMealvouchersProductType">
+            <value code="FOOD_AND_DRINK" />
+            <value code="HOME_AND_GARDEN" />
+            <value code="GIFT_AND_FLOWERS" />
+        </enumtype>
     </enumtypes>
 
     <itemtypes>
@@ -580,6 +585,16 @@
                     <persistence type="property" />
                     <modifiers optional="false" />
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="Product" autocreate="false" generate="false">
+            <description>Extending Product to include MealVouchers information.</description>
+            <attributes>
+                <attribute qualifier="worldlineMealvoucherProductType" type="WorldlineMealvouchersProductType">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
                 </attribute>
             </attributes>
         </itemtype>
