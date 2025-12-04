@@ -148,6 +148,9 @@
     <bean id="worldlinePaymentProductSortStrategy" class="com.worldline.direct.strategy.impl.WorldlinePaymentProductSortStrategy">
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService" />
     </bean>
+    <bean id="worldlinePaymentProductFilterByCartDataMealvouchersStrategy" class="com.worldline.direct.strategy.impl.WorldlinePaymentProductFilterByCartDataMealvouchersStrategy">
+
+    </bean>
 
     <util:map id="worldlinePaymentProductFilterStrategyMap"
               key-type="com.worldline.direct.enums.WorldlinePaymentProductFilterEnum"
@@ -159,9 +162,18 @@
         <entry key="NAMES" value-ref="worldlinePaymentProductFilterNamesStrategy" />
         <entry key="SORT" value-ref="worldlinePaymentProductSortStrategy" />
     </util:map>
+
+    <util:map id="worldlinePaymentProductFilterByCartDataStrategyMap"
+              key-type="com.worldline.direct.enums.WorldlinePaymentProductFilterByCartDataEnum"
+              value-type="com.worldline.direct.strategy.WorldlinePaymentProductFilterByCartDataStrategy"
+              map-class="java.util.HashMap">
+        <entry key="MEALVOUCHERS" value-ref="worldlinePaymentProductFilterByCartDataMealvouchersStrategy" />
+    </util:map>
+
     <bean id="worldlinePaymentProductFilterStrategyFactory"
           class="com.worldline.direct.factory.impl.DefaultWorldlinePaymentProductFilterStrategyFactory">
         <property name="paymentProductFilterStrategyMap" ref="worldlinePaymentProductFilterStrategyMap"/>
+        <property name="paymentProductFilterByCartDataStrategyMap"  ref="worldlinePaymentProductFilterByCartDataStrategyMap" />
     </bean>
 
     <!-- evaluator -->

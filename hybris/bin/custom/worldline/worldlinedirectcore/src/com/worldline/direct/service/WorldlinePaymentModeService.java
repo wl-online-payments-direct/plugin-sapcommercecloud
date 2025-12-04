@@ -1,5 +1,6 @@
 package com.worldline.direct.service;
 
+import com.onlinepayments.domain.PaymentProduct;
 import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.order.PaymentModeService;
 
@@ -11,4 +12,6 @@ public interface WorldlinePaymentModeService extends PaymentModeService {
     boolean isIntersolve(String paymentModeId);
 
     boolean isSaleOnly(String paymentModeId);
+
+    PaymentModeModel getPaymentModeForPaymentProduct(PaymentProduct paymentProduct);
 }
