@@ -10,6 +10,7 @@ import com.worldline.direct.util.WorldlineAmountUtils;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.order.CalculationService;
 import de.hybris.platform.order.exceptions.CalculationException;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
@@ -110,6 +111,12 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         final String paymentTransactionId = webhooksEvent.getPayment().getId();
         final PaymentTransactionModel paymentTransaction = worldlineTransactionDao.findPaymentTransaction(getPaymentId(paymentTransactionId));
 
+        String merchantReference = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
+        AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(merchantReference);
+
+        // Update 3DS Parameters from webhook
+        update3DSParameters(webhooksEvent, order, merchantReference);
+
         final boolean alreadyProcessed = paymentTransaction.getEntries().stream()
                 .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
                 .filter(entry -> webhooksEvent.getPayment().getStatus().equals(entry.getTransactionStatusDetails()))
@@ -190,6 +197,11 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
         LOGGER.debug("[WORLDLINE] Process {} EVENT id : {}", webhooksEvent.getType(), webhooksEvent.getId());
         String paymentTransactionId = getPaymentId(webhooksEvent.getPayment().getId());
+        String merchantReference = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
+        AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(merchantReference);
+
+        // Update 3DS Parameters from webhook
+        update3DSParameters(webhooksEvent, order, merchantReference);
 
         PaymentTransactionModel paymentTransaction;
         try {
@@ -213,8 +225,6 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
             }
         } catch (ModelNotFoundException e) {
             // If it doesn't exist (which it should), we create the PaymentTransaction now.
-            String merchantReference = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
-            AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(merchantReference);
             String status = webhooksEvent.getPayment().getStatus();
             paymentTransaction = createAuthorizationPaymentTransaction(order, merchantReference, paymentTransactionId, status, webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney());
         }
@@ -379,6 +389,22 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 return WorldlinedirectcoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue();
             default:
                 return "NOT_SUPPORTED";
+        }
+    }
+
+    private void update3DSParameters(WebhooksEvent webhooksEvent, AbstractOrderModel order, String merchantReference) {
+        if(order.getPaymentInfo() instanceof WorldlinePaymentInfoModel worldlinePaymentInfo) {
+            if(webhooksEvent.getPayment().getPaymentOutput() != null && webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput() != null && webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput().getThreeDSecureResults() != null) {
+                ThreeDSecureResults threeDSecureResults = webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput().getThreeDSecureResults();
+                if(StringUtils.isNotBlank(threeDSecureResults.getAppliedExemption()) && StringUtils.isBlank(worldlinePaymentInfo.getAppliedExemption())) {
+                    worldlinePaymentInfo.setAppliedExemption(threeDSecureResults.getAppliedExemption());
+                    modelService.save(worldlinePaymentInfo);
+                }
+                if(StringUtils.isNotBlank(threeDSecureResults.getLiability()) && StringUtils.isBlank(worldlinePaymentInfo.getLiability())) {
+                    worldlinePaymentInfo.setLiability(threeDSecureResults.getLiability());
+                    modelService.save(worldlinePaymentInfo);
+                }
+            }
         }
     }
 

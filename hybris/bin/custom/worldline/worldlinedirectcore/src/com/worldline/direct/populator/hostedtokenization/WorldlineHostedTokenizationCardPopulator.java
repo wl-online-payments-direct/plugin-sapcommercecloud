@@ -4,17 +4,18 @@ import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
+import com.worldline.direct.factory.impl.WorldlinePaymentProduct130SpecificInputFactory;
+import com.worldline.direct.factory.impl.WorldlineThreeDSecureFactory;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentModeService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.converters.Populator;
-import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
+import de.hybris.platform.enumeration.EnumerationService;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
@@ -28,16 +29,12 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
     private static final String RECCURANCE_FIRST = "first";
     private static final String CARDHOLDER_INITIAITED = "cardholderInitiated";
     private static final String MERCHANT_INITIAITED = "merchantInitiated";
-    public static final String CHALLENGE_REQUIRED = "challenge-required";
-    public static final String LOW_VALUE = "low-value";
+
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentService worldlinePaymentService;
     private WorldlinePaymentModeService worldlinePaymentModeService;
-
-    public static final String CARTES_BANCAIRES_SINGLE_SALE = "single-amount";
-    public static final String CARTES_BANCAIRES_SINGLE_AUTH = "payment-upon-shipment";
-    public static final String CARTES_BANCAIRES_RECURRING = "other-recurring-payments";
+    private EnumerationService enumerationService;
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreatePaymentRequest createPaymentRequest) throws ConversionException {
@@ -81,8 +78,10 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         }
 
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS == hostedTokenization.getToken().getPaymentProductId()) {
-            PaymentProduct130SpecificInput paymentProduct130SpecificInput = getPaymentProduct130SpecificInput(abstractOrderModel, paymentInfo, isSale);
-            cardPaymentMethodSpecificInput.setPaymentProduct130SpecificInput(paymentProduct130SpecificInput);
+            PaymentProduct130SpecificInput paymentProduct130SpecificInput = WorldlinePaymentProduct130SpecificInputFactory.getPaymentProduct130SpecificInput(currentWorldlineConfiguration, abstractOrderModel, paymentInfo, isSale);
+            if (paymentProduct130SpecificInput != null) {
+                cardPaymentMethodSpecificInput.setPaymentProduct130SpecificInput(paymentProduct130SpecificInput);
+            }
         }
         return cardPaymentMethodSpecificInput;
     }
@@ -91,7 +90,6 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
         cardPaymentMethodSpecificInput.setTokenize(false);
-        cardPaymentMethodSpecificInput.setSkipAuthentication(false);
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
         cardPaymentMethodSpecificInput.setIsRecurring(isRecurring);
 
@@ -102,20 +100,11 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
 
         } else {
-            cardPaymentMethodSpecificInput.setThreeDSecure(new ThreeDSecure());
-            cardPaymentMethodSpecificInput.getThreeDSecure().setRedirectionData(new RedirectionData());
-            cardPaymentMethodSpecificInput.getThreeDSecure().getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
-
-//            if (BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired())) {
-//                cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
-//            }
-            boolean isExemptionRequestLowValue = BooleanUtils.isTrue(currentWorldlineConfiguration.isExemptionRequest()) && abstractOrderModel.getCurrency().getIsocode().equals("EUR") && abstractOrderModel.getTotalPrice() < 30;
-            boolean isChallengeRequired = BooleanUtils.isTrue(currentWorldlineConfiguration.isChallengeRequired());
-
-            if (isChallengeRequired) {
-                cardPaymentMethodSpecificInput.getThreeDSecure().setChallengeIndicator(CHALLENGE_REQUIRED);
-            } else if (isExemptionRequestLowValue) {
-                cardPaymentMethodSpecificInput.getThreeDSecure().setExemptionRequest(LOW_VALUE);
+            ThreeDSecure threeDSecure = WorldlineThreeDSecureFactory.createThreeDSecure(currentWorldlineConfiguration, abstractOrderModel, enumerationService);
+            if(threeDSecure != null) {
+                cardPaymentMethodSpecificInput.setThreeDSecure(threeDSecure);
+                threeDSecure.setRedirectionData(new RedirectionData());
+                threeDSecure.getRedirectionData().setReturnUrl(getHostedTokenizationReturnUrl());
             }
 
             if (isRecurring) {
@@ -126,37 +115,6 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         }
 
         return cardPaymentMethodSpecificInput;
-    }
-
-    /**
-     * Generates a PaymentProduct130SpecificInput for Cartes Bancaires. Provides numberOfItems which will represent the
-     * number of items in the AbstractOrder but is capped to 99, and populates the 3DSecure use case.
-     * @param abstractOrderModel Used to find the total items being ordered.
-     * @param paymentInfo Used to find whether this is a recurring payment.
-     * @param isSale Used to populate 3DSecure use case if not a recurring payment.
-     *
-     * @return A PaymentProduct130SpecificInput for the provided AbstractOrderModel based on whether the order is recurring
-     * and whether the current payment mode is SALE or AUTH.
-     */
-    private static PaymentProduct130SpecificInput getPaymentProduct130SpecificInput(AbstractOrderModel abstractOrderModel, WorldlinePaymentInfoModel paymentInfo, boolean isSale) {
-        PaymentProduct130SpecificInput paymentProduct130SpecificInput = new PaymentProduct130SpecificInput();
-        PaymentProduct130SpecificThreeDSecure threeDSecure = new PaymentProduct130SpecificThreeDSecure();
-        int numberOfItems = 0;
-        for (AbstractOrderEntryModel entry : abstractOrderModel.getEntries()) {
-            numberOfItems += entry.getQuantity();
-        }
-        threeDSecure.setNumberOfItems(Math.min(numberOfItems, 99));
-
-        if (paymentInfo.isRecurringToken()) {
-            threeDSecure.setUsecase(CARTES_BANCAIRES_RECURRING);
-        } else if (isSale) {
-            threeDSecure.setUsecase(CARTES_BANCAIRES_SINGLE_SALE);
-        } else {
-            threeDSecure.setUsecase(CARTES_BANCAIRES_SINGLE_AUTH);
-        }
-        paymentProduct130SpecificInput.setThreeDSecure(threeDSecure);
-
-        return paymentProduct130SpecificInput;
     }
 
     private String getHostedTokenizationReturnUrl() {
@@ -178,5 +136,9 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
 
     public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
         this.worldlinePaymentModeService = worldlinePaymentModeService;
+    }
+
+    public void setEnumerationService(EnumerationService enumerationService) {
+        this.enumerationService = enumerationService;
     }
 }

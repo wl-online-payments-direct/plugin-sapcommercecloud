@@ -1,0 +1,2 @@
+INSERT_UPDATE WorldlineConfigurationConstraint; id[unique = true]            ; type(code)             ; severity(code); active; message
+                                              ; worldlineExemptionValueCheck ; WorldlineConfiguration ; ERROR         ; true  ; ""
