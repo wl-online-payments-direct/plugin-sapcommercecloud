@@ -3,7 +3,6 @@ package com.worldline.direct.populator.hostedtokenization;
 import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.CreatePaymentRequest;
 import com.onlinepayments.domain.RedirectPaymentMethodSpecificInput;
-import com.onlinepayments.domain.RedirectPaymentProduct809SpecificInput;
 import com.onlinepayments.domain.RedirectionData;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import de.hybris.platform.converters.Populator;
@@ -13,7 +12,6 @@ import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
 import org.springframework.beans.factory.annotation.Required;
 
-import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_IDEAL;
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
