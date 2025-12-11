@@ -378,6 +378,7 @@
 						<ea:attribute qualifier="worldlineRecurringToken"/>
 						<ea:attribute qualifier="liability" />
 						<ea:attribute qualifier="appliedExemption" />
+						<ea:attribute qualifier="mealvoucherBrand" />
 					</ea:section>
 				</ea:tab>
 			</ea:editorArea>
