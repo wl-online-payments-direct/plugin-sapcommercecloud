@@ -108,8 +108,6 @@
 				<ea:section name="hmc.worldline.3dsecure.basic">
 					<ea:attribute qualifier="enable3DS"/>
 					<ea:attribute qualifier="enableMandatory3DS"/>
-					<ea:attribute qualifier="challengeRequired"/>
-					<ea:attribute qualifier="exemptionRequest"/>
 				</ea:section>
 				<ea:section name="hmc.worldline.3dsecure.exemption">
 					<ea:attribute qualifier="exemptionType3DS" />
