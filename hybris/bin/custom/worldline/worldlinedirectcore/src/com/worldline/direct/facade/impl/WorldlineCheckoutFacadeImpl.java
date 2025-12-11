@@ -595,7 +595,15 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     protected void updatePaymentInfoIfNeeded(final AbstractOrderModel orderModel, PaymentResponse paymentResponse) {
         if (orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel paymentInfo) {
             final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
-
+            if (paymentOutput.getRedirectPaymentMethodSpecificOutput() != null) {
+                if (WorldlinedirectcoreConstants.PAYMENT_METHOD_MEALVOUCHER == paymentInfo.getId()) {
+                    String brand = paymentOutput.getRedirectPaymentMethodSpecificOutput().getPaymentProduct5402SpecificOutput().getBrand();
+                    if (brand != null) {
+                        paymentInfo.setMealvoucherBrand(brand);
+                        modelService.save(paymentInfo);
+                    }
+                }
+            }
             if (paymentOutput.getCardPaymentMethodSpecificOutput() != null) {
                 if (paymentInfo.getId().equals(PAYMENT_METHOD_HTP) || paymentInfo.getId().equals(PAYMENT_METHOD_GROUP_CARDS)) {
                     paymentInfo.setId(paymentOutput.getCardPaymentMethodSpecificOutput().getPaymentProductId());

@@ -327,6 +327,10 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
+                <attribute qualifier="mealvoucherBrand" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
             </attributes>
         </itemtype>
 
