@@ -84,10 +84,6 @@
 				<ea:section name="hmc.worldline.worldlineHostecCheckoutConfig">
 					<ea:attribute qualifier="hostedCheckoutVariant"/>
 				</ea:section>
-				<ea:section name="hmc.worldline.settings.3ds">
-					<ea:attribute qualifier="challengeRequired"/>
-					<ea:attribute qualifier="exemptionRequest"/>
-				</ea:section>
 				<ea:section name="hmc.worldline.worldlineGroupedCardsConfig">
 					<ea:attribute qualifier="groupCards"/>
 					<ea:attribute qualifier="groupCardsLogo"/>
@@ -99,12 +95,33 @@
 				<ea:section name="hmc.worldline.worldlineUnboundConfig">
 					<ea:attribute qualifier="submitOrderPromotion"/>
 					<ea:attribute qualifier="applySurcharge"/>
+					<ea:attribute qualifier="paymentModeSort" />
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineBankTransferConfig">
 					<ea:attribute qualifier="instantBankTransfers"/>
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineIntersolveConfig">
 					<ea:attribute qualifier="intersolveTimeout"/>
+				</ea:section>
+			</ea:tab>
+			<ea:tab name="hmc.worldline.3dsecure">
+				<ea:section name="hmc.worldline.3dsecure.basic">
+					<ea:attribute qualifier="enable3DS"/>
+					<ea:attribute qualifier="enableMandatory3DS"/>
+					<ea:attribute qualifier="challengeRequired"/>
+					<ea:attribute qualifier="exemptionRequest"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.3dsecure.exemption">
+					<ea:attribute qualifier="exemptionType3DS" />
+					<ea:custom>
+						<ea:default><![CDATA[<h3>[hmc.worldline.worldlineConfiguration.3ds.liability.message]</h3>]]></ea:default>
+					</ea:custom>
+					<ea:attribute qualifier="exemptionLimit3DS" editor="com.hybris.cockpitng.editor.defaultbigdecimal">
+						<ea:editor-parameter>
+							<ea:name>numberFormat</ea:name>
+							<ea:value>0.00</ea:value>
+						</ea:editor-parameter>
+					</ea:attribute>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>
@@ -281,8 +298,8 @@
 		<ea:editorArea name="">
 			<ea:tab name="hmc.worldline">
 				<ea:section name="hmc.worldline.worldlineSpecificPaymentConfigurations">
+					<ea:attribute qualifier="overrideName"/>
 					<ea:attribute qualifier="intersolve"/>
-					<ea:attribute qualifier="floapay"/>
 					<ea:attribute qualifier="saleOnly"/>
 				</ea:section>
 			</ea:tab>
@@ -349,6 +366,8 @@
 						<ea:attribute qualifier="usedSavedPayment"/>
 						<ea:attribute qualifier="recurringToken"/>
 						<ea:attribute qualifier="worldlineRecurringToken"/>
+						<ea:attribute qualifier="liability" />
+						<ea:attribute qualifier="appliedExemption" />
 					</ea:section>
 				</ea:tab>
 			</ea:editorArea>
