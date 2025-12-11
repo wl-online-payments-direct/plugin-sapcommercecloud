@@ -59,6 +59,11 @@
             <value code="HOME_AND_GARDEN" />
             <value code="GIFT_AND_FLOWERS" />
         </enumtype>
+        <enumtype code="WorldlineExemptionType">
+            <value code="NO_3DS_EXEMPTION" />
+            <value code="LOW_VALUE" />
+            <value code="TRANSACTION_RISK_ANALYSIS" />
+        </enumtype>
     </enumtypes>
 
     <itemtypes>
@@ -153,18 +158,6 @@
                     <modifiers read="true" write="true"/>
                     <persistence type="property"/>
                 </attribute>
-                <attribute qualifier="exemptionRequest" type="boolean">
-                    <persistence type="property" />
-                    <modifiers optional="false" />
-                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
-                    <description>Request a SCA exemption for all transactions below 30 EUR.</description>
-                </attribute>
-                <attribute qualifier="challengeRequired" type="boolean">
-                    <persistence type="property" />
-                    <modifiers optional="false" />
-                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
-                    <description>Enforce SCA for all transactions.</description>
-                </attribute>
                 <attribute qualifier="applySurcharge" type="boolean">
                     <persistence type="property" />
                     <modifiers optional="false" />
@@ -190,7 +183,30 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
-
+                <attribute qualifier="enable3DS" type="java.lang.Boolean">
+                    <description>Corresponds to skipAuthentication flag in payment calls (inversely).</description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.TRUE</defaultvalue>
+                </attribute>
+                <attribute qualifier="enableMandatory3DS" type="java.lang.Boolean">
+                    <description>Corresponds to challengeIndicator in payment calls.</description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                </attribute>
+                <attribute qualifier="exemptionType3DS" type="WorldlineExemptionType">
+                    <description>Type of 3DS Exemption for EUR only</description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>em().getEnumerationValue("WorldlineExemptionType","NO_3DS_EXEMPTION")</defaultvalue>
+                </attribute>
+                <attribute qualifier="exemptionLimit3DS" type="java.math.BigDecimal">
+                    <description>Max transaction value for 3DS exemptions.</description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.math.BigDecimal.ZERO</defaultvalue>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -302,6 +318,14 @@
                 <attribute qualifier="worldlineRecurringToken" type="WorldlineRecurringToken">
                     <persistence type="property" />
                     <description>Token that is used for recurring payment</description>
+                </attribute>
+                <attribute qualifier="appliedExemption" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="liability" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
                 </attribute>
             </attributes>
         </itemtype>
@@ -595,6 +619,17 @@
                 <attribute qualifier="worldlineMealvoucherProductType" type="WorldlineMealvouchersProductType">
                     <persistence type="property" />
                     <modifiers optional="true" />
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <itemtype code="WorldlineConfigurationConstraint" extends="TypeConstraint"
+                  autocreate="true" generate="true">
+            <description>Cross-field validation for WorldlineConfiguration</description>
+            <attributes>
+                <attribute qualifier="annotation" type="java.lang.Class" redeclare="true">
+                    <modifiers write="false" initial="true" optional="false"/>
+                    <defaultvalue>com.worldline.direct.constraints.WorldlineConfigurationValid.class</defaultvalue>
                 </attribute>
             </attributes>
         </itemtype>

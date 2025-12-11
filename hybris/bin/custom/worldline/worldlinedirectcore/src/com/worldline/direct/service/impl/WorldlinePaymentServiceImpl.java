@@ -106,7 +106,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
             // Find PaymentMode corresponding to PaymentProduct and check if we're supposed to override its name:
             PaymentModeModel paymentMode = worldlinePaymentModeService.getPaymentModeForPaymentProduct(paymentProduct);
-            if(paymentMode != null && paymentMode.getOverrideName()) {
+            if(paymentMode != null && paymentMode.getOverrideName() != null  && paymentMode.getOverrideName()) {
                 // It exists and we are, so set the name to the localised PaymentMode name.
                 paymentProduct.getDisplayHints().setLabel(paymentMode.getName());
             }
