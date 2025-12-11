@@ -1,46 +1,48 @@
 # Create PaymentModes by group
-INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]               ; description[lang = en]        ; active; intersolve; floapay; saleOnly; paymentinfotype(code);
-                                 ; 1                  ; Visa                          ; Visa                          ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 2                  ; American Express              ; American Express              ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 3                  ; Mastercard                    ; Mastercard                    ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 861                ; Alipay                        ; Alipay                        ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 302                ; Apple Pay                     ; Apple Pay                     ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 3012               ; Bancontact                    ; Bancontact                    ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5001               ; Bizum                         ; Bizum                         ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5100               ; Cpay                          ; Cpay                          ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 132                ; Diners Club                   ; Diners Club                   ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 320                ; Google Pay                    ; Google Pay                    ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 809                ; iDEAL                         ; iDEAL                         ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 3112               ; Illicado                      ; Illicado                      ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5700               ; Intersolve                    ; Intersolve                    ; true  ; true      ; false  ; true    ; WorldlinePaymentInfo
-                                 ; 125                ; JCB                           ; JCB                           ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 3301               ; Klarna Pay Now                ; Klarna Pay Now                ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 3302               ; Klarna Pay Later              ; Klarna Pay Later              ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 117                ; Maestro                       ; Maestro                       ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5402               ; Mealvouchers                  ; Mealvouchers                  ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5500               ; Multibanco                    ; Multibanco                    ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5110               ; Oney 3x-4x                    ; Oney 3x-4x                    ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5125               ; Oney Financement long         ; Oney Financement long         ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5600               ; OneyBrandedGiftCard           ; OneyBrandedGiftCard           ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 840                ; Paypal                        ; Paypal                        ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 771                ; SEPA Direct Debit             ; SEPA Direct Debit             ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 863                ; WeChat Pay                    ; WeChat Pay                    ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5407               ; Twint                         ; Twint                         ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 130                ; Cartes Bancaires Frictionless ; Cartes Bancaires Frictionless ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 3203               ; PostFinance Pay               ; PostFinancePay                ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5408               ; Bank Transfer                 ; Bank Transfer                 ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5405               ; Alipay+                       ; Alipay+                       ; true  ; false     ; false  ; true    ; WorldlinePaymentInfo
-                                 ; 5406               ; EPS                           ; EPS                           ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5404               ; WeChat Pay                    ; WeChatPay                     ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 56                 ; Union Pay International       ; Union Pay International       ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5127               ; Oney Card                     ; Oney Card                     ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5128               ; Oney Branded Card             ; Oney Branded Card             ; false ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 3124               ; Przelewy24                    ; Przelewy24                    ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5138               ; Floa 1x                       ; Floa 1x                       ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
-                                 ; 5139               ; Floa 3x                       ; Floa 3x                       ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
-                                 ; 5140               ; Floa 4x                       ; Floa 4x                       ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
-                                 ; 5144               ; Floa 10x                      ; Floa 10x                      ; true  ; false     ; true   ; true    ; WorldlinePaymentInfo
-                                 ; 128                ; Discover                      ; Discover                      ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5403               ; Chèques Vacance Connect       ; Chèques Vacance Connect       ; true  ; false     ; false  ; true    ; WorldlinePaymentInfo
-                                 ; 3204               ; BLIK                          ; BLIK                          ; true  ; false     ; false  ; false   ; WorldlinePaymentInfo
-                                 ; 5003               ; Linxo Connect                 ; Linxo Connect                 ; true  ; false     ; false  ; true    ; WorldlinePaymentInfo
+INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]               ; description[lang = en]        ; active; intersolve; saleOnly; overrideName; paymentinfotype(code);
+                                 ; 1                  ; Visa                          ; Visa                          ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 2                  ; American Express              ; American Express              ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 3                  ; Mastercard                    ; Mastercard                    ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 861                ; Alipay                        ; Alipay                        ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 302                ; Apple Pay                     ; Apple Pay                     ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 3012               ; Bancontact                    ; Bancontact                    ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5001               ; Bizum                         ; Bizum                         ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5100               ; Cpay                          ; Cpay                          ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 132                ; Diners Club                   ; Diners Club                   ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 320                ; Google Pay                    ; Google Pay                    ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 809                ; iDEAL                         ; iDEAL                         ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 3112               ; Illicado                      ; Illicado                      ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5700               ; Intersolve                    ; Intersolve                    ; true  ; true      ; true    ; false       ; WorldlinePaymentInfo
+                                 ; 125                ; JCB                           ; JCB                           ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 3301               ; Klarna Pay Now                ; Klarna Pay Now                ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 3302               ; Klarna Pay Later              ; Klarna Pay Later              ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 117                ; Maestro                       ; Maestro                       ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5402               ; Mealvouchers                  ; Mealvouchers                  ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5500               ; Multibanco                    ; Multibanco                    ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5110               ; Oney 3x-4x                    ; Oney 3x-4x                    ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5125               ; Oney Financement long         ; Oney Financement long         ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5600               ; OneyBrandedGiftCard           ; OneyBrandedGiftCard           ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 840                ; Paypal                        ; Paypal                        ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 771                ; SEPA Direct Debit             ; SEPA Direct Debit             ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 863                ; WeChat Pay                    ; WeChat Pay                    ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5407               ; Twint                         ; Twint                         ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 130                ; Cartes Bancaires Frictionless ; Cartes Bancaires Frictionless ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 3203               ; PostFinance Pay               ; PostFinancePay                ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5408               ; Bank Transfer                 ; Bank Transfer                 ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5405               ; Alipay+                       ; Alipay+                       ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
+                                 ; 5406               ; EPS                           ; EPS                           ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5404               ; WeChat Pay                    ; WeChatPay                     ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 56                 ; Union Pay International       ; Union Pay International       ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 3124               ; Przelewy24                    ; Przelewy24                    ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5138               ; Floa 1x                       ; Floa 1x                       ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
+                                 ; 5139               ; Floa 3x                       ; Floa 3x                       ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
+                                 ; 5140               ; Floa 4x                       ; Floa 4x                       ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
+                                 ; 5144               ; Floa 10x                      ; Floa 10x                      ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
+                                 ; 128                ; Discover                      ; Discover                      ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5403               ; Chèques Vacance Connect       ; Chèques Vacance Connect       ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
+                                 ; 3204               ; BLIK                          ; BLIK                          ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 5003               ; Linxo Connect                 ; Linxo Connect                 ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
+
+INSERT_UPDATE OneyPaymentMode; code[unique = true]; name[lang = en]   ; description[lang = en]; active; intersolve; saleOnly; overrideName; paymentOption; paymentinfotype(code);
+                             ; 5127               ; Oney Card         ; Oney Card             ; true  ; false     ; false   ; false       ; 0            ; WorldlinePaymentInfo
+                             ; 5128               ; Oney Branded Card ; Oney Branded Card     ; false ; false     ; false   ; false       ; 0            ; WorldlinePaymentInfo

@@ -613,6 +613,15 @@
             </attributes>
         </itemtype>
 
+        <itemtype code="OneyPaymentMode" extends="StandardPaymentMode">
+            <attributes>
+                <attribute qualifier="paymentOption" type="java.lang.Integer">
+                    <persistence type="property" />
+                    <modifiers optional="false" initial="true" />
+                </attribute>
+            </attributes>
+        </itemtype>
+
         <itemtype code="Product" autocreate="false" generate="false">
             <description>Extending Product to include MealVouchers information.</description>
             <attributes>

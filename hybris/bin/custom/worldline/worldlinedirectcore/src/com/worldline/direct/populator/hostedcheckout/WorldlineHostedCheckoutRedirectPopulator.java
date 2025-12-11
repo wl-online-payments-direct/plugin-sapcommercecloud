@@ -4,11 +4,13 @@ import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
+import com.worldline.direct.model.OneyPaymentModeModel;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentModeService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
@@ -63,7 +65,10 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 // No Specific parameter needed for this paymentMethod
                 break;
         }
-
+        PaymentModeModel paymentMode = worldlinePaymentModeService.getPaymentModeForCode(String.valueOf(paymentInfo.getId()));
+        if (paymentMode instanceof OneyPaymentModeModel oneyPaymentModeModel) {
+            redirectPaymentMethodSpecificInput.setPaymentOption(String.valueOf(oneyPaymentModeModel.getPaymentOption()));
+        }
 
         return redirectPaymentMethodSpecificInput;
     }
