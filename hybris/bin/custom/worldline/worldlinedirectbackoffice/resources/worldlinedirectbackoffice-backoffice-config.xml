@@ -305,6 +305,18 @@
 	</context>
 	<!-- PaymentMode update BO appearance END -->
 
+	<!-- OneyPaymentMode update BO appearance START -->
+	<context merge-by="type" parent="StandardPaymentMode" type="OneyPaymentMode" component="editor-area">
+		<ea:editorArea name="">
+			<ea:tab name="hmc.worldline" merge-mode="MERGE">
+				<ea:section name="hmc.worldline.worldlineSpecificPaymentConfigurations" merge-mode="MERGE">
+					<ea:attribute qualifier="paymentOption" />
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+	<!--= OneyPaymentMode update BO appearance END -->
+
 	<!-- WorldlinePaymentInfo BO appearance -->
 	<context merge-by="type" parent="PaymentInfo" type="WorldlinePaymentInfo">
 		<context component="base">
