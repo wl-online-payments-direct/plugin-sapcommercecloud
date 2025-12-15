@@ -33,14 +33,14 @@
     <c:otherwise>
         <div id="worldline_payment_product_${paymentProduct.id}"
              class="worldline_payment_product js-worldline_payment_product ${applePayId eq paymentProduct.id? 'display-none' : ''}"
-             title="${paymentProduct.displayHints.label}">
+             title="<c:out value='${paymentProduct.displayHints.label}'/>">
             <div class="payment_product_row">
                 <form:radiobutton path="paymentProductId" cssClass="payment_product"
                                   value="${paymentProduct.id}" tabindex="${tabindex}"
                                   checked="${!isSelectedStoredCard && isSelectedID ? 'checked' : '' }"/>
                 <span class="payment_product">
                 <c:if test="${not empty paymentProduct.displayHints.logo}">
-                    <img src="${paymentProduct.displayHints.logo}" alt="${paymentProduct.displayHints.label}"/>
+                    <img src="${paymentProduct.displayHints.logo}" alt="<c:out value='${paymentProduct.displayHints.label}'/>"/>
                 </c:if>
                 ${paymentProduct.displayHints.label}
             </span>
