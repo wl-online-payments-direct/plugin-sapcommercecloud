@@ -1,6 +1,7 @@
 package com.worldline.direct.strategy.impl;
 
 import com.onlinepayments.domain.PaymentProduct;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.strategy.WorldlinePaymentProductFilterStrategy;
@@ -36,6 +37,12 @@ public class WorldlinePaymentProductSortStrategy implements WorldlinePaymentProd
                 ));
         int counter = 0;
         List<PaymentProduct> output = new ArrayList<>();
+
+        // Hard coded entries - ensure these are included first.
+        addPaymentProductAndIncrementCounterIfExists(WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP, counter, productMap, output);
+        addPaymentProductAndIncrementCounterIfExists(WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP, counter, productMap, output);
+        addPaymentProductAndIncrementCounterIfExists(WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS, counter, productMap, output);
+
         for(PaymentModeModel paymentMode : paymentModes) {
             Integer paymentModeCode;
             try {
@@ -45,15 +52,19 @@ public class WorldlinePaymentProductSortStrategy implements WorldlinePaymentProd
                 continue;
             }
 
-            if (productMap.containsKey(paymentModeCode)) {
-                PaymentProduct paymentProduct = productMap.get(paymentModeCode);
-                paymentProduct.getDisplayHints().setDisplayOrder(counter);
-                counter++;
-                output.add(paymentProduct);
-            }
+            addPaymentProductAndIncrementCounterIfExists(paymentModeCode, counter, productMap, output);
         }
 
         return output;
+    }
+
+    private void addPaymentProductAndIncrementCounterIfExists(int paymentProductId, int counter, Map<Integer, PaymentProduct> productMap, List<PaymentProduct> paymentProducts) {
+        if(productMap.containsKey(paymentProductId)) {
+            PaymentProduct paymentProduct = productMap.get(paymentProductId);
+            paymentProduct.getDisplayHints().setDisplayOrder(counter);
+            counter++;
+            paymentProducts.add(paymentProduct);
+        }
     }
 
     @Required
