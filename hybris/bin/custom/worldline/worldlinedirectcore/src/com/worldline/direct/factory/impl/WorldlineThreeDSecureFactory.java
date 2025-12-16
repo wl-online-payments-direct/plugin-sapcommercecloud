@@ -23,7 +23,9 @@ public class WorldlineThreeDSecureFactory {
         if (!"EUR".equals(order.getCurrency().getIsocode())) {
             // If currency is not EUR, skip exemption logic and use simplified version:
             threeDSecure.setSkipAuthentication(!config.getEnable3DS());
-            threeDSecure.setChallengeIndicator(config.getEnableMandatory3DS() ? CHALLENGE_REQUIRED : NO_PREFERENCE);
+            if (config.getEnable3DS()) {
+                threeDSecure.setChallengeIndicator(config.getEnableMandatory3DS() ? CHALLENGE_REQUIRED : NO_PREFERENCE);
+            }
 
             return threeDSecure;
         }
@@ -62,7 +64,9 @@ public class WorldlineThreeDSecureFactory {
         if (!"EUR".equals(order.getCurrency().getIsocode())) {
             // If currency is not EUR, skip exemption logic and use simplified version:
             threeDSecure.setSkipAuthentication(!config.getEnable3DS());
-            threeDSecure.setChallengeIndicator(config.getEnableMandatory3DS() ? CHALLENGE_REQUIRED : NO_PREFERENCE);
+            if (config.getEnable3DS()) {
+                threeDSecure.setChallengeIndicator(config.getEnableMandatory3DS() ? CHALLENGE_REQUIRED : NO_PREFERENCE);
+            }
 
             return threeDSecure;
         }
