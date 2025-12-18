@@ -113,8 +113,8 @@ INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]        
 
 UPDATE RendererTemplate;code[unique=true];description[lang=$lang];templateScript[lang=$lang,translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
                        ;apparel-uk_Email_Order_Confirmation_Body;"Order Confirmation Body";$emailResource/email-orderConfirmationBody.vm
-#UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];cmsComponents(uid,$contentCV)
-#                  ;;OrderConfirmationEmailTopSlot;EmailBannerSaleNowOnImage,WorldlineOrderConfirmationEmailBody
+UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];cmsComponents(uid,$contentCV)
+                  ;;OrderConfirmationEmailTopSlot;EmailBannerSaleNowOnImage,WorldlineOrderConfirmationEmailBody
 
 INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved'];fromEmail[lang=de];fromName[lang=de]
                        ;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;;martinapenevaBB@gmail.com;Customer Services Team
