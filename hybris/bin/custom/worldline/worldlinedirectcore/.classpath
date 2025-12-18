@@ -8,6 +8,7 @@
 	<classpathentry exported="true" kind="lib" path="resources" />
 	<classpathentry exported="true" output="eclipsebin/classes" kind="src" path="src" />
 	<classpathentry exported="true" output="eclipsebin/classes" kind="src" path="gensrc" />
+	<classpathentry exported="true" output="eclipsebin/classes" kind="src" path="testsrc" />
 	<classpathentry exported="false" kind="src" path="/platform" />
 				
 </classpath>
