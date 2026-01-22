@@ -62,6 +62,9 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             case PAYMENT_METHOD_JCB:
             case PAYMENT_METHOD_MASTERCARD:
             case PAYMENT_METHOD_VISA:
+            case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
+            case PAYMENT_METHOD_DISCOVER:
+            case PAYMENT_METHOD_UNIONPAY:
             case PAYMENT_METHOD_GROUP_CARDS: {
                 if (WorldlineRecurringPaymentStatus.ACTIVE.equals(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getWorldlineRecurringToken().getStatus())) {
                     try {
@@ -73,6 +76,7 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                     }
                 } else {
                     LOG.info("No token id is saved against payment info: " + worldlinePaymentInfo.getCode());
+                    return Optional.empty();
                 }
             }
             default:
@@ -103,6 +107,9 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                 case PAYMENT_METHOD_JCB:
                 case PAYMENT_METHOD_MASTERCARD:
                 case PAYMENT_METHOD_VISA:
+                case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
+                case PAYMENT_METHOD_DISCOVER:
+                case PAYMENT_METHOD_UNIONPAY:
                 case PAYMENT_METHOD_GROUP_CARDS: {
                     WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfoModel.getWorldlineRecurringToken();
 
@@ -171,6 +178,9 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             case PAYMENT_METHOD_JCB:
             case PAYMENT_METHOD_MASTERCARD:
             case PAYMENT_METHOD_VISA:
+            case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
+            case PAYMENT_METHOD_DISCOVER:
+            case PAYMENT_METHOD_UNIONPAY:
             case PAYMENT_METHOD_GROUP_CARDS: {
                 WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfo.getWorldlineRecurringToken();
 
