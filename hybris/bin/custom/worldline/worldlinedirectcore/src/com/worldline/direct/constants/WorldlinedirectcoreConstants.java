@@ -31,6 +31,8 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final int PAYMENT_METHOD_VISA = 1;
     public static final int PAYMENT_METHOD_TWINT = 5407;
     public static final int PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS = 130;
+    public static final int PAYMENT_METHOD_DISCOVER = 128;
+    public static final int PAYMENT_METHOD_UNIONPAY = 56;
     public static final int PAYMENT_METHOD_CHEQUES_VACANCE_CONNECT = 5403;
     public static final int PAYMENT_METHOD_MEALVOUCHER = 5402;
 
