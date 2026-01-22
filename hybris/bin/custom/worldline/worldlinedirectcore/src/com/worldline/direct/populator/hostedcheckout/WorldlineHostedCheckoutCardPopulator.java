@@ -72,8 +72,6 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
             CardRecurrenceDetails cardRecurrenceDetails = new CardRecurrenceDetails();
             cardRecurrenceDetails.setRecurringPaymentSequenceIndicator(FIRST_RECCURANCE);
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
-        } else {
-            cardPaymentMethodSpecificInput.setTokenize(false);
         }
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS == paymentInfo.getId()) {
             PaymentProduct130SpecificInput paymentProduct130SpecificInput = WorldlinePaymentProduct130SpecificInputFactory.getPaymentProduct130SpecificInput(currentWorldlineConfiguration, abstractOrderModel, paymentInfo, isSale);
