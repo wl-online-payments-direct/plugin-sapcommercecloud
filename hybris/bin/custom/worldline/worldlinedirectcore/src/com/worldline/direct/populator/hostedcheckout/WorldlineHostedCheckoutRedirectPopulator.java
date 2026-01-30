@@ -71,7 +71,9 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
         }
         PaymentModeModel paymentMode = worldlinePaymentModeService.getPaymentModeForCode(String.valueOf(paymentInfo.getId()));
         if (paymentMode instanceof OneyPaymentModeModel oneyPaymentModeModel) {
-            redirectPaymentMethodSpecificInput.setPaymentOption(String.valueOf(oneyPaymentModeModel.getPaymentOption()));
+            if(oneyPaymentModeModel.getPaymentOption() != null) {
+                redirectPaymentMethodSpecificInput.setPaymentOption(String.valueOf(oneyPaymentModeModel.getPaymentOption()));
+            }
         }
 
         return redirectPaymentMethodSpecificInput;

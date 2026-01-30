@@ -621,7 +621,7 @@
             <attributes>
                 <attribute qualifier="paymentOption" type="java.lang.Integer">
                     <persistence type="property" />
-                    <modifiers optional="false" initial="true" />
+                    <modifiers optional="true" initial="true" />
                 </attribute>
             </attributes>
         </itemtype>
