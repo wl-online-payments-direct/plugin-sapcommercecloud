@@ -1,0 +1,9 @@
+UPDATE WorldlineMealvouchersProductType; code[unique = true]; name[lang = en]; name[lang = fr]        ; name[lang = de]    ; name[lang = it] ; name[lang = es]
+                                       ; FOOD_AND_DRINK     ; Food & Drink   ; Nourriture et Boissons ; Essen & Trinken    ; Cibo e Bevande  ; Comida y Bebida
+                                       ; HOME_AND_GARDEN    ; Home & Garden  ; Maison et Jardin       ; Haus & Garten      ; Casa e Giardino ; Hogar y Jardin
+                                       ; GIFT_AND_FLOWERS   ; Gift & Flowers ; Cadeaux & Fleurs       ; Geschenke & Blumen ; Regali e Fiori  ; Regalos y Flores
+
+UPDATE WorldlineExemptionType; code[unique = true]       ; name[lang = en];
+                             ; NO_3DS_EXEMPTION          ; no-3ds-exemption
+                             ; LOW_VALUE                 ; low-value
+                             ; TRANSACTION_RISK_ANALYSIS ; transaction-risk-analysis
