@@ -68,8 +68,12 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 redirectPaymentProduct5403SpecificInput.setCompleteRemainingPaymentAmount(true);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5403SpecificInput(redirectPaymentProduct5403SpecificInput);
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_WERO:
-                //RedirectPaymentProduct900SpecificInput redirectPaymentProduct900SpecificInput = new RedirectPaymentProduct900SpecificInput();
-                //redirectPaymentProduct900SpecificInput.setCaptureTrigger(getWeroCaptureTrigger());
+                // TODO: RedirectPaymentProduct900SpecificInput is not yet available in SDK 7.0.0.
+                //  Once available, uncomment and set captureTrigger:
+                //  RedirectPaymentProduct900SpecificInput product900Input = new RedirectPaymentProduct900SpecificInput();
+                //  product900Input.setCaptureTrigger(getWeroCaptureTrigger());
+                //  redirectPaymentMethodSpecificInput.setPaymentProduct900SpecificInput(product900Input);
+                break;
 
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_MEALVOUCHER:
                 RedirectPaymentProduct5402SpecificInput redirectPaymentProduct5402SpecificInput = new RedirectPaymentProduct5402SpecificInput();

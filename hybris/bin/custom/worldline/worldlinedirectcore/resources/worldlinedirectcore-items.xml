@@ -221,11 +221,6 @@
                     <modifiers optional="false" />
                     <defaultvalue>java.math.BigDecimal.ZERO</defaultvalue>
                 </attribute>
-                <attribute qualifier="intersolveTimeout" type="java.lang.Integer">
-                    <description>The timeout to send to Worldline if an Intersolve payment is used.</description>
-                    <persistence type="property" />
-                    <modifiers optional="true" />
-                </attribute>
                 <attribute qualifier="merchantName" type="java.lang.String">
                     <description>The name of the merchant, sent in order.references.descriptor.</description>
                     <persistence type="property" />
@@ -236,8 +231,7 @@
                     the actual capturing of orders, it is expected that the merchant will implement this according
                     to their own requirements.</description>
                     <persistence type="property" />
-                    <modifiers optional="false" />
-                    <defaultvalue>java.math.BigDecimal.ZERO</defaultvalue>
+                    <modifiers optional="true" />
                 </attribute>
             </attributes>
         </itemtype>

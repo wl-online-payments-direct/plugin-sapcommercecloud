@@ -23,7 +23,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUNDED;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_STATUS_ENUM.REFUND_REQUESTED;
@@ -86,7 +85,8 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
                return result;
             }
          } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_WERO == worldlinePaymentInfo.getId().intValue()) {
-
+             this.sendOutput("weroRefundContext", returnRequestModel);
+             return new ActionResult<>(ActionResult.SUCCESS, returnRequestModel);
          }
       }
 
