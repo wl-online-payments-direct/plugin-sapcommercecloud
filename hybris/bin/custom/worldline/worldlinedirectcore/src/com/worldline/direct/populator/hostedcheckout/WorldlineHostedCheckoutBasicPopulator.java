@@ -63,10 +63,17 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
             }
 
             if (isIntersolve) {
-                int intersolveTimeout = worldlineConfiguration.getIntersolveTimeout();
-                if (intersolveTimeout > 0) {
+                int intersolveTimeout;
+                if (worldlineConfiguration.getIntersolveTimeout() == null) {
+                    intersolveTimeout = WorldlinedirectcoreConstants.DEFAULT_INTERSOLVE_TIMEOUT;
+                } else {
+                    intersolveTimeout = worldlineConfiguration.getIntersolveTimeout();
+                }
+                if (intersolveTimeout > 0 && intersolveTimeout <= 1440) {
                     hostedCheckoutSpecificInput.setSessionTimeout(intersolveTimeout);
                 }
+            } else if (worldlineConfiguration.getSessionTimeout() != null) {
+                hostedCheckoutSpecificInput.setSessionTimeout(worldlineConfiguration.getSessionTimeout());
             }
         }
         /*  As per WL5SAP-10, we MUST show the result page if Intersolve is being used (else we never show it, as per
@@ -74,9 +81,7 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         hostedCheckoutSpecificInput.setShowResultPage(isIntersolve);
 
         hostedCheckoutSpecificInput.setReturnUrl(getReturnUrlFromSession());
-        if (worldlineConfiguration.getSessionTimeout() != null) {
-            hostedCheckoutSpecificInput.setSessionTimeout(worldlineConfiguration.getSessionTimeout());
-        }
+
         if (StringUtils.isNotBlank(worldlineConfiguration.getHostedCheckoutVariant())) {
             hostedCheckoutSpecificInput.setVariant(worldlineConfiguration.getHostedCheckoutVariant());
         }

@@ -1,21 +1,19 @@
 package com.worldline.direct.factory.impl;
 
-import com.onlinepayments.domain.*;
+import com.onlinepayments.domain.AmountOfMoney;
+import com.onlinepayments.domain.LineItem;
+import com.onlinepayments.domain.OrderLineDetails;
+import com.onlinepayments.domain.ShoppingCart;
 import com.worldline.direct.factory.WorldlineShoppingCartFactory;
-import com.worldline.direct.populator.WorldlineOrderRequestParamPopulator;
 import com.worldline.direct.util.WorldlineAmountUtils;
-import de.hybris.platform.core.model.c2l.CurrencyModel;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
-import de.hybris.platform.core.model.order.OrderModel;
-import de.hybris.platform.core.model.order.price.DiscountModel;
 import de.hybris.platform.util.DiscountValue;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DefaultWorldlineShoppingCartFactory implements WorldlineShoppingCartFactory {
     private WorldlineAmountUtils worldlineAmountUtils;

@@ -74,6 +74,7 @@ public class WorldlineCustomerRequestParamPopulator implements Populator<Abstrac
             contactDetails.setMobilePhoneNumber(formatPhoneNumber(billingAddress.getCellphone()));
             customer.setContactDetails(contactDetails);
             customer.setAccountType(isGuestUser(customerModel) ? GUEST : CUSTOMER);
+            customer.setMerchantCustomerId(customerModel.getCustomerID());
         }
         return customer;
     }

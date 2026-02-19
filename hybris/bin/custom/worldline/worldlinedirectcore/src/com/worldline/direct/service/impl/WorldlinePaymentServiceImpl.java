@@ -13,13 +13,14 @@ import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.model.WorldlineMandateModel;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.service.WorldlineConfigurationService;
+import com.worldline.direct.service.WorldlinePaymentModeService;
 import com.worldline.direct.service.WorldlinePaymentService;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlineLogUtils;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
-import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
+import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.store.services.BaseStoreService;
 import org.apache.commons.collections.CollectionUtils;
@@ -27,7 +28,6 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -46,6 +46,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     protected Converter<AbstractOrderModel, CreatePaymentRequest> worldlineHostedTokenizationParamConverter;
     protected Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter;
     protected Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter;
+    private WorldlinePaymentModeService worldlinePaymentModeService;
 
     protected BaseStoreService baseStoreService;
     @Override
@@ -101,8 +102,14 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             params.setLocale(shopperLocale);
 
             final PaymentProduct paymentProduct = merchant.products().getPaymentProduct(id, params);
-
             WorldlineLogUtils.logAction(LOGGER, "getPaymentProduct", params, paymentProduct);
+
+            // Find PaymentMode corresponding to PaymentProduct and check if we're supposed to override its name:
+            PaymentModeModel paymentMode = worldlinePaymentModeService.getPaymentModeForPaymentProduct(paymentProduct);
+            if(paymentMode != null && paymentMode.getOverrideName() != null  && paymentMode.getOverrideName()) {
+                // It exists and we are, so set the name to the localised PaymentMode name.
+                paymentProduct.getDisplayHints().setLabel(paymentMode.getName());
+            }
 
             return paymentProduct;
         } catch (Exception e) {
@@ -640,5 +647,9 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     public void setBaseStoreService(BaseStoreService baseStoreService) {
         this.baseStoreService = baseStoreService;
+    }
+
+    public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
+        this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 }

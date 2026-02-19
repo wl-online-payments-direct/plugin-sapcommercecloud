@@ -1,5 +1,6 @@
 package com.worldline.direct.service.impl;
 
+import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.direct.dao.WorldlinePaymentModeDao;
 import com.worldline.direct.service.WorldlinePaymentModeService;
 import de.hybris.platform.core.model.order.payment.PaymentModeModel;
@@ -29,15 +30,6 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
         return false;
     }
 
-    @Override
-    public boolean isFloa(String paymentModeId) {
-        PaymentModeModel paymentMode = getPaymentModeForCode(paymentModeId);
-        if(paymentMode != null) {
-            return paymentMode.getFloapay();
-        }
-        return false;
-    }
-
     /**
      * Returns a boolean representing whether the payment mode is SALE only (e.g. cannot be preauthed).
      * @param paymentModeId A String representing the code of a PaymentMode.
@@ -53,10 +45,6 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
         return false;
     }
 
-    public void setWorldlinePaymentModeDao(WorldlinePaymentModeDao worldlinePaymentModeDao) {
-        this.worldlinePaymentModeDao = worldlinePaymentModeDao;
-    }
-
     @Override
     public PaymentModeModel getPaymentModeForCode(final String code)
     {
@@ -65,5 +53,16 @@ public class WorldlinePaymentModeServiceImpl extends DefaultPaymentModeService i
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public PaymentModeModel getPaymentModeForPaymentProduct(final PaymentProduct paymentProduct) {
+        String paymentModeCode = String.valueOf(paymentProduct.getId());
+
+        return super.getPaymentModeForCode(paymentModeCode);
+    }
+
+    public void setWorldlinePaymentModeDao(WorldlinePaymentModeDao worldlinePaymentModeDao) {
+        this.worldlinePaymentModeDao = worldlinePaymentModeDao;
     }
 }
