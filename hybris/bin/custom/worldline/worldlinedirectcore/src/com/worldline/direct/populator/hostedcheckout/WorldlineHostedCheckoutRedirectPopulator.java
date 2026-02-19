@@ -4,11 +4,13 @@ import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
+import com.worldline.direct.model.OneyPaymentModeModel;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.service.WorldlinePaymentModeService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
@@ -55,15 +57,27 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 RedirectPaymentProduct5408SpecificInput redirectPaymentProduct5408SpecificInput = new RedirectPaymentProduct5408SpecificInput();
                 redirectPaymentProduct5408SpecificInput.setInstantPaymentOnly(instantPaymentOnly);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5408SpecificInput(redirectPaymentProduct5408SpecificInput);
+                break;
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_CHEQUES_VACANCE_CONNECT:
                 RedirectPaymentProduct5403SpecificInput redirectPaymentProduct5403SpecificInput = new RedirectPaymentProduct5403SpecificInput();
                 redirectPaymentProduct5403SpecificInput.setCompleteRemainingPaymentAmount(true);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5403SpecificInput(redirectPaymentProduct5403SpecificInput);
+                break;
+            case WorldlinedirectcoreConstants.PAYMENT_METHOD_MEALVOUCHER:
+                RedirectPaymentProduct5402SpecificInput redirectPaymentProduct5402SpecificInput = new RedirectPaymentProduct5402SpecificInput();
+                redirectPaymentProduct5402SpecificInput.setCompleteRemainingPaymentAmount(true);
+                redirectPaymentMethodSpecificInput.setPaymentProduct5402SpecificInput(redirectPaymentProduct5402SpecificInput);
+                break;
             default:
                 // No Specific parameter needed for this paymentMethod
                 break;
         }
-
+        PaymentModeModel paymentMode = worldlinePaymentModeService.getPaymentModeForCode(String.valueOf(paymentInfo.getId()));
+        if (paymentMode instanceof OneyPaymentModeModel oneyPaymentModeModel) {
+            if(oneyPaymentModeModel.getPaymentOption() != null) {
+                redirectPaymentMethodSpecificInput.setPaymentOption(String.valueOf(oneyPaymentModeModel.getPaymentOption()));
+            }
+        }
 
         return redirectPaymentMethodSpecificInput;
     }
