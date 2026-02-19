@@ -74,7 +74,6 @@
     <bean id="worldlineHostedCheckoutCardPopulator"
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator">
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
-        <property name="enumerationService" ref="enumerationService" />
     </bean>
 
 
@@ -120,7 +119,6 @@
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
-        <property name="enumerationService" ref="enumerationService" />
     </bean>
     <bean id="worldlineHostedTokenizationRedirectPopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationRedirectPopulator">

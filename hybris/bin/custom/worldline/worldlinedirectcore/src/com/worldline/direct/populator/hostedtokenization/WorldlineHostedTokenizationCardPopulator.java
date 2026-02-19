@@ -13,7 +13,7 @@ import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
-import de.hybris.platform.enumeration.EnumerationService;
+
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
 import org.apache.commons.lang.StringUtils;
@@ -34,8 +34,6 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentService worldlinePaymentService;
     private WorldlinePaymentModeService worldlinePaymentModeService;
-    private EnumerationService enumerationService;
-
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreatePaymentRequest createPaymentRequest) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "abstractOrderModel cannot be null!");
@@ -103,7 +101,7 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
             cardPaymentMethodSpecificInput.setRecurring(cardRecurrenceDetails);
 
         } else {
-            ThreeDSecure threeDSecure = WorldlineThreeDSecureFactory.createThreeDSecure(currentWorldlineConfiguration, abstractOrderModel, enumerationService);
+            ThreeDSecure threeDSecure = WorldlineThreeDSecureFactory.createThreeDSecure(currentWorldlineConfiguration, abstractOrderModel);
             if(threeDSecure != null) {
                 cardPaymentMethodSpecificInput.setThreeDSecure(threeDSecure);
                 threeDSecure.setRedirectionData(new RedirectionData());
@@ -141,7 +139,4 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 
-    public void setEnumerationService(EnumerationService enumerationService) {
-        this.enumerationService = enumerationService;
-    }
 }

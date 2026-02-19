@@ -11,7 +11,7 @@ import com.worldline.direct.service.WorldlinePaymentModeService;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
-import de.hybris.platform.enumeration.EnumerationService;
+
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 
 import java.util.List;
@@ -30,8 +30,6 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
     public static final String LOW_VALUE = "low-value";
 
     private WorldlinePaymentModeService worldlinePaymentModeService;
-    private EnumerationService enumerationService;
-
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
         validateParameterNotNull(abstractOrderModel, "abstractOrderModel cannot be null!");
@@ -55,7 +53,7 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS != paymentInfo.getId()) {
             cardPaymentMethodSpecificInput.setPaymentProductId(paymentInfo.getId());
         }
-        ThreeDSecureBase threeDSecure = WorldlineThreeDSecureFactory.createThreeDSecureBase(currentWorldlineConfiguration, abstractOrderModel, enumerationService);
+        ThreeDSecureBase threeDSecure = WorldlineThreeDSecureFactory.createThreeDSecureBase(currentWorldlineConfiguration, abstractOrderModel);
         cardPaymentMethodSpecificInput.setThreeDSecure(threeDSecure);
 
         boolean isSale = false;
@@ -87,7 +85,4 @@ public class WorldlineHostedCheckoutCardPopulator implements Populator<AbstractO
         this.worldlinePaymentModeService = worldlinePaymentModeService;
     }
 
-    public void setEnumerationService(EnumerationService enumerationService) {
-        this.enumerationService = enumerationService;
-    }
 }
