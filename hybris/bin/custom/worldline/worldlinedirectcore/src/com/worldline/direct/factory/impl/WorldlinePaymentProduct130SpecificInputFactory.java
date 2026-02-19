@@ -47,7 +47,7 @@ public class WorldlinePaymentProduct130SpecificInputFactory {
 
         threeDSecure.setAcquirerExemption(false);
         if ("EUR".equals(abstractOrderModel.getCurrency().getIsocode())) {
-            if (!WorldlineExemptionType.NO_3DS_EXEMPTION.equals(config.getExemptionType3DS())) {
+            if (WorldlineExemptionType.TRANSACTION_RISK_ANALYSIS.equals(config.getExemptionType3DS())) {
                 BigDecimal total = BigDecimal.valueOf(abstractOrderModel.getTotalPrice());
                 BigDecimal limit = config.getExemptionLimit3DS();
 
@@ -55,7 +55,6 @@ public class WorldlinePaymentProduct130SpecificInputFactory {
                     threeDSecure.setAcquirerExemption(true);
                 }
             }
-
         }
         paymentProduct130SpecificInput.setThreeDSecure(threeDSecure);
         return paymentProduct130SpecificInput;
