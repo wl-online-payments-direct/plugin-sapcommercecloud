@@ -61,6 +61,7 @@
         </enumtype>
         <enumtype code="WorldlineExemptionType">
             <value code="NO_3DS_EXEMPTION" />
+            <value code="NO_CHALLENGE_REQUEST" />
             <value code="LOW_VALUE" />
             <value code="TRANSACTION_RISK_ANALYSIS" />
         </enumtype>
@@ -199,7 +200,7 @@
                     <description>Type of 3DS Exemption for EUR only</description>
                     <persistence type="property" />
                     <modifiers optional="false" />
-                    <defaultvalue>em().getEnumerationValue("WorldlineExemptionType","NO_3DS_EXEMPTION")</defaultvalue>
+                    <defaultvalue>em().getEnumerationValue("WorldlineExemptionType","NO_CHALLENGE_REQUEST")</defaultvalue>
                 </attribute>
                 <attribute qualifier="exemptionLimit3DS" type="java.math.BigDecimal">
                     <description>Max transaction value for 3DS exemptions.</description>

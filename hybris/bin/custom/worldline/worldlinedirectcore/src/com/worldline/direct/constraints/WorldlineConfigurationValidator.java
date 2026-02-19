@@ -12,9 +12,11 @@ public class WorldlineConfigurationValidator implements ConstraintValidator<Worl
 {
     private static final BigDecimal LOW_VALUE_LIMIT = BigDecimal.valueOf(30);
     private static final BigDecimal TRANSACTION_RISK_ANALYSIS_LIMIT = BigDecimal.valueOf(100);
+    private static final BigDecimal NO_CHALLENGE_REQUEST_LIMIT = BigDecimal.valueOf(100);
 
     private static final String LOW_VALUE_ERROR_KEY = "com.worldline.direct.error.3ds.lowvalue.message";
     private static final String TRANSACTION_RISK_ANALYSIS_LIMIT_KEY = "com.worldline.direct.error.3ds.transactionriskanalysis.message";
+    private static final String NO_CHALLENGE_REQUEST_ERROR_KEY = "com.worldline.direct.error.3ds.nochallengerequest.message";
 
     @Override
     public void initialize(final WorldlineConfigurationValid constraintAnnotation)
@@ -40,14 +42,23 @@ public class WorldlineConfigurationValidator implements ConstraintValidator<Worl
          */
         String localizedMsg = null;
         switch(exemptionType) {
+            case NO_CHALLENGE_REQUEST:
+                if (exemptionLimit.compareTo(NO_CHALLENGE_REQUEST_LIMIT) > 0) {
+                    localizedMsg = Localization.getLocalizedString(NO_CHALLENGE_REQUEST_ERROR_KEY);
+                }
+                break;
             case LOW_VALUE:
                 if (exemptionLimit.compareTo(LOW_VALUE_LIMIT) > 0) {
                     localizedMsg  = Localization.getLocalizedString(LOW_VALUE_ERROR_KEY);
                 }
+                break;
             case TRANSACTION_RISK_ANALYSIS:
                 if (exemptionLimit.compareTo(TRANSACTION_RISK_ANALYSIS_LIMIT) > 0) {
                     localizedMsg = Localization.getLocalizedString(TRANSACTION_RISK_ANALYSIS_LIMIT_KEY);
                 }
+                break;
+            default:
+                break;
         }
 
         if(localizedMsg != null) {
