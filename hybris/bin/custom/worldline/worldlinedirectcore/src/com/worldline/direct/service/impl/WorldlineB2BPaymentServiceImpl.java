@@ -113,6 +113,9 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             if (!orderModel.getStore().getWorldlineConfiguration().isFirstRecurringPayment()) {
                 params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, orderModel.getCurrency().getIsocode()));
                 params.getOrder().setShoppingCart(null);
+                if (params.getCardPaymentMethodSpecificInput() != null) {
+                    params.getCardPaymentMethodSpecificInput().setTokenize(true);
+                }
             }
 
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
@@ -144,6 +147,9 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cartToOrderCronJob.getCart().getPaymentInfo();
             if (!worldlineConfigurationService.getWorldlineConfiguration(cartToOrderCronJob.getCart().getStore()).isFirstRecurringPayment()) {
                 params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, cartToOrderCronJob.getCart().getCurrency().getIsocode()));
+                if (params.getCardPaymentMethodSpecificInput() != null) {
+                    params.getCardPaymentMethodSpecificInput().setTokenize(true);
+                }
             }
 
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
