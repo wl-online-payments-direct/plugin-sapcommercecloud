@@ -42,6 +42,7 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 5403               ; Chèques Vacance Connect       ; Chèques Vacance Connect       ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
                                  ; 3204               ; BLIK                          ; BLIK                          ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
                                  ; 5003               ; Linxo Connect                 ; Linxo Connect                 ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
+                                 ; 5300               ; Pledg                         ; Pledg                         ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
 
 INSERT_UPDATE OneyPaymentMode; code[unique = true]; name[lang = en]   ; description[lang = en]; active; intersolve; saleOnly; overrideName; paymentOption; paymentinfotype(code);
                              ; 5127               ; Oney Card         ; Oney Card             ; true  ; false     ; false   ; false       ; 0            ; WorldlinePaymentInfo
