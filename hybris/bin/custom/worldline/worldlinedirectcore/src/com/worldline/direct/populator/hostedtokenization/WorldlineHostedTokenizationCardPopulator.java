@@ -88,9 +88,9 @@ public class WorldlineHostedTokenizationCardPopulator implements Populator<Abstr
         final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
 
-//        if (Boolean.TRUE.equals(isRecurring) && StringUtils.equals(RECCURANCE_FIRST, recurrance)) {
-//            cardPaymentMethodSpecificInput.setTokenize(true);
-//        }
+        if (abstractOrderModel.getTotalPrice() == 0d) {
+            cardPaymentMethodSpecificInput.setTokenize(true);
+        }
         cardPaymentMethodSpecificInput.setTransactionChannel(ECOMMERCE);
         cardPaymentMethodSpecificInput.setIsRecurring(isRecurring);
 
