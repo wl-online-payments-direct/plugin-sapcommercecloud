@@ -10,7 +10,7 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 5100               ; Cpay                          ; Cpay                          ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
                                  ; 132                ; Diners Club                   ; Diners Club                   ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
                                  ; 320                ; Google Pay                    ; Google Pay                    ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
-                                 ; 809                ; iDEAL                         ; iDEAL                         ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
+                                 ; 809                ; "iDEAL | WERO"                ; "iDEAL | WERO"                ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
                                  ; 3112               ; Illicado                      ; Illicado                      ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
                                  ; 5700               ; Intersolve                    ; Intersolve                    ; true  ; true      ; true    ; false       ; WorldlinePaymentInfo
                                  ; 125                ; JCB                           ; JCB                           ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
