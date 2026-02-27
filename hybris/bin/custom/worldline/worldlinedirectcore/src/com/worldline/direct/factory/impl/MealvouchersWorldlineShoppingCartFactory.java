@@ -96,7 +96,7 @@ public class MealvouchersWorldlineShoppingCartFactory implements WorldlineShoppi
             totalTaxes = BigDecimal.valueOf(order.getTotalTax());
         }
 
-        String overallProductTypeName = enumerationService.getEnumerationName(overallProductType);
+        String overallProductTypeName = overallProductType.getCode();
 
         // Set Details
         if(order.getEntries().size() == 1) {
@@ -141,19 +141,19 @@ public class MealvouchersWorldlineShoppingCartFactory implements WorldlineShoppi
      */
     private WorldlineMealvouchersProductType resolveProductType(WorldlineMealvouchersProductType currentType,
                                                                 WorldlineMealvouchersProductType newType) {
-        if (WorldlineMealvouchersProductType.FOOD_AND_DRINK.equals(currentType)) {
+        if (WorldlineMealvouchersProductType.FOODANDDRINK.equals(currentType)) {
             return currentType;
         }
 
-        if (WorldlineMealvouchersProductType.FOOD_AND_DRINK.equals(newType)) {
+        if (WorldlineMealvouchersProductType.FOODANDDRINK.equals(newType)) {
             return newType;
         }
 
-        if (WorldlineMealvouchersProductType.HOME_AND_GARDEN.equals(newType)) {
+        if (WorldlineMealvouchersProductType.HOMEANDGARDEN.equals(newType)) {
             return newType;
         }
 
-        if (WorldlineMealvouchersProductType.GIFT_AND_FLOWERS.equals(newType) && currentType == null) {
+        if (WorldlineMealvouchersProductType.GIFTANDFLOWERS.equals(newType) && currentType == null) {
             return newType;
         }
 

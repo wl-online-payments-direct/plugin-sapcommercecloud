@@ -55,9 +55,9 @@
             <value code="YEARLY" />
         </enumtype>
         <enumtype code="WorldlineMealvouchersProductType">
-            <value code="FOOD_AND_DRINK" />
-            <value code="HOME_AND_GARDEN" />
-            <value code="GIFT_AND_FLOWERS" />
+            <value code="FoodAndDrink" />
+            <value code="HomeAndGarden" />
+            <value code="GiftAndFlowers" />
         </enumtype>
         <enumtype code="WorldlineExemptionType">
             <value code="NO_3DS_EXEMPTION" />
