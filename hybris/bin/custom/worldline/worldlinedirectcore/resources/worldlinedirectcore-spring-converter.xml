@@ -66,6 +66,7 @@
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator">
         <property name="sessionService" ref="sessionService"/>
         <property name="i18NService" ref="i18NService"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
         <property name="worldlineUserFacade" ref="worldlineUserFacade"/>
         <property name="worldlineOrderParamConverter" ref="worldlineOrderParamConverter"/>
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
