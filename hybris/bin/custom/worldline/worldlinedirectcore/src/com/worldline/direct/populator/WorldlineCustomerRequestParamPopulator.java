@@ -82,6 +82,9 @@ public class WorldlineCustomerRequestParamPopulator implements Populator<Abstrac
     protected String getShopperLocale() {
         final LanguageModel currentLanguage = commonI18NService.getCurrentLanguage();
         if (currentLanguage != null) {
+            if (StringUtils.isNotBlank(currentLanguage.getLocaleCode())) {
+                return currentLanguage.getLocaleCode();
+            }
             return commonI18NService.getLocaleForLanguage(currentLanguage).toString();
         }
         return Locale.ENGLISH.toString();

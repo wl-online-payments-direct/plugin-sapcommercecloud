@@ -10,6 +10,8 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
+import de.hybris.platform.core.model.c2l.LanguageModel;
+import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.i18n.I18NService;
 import de.hybris.platform.servicelayer.session.SessionService;
 import org.apache.commons.collections.CollectionUtils;
@@ -29,6 +31,7 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
 
     private SessionService sessionService;
     private I18NService i18NService;
+    private CommonI18NService commonI18NService;
 
     private WorldlineUserFacade worldlineUserFacade;
     private Converter<AbstractOrderModel, Order> worldlineOrderParamConverter;
@@ -46,7 +49,7 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
         HostedCheckoutSpecificInput hostedCheckoutSpecificInput = new HostedCheckoutSpecificInput();
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
 
-        hostedCheckoutSpecificInput.setLocale(i18NService.getCurrentLocale().toString());
+        hostedCheckoutSpecificInput.setLocale(getShopperLocale());
         if (!paymentInfo.isRecurringToken()) {
             hostedCheckoutSpecificInput.setTokens(getSavedTokens(paymentInfo.getId()));
         }
@@ -136,5 +139,19 @@ public class WorldlineHostedCheckoutBasicPopulator implements Populator<Abstract
 
     public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
         this.worldlinePaymentModeService = worldlinePaymentModeService;
+    }
+
+    public void setCommonI18NService(CommonI18NService commonI18NService) {
+        this.commonI18NService = commonI18NService;
+    }
+
+    protected String getShopperLocale() {
+        final LanguageModel currentLanguage = commonI18NService.getCurrentLanguage();
+        if (currentLanguage != null) {
+            if (StringUtils.isNotBlank(currentLanguage.getLocaleCode())) {
+                return currentLanguage.getLocaleCode();
+            }
+        }
+        return i18NService.getCurrentLocale().toString();
     }
 }
