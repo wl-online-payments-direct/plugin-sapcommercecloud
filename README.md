@@ -229,7 +229,7 @@ website.powertools.https=https\://powertools.local\:9002/yb2bacceleratorstorefro
 occ.rewrite.overlapping.paths.enabled=true
 
 # Worldline Hosted Tokenization JS
-worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js
+worldline.hosted.tokenization.js=https://payment.preprod.direct.worldline.com/hostedtokenization/js/client/tokenizer.min.js
 ```
 
 ## Configuration
@@ -269,10 +269,10 @@ Add the Worldline tokenization JavaScript URL to `hybris/config/local.properties
 
 ```properties
 # Pre-production / sandbox
-worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js
+worldline.hosted.tokenization.js=https://payment.preprod.direct.worldline.com/hostedtokenization/js/client/tokenizer.min.js
 
 # Production (update when going live)
-# worldline.hosted.tokenization.js=https://payment.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js
+# worldline.hosted.tokenization.js=https://payment.direct.worldline.com/hostedtokenization/js/client/tokenizer.min.js
 ```
 
 ### Webhook Endpoint
