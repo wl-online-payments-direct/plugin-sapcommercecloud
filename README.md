@@ -6,7 +6,6 @@ The Worldline Direct plugin for SAP Commerce Cloud connects your SAP Commerce (H
 
 **Plugin Version:** 6.0
 **Worldline SDK Version:** 6.3.1
-**Developed by:** Greenlight Commerce
 
 ## Supported Payment Methods
 
@@ -405,4 +404,4 @@ For technical support and documentation, contact your Worldline account represen
 
 ## License
 
-This plugin is provided under the terms of your Worldline merchant agreement. Copyright Worldline / Greenlight Commerce.
+This plugin is provided under the terms of your Worldline merchant agreement. Copyright Worldline.
