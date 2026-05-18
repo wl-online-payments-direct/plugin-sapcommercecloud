@@ -40,6 +40,7 @@ eclipsebin
 !**/hybris/bin/custom/
 
 # Folders to ignore at the root of the repository
+cawl_output/
 installer
 build-tools
 hybris-sbg
@@ -120,4 +121,3 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
-
