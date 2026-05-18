@@ -409,8 +409,15 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
     }
 
     private String getPaymentId(String rawPaymentTransactionId) {
-        String paymentTransactionId = StringUtils.split(rawPaymentTransactionId, "_")[0];
-        if (paymentTransactionId.length() > PAYMENT_ID_LENGTH) {
+        if (StringUtils.isBlank(rawPaymentTransactionId)) {
+            return StringUtils.EMPTY;
+        }
+        String[] parts = StringUtils.split(rawPaymentTransactionId, "_");
+        if (parts == null || parts.length == 0) {
+            return rawPaymentTransactionId;
+        }
+        String paymentTransactionId = parts[0];
+        if (paymentTransactionId.length() >= PAYMENT_ID_LENGTH + PAYMENT_ID_START_STRIP_LENGTH) {
             paymentTransactionId = paymentTransactionId.substring(PAYMENT_ID_START_STRIP_LENGTH, PAYMENT_ID_LENGTH + PAYMENT_ID_START_STRIP_LENGTH);
         }
         return paymentTransactionId;
