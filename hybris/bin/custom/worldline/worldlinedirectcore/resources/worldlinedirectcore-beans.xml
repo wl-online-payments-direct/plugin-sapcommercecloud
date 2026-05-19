@@ -26,7 +26,21 @@
         <property name="defaultPayment" type="boolean"/>
         <property name="cardType" type="de.hybris.platform.commercefacades.order.data.CardTypeData"/>
         <property name="mandateDetail" type="com.worldline.direct.order.data.WorldlineMandateDetail"/>
+        <property name="googlePayEncryptedPaymentData" type="String"/>
+        <property name="googlePayMobileDevice" type="Boolean"/>
 
+    </bean>
+
+    <bean class="com.worldline.direct.order.data.WorldlineGooglePayConfigurationData">
+        <property name="environment" type="String"/>
+        <property name="merchantId" type="String"/>
+        <property name="merchantName" type="String"/>
+        <property name="gateway" type="String"/>
+        <property name="gatewayMerchantId" type="String"/>
+        <property name="networks" type="String"/>
+        <property name="countryCode" type="String"/>
+        <property name="currencyCode" type="String"/>
+        <property name="totalPrice" type="String"/>
     </bean>
 
     <bean class="de.hybris.platform.commercefacades.order.data.CartData">

@@ -31,6 +31,8 @@ public interface WorldlinePaymentService {
 
     CreatePaymentResponse createPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException;
 
+    CreatePaymentResponse createSubsequentPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException;
+
     CreateHostedCheckoutResponse createHostedCheckout(OrderModel orderForCode, BrowserData browserData);
 
     CreateHostedCheckoutResponse createHostedCheckout(CartModel cartModel);

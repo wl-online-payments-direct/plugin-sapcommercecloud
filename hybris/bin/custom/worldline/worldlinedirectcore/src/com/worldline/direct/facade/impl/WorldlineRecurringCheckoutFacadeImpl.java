@@ -115,6 +115,33 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
     }
 
     @Override
+    public ScheduledCartData authorizeRecurringPaymentForGooglePay(String code, BrowserData browserData, RecurringPaymentEnum recurringPaymentType)
+          throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+        switch (recurringPaymentType) {
+            case IMMEDIATE:
+                final OrderModel order = customerAccountService.getOrderForCode(code, baseStoreService.getCurrentBaseStore());
+                WorldlineHostedTokenizationData paymentData = new WorldlineHostedTokenizationData();
+                paymentData.setBrowserData(browserData);
+                CreatePaymentResponse paymentResponse = worldlinePaymentService.createPaymentForHostedTokenization(order, paymentData);
+
+                if (paymentResponse.getMerchantAction() != null) {
+                    storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
+                    throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
+                          paymentResponse.getMerchantAction(),
+                          WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
+                }
+                saveSurchargeData(order, paymentResponse.getPayment());
+                savePaymentToken(order, paymentResponse.getPayment(), Boolean.TRUE, order.getSchedulingCronJob().getCode());
+
+                handlePaymentResponse(order, paymentResponse.getPayment());
+                return prepareCronJob(code);
+            default:
+                LOGGER.error("Unexpected Error when creating a Google Pay payment for recurring order: " + code);
+                throw new IllegalStateException("Unexpected Google Pay payment error");
+        }
+    }
+
+    @Override
     public ScheduledCartData handleRecurring3DsHostedTokenizationPayment(String orderId, String paymentId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         handle3dsResponse(orderId, paymentId, Boolean.TRUE);
         return prepareCronJob(orderId);

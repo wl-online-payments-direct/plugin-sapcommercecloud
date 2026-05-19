@@ -84,6 +84,12 @@
 				<ea:section name="hmc.worldline.worldlineHostecCheckoutConfig">
 					<ea:attribute qualifier="hostedCheckoutVariant"/>
 				</ea:section>
+				<ea:section name="hmc.worldline.googlePayConfig">
+					<ea:attribute qualifier="googlePayEnvironment"/>
+					<ea:attribute qualifier="googlePayMerchantId"/>
+					<ea:attribute qualifier="googlePayMerchantName"/>
+					<ea:attribute qualifier="googlePayAcquirerCountry"/>
+				</ea:section>
 				<ea:section name="hmc.worldline.worldlineGroupedCardsConfig">
 					<ea:attribute qualifier="groupCards"/>
 					<ea:attribute qualifier="groupCardsLogo"/>

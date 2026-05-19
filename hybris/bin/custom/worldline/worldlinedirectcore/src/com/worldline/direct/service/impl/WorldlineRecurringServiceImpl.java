@@ -65,10 +65,13 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
             case PAYMENT_METHOD_DISCOVER:
             case PAYMENT_METHOD_UNIONPAY:
-            case PAYMENT_METHOD_GROUP_CARDS: {
+            case PAYMENT_METHOD_GROUP_CARDS:
+            case PAYMENT_METHOD_GOOGLEPAY: {
                 if (WorldlineRecurringPaymentStatus.ACTIVE.equals(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getWorldlineRecurringToken().getStatus())) {
                     try {
-                        CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
+                        CreatePaymentResponse createPaymentResponse = PAYMENT_METHOD_GOOGLEPAY == worldlinePaymentInfo.getId()
+                              ? worldlinePaymentService.createSubsequentPayment(abstractOrderModel)
+                              : worldlinePaymentService.createPayment(abstractOrderModel);
                         return Optional.of(createPaymentResponse);
                     } catch (Exception e) {
                         LOG.error("something went wrong during payment creation", e);
@@ -110,10 +113,13 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                 case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
                 case PAYMENT_METHOD_DISCOVER:
                 case PAYMENT_METHOD_UNIONPAY:
-                case PAYMENT_METHOD_GROUP_CARDS: {
+                case PAYMENT_METHOD_GROUP_CARDS:
+                case PAYMENT_METHOD_GOOGLEPAY: {
                     WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfoModel.getWorldlineRecurringToken();
 
-                    worldlinePaymentService.deleteToken(tokenModel.getToken(), tokenModel.getStoreId());
+                    if (tokenModel.getToken() != null) {
+                        worldlinePaymentService.deleteToken(tokenModel.getToken(), tokenModel.getStoreId());
+                    }
                     tokenModel.setStatus(WorldlineRecurringPaymentStatus.REVOKED);
                     modelService.save(tokenModel);
 
@@ -181,10 +187,13 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
             case PAYMENT_METHOD_DISCOVER:
             case PAYMENT_METHOD_UNIONPAY:
-            case PAYMENT_METHOD_GROUP_CARDS: {
+            case PAYMENT_METHOD_GROUP_CARDS:
+            case PAYMENT_METHOD_GOOGLEPAY: {
                 WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfo.getWorldlineRecurringToken();
 
-                worldlinePaymentService.deleteToken(tokenModel.getToken());
+                if (tokenModel.getToken() != null) {
+                    worldlinePaymentService.deleteToken(tokenModel.getToken());
+                }
                 tokenModel.setStatus(WorldlineRecurringPaymentStatus.BLOCKED);
                 modelService.save(tokenModel);
                 break;

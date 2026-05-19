@@ -24,7 +24,8 @@ public class WorldlinePaymentProductUtils {
         WorldlinePaymentModeService worldlinePaymentModeService = Registry.getApplicationContext().getBean(WorldlinePaymentModeService.class);
         return (WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue().equals(worldlinePaymentInfoModel.getPaymentMethod()) &&
                 !worldlinePaymentModeService.isIntersolve(String.valueOf(worldlinePaymentInfoModel.getId()))) ||
-                WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoModel.getId();
+                WorldlinedirectcoreConstants.PAYMENT_METHOD_SEPA == worldlinePaymentInfoModel.getId() ||
+                WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY == worldlinePaymentInfoModel.getId();
     }
 
     public static boolean isCreditCard(WorldlinePaymentInfoData worldlinePaymentInfoData) {

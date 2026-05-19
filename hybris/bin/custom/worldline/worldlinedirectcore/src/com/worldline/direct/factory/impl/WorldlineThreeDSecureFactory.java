@@ -1,9 +1,11 @@
 package com.worldline.direct.factory.impl;
 
+import com.onlinepayments.domain.GPayThreeDSecure;
 import com.onlinepayments.domain.ThreeDSecure;
 import com.onlinepayments.domain.ThreeDSecureBase;
 import com.worldline.direct.enums.WorldlineExemptionType;
 import com.worldline.direct.model.WorldlineConfigurationModel;
+import com.worldline.direct.model.WorldlineGPayThreeDSecure;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 
 import java.math.BigDecimal;
@@ -95,6 +97,54 @@ public class WorldlineThreeDSecureFactory {
         return threeDSecure;
     }
 
+    public static GPayThreeDSecure createGPayThreeDSecure(WorldlineConfigurationModel config, AbstractOrderModel order) {
+        if (order.getCurrency() == null) {
+            return null;
+        }
+
+        WorldlineGPayThreeDSecure threeDSecure = new WorldlineGPayThreeDSecure();
+
+        if (!"EUR".equals(order.getCurrency().getIsocode())) {
+            threeDSecure.setSkipAuthentication(!config.getEnable3DS());
+            if (config.getEnable3DS()) {
+                threeDSecure.setChallengeIndicator(config.getEnableMandatory3DS() ? CHALLENGE_REQUIRED : NO_PREFERENCE);
+            }
+            return threeDSecure;
+        }
+
+        boolean exemptionEnabled = isExemptionEnabled(config);
+        boolean withinLimit = exemptionEnabled && isWithinExemptionLimit(config, order);
+
+        if (config.getEnable3DS()) {
+            if (exemptionEnabled && withinLimit) {
+                applyExemption(threeDSecure, config.getExemptionType3DS());
+            } else {
+                threeDSecure.setSkipAuthentication(false);
+                threeDSecure.setChallengeIndicator(config.getEnableMandatory3DS() ? CHALLENGE_REQUIRED : NO_PREFERENCE);
+            }
+        } else {
+            if (exemptionEnabled && withinLimit) {
+                applyExemption(threeDSecure, config.getExemptionType3DS());
+            } else {
+                threeDSecure.setSkipAuthentication(true);
+            }
+        }
+
+        if (isGooglePayAcquirerExemptionRequired(config, order)) {
+            threeDSecure.setAcquirerExemption(Boolean.TRUE);
+        }
+
+        return threeDSecure;
+    }
+
+    public static boolean isGooglePayAcquirerExemptionRequired(WorldlineConfigurationModel config, AbstractOrderModel order) {
+        return order.getCurrency() != null
+              && "EUR".equals(order.getCurrency().getIsocode())
+              && isExemptionEnabled(config)
+              && isWithinExemptionLimit(config, order)
+              && WorldlineExemptionType.TRANSACTION_RISK_ANALYSIS.equals(config.getExemptionType3DS());
+    }
+
     private static boolean isExemptionEnabled(WorldlineConfigurationModel config) {
         WorldlineExemptionType type = config.getExemptionType3DS();
         return type != null && !WorldlineExemptionType.NO_3DS_EXEMPTION.equals(type);
@@ -128,6 +178,27 @@ public class WorldlineThreeDSecureFactory {
     }
 
     private static void applyExemption(ThreeDSecureBase threeDSecure, WorldlineExemptionType type) {
+        threeDSecure.setSkipAuthentication(false);
+        threeDSecure.setSkipSoftDecline(false);
+
+        switch (type) {
+            case NO_CHALLENGE_REQUEST:
+                threeDSecure.setChallengeIndicator(NO_CHALLENGE_REQUESTED);
+                break;
+            case LOW_VALUE:
+                threeDSecure.setChallengeIndicator(NO_CHALLENGE_REQUESTED);
+                threeDSecure.setExemptionRequest(EXEMPTION_LOW_VALUE);
+                break;
+            case TRANSACTION_RISK_ANALYSIS:
+                threeDSecure.setChallengeIndicator(NO_CHALLENGE_REQUESTED_RISK_ANALYSIS);
+                threeDSecure.setExemptionRequest(EXEMPTION_TRANSACTION_RISK_ANALYSIS);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private static void applyExemption(GPayThreeDSecure threeDSecure, WorldlineExemptionType type) {
         threeDSecure.setSkipAuthentication(false);
         threeDSecure.setSkipSoftDecline(false);
 
