@@ -6,6 +6,11 @@ const PAYMENT_METHOD_SELECTORS = {
     PAYMENT_PRODUCT_ROW: '.js-worldline_payment_product',
     PAYMENT_METHOD_CONTAINER: '.worldline_payment_products',
     SAVED_CARD_CODE_PARAM: 'savedCardCode',
+    GOOGLE_PAY_PRODUCT_ID: '320',
+    GOOGLE_PAY_PRODUCT: '#worldline_payment_product_320',
+    GOOGLE_PAY_BUTTON: '#worldline-google-pay-button',
+    GOOGLE_PAY_TOKEN_PARAM: 'googlePayEncryptedPaymentData',
+    GOOGLE_PAY_MOBILE_PARAM: 'googlePayMobileDevice',
     TOKENIZATION_FORM_TABLE_ROW: '.js-hostedTokenization',
     TOKENIZATION_FORM_CLASS: 'js-hostedTokenization',
     HTP_CLASS: '.htp'
@@ -41,6 +46,11 @@ ACC.worldlinePaymentPost = {
                 $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM + ' input[name=' + PAYMENT_METHOD_SELECTORS.SAVED_CARD_CODE_PARAM + ']').val($('input:radio[name="paymentProductId"]:checked').attr("code"));
             } else {
                 $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM + ' input[name=' + PAYMENT_METHOD_SELECTORS.SAVED_CARD_CODE_PARAM + ']').val('');
+            }
+            if ($('input:radio[name="paymentProductId"]:checked').val() === PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_PRODUCT_ID &&
+                !$(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM + ' input[name=' + PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_TOKEN_PARAM + ']').val()) {
+                ACC.worldlinePaymentPost.requestGooglePayPayment();
+                return;
             }
             if (isHTP.length && isSavedCard) {
                 if (ACC.worldlinePaymentPost.tokenizer !== undefined) {
@@ -141,7 +151,97 @@ ACC.worldlinePaymentPost = {
             }
         }
         $('#worldline_payment_product_302').remove();
-    }, load: function () {
+    },
+    googlePayClient: function () {
+        var $googlePayProduct = $(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_PRODUCT);
+        if (!$googlePayProduct.length || !window.google || !google.payments || !google.payments.api) {
+            return null;
+        }
+        return new google.payments.api.PaymentsClient({environment: $googlePayProduct.data('google-pay-environment') || 'TEST'});
+    },
+    googlePayBaseRequest: function () {
+        return {
+            apiVersion: 2,
+            apiVersionMinor: 0
+        };
+    },
+    googlePayAllowedPaymentMethods: function () {
+        var $googlePayProduct = $(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_PRODUCT);
+        var networks = ($googlePayProduct.data('google-pay-networks') || '').split(',').filter(function (network) {
+            return network;
+        });
+        return [{
+            type: 'CARD',
+            parameters: {
+                allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                allowedCardNetworks: networks
+            },
+            tokenizationSpecification: {
+                type: 'PAYMENT_GATEWAY',
+                parameters: {
+                    gateway: $googlePayProduct.data('google-pay-gateway'),
+                    gatewayMerchantId: $googlePayProduct.data('google-pay-gateway-merchant-id')
+                }
+            }
+        }];
+    },
+    googlePayPaymentDataRequest: function () {
+        var $googlePayProduct = $(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_PRODUCT);
+        var request = ACC.worldlinePaymentPost.googlePayBaseRequest();
+        request.allowedPaymentMethods = ACC.worldlinePaymentPost.googlePayAllowedPaymentMethods();
+        request.transactionInfo = {
+            totalPriceStatus: 'FINAL',
+            totalPrice: String($googlePayProduct.data('google-pay-total-price')),
+            currencyCode: $googlePayProduct.data('google-pay-currency-code'),
+            countryCode: $googlePayProduct.data('google-pay-country-code')
+        };
+        request.merchantInfo = {
+            merchantId: $googlePayProduct.data('google-pay-merchant-id'),
+            merchantName: $googlePayProduct.data('google-pay-merchant-name')
+        };
+        return request;
+    },
+    requestGooglePayPayment: function () {
+        var paymentsClient = ACC.worldlinePaymentPost.googlePayClient();
+        if (!paymentsClient) {
+            return;
+        }
+        paymentsClient.loadPaymentData(ACC.worldlinePaymentPost.googlePayPaymentDataRequest())
+            .then(function (paymentData) {
+                $('input:radio[name="paymentProductId"][value="' + PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_PRODUCT_ID + '"]').prop('checked', true).change();
+                $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM + ' input[name=' + PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_TOKEN_PARAM + ']').val(paymentData.paymentMethodData.tokenizationData.token);
+                $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM + ' input[name=' + PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_MOBILE_PARAM + ']').val(ACC.worldlinePaymentPost.isMobileDevice());
+                ACC.common.blockFormAndShowProcessingMessage($(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_SUBMIT_BUTTON));
+                $('.worldlineBillingAddressForm').filter(":hidden").remove();
+                ACC.worldlineOrderPost.enableAddressForm();
+                $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM).submit();
+            });
+    },
+    isMobileDevice: function () {
+        return /Mobi|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    },
+    renderGooglePayButton: function () {
+        var paymentsClient = ACC.worldlinePaymentPost.googlePayClient();
+        if (!paymentsClient) {
+            $(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_PRODUCT).remove();
+            return;
+        }
+        var isReadyToPayRequest = ACC.worldlinePaymentPost.googlePayBaseRequest();
+        isReadyToPayRequest.allowedPaymentMethods = ACC.worldlinePaymentPost.googlePayAllowedPaymentMethods();
+        paymentsClient.isReadyToPay(isReadyToPayRequest).then(function (response) {
+            if (response.result) {
+                var button = paymentsClient.createButton({
+                    onClick: ACC.worldlinePaymentPost.requestGooglePayPayment
+                });
+                $(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_BUTTON).empty().append(button);
+            } else {
+                $(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_PRODUCT).remove();
+            }
+        }).catch(function () {
+            $(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_PRODUCT).remove();
+        });
+    },
+    load: function () {
         let $selectedRadio = $('input:radio[name="paymentProductId"]:checked');
         var isHTP = $(PAYMENT_METHOD_SELECTORS.HTP_CLASS);
 
@@ -199,6 +299,7 @@ $(document).ready(function () {
     ACC.worldlinePaymentPost.bindSubmitWorldlinePlaceOrderForm();
     ACC.worldlinePaymentPost.bindWorldlineSavedPayments();
     ACC.worldlinePaymentPost.checkApplePayAvailability();
+    ACC.worldlinePaymentPost.renderGooglePayButton();
     ACC.worldlinePaymentPost.load();
 });
 

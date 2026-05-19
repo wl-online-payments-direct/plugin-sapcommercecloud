@@ -32,7 +32,16 @@
         <form:input type="hidden" path="savedCardCode"/>
     </c:when>
     <c:otherwise>
-        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product js-worldline_payment_product ${applePayId eq paymentProduct.id? 'display-none' : ''}" title="<c:out value='${paymentProduct.displayHints.label}'/>">
+        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product js-worldline_payment_product ${applePayId eq paymentProduct.id? 'display-none' : ''}" title="<c:out value='${paymentProduct.displayHints.label}'/>"
+             data-google-pay-environment="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.environment) : ''}"
+             data-google-pay-merchant-id="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.merchantId) : ''}"
+             data-google-pay-merchant-name="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.merchantName) : ''}"
+             data-google-pay-gateway="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.gateway) : ''}"
+             data-google-pay-gateway-merchant-id="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.gatewayMerchantId) : ''}"
+             data-google-pay-networks="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.networks) : ''}"
+             data-google-pay-country-code="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.countryCode) : ''}"
+             data-google-pay-currency-code="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.currencyCode) : ''}"
+             data-google-pay-total-price="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.totalPrice) : ''}">
             <div class="payment_product_row">
                 <form:radiobutton path="paymentProductId" cssClass="payment_product"
                                   value="${paymentProduct.id}" tabindex="${tabindex}"
@@ -44,6 +53,11 @@
                 ${paymentProduct.displayHints.label}
             </span>
             </div>
+            <c:if test="${googlePayId eq paymentProduct.id}">
+                <form:input type="hidden" path="googlePayEncryptedPaymentData"/>
+                <form:input type="hidden" path="googlePayMobileDevice"/>
+                <div id="worldline-google-pay-button"></div>
+            </c:if>
 
         </div>
     </c:otherwise>

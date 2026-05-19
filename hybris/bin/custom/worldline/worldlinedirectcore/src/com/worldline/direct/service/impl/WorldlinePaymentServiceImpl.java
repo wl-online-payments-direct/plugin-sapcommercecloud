@@ -7,6 +7,7 @@ import com.onlinepayments.merchant.MerchantClient;
 import com.onlinepayments.merchant.products.GetPaymentProductParams;
 import com.onlinepayments.merchant.products.GetPaymentProductsParams;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.factory.WorldlineClientFactory;
 import com.worldline.direct.model.WorldlineConfigurationModel;
@@ -21,6 +22,7 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentModeModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.store.services.BaseStoreService;
 import org.apache.commons.collections.CollectionUtils;
@@ -480,6 +482,58 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             //TODO Throw Logical Exception
         }
         return null;
+    }
+
+    @Override
+    public CreatePaymentResponse createSubsequentPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException {
+        validateParameterNotNull(abstractOrderModel, "order cannot be null");
+        validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "PaymentInfo cannot be null");
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+            WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+            final CreatePaymentRequest createPaymentParams = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
+
+            SubsequentPaymentRequest params = new SubsequentPaymentRequest();
+            params.setOrder(createPaymentParams.getOrder());
+
+            SubsequentCardPaymentMethodSpecificInput cardInput = new SubsequentCardPaymentMethodSpecificInput();
+            if (StringUtils.isNotBlank(paymentInfo.getWorldlineRecurringToken().getToken())) {
+                cardInput.setToken(paymentInfo.getWorldlineRecurringToken().getToken());
+            }
+            cardInput.setSubsequentType("recurring");
+            cardInput.setTransactionChannel("ECOMMERCE");
+            String authorizationMode = getAuthorizationMode(paymentInfo);
+            if (StringUtils.isNotBlank(authorizationMode)) {
+                cardInput.setAuthorizationMode(authorizationMode);
+            }
+            params.setSubsequentcardPaymentMethodSpecificInput(cardInput);
+
+            SubsequentPaymentResponse subsequentPayment = merchant.subsequent()
+                  .subsequentPayment(paymentInfo.getWorldlineRecurringToken().getInitialPaymentId(), params);
+            CreatePaymentResponse response = new CreatePaymentResponse();
+            response.setPayment(subsequentPayment.getPayment());
+
+            WorldlineLogUtils.logAction(LOGGER, "createSubsequentPayment", params, response);
+
+            return response;
+        } catch (DeclinedPaymentException e) {
+            LOGGER.debug("[ WORLDLINE ] Errors during getting createSubsequentPayment ", e.getMessage());
+            throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
+        } catch (Exception e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getting createSubsequentPayment ", e);
+        }
+        return null;
+    }
+
+    private String getAuthorizationMode(WorldlinePaymentInfoModel paymentInfo) {
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (worldlinePaymentModeService.isSaleOnly(String.valueOf(paymentInfo.getId()))) {
+            return OperationCodesEnum.SALE.getCode();
+        }
+        if (configuration.getDefaultOperationCode() != null) {
+            return configuration.getDefaultOperationCode().getCode();
+        }
+        return StringUtils.EMPTY;
     }
 
     @Override
