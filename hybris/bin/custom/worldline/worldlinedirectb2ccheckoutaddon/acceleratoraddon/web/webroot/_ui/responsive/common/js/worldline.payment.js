@@ -132,15 +132,6 @@ ACC.worldlinePaymentPost = {
                 }
             }
         });
-    },
-    checkApplePayAvailability: function () {
-        if (window.ApplePaySession) {
-            if (ApplePaySession.canMakePayments()) {
-                $('#worldline_payment_product_302').removeClass("display-none");
-                return;
-            }
-        }
-        $('#worldline_payment_product_302').remove();
     }, load: function () {
         let $selectedRadio = $('input:radio[name="paymentProductId"]:checked');
         var isHTP = $(PAYMENT_METHOD_SELECTORS.HTP_CLASS);
@@ -198,7 +189,6 @@ $(document).ready(function () {
     ACC.worldlinePaymentPost.bindSubmitWorldlineSelectPaymentForm();
     ACC.worldlinePaymentPost.bindSubmitWorldlinePlaceOrderForm();
     ACC.worldlinePaymentPost.bindWorldlineSavedPayments();
-    ACC.worldlinePaymentPost.checkApplePayAvailability();
     ACC.worldlinePaymentPost.load();
 });
 
