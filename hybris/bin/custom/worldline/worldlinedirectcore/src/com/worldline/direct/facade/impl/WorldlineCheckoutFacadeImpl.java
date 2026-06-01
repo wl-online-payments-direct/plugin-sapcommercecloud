@@ -262,7 +262,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             if (isRecurring) {
                 final TokenResponse tokenResponse = worldlinePaymentService.getToken(
                         paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken());
-                worldlineUserFacade.updateWorldlinePaymentInfo(paymentInfoModel, tokenResponse, cronjobId, baseStoreService.getCurrentBaseStore().getUid());
+                worldlineUserFacade.updateWorldlinePaymentInfo(paymentInfoModel, tokenResponse, cronjobId, baseStoreService.getCurrentBaseStore().getUid(), paymentData.getId());
                 modelService.refresh(orderModel);
             } else {
                 savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, paymentData);
