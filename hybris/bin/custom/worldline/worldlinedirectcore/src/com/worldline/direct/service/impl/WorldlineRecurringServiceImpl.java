@@ -68,8 +68,8 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             case PAYMENT_METHOD_GROUP_CARDS: {
                 if (WorldlineRecurringPaymentStatus.ACTIVE.equals(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getWorldlineRecurringToken().getStatus())) {
                     try {
-                        CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
-                        return Optional.of(createPaymentResponse);
+                        CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createSubsequentPayment(abstractOrderModel);
+                        return Optional.ofNullable(createPaymentResponse);
                     } catch (Exception e) {
                         LOG.error("something went wrong during payment creation", e);
                         throw new Exception(e);

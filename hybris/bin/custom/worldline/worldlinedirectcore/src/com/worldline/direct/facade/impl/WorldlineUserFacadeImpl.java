@@ -173,11 +173,12 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
     }
 
     @Override
-    public void updateWorldlinePaymentInfo(WorldlinePaymentInfoModel paymentInfoModel, TokenResponse tokenResponse, String cronjobId, String storeId) {
+    public void updateWorldlinePaymentInfo(WorldlinePaymentInfoModel paymentInfoModel, TokenResponse tokenResponse, String cronjobId, String storeId, String initialPaymentId) {
         CustomerModel customer = checkoutCustomerStrategy.getCurrentUserForCheckout();
         WorldlineRecurringTokenModel worldlineRecurringTokenModel = modelService.create(WorldlineRecurringTokenModel.class);
         worldlineRecurringTokenModel.setToken(tokenResponse.getId());
         worldlineRecurringTokenModel.setSubscriptionID(cronjobId);
+        worldlineRecurringTokenModel.setInitialPaymentId(initialPaymentId);
         worldlineRecurringTokenModel.setStatus(WorldlineRecurringPaymentStatus.ACTIVE);
         final CardWithoutCvv cardWithoutCvv = tokenResponse.getCard().getData().getCardWithoutCvv();
         worldlineRecurringTokenModel.setCardholderName(cardWithoutCvv.getCardholderName());
