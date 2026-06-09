@@ -4,7 +4,7 @@
 
 The Worldline Direct plugin for SAP Commerce Cloud connects your SAP Commerce (Hybris) storefront to the Worldline Online Payments platform, enabling you to accept a wide range of payment methods through a single integration. The plugin supports both B2C and B2B commerce scenarios, including recurring payments, saved payment methods, and order replenishment.
 
-**Plugin Version:** 6.0
+**Plugin Version:** 6.1
 **Worldline SDK Version:** 6.3.1
 
 ## Supported Payment Methods
