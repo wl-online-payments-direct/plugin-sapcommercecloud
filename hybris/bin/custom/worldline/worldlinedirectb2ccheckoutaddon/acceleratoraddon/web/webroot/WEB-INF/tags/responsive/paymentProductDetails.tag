@@ -32,7 +32,7 @@
         <form:input type="hidden" path="savedCardCode"/>
     </c:when>
     <c:otherwise>
-        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product js-worldline_payment_product ${applePayId eq paymentProduct.id? 'display-none' : ''} ${googlePayId eq paymentProduct.id ? 'js-worldline-google-pay-product' : ''}" title="<c:out value='${paymentProduct.displayHints.label}'/>"
+        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product js-worldline_payment_product ${googlePayId eq paymentProduct.id ? 'js-worldline-google-pay-product' : ''}" title="<c:out value='${paymentProduct.displayHints.label}'/>"
              data-payment-product-id="${paymentProduct.id}"
              data-google-pay-environment="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.environment) : ''}"
              data-google-pay-merchant-id="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.merchantId) : ''}"

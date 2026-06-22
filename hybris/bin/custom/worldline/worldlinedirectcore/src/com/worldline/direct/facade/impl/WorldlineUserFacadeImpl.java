@@ -179,6 +179,7 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         worldlineRecurringTokenModel.setToken(tokenResponse.getId());
         worldlineRecurringTokenModel.setInitialPaymentId(initialPaymentId);
         worldlineRecurringTokenModel.setSubscriptionID(cronjobId);
+        worldlineRecurringTokenModel.setInitialPaymentId(initialPaymentId);
         worldlineRecurringTokenModel.setStatus(WorldlineRecurringPaymentStatus.ACTIVE);
         if (tokenResponse.getCard() != null && tokenResponse.getCard().getData() != null && tokenResponse.getCard().getData().getCardWithoutCvv() != null) {
             final CardWithoutCvv cardWithoutCvv = tokenResponse.getCard().getData().getCardWithoutCvv();

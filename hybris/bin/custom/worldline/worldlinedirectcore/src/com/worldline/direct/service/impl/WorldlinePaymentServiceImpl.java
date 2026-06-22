@@ -41,6 +41,8 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlinePaymentServiceImpl.class);
+    private static final String ECOMMERCE = "ECOMMERCE";
+    private static final String SUBSEQUENT_TYPE_RECURRING = "recurring";
 
     protected WorldlineConfigurationService worldlineConfigurationService;
     protected WorldlineAmountUtils worldlineAmountUtils;
@@ -487,42 +489,72 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     @Override
     public CreatePaymentResponse createSubsequentPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null");
-        validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "PaymentInfo cannot be null");
+        validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "order.paymentInfo cannot be null");
+        if (!(abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel paymentInfo)
+                || (!StringUtils.equals(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue(), paymentInfo.getPaymentMethod())
+                && !Integer.valueOf(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY).equals(paymentInfo.getId()))) {
+            throw new IllegalArgumentException("Subsequent payment API is supported only for Worldline card and Google Pay payments");
+        }
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
-            WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
-            final CreatePaymentRequest createPaymentParams = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
 
-            SubsequentPaymentRequest params = new SubsequentPaymentRequest();
-            params.setOrder(createPaymentParams.getOrder());
+            final CreatePaymentRequest createPaymentRequest = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
+            final SubsequentPaymentRequest params = new SubsequentPaymentRequest();
+            params.setOrder(createPaymentRequest.getOrder());
+            params.setSubsequentcardPaymentMethodSpecificInput(createSubsequentCardPaymentMethodSpecificInput(abstractOrderModel, createPaymentRequest));
 
-            SubsequentCardPaymentMethodSpecificInput cardInput = new SubsequentCardPaymentMethodSpecificInput();
-            if (StringUtils.isNotBlank(paymentInfo.getWorldlineRecurringToken().getToken())) {
-                cardInput.setToken(paymentInfo.getWorldlineRecurringToken().getToken());
-            }
-            cardInput.setSubsequentType("recurring");
-            cardInput.setTransactionChannel("ECOMMERCE");
-            String authorizationMode = getAuthorizationMode(paymentInfo);
-            if (StringUtils.isNotBlank(authorizationMode)) {
-                cardInput.setAuthorizationMode(authorizationMode);
-            }
-            params.setSubsequentcardPaymentMethodSpecificInput(cardInput);
+            final String initialPaymentId = getInitialPaymentId(abstractOrderModel);
+            validateParameterNotNull(initialPaymentId, "worldlineRecurringToken.initialPaymentId cannot be null");
 
-            SubsequentPaymentResponse subsequentPayment = merchant.subsequent()
-                  .subsequentPayment(paymentInfo.getWorldlineRecurringToken().getInitialPaymentId(), params);
-            CreatePaymentResponse response = new CreatePaymentResponse();
-            response.setPayment(subsequentPayment.getPayment());
+            final SubsequentPaymentResponse subsequentPayment = merchant.subsequent().subsequentPayment(initialPaymentId, params);
+            final CreatePaymentResponse payment = new CreatePaymentResponse();
+            payment.setPayment(subsequentPayment.getPayment());
 
-            WorldlineLogUtils.logAction(LOGGER, "createSubsequentPayment", params, response);
+            WorldlineLogUtils.logAction(LOGGER, "createSubsequentPayment", params, payment);
 
-            return response;
+            return payment;
         } catch (DeclinedPaymentException e) {
             LOGGER.debug("[ WORLDLINE ] Errors during getting createSubsequentPayment ", e.getMessage());
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
             LOGGER.error("[ WORLDLINE ] Errors during getting createSubsequentPayment ", e);
+            //TODO Throw Logical Exception
         }
         return null;
+    }
+
+    private SubsequentCardPaymentMethodSpecificInput createSubsequentCardPaymentMethodSpecificInput(AbstractOrderModel abstractOrderModel, CreatePaymentRequest createPaymentRequest) {
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+        validateParameterNotNull(paymentInfo.getWorldlineRecurringToken(), "worldlineRecurringToken cannot be null");
+        validateParameterNotNull(paymentInfo.getWorldlineRecurringToken().getToken(), "worldlineRecurringToken.token cannot be null");
+
+        final SubsequentCardPaymentMethodSpecificInput subsequentCardInput = new SubsequentCardPaymentMethodSpecificInput();
+        subsequentCardInput.setSubsequentType(SUBSEQUENT_TYPE_RECURRING);
+        subsequentCardInput.setTransactionChannel(ECOMMERCE);
+
+        if (createPaymentRequest.getCardPaymentMethodSpecificInput() != null) {
+            final CardPaymentMethodSpecificInput cardInput = createPaymentRequest.getCardPaymentMethodSpecificInput();
+            subsequentCardInput.setAuthorizationMode(cardInput.getAuthorizationMode());
+            subsequentCardInput.setMarketPlace(cardInput.getMarketPlace());
+            subsequentCardInput.setSchemeReferenceData(cardInput.getSchemeReferenceData());
+        } else {
+            final String authorizationMode = getAuthorizationMode(paymentInfo);
+            if (StringUtils.isNotBlank(authorizationMode)) {
+                subsequentCardInput.setAuthorizationMode(authorizationMode);
+            }
+        }
+
+        subsequentCardInput.setToken(paymentInfo.getWorldlineRecurringToken().getToken());
+
+        return subsequentCardInput;
+    }
+
+    private String getInitialPaymentId(AbstractOrderModel abstractOrderModel) {
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+        if (paymentInfo.getWorldlineRecurringToken() == null) {
+            return null;
+        }
+        return paymentInfo.getWorldlineRecurringToken().getInitialPaymentId();
     }
 
     private String getAuthorizationMode(WorldlinePaymentInfoModel paymentInfo) {

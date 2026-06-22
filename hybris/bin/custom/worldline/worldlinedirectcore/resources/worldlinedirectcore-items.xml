@@ -412,6 +412,11 @@
                     <persistence type="property"/>
                     <modifiers read="true" search="true"/>
                 </attribute>
+                <attribute qualifier="initialPaymentId" type="java.lang.String">
+                    <description>Worldline payment id from the initial card payment in the recurring series.</description>
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
                 <attribute qualifier="customer" type="Customer">
                     <description>The customer who is using the token for recurring payments</description>
                     <persistence type="property" />
