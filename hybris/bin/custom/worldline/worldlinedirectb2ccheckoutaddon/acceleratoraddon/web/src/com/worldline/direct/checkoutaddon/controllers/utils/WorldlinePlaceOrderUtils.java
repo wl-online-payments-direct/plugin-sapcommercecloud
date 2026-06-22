@@ -83,6 +83,32 @@ public class WorldlinePlaceOrderUtils {
                                     WorldlineWebConstants.URL.Checkout.Payment.select;
                     }
                 }
+                break;
+            case GOOGLE_PAY:
+                try {
+                    storeHTPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
+                    worldlineCheckoutFacade.authorisePaymentForGooglePay(abstractOrderData.getCode(), browserData);
+                    return redirectToOrderConfirmationPage(abstractOrderData);
+                } catch (WorldlineNonAuthorizedPaymentException e) {
+                    switch (e.getReason()) {
+                        case NEED_3DS:
+                            return REDIRECT_PREFIX + e.getMerchantAction().getRedirectData().getRedirectURL();
+                        case REJECTED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                    GlobalMessages.ERROR_MESSAGES_HOLDER,
+                                    "checkout.error.payment.rejected");
+                            return REDIRECT_PREFIX +
+                                    WorldlineWebConstants.URL.Checkout.Payment.root +
+                                    WorldlineWebConstants.URL.Checkout.Payment.select;
+                        case CANCELLED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                    GlobalMessages.INFO_MESSAGES_HOLDER,
+                                    "checkout.error.payment.cancelled");
+                            return REDIRECT_PREFIX +
+                                    WorldlineWebConstants.URL.Checkout.Payment.root +
+                                    WorldlineWebConstants.URL.Checkout.Payment.select;
+                    }
+                }
             default:
                 break;
         }
@@ -104,6 +130,32 @@ public class WorldlinePlaceOrderUtils {
                     WorldlineHostedTokenizationData worldlineHostedTokenizationData = prepareHTPData(abstractOrderData, browserData);
                     storeHTPReturnUrlInSession(getOrderCode(abstractOrderData),  OrderType.SCHEDULE_REPLENISHMENT_ORDER);
                     abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData, RecurringPaymentEnum.IMMEDIATE);
+                    return redirectToOrderConfirmationPage(abstractOrderData);
+                } catch (WorldlineNonAuthorizedPaymentException e) {
+                    switch (e.getReason()) {
+                        case NEED_3DS:
+                            return REDIRECT_PREFIX + e.getMerchantAction().getRedirectData().getRedirectURL();
+                        case REJECTED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                  GlobalMessages.ERROR_MESSAGES_HOLDER,
+                                  "checkout.error.payment.rejected");
+                            return REDIRECT_PREFIX +
+                                  WorldlineWebConstants.URL.Checkout.Payment.root +
+                                  WorldlineWebConstants.URL.Checkout.Payment.select;
+                        case CANCELLED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                  GlobalMessages.INFO_MESSAGES_HOLDER,
+                                  "checkout.error.payment.cancelled");
+                            return REDIRECT_PREFIX +
+                                  WorldlineWebConstants.URL.Checkout.Payment.root +
+                                  WorldlineWebConstants.URL.Checkout.Payment.select;
+                    }
+                }
+                break;
+            case GOOGLE_PAY:
+                try {
+                    storeHTPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+                    abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForGooglePay(abstractOrderData.getCode(), browserData, RecurringPaymentEnum.IMMEDIATE);
                     return redirectToOrderConfirmationPage(abstractOrderData);
                 } catch (WorldlineNonAuthorizedPaymentException e) {
                     switch (e.getReason()) {

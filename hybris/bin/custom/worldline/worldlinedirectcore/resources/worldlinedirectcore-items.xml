@@ -15,6 +15,12 @@
             <description>Checkout types for card payments</description>
             <value code="HOSTED_CHECKOUT"/>
             <value code="HOSTED_TOKENIZATION"/>
+            <value code="GOOGLE_PAY"/>
+        </enumtype>
+        <enumtype generate="true" code="WorldlineGooglePayEnvironment" autocreate="true">
+            <description>Google Pay API environment</description>
+            <value code="TEST"/>
+            <value code="PRODUCTION"/>
         </enumtype>
         <enumtype generate="true" code="OperationCodesEnum" autocreate="true">
             <description>Checkout types for card payments</description>
@@ -208,6 +214,27 @@
                     <modifiers optional="false" />
                     <defaultvalue>java.math.BigDecimal.ZERO</defaultvalue>
                 </attribute>
+                <attribute qualifier="googlePayMerchantId" type="java.lang.String">
+                    <description>Merchant ID from the Google Pay Business Console.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="googlePayMerchantName" type="java.lang.String">
+                    <description>Merchant name rendered in the Google Pay payment sheet.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="googlePayEnvironment" type="WorldlineGooglePayEnvironment">
+                    <description>Google Pay API environment.</description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>em().getEnumerationValue("WorldlineGooglePayEnvironment","TEST")</defaultvalue>
+                </attribute>
+                <attribute qualifier="googlePayAcquirerCountry" type="java.lang.String">
+                    <description>Acquiring bank country/region code sent to Google Pay TransactionInfo.countryCode.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -332,6 +359,24 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
+                <attribute qualifier="googlePayEncryptedPaymentData" type="java.lang.String">
+                    <persistence type="property">
+                        <columntype database="oracle">
+                            <value>clob</value>
+                        </columntype>
+                        <columntype database="sap">
+                            <value>NCLOB</value>
+                        </columntype>
+                        <columntype>
+                            <value>HYBRIS.LONG_STRING</value>
+                        </columntype>
+                    </persistence>
+                    <modifiers optional="true" search="false" />
+                </attribute>
+                <attribute qualifier="googlePayMobileDevice" type="java.lang.Boolean">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="false" />
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -339,6 +384,10 @@
             <deployment table="worldlineRecurringToken" typecode="15008"/>
             <attributes>
                 <attribute qualifier="token" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="initialPaymentId" type="java.lang.String">
                     <modifiers read="true" write="true" search="false" optional="true"/>
                     <persistence type="property"/>
                 </attribute>

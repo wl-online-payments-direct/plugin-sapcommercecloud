@@ -37,6 +37,8 @@ public interface WorldlineCheckoutFacade {
 
     void authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData hostedTokenizationId) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
+    void authorisePaymentForGooglePay(String orderCode, BrowserData browserData) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
+
     void handle3dsResponse(String ref, String paymentId, Boolean isRecurring) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
     CreateHostedCheckoutResponse createHostedCheckout(String orderCode, BrowserData browserData) throws InvalidCartException;

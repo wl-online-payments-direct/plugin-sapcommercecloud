@@ -177,13 +177,18 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         CustomerModel customer = checkoutCustomerStrategy.getCurrentUserForCheckout();
         WorldlineRecurringTokenModel worldlineRecurringTokenModel = modelService.create(WorldlineRecurringTokenModel.class);
         worldlineRecurringTokenModel.setToken(tokenResponse.getId());
+        worldlineRecurringTokenModel.setInitialPaymentId(initialPaymentId);
         worldlineRecurringTokenModel.setSubscriptionID(cronjobId);
         worldlineRecurringTokenModel.setInitialPaymentId(initialPaymentId);
         worldlineRecurringTokenModel.setStatus(WorldlineRecurringPaymentStatus.ACTIVE);
-        final CardWithoutCvv cardWithoutCvv = tokenResponse.getCard().getData().getCardWithoutCvv();
-        worldlineRecurringTokenModel.setCardholderName(cardWithoutCvv.getCardholderName());
-        worldlineRecurringTokenModel.setAlias(cardWithoutCvv.getCardNumber());
-        worldlineRecurringTokenModel.setExpiryDate(String.join("/", EXPIRY_DATE_PATTERN.split(cardWithoutCvv.getExpiryDate())));
+        if (tokenResponse.getCard() != null && tokenResponse.getCard().getData() != null && tokenResponse.getCard().getData().getCardWithoutCvv() != null) {
+            final CardWithoutCvv cardWithoutCvv = tokenResponse.getCard().getData().getCardWithoutCvv();
+            worldlineRecurringTokenModel.setCardholderName(cardWithoutCvv.getCardholderName());
+            worldlineRecurringTokenModel.setAlias(cardWithoutCvv.getCardNumber());
+            worldlineRecurringTokenModel.setExpiryDate(String.join("/", EXPIRY_DATE_PATTERN.split(cardWithoutCvv.getExpiryDate())));
+        } else {
+            worldlineRecurringTokenModel.setAlias(tokenResponse.getId());
+        }
         worldlineRecurringTokenModel.setCustomer(customer);
         worldlineRecurringTokenModel.setStoreId(storeId);
         paymentInfoModel.setWorldlineRecurringToken(worldlineRecurringTokenModel);
