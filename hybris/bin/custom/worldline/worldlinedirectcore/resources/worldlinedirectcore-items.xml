@@ -387,10 +387,6 @@
                     <modifiers read="true" write="true" search="false" optional="true"/>
                     <persistence type="property"/>
                 </attribute>
-                <attribute qualifier="initialPaymentId" type="java.lang.String">
-                    <modifiers read="true" write="true" search="false" optional="true"/>
-                    <persistence type="property"/>
-                </attribute>
                 <attribute qualifier="alias" type="java.lang.String">
                     <modifiers read="true" write="true" search="false" optional="true"/>
                     <persistence type="property"/>
