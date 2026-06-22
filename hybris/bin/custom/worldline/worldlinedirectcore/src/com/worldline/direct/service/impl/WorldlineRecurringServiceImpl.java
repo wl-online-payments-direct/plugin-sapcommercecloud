@@ -4,6 +4,7 @@ import com.onlinepayments.domain.CreatePaymentResponse;
 import com.onlinepayments.domain.GetMandateResponse;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
+import com.worldline.direct.enums.WorldlineRecurringType;
 import com.worldline.direct.model.WorldlineMandateModel;
 import com.worldline.direct.model.WorldlineRecurringTokenModel;
 import com.worldline.direct.service.WorldlinePaymentService;
@@ -39,10 +40,13 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                     if (worldlinePaymentInfo.getMandateDetail() != null) {
                         WorldlineMandateModel mandateDetail = worldlinePaymentInfo.getMandateDetail();
                         updateMandate(mandateDetail);
-                        if (WorldlineRecurringPaymentStatus.ACTIVE.equals(mandateDetail.getStatus())) {
+                        if (WorldlineRecurringPaymentStatus.ACTIVE.equals(mandateDetail.getStatus())
+                                && WorldlineRecurringType.RECURRING.equals(mandateDetail.getRecurrenceType())) {
                             CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
                             return Optional.of(createPaymentResponse);
                         } else {
+                            LOG.warn(String.format("cannot create SEPA recurring payment with mandate status = %s and recurrenceType = %s",
+                                    mandateDetail.getStatus(), mandateDetail.getRecurrenceType()));
                             return Optional.empty();
                         }
 
@@ -152,7 +156,16 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                     break;
                 }
             }
+            updateMandateRecurrenceType(mandateModel, mandate.getMandate().getRecurrenceType());
             modelService.save(mandateModel);
+        }
+    }
+
+    private void updateMandateRecurrenceType(WorldlineMandateModel mandateModel, String recurrenceType) {
+        try {
+            mandateModel.setRecurrenceType(WorldlineRecurringType.valueOf(recurrenceType));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            mandateModel.setRecurrenceType(WorldlineRecurringType.UNKNOWN);
         }
     }
 
