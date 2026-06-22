@@ -21,6 +21,8 @@ import de.hybris.platform.servicelayer.session.SessionService;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY;
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
 
@@ -46,7 +48,7 @@ public class WorldlineHostedTokenizationMobilePopulator implements Populator<Abs
 
         MobilePaymentMethodSpecificInput mobileInput = new MobilePaymentMethodSpecificInput();
         mobileInput.setPaymentProductId(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY);
-        mobileInput.setEncryptedPaymentData(paymentInfo.getGooglePayEncryptedPaymentData());
+        mobileInput.setEncryptedPaymentData(sessionService.getAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY));
         mobileInput.setPaymentProduct320SpecificInput(createProduct320SpecificInput(abstractOrderModel, paymentInfo));
 
         String authorizationMode = getAuthorizationMode(paymentInfo);
@@ -69,7 +71,7 @@ public class WorldlineHostedTokenizationMobilePopulator implements Populator<Abs
             productInput.setRecurring(recurring);
         }
 
-        if (!BooleanUtils.isTrue(paymentInfo.getGooglePayMobileDevice())) {
+        if (!BooleanUtils.isTrue(sessionService.getAttribute(GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY))) {
             WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
             GPayThreeDSecure threeDSecure = WorldlineThreeDSecureFactory.createGPayThreeDSecure(configuration, order);
             if (threeDSecure != null) {

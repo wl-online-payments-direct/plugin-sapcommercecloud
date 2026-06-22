@@ -1,0 +1,171 @@
+package com.worldline.direct.facade.impl;
+
+import com.onlinepayments.domain.CardPaymentMethodSpecificOutput;
+import com.onlinepayments.domain.MobilePaymentData;
+import com.onlinepayments.domain.MobilePaymentMethodSpecificOutput;
+import com.onlinepayments.domain.PaymentOutput;
+import com.onlinepayments.domain.PaymentResponse;
+import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
+import com.worldline.direct.model.WorldlineRecurringTokenModel;
+import de.hybris.bootstrap.annotations.UnitTest;
+import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
+import de.hybris.platform.core.model.user.CustomerModel;
+import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.store.BaseStoreModel;
+import de.hybris.platform.store.services.BaseStoreService;
+import org.junit.Test;
+
+import java.lang.reflect.Proxy;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+
+@UnitTest
+public class WorldlineCheckoutFacadeImplPaymentOutputTest {
+
+    private final TestableWorldlineCheckoutFacadeImpl facade = new TestableWorldlineCheckoutFacadeImpl();
+
+    @Test
+    public void getPaymentProductIdUsesMobileOutputWhenCardOutputDoesNotIdentifyProduct() {
+        PaymentOutput paymentOutput = new PaymentOutput();
+        paymentOutput.setCardPaymentMethodSpecificOutput(new CardPaymentMethodSpecificOutput());
+        paymentOutput.setMobilePaymentMethodSpecificOutput(mobilePaymentMethodSpecificOutput(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY));
+
+        Integer paymentProductId = facade.getPaymentProductId(paymentOutput);
+
+        assertEquals(Integer.valueOf(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY), paymentProductId);
+    }
+
+    @Test
+    public void getPaymentProductIdUsesCardOutputWhenOnlyCardOutputIdentifiesProduct() {
+        PaymentOutput paymentOutput = new PaymentOutput();
+        paymentOutput.setCardPaymentMethodSpecificOutput(cardPaymentMethodSpecificOutput(WorldlinedirectcoreConstants.PAYMENT_METHOD_VISA));
+
+        Integer paymentProductId = facade.getPaymentProductId(paymentOutput);
+
+        assertEquals(Integer.valueOf(WorldlinedirectcoreConstants.PAYMENT_METHOD_VISA), paymentProductId);
+    }
+
+    @Test
+    public void savePaymentTokenAssignsCheckoutCustomerToGooglePayRecurringToken() {
+        CustomerModel customer = new CustomerModel();
+        CartModel order = new CartModel();
+        WorldlinePaymentInfoModel paymentInfo = new WorldlinePaymentInfoModel();
+        WorldlineRecurringTokenModel recurringToken = new WorldlineRecurringTokenModel();
+        BaseStoreModel baseStore = new BaseStoreModel();
+        baseStore.setUid("store-id");
+        TestModelService modelService = new TestModelService(recurringToken);
+        order.setPaymentInfo(paymentInfo);
+
+        facade.setModelService(modelService.proxy());
+        facade.setBaseStoreService(baseStoreService(baseStore));
+        facade.setCheckoutCustomerStrategy(checkoutCustomerStrategy(customer));
+
+        facade.savePaymentToken(order, googlePayPaymentResponse(), Boolean.TRUE, "cronjob-id");
+
+        assertEquals("payment-id", recurringToken.getInitialPaymentId());
+        assertEquals("cronjob-id", recurringToken.getSubscriptionID());
+        assertEquals(WorldlineRecurringPaymentStatus.ACTIVE, recurringToken.getStatus());
+        assertEquals("store-id", recurringToken.getStoreId());
+        assertEquals("dpan", recurringToken.getAlias());
+        assertEquals("1228", recurringToken.getExpiryDate());
+        assertSame(customer, recurringToken.getCustomer());
+        assertSame(recurringToken, paymentInfo.getWorldlineRecurringToken());
+        assertSame(paymentInfo, modelService.savedModels[0]);
+        assertSame(recurringToken, modelService.savedModels[1]);
+        assertSame(order, modelService.refreshedModel);
+    }
+
+    private CardPaymentMethodSpecificOutput cardPaymentMethodSpecificOutput(Integer paymentProductId) {
+        CardPaymentMethodSpecificOutput output = new CardPaymentMethodSpecificOutput();
+        output.setPaymentProductId(paymentProductId);
+        return output;
+    }
+
+    private MobilePaymentMethodSpecificOutput mobilePaymentMethodSpecificOutput(Integer paymentProductId) {
+        MobilePaymentMethodSpecificOutput output = new MobilePaymentMethodSpecificOutput();
+        output.setPaymentProductId(paymentProductId);
+        return output;
+    }
+
+    private PaymentResponse googlePayPaymentResponse() {
+        MobilePaymentData paymentData = new MobilePaymentData();
+        paymentData.setDpan("dpan");
+        paymentData.setExpiryDate("1228");
+
+        MobilePaymentMethodSpecificOutput mobileOutput = mobilePaymentMethodSpecificOutput(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY);
+        mobileOutput.setPaymentData(paymentData);
+
+        PaymentOutput paymentOutput = new PaymentOutput();
+        paymentOutput.setMobilePaymentMethodSpecificOutput(mobileOutput);
+
+        PaymentResponse paymentResponse = new PaymentResponse();
+        paymentResponse.setId("payment-id");
+        paymentResponse.setPaymentOutput(paymentOutput);
+        return paymentResponse;
+    }
+
+    private static class TestableWorldlineCheckoutFacadeImpl extends WorldlineCheckoutFacadeImpl {
+        Integer getPaymentProductId(PaymentOutput paymentOutput) {
+            return getPaymentProductIdFromPaymentOutput(paymentOutput);
+        }
+    }
+
+    private BaseStoreService baseStoreService(BaseStoreModel baseStore) {
+        return (BaseStoreService) Proxy.newProxyInstance(
+              BaseStoreService.class.getClassLoader(),
+              new Class[]{BaseStoreService.class},
+              (proxy, method, args) -> "getCurrentBaseStore".equals(method.getName()) ? baseStore : defaultValue(method.getReturnType()));
+    }
+
+    private CheckoutCustomerStrategy checkoutCustomerStrategy(CustomerModel customer) {
+        return (CheckoutCustomerStrategy) Proxy.newProxyInstance(
+              CheckoutCustomerStrategy.class.getClassLoader(),
+              new Class[]{CheckoutCustomerStrategy.class},
+              (proxy, method, args) -> "getCurrentUserForCheckout".equals(method.getName()) ? customer : defaultValue(method.getReturnType()));
+    }
+
+    private static class TestModelService {
+        private final WorldlineRecurringTokenModel recurringToken;
+        private Object[] savedModels;
+        private Object refreshedModel;
+
+        TestModelService(WorldlineRecurringTokenModel recurringToken) {
+            this.recurringToken = recurringToken;
+        }
+
+        ModelService proxy() {
+            return (ModelService) Proxy.newProxyInstance(
+                  ModelService.class.getClassLoader(),
+                  new Class[]{ModelService.class},
+                  (proxy, method, args) -> {
+                      if ("create".equals(method.getName())) {
+                          return recurringToken;
+                      }
+                      if ("saveAll".equals(method.getName())) {
+                          savedModels = (Object[]) args[0];
+                          return null;
+                      }
+                      if ("refresh".equals(method.getName())) {
+                          refreshedModel = args[0];
+                          return null;
+                      }
+                      return defaultValue(method.getReturnType());
+                  });
+        }
+    }
+
+    private static Object defaultValue(Class<?> returnType) {
+        if (Boolean.TYPE.equals(returnType)) {
+            return Boolean.FALSE;
+        }
+        if (Integer.TYPE.equals(returnType)) {
+            return 0;
+        }
+        return null;
+    }
+}

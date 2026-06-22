@@ -32,7 +32,8 @@
         <form:input type="hidden" path="savedCardCode"/>
     </c:when>
     <c:otherwise>
-        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product js-worldline_payment_product ${applePayId eq paymentProduct.id? 'display-none' : ''}" title="<c:out value='${paymentProduct.displayHints.label}'/>"
+        <div id="worldline_payment_product_${paymentProduct.id}" class="worldline_payment_product js-worldline_payment_product ${applePayId eq paymentProduct.id? 'display-none' : ''} ${googlePayId eq paymentProduct.id ? 'js-worldline-google-pay-product' : ''}" title="<c:out value='${paymentProduct.displayHints.label}'/>"
+             data-payment-product-id="${paymentProduct.id}"
              data-google-pay-environment="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.environment) : ''}"
              data-google-pay-merchant-id="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.merchantId) : ''}"
              data-google-pay-merchant-name="${googlePayId eq paymentProduct.id && googlePayConfiguration != null ? fn:escapeXml(googlePayConfiguration.merchantName) : ''}"
@@ -54,9 +55,8 @@
             </span>
             </div>
             <c:if test="${googlePayId eq paymentProduct.id}">
-                <form:input type="hidden" path="googlePayEncryptedPaymentData"/>
-                <form:input type="hidden" path="googlePayMobileDevice"/>
-                <div id="worldline-google-pay-button"></div>
+                <form:input type="hidden" path="googlePayEncryptedPaymentData" cssClass="js-worldline-google-pay-token"/>
+                <div class="js-worldline-google-pay-button"></div>
             </c:if>
 
         </div>

@@ -1,12 +1,19 @@
 package com.worldline.direct.factory.impl;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.onlinepayments.domain.CreatePaymentRequest;
 import com.onlinepayments.domain.GPayThreeDSecure;
+import com.onlinepayments.domain.MobilePaymentMethodSpecificInput;
+import com.onlinepayments.domain.MobilePaymentProduct320SpecificInput;
+import com.onlinepayments.json.DefaultMarshaller;
 import com.worldline.direct.enums.WorldlineExemptionType;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.model.WorldlineGPayThreeDSecure;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.core.model.c2l.CurrencyModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.CartModel;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -15,8 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @UnitTest
 public class WorldlineGooglePayThreeDSecureFactoryTest {
@@ -32,6 +37,29 @@ public class WorldlineGooglePayThreeDSecureFactoryTest {
         assertEquals("no-challenge-requested-risk-analysis-performed", threeDSecure.getChallengeIndicator());
         assertEquals("transaction-risk-analysis", threeDSecure.getExemptionRequest());
         assertTrue(((WorldlineGPayThreeDSecure) threeDSecure).getAcquirerExemption());
+    }
+
+    @Test
+    public void createGPayThreeDSecureSerializesAcquirerExemptionForGooglePayTra() {
+        GPayThreeDSecure threeDSecure = WorldlineThreeDSecureFactory.createGPayThreeDSecure(
+              configuration(true, false, WorldlineExemptionType.TRANSACTION_RISK_ANALYSIS, BigDecimal.valueOf(50)),
+              order("EUR", 25d));
+
+        MobilePaymentProduct320SpecificInput product320SpecificInput = new MobilePaymentProduct320SpecificInput();
+        product320SpecificInput.setThreeDSecure(threeDSecure);
+        MobilePaymentMethodSpecificInput mobilePaymentMethodSpecificInput = new MobilePaymentMethodSpecificInput();
+        mobilePaymentMethodSpecificInput.setPaymentProduct320SpecificInput(product320SpecificInput);
+        CreatePaymentRequest request = new CreatePaymentRequest();
+        request.setMobilePaymentMethodSpecificInput(mobilePaymentMethodSpecificInput);
+
+        String json = DefaultMarshaller.INSTANCE.marshal(request);
+        JsonObject threeDSecureJson = new JsonParser().parse(json).getAsJsonObject()
+              .getAsJsonObject("mobilePaymentMethodSpecificInput")
+              .getAsJsonObject("paymentProduct320SpecificInput")
+              .getAsJsonObject("threeDSecure");
+
+        assertTrue(json.contains("\"acquirerExemption\":true"));
+        assertTrue(threeDSecureJson.get("acquirerExemption").getAsBoolean());
     }
 
     @Test
@@ -58,21 +86,21 @@ public class WorldlineGooglePayThreeDSecureFactoryTest {
     }
 
     private WorldlineConfigurationModel configuration(boolean enable3ds, boolean mandatory3ds, WorldlineExemptionType exemptionType, BigDecimal exemptionLimit) {
-        WorldlineConfigurationModel configuration = mock(WorldlineConfigurationModel.class);
-        when(configuration.getEnable3DS()).thenReturn(enable3ds);
-        when(configuration.getEnableMandatory3DS()).thenReturn(mandatory3ds);
-        when(configuration.getExemptionType3DS()).thenReturn(exemptionType);
-        when(configuration.getExemptionLimit3DS()).thenReturn(exemptionLimit);
+        WorldlineConfigurationModel configuration = new WorldlineConfigurationModel();
+        configuration.setEnable3DS(enable3ds);
+        configuration.setEnableMandatory3DS(mandatory3ds);
+        configuration.setExemptionType3DS(exemptionType);
+        configuration.setExemptionLimit3DS(exemptionLimit);
         return configuration;
     }
 
     private AbstractOrderModel order(String currencyCode, double totalPrice) {
-        CurrencyModel currency = mock(CurrencyModel.class);
-        when(currency.getIsocode()).thenReturn(currencyCode);
+        CurrencyModel currency = new CurrencyModel();
+        currency.setIsocode(currencyCode);
 
-        AbstractOrderModel order = mock(AbstractOrderModel.class);
-        when(order.getCurrency()).thenReturn(currency);
-        when(order.getTotalPrice()).thenReturn(totalPrice);
+        CartModel order = new CartModel();
+        order.setCurrency(currency);
+        order.setTotalPrice(totalPrice);
         return order;
     }
 }

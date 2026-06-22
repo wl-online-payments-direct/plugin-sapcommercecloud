@@ -31,6 +31,7 @@ import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commerceservices.enums.CountryType;
+import de.hybris.platform.servicelayer.session.SessionService;
 import de.hybris.platform.util.Config;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.BooleanUtils;
@@ -50,6 +51,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_APPLEPAY;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -83,6 +85,9 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
 
     @Resource(name = "worldlineConfigurationService")
     private WorldlineConfigurationService worldlineConfigurationService;
+
+    @Resource(name = "sessionService")
+    private SessionService sessionService;
 
     protected UserFacade getUserFacade() {
         return userFacade;
@@ -165,8 +170,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
 
         getAddressVerificationFacade().verifyAddressData(addressData);
         worldlinePaymentInfoData.setBillingAddress(addressData);
-        worldlinePaymentInfoData.setGooglePayEncryptedPaymentData(worldlinePaymentDetailsForm.getGooglePayEncryptedPaymentData());
-        worldlinePaymentInfoData.setGooglePayMobileDevice(worldlinePaymentDetailsForm.getGooglePayMobileDevice());
+        storeGooglePayEncryptedPaymentData(worldlinePaymentDetailsForm);
 
         worldlineCheckoutFacade.handlePaymentInfo(worldlinePaymentInfoData);
 
@@ -228,7 +232,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
 
     @ModelAttribute("googlePayJs")
     String getGooglePayJs(){
-        return "https://pay.google.com/gp/p/js/pay.js";
+        return Config.getString("worldline.google.pay.js", "https://pay.google.com/gp/p/js/pay.js");
     }
 
     private void addGooglePayConfiguration(final Model model, List<PaymentProduct> paymentProducts, CartData cartData) {
@@ -281,6 +285,14 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
     @Override
     public String next(final RedirectAttributes redirectAttributes) {
         return getCheckoutStep().nextStep();
+    }
+
+    private void storeGooglePayEncryptedPaymentData(WorldlinePaymentDetailsForm worldlinePaymentDetailsForm) {
+        if (PAYMENT_METHOD_GOOGLEPAY == worldlinePaymentDetailsForm.getPaymentProductId()) {
+            sessionService.setAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY, worldlinePaymentDetailsForm.getGooglePayEncryptedPaymentData());
+        } else {
+            sessionService.removeAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY);
+        }
     }
 
     /**

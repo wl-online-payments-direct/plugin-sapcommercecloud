@@ -122,7 +122,13 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                 final OrderModel order = customerAccountService.getOrderForCode(code, baseStoreService.getCurrentBaseStore());
                 WorldlineHostedTokenizationData paymentData = new WorldlineHostedTokenizationData();
                 paymentData.setBrowserData(browserData);
-                CreatePaymentResponse paymentResponse = worldlinePaymentService.createPaymentForHostedTokenization(order, paymentData);
+                CreatePaymentResponse paymentResponse;
+                try {
+                    storeGooglePayDeviceContext(browserData);
+                    paymentResponse = worldlinePaymentService.createPaymentForHostedTokenization(order, paymentData);
+                } finally {
+                    clearGooglePayPaymentSessionData();
+                }
 
                 if (paymentResponse.getMerchantAction() != null) {
                     storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());

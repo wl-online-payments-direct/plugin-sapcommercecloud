@@ -78,6 +78,7 @@
         <property name="virtualPaymentModes" ref="virtualPaymentModes"/>
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+        <property name="sessionService" ref="sessionService"/>
     </bean>
 
     <bean id="worldlineRecurringCheckoutFacade" parent="worldlineCheckoutFacade"
@@ -206,10 +207,18 @@
                     static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_APPLEPAY"/>
         </property>
     </bean>
+    <bean id="worldlineGooglePayPaymentProductsEvaluator"
+          class="com.worldline.direct.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
+        <property name="paymentProductId">
+            <utils:constant
+                    static-field="com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY"/>
+        </property>
+    </bean>
 
     <utils:list id="worldlineHostedCheckoutPaymentProductsEvaluatorList">
         <ref bean="worldlineHostedCheckoutPaymentProductsEvaluator"/>
         <ref bean="worldlineApplePayPaymentProductsEvaluator"/>
+        <ref bean="worldlineGooglePayPaymentProductsEvaluator"/>
     </utils:list>
 
     <utils:list id="worldlineHostedTokenizationPaymentProductsEvaluatorList">

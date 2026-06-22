@@ -53,8 +53,6 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         worldlinePaymentInfoData.setReturnMAC(worldlinePaymentInfoModel.getReturnMAC());
         worldlinePaymentInfoData.setSaved(worldlinePaymentInfoModel.isSaved());
         worldlinePaymentInfoData.setRecurring(worldlinePaymentInfoModel.isRecurringToken());
-        worldlinePaymentInfoData.setGooglePayEncryptedPaymentData(worldlinePaymentInfoModel.getGooglePayEncryptedPaymentData());
-        worldlinePaymentInfoData.setGooglePayMobileDevice(worldlinePaymentInfoModel.getGooglePayMobileDevice());
         CardTypeData cardTypeData=new CardTypeData();
         cardTypeData.setName(worldlinePaymentInfoModel.getCardBrand());
         worldlinePaymentInfoData.setCardType(cardTypeData);
