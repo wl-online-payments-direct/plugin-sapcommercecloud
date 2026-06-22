@@ -56,6 +56,7 @@
             </div>
             <c:if test="${googlePayId eq paymentProduct.id}">
                 <form:input type="hidden" path="googlePayEncryptedPaymentData" cssClass="js-worldline-google-pay-token"/>
+                <form:input type="hidden" path="googlePayMobileDevice" cssClass="js-worldline-google-pay-mobile-device"/>
                 <div class="js-worldline-google-pay-button"></div>
             </c:if>
 

@@ -170,6 +170,8 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
 
         getAddressVerificationFacade().verifyAddressData(addressData);
         worldlinePaymentInfoData.setBillingAddress(addressData);
+        worldlinePaymentInfoData.setGooglePayEncryptedPaymentData(worldlinePaymentDetailsForm.getGooglePayEncryptedPaymentData());
+        worldlinePaymentInfoData.setGooglePayMobileDevice(worldlinePaymentDetailsForm.getGooglePayMobileDevice());
         storeGooglePayEncryptedPaymentData(worldlinePaymentDetailsForm);
 
         worldlineCheckoutFacade.handlePaymentInfo(worldlinePaymentInfoData);

@@ -26,6 +26,8 @@
         <property name="defaultPayment" type="boolean"/>
         <property name="cardType" type="de.hybris.platform.commercefacades.order.data.CardTypeData"/>
         <property name="mandateDetail" type="com.worldline.direct.order.data.WorldlineMandateDetail"/>
+        <property name="googlePayEncryptedPaymentData" type="String"/>
+        <property name="googlePayMobileDevice" type="Boolean"/>
 
     </bean>
 

@@ -119,18 +119,18 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
           throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
         switch (recurringPaymentType) {
             case IMMEDIATE:
-                final OrderModel order = customerAccountService.getOrderForCode(code, baseStoreService.getCurrentBaseStore());
-                WorldlineHostedTokenizationData paymentData = new WorldlineHostedTokenizationData();
-                paymentData.setBrowserData(browserData);
-                CreatePaymentResponse paymentResponse;
-                try {
-                    storeGooglePayDeviceContext(browserData);
-                    paymentResponse = worldlinePaymentService.createPaymentForHostedTokenization(order, paymentData);
-                } finally {
-                    clearGooglePayPaymentSessionData();
-                }
+                 final OrderModel order = customerAccountService.getOrderForCode(code, baseStoreService.getCurrentBaseStore());
+                 WorldlineHostedTokenizationData paymentData = new WorldlineHostedTokenizationData();
+                 paymentData.setBrowserData(browserData);
+                 CreatePaymentResponse paymentResponse;
+                 try {
+                     storeGooglePayDeviceContext(browserData);
+                     paymentResponse = worldlinePaymentService.createPaymentForHostedTokenization(order, paymentData);
+                 } finally {
+                     clearGooglePayPaymentSessionData();
+                 }
 
-                if (paymentResponse.getMerchantAction() != null) {
+                 if (paymentResponse.getMerchantAction() != null) {
                     storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
                     throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
                           paymentResponse.getMerchantAction(),

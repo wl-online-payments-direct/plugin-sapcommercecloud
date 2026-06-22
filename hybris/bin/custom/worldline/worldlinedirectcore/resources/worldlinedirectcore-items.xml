@@ -359,6 +359,24 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
+                <attribute qualifier="googlePayEncryptedPaymentData" type="java.lang.String">
+                    <persistence type="property">
+                        <columntype database="oracle">
+                            <value>clob</value>
+                        </columntype>
+                        <columntype database="sap">
+                            <value>NCLOB</value>
+                        </columntype>
+                        <columntype>
+                            <value>HYBRIS.LONG_STRING</value>
+                        </columntype>
+                    </persistence>
+                    <modifiers optional="true" search="false" />
+                </attribute>
+                <attribute qualifier="googlePayMobileDevice" type="java.lang.Boolean">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="false" />
+                </attribute>
             </attributes>
         </itemtype>
 

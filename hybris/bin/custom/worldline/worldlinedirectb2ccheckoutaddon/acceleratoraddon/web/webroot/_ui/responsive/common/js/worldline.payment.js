@@ -9,6 +9,7 @@ const PAYMENT_METHOD_SELECTORS = {
     GOOGLE_PAY_PRODUCT: '.js-worldline-google-pay-product',
     GOOGLE_PAY_BUTTON: '.js-worldline-google-pay-button',
     GOOGLE_PAY_TOKEN_INPUT: '.js-worldline-google-pay-token',
+    GOOGLE_PAY_MOBILE_INPUT: '.js-worldline-google-pay-mobile-device',
     TOKENIZATION_FORM_TABLE_ROW: '.js-hostedTokenization',
     TOKENIZATION_FORM_CLASS: 'js-hostedTokenization',
     HTP_CLASS: '.htp'
@@ -214,6 +215,7 @@ ACC.worldlinePaymentPost = {
                 var $googlePayProduct = ACC.worldlinePaymentPost.googlePayProduct();
                 $googlePayProduct.find('input:radio[name="paymentProductId"]').prop('checked', true).change();
                 $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM).find(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_TOKEN_INPUT).val(paymentData.paymentMethodData.tokenizationData.token);
+                $(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_FORM).find(PAYMENT_METHOD_SELECTORS.GOOGLE_PAY_MOBILE_INPUT).val(ACC.worldlinePaymentPost.isMobileDevice());
                 ACC.common.blockFormAndShowProcessingMessage($(PAYMENT_METHOD_SELECTORS.PAYMENT_METHOD_SUBMIT_BUTTON));
                 $('.worldlineBillingAddressForm').filter(":hidden").remove();
                 ACC.worldlineOrderPost.enableAddressForm();
@@ -226,6 +228,9 @@ ACC.worldlinePaymentPost = {
                     window.console.error("Unknown Error :", error);
                 }
             });
+    },
+    isMobileDevice: function () {
+        return /Mobi|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     },
     renderGooglePayButton: function () {
         var paymentsClient = ACC.worldlinePaymentPost.googlePayClient();

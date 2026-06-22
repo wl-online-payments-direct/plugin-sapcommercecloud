@@ -638,6 +638,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         paymentInfo.setPaymentMethod(worldlinePaymentInfoData.getPaymentMethod());
         paymentInfo.setHostedTokenizationId(worldlinePaymentInfoData.getHostedTokenizationId());
         paymentInfo.setWorldlineCheckoutType(worldlinePaymentInfoData.getWorldlineCheckoutType());
+        paymentInfo.setGooglePayEncryptedPaymentData(worldlinePaymentInfoData.getGooglePayEncryptedPaymentData());
+        paymentInfo.setGooglePayMobileDevice(worldlinePaymentInfoData.getGooglePayMobileDevice());
         AddressModel billingAddress = convertToAddressModel(worldlinePaymentInfoData.getBillingAddress());
         paymentInfo.setBillingAddress(billingAddress);
         billingAddress.setOwner(paymentInfo);
