@@ -17,6 +17,7 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final int PAYMENT_METHOD_IDEAL = 809;
     public static final int PAYMENT_METHOD_PAYPAL = 840;
     public static final int PAYMENT_METHOD_APPLEPAY = 302;
+    public static final int PAYMENT_METHOD_GOOGLEPAY = 320;
     public static final int PAYMENT_METHOD_KLARNA_PAY_AFTER = 3302;
     public static final int PAYMENT_METHOD_KLARNA_PAY_NOW = 3301;
     public static final int PAYMENT_METHOD_SEPA = 771;
@@ -41,6 +42,8 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final String PAYMENT_PROVIDER = "WORLDLINE";
     public static final String WORLDLINE_EVENT_PAYMENT = "worldline_payment_received";
     public static final String WORLDLINE_EVENT_REFUND = "worldline_refund_received";
+    public static final String GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY = "worldlineGooglePayEncryptedPaymentData";
+    public static final String GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY = "worldlineGooglePayMobileDevice";
 
     public static final int DEFAULT_INTERSOLVE_TIMEOUT = 180;
 

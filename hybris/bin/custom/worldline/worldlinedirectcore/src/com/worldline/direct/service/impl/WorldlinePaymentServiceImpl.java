@@ -7,6 +7,7 @@ import com.onlinepayments.merchant.MerchantClient;
 import com.onlinepayments.merchant.products.GetPaymentProductParams;
 import com.onlinepayments.merchant.products.GetPaymentProductsParams;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.factory.WorldlineClientFactory;
 import com.worldline.direct.model.WorldlineConfigurationModel;
@@ -489,9 +490,10 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     public CreatePaymentResponse createSubsequentPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null");
         validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "order.paymentInfo cannot be null");
-        if (!(abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel)
-                || !StringUtils.equals(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue(), ((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getPaymentMethod())) {
-            throw new IllegalArgumentException("Subsequent payment API is supported only for Worldline card payments");
+        if (!(abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel paymentInfo)
+                || (!StringUtils.equals(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue(), paymentInfo.getPaymentMethod())
+                && !Integer.valueOf(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY).equals(paymentInfo.getId()))) {
+            throw new IllegalArgumentException("Subsequent payment API is supported only for Worldline card and Google Pay payments");
         }
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
@@ -535,6 +537,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             subsequentCardInput.setAuthorizationMode(cardInput.getAuthorizationMode());
             subsequentCardInput.setMarketPlace(cardInput.getMarketPlace());
             subsequentCardInput.setSchemeReferenceData(cardInput.getSchemeReferenceData());
+        } else {
+            final String authorizationMode = getAuthorizationMode(paymentInfo);
+            if (StringUtils.isNotBlank(authorizationMode)) {
+                subsequentCardInput.setAuthorizationMode(authorizationMode);
+            }
         }
 
         subsequentCardInput.setToken(paymentInfo.getWorldlineRecurringToken().getToken());
@@ -548,6 +555,17 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             return null;
         }
         return paymentInfo.getWorldlineRecurringToken().getInitialPaymentId();
+    }
+
+    private String getAuthorizationMode(WorldlinePaymentInfoModel paymentInfo) {
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (worldlinePaymentModeService.isSaleOnly(String.valueOf(paymentInfo.getId()))) {
+            return OperationCodesEnum.SALE.getCode();
+        }
+        if (configuration.getDefaultOperationCode() != null) {
+            return configuration.getDefaultOperationCode().getCode();
+        }
+        return StringUtils.EMPTY;
     }
 
     @Override

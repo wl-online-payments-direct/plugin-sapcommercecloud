@@ -14,6 +14,10 @@ public class WorldlinePaymentDetailsForm {
 
     private String savedCardCode;
 
+    private String googlePayEncryptedPaymentData;
+
+    private Boolean googlePayMobileDevice;
+
     private boolean useDeliveryAddress;
 
     private boolean newBillingAddress;
@@ -66,6 +70,22 @@ public class WorldlinePaymentDetailsForm {
 
     public void setSavedCardCode(String savedCardCode) {
         this.savedCardCode = savedCardCode;
+    }
+
+    public String getGooglePayEncryptedPaymentData() {
+        return googlePayEncryptedPaymentData;
+    }
+
+    public void setGooglePayEncryptedPaymentData(String googlePayEncryptedPaymentData) {
+        this.googlePayEncryptedPaymentData = googlePayEncryptedPaymentData;
+    }
+
+    public Boolean getGooglePayMobileDevice() {
+        return googlePayMobileDevice;
+    }
+
+    public void setGooglePayMobileDevice(Boolean googlePayMobileDevice) {
+        this.googlePayMobileDevice = googlePayMobileDevice;
     }
 
 }

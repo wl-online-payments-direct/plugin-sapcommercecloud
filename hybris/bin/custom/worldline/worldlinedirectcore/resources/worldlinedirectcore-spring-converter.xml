@@ -131,6 +131,9 @@
 
     <bean id="worldlineHostedTokenizationMobilePopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationMobilePopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
     </bean>
 
 
