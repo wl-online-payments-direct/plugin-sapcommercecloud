@@ -19,6 +19,7 @@ import com.worldline.direct.order.data.BrowserData;
 import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.*;
+import com.worldline.direct.util.WorldlinePaymentDetailsUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import com.worldline.direct.util.WorldlineUrlUtils;
 import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
@@ -206,6 +207,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final PaymentResponse payment = paymentForHostedTokenization.getPayment();
         savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION, payment);
         if (paymentForHostedTokenization.getMerchantAction() != null) {
+            updatePaymentInfoIfNeeded(orderForCode, payment);
             storeReturnMac(orderForCode, paymentForHostedTokenization.getMerchantAction().getRedirectData().getRETURNMAC());
             throw new WorldlineNonAuthorizedPaymentException(payment,
                     paymentForHostedTokenization.getMerchantAction(),
@@ -232,6 +234,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final PaymentResponse payment = paymentForGooglePay.getPayment();
         savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.GOOGLE_PAY, payment);
         if (paymentForGooglePay.getMerchantAction() != null) {
+            updatePaymentInfoIfNeeded(orderForCode, payment);
             storeReturnMac(orderForCode, paymentForGooglePay.getMerchantAction().getRedirectData().getRETURNMAC());
             throw new WorldlineNonAuthorizedPaymentException(payment,
                   paymentForGooglePay.getMerchantAction(),
@@ -483,6 +486,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 // fall through - non-zero CREATED means incomplete/abandoned
             case REJECTED:
             case REJECTED_CAPTURE:
+                updatePaymentInfoIfNeeded(orderModel, paymentResponse);
                 worldlineTransactionService.createAuthorizationPaymentTransaction(orderModel,
                         paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
                         paymentResponse.getId(),
@@ -490,6 +494,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                         paymentResponse.getPaymentOutput().getAmountOfMoney());
                 throw new WorldlineNonAuthorizedPaymentException(paymentResponse, WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
             case CANCELLED:
+                updatePaymentInfoIfNeeded(orderModel, paymentResponse);
                 worldlineTransactionService.createAuthorizationPaymentTransaction(orderModel,
                         paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
                         paymentResponse.getId(),
@@ -556,6 +561,11 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final CardPaymentMethodSpecificOutput cardPaymentMethodSpecificOutput = paymentOutput.getCardPaymentMethodSpecificOutput();
         if (cardPaymentMethodSpecificOutput != null) {
             return cardPaymentMethodSpecificOutput.getPaymentProductId();
+        }
+
+        final RedirectPaymentMethodSpecificOutput redirectPaymentMethodSpecificOutput = paymentOutput.getRedirectPaymentMethodSpecificOutput();
+        if (redirectPaymentMethodSpecificOutput != null) {
+            return redirectPaymentMethodSpecificOutput.getPaymentProductId();
         }
 
         return null;
@@ -678,9 +688,14 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     protected void updatePaymentInfoIfNeeded(final AbstractOrderModel orderModel, PaymentResponse paymentResponse) {
         if (orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel paymentInfo) {
             final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
+            if (paymentOutput == null) {
+                return;
+            }
+            WorldlinePaymentDetailsUtils.updatePaymentDetails(paymentInfo, paymentResponse);
+            modelService.save(paymentInfo);
             final Integer paymentProductId = getPaymentProductIdFromPaymentOutput(paymentOutput);
             if (paymentOutput.getRedirectPaymentMethodSpecificOutput() != null) {
-                if (WorldlinedirectcoreConstants.PAYMENT_METHOD_MEALVOUCHER == paymentInfo.getId()) {
+                if (Integer.valueOf(WorldlinedirectcoreConstants.PAYMENT_METHOD_MEALVOUCHER).equals(paymentInfo.getId())) {
                     String brand = paymentOutput.getRedirectPaymentMethodSpecificOutput().getPaymentProduct5402SpecificOutput().getBrand();
                     if (brand != null) {
                         paymentInfo.setMealvoucherBrand(brand);
@@ -689,7 +704,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 }
             }
             if (paymentOutput.getCardPaymentMethodSpecificOutput() != null) {
-                if ((paymentInfo.getId().equals(PAYMENT_METHOD_HTP) || paymentInfo.getId().equals(PAYMENT_METHOD_GROUP_CARDS)) && paymentProductId != null) {
+                if ((Integer.valueOf(PAYMENT_METHOD_HTP).equals(paymentInfo.getId()) || Integer.valueOf(PAYMENT_METHOD_GROUP_CARDS).equals(paymentInfo.getId())) && paymentProductId != null) {
                     paymentInfo.setId(paymentProductId);
                     if (paymentInfo.isRecurringToken()) {
                         // update cart so the recurring payments for subscription made by HTP to have valid payment method
@@ -700,21 +715,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                     modelService.save(paymentInfo);
                     modelService.refresh(orderModel);
                 }
-                if (paymentOutput.getCardPaymentMethodSpecificOutput().getThreeDSecureResults() != null) {
-                    ThreeDSecureResults threeDSecureResults = paymentOutput.getCardPaymentMethodSpecificOutput().getThreeDSecureResults();
-                    paymentInfo.setLiability(threeDSecureResults.getLiability());
-                    paymentInfo.setAppliedExemption(threeDSecureResults.getAppliedExemption());
-                    modelService.save(paymentInfo);
-                    modelService.refresh(orderModel);
-                }
-            }
-            if (paymentOutput.getMobilePaymentMethodSpecificOutput() != null
-                  && paymentOutput.getMobilePaymentMethodSpecificOutput().getThreeDSecureResults() != null) {
-                ThreeDSecureResults threeDSecureResults = paymentOutput.getMobilePaymentMethodSpecificOutput().getThreeDSecureResults();
-                paymentInfo.setLiability(threeDSecureResults.getLiability());
-                paymentInfo.setAppliedExemption(threeDSecureResults.getAppliedExemption());
-                modelService.save(paymentInfo);
-                modelService.refresh(orderModel);
             }
         }
     }

@@ -94,6 +94,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                 paymentResponse = worldlineB2BPaymentService.createRecurringPaymentForImmediateReplenishmentHostedTokenization(order, worldlineHostedTokenizationData);
 
                 if (paymentResponse.getMerchantAction() != null) {
+                    updatePaymentInfoIfNeeded(order, paymentResponse.getPayment());
                     storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
                     throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
                           paymentResponse.getMerchantAction(),
@@ -131,6 +132,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                  }
 
                  if (paymentResponse.getMerchantAction() != null) {
+                    updatePaymentInfoIfNeeded(order, paymentResponse.getPayment());
                     storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
                     throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
                           paymentResponse.getMerchantAction(),
