@@ -16,5 +16,11 @@
         <spring:theme code="checkout.multi.tokenization.expire"
             arguments="${order.worldlinePaymentInfo.expiryDate}"/>
     </c:if>
+    <c:if test="${not empty order.worldlinePaymentInfo.paymentLinkRedirectionUrl}">
+        <br/>
+        <spring:theme code="checkout.multi.paymentLink.payLink"/>:
+        <a href="${fn:escapeXml(order.worldlinePaymentInfo.paymentLinkRedirectionUrl)}">
+            ${fn:escapeXml(order.worldlinePaymentInfo.paymentLinkRedirectionUrl)}
+        </a>
+    </c:if>
 </div>
-

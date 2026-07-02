@@ -36,4 +36,6 @@ public interface WorldlineTransactionService {
     void savePaymentCost(AbstractOrderModel orderModel, AmountOfMoney surchargeAmount);
 
     void processAuthorisedEvent(WebhooksEvent webhooksEvent);
+
+    void processPaymentLinkEvent(WebhooksEvent webhooksEvent);
 }

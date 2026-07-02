@@ -223,7 +223,8 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
             String redirect = StringUtils.EMPTY;
             if (
                     (abstractOrderData instanceof OrderData && CheckoutPaymentType.CARD.getCode().equals(((OrderData) abstractOrderData).getPaymentType().getCode()))
-                            || (abstractOrderData instanceof ScheduledCartData && CheckoutPaymentType.CARD.getCode().equals(((ScheduledCartData) abstractOrderData).getPaymentType().getCode()))) {
+                            || (abstractOrderData instanceof ScheduledCartData && CheckoutPaymentType.CARD.getCode().equals(((ScheduledCartData) abstractOrderData).getPaymentType().getCode()))
+                            || WorldlineCheckoutTypesEnum.PAY_BY_LINK.equals(worldlinePaymentInfo.getWorldlineCheckoutType())) {
                 if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder())) {
                     redirect = worldlinePlaceOrderUtils.submitReplenishmentOrder(abstractOrderData, browserData, redirectModel);
                 } else {

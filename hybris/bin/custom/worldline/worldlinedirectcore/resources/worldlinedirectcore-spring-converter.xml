@@ -108,6 +108,21 @@
         </property>
     </bean>
 
+    <bean id="worldlinePaymentLinkPopulator"
+          class="com.worldline.direct.populator.paymentlink.WorldlinePaymentLinkPopulator">
+        <property name="worldlineHostedCheckoutParamConverter" ref="worldlineHostedCheckoutParamConverter"/>
+        <property name="displayQRCode" value="true"/>
+    </bean>
+
+    <bean id="worldlinePaymentLinkParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.onlinepayments.domain.CreatePaymentLinkRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlinePaymentLinkPopulator"/>
+            </list>
+        </property>
+    </bean>
+
 
     <bean id="worldlineHostedTokenizationBasicPopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator">

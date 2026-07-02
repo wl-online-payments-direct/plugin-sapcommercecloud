@@ -55,6 +55,13 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         worldlinePaymentInfoData.setRecurring(worldlinePaymentInfoModel.isRecurringToken());
         worldlinePaymentInfoData.setGooglePayEncryptedPaymentData(worldlinePaymentInfoModel.getGooglePayEncryptedPaymentData());
         worldlinePaymentInfoData.setGooglePayMobileDevice(worldlinePaymentInfoModel.getGooglePayMobileDevice());
+        worldlinePaymentInfoData.setPaymentLinkId(worldlinePaymentInfoModel.getPaymentLinkId());
+        worldlinePaymentInfoData.setPaymentLinkRedirectionUrl(worldlinePaymentInfoModel.getPaymentLinkRedirectionUrl());
+        worldlinePaymentInfoData.setPaymentLinkExpirationDate(worldlinePaymentInfoModel.getPaymentLinkExpirationDate());
+        worldlinePaymentInfoData.setPaymentLinkStatus(worldlinePaymentInfoModel.getPaymentLinkStatus());
+        worldlinePaymentInfoData.setPaymentLinkPaymentId(worldlinePaymentInfoModel.getPaymentLinkPaymentId());
+        worldlinePaymentInfoData.setPaymentLinkLastEvent(worldlinePaymentInfoModel.getPaymentLinkLastEvent());
+        worldlinePaymentInfoData.setPaymentLinkReusable(worldlinePaymentInfoModel.getPaymentLinkReusable());
         CardTypeData cardTypeData=new CardTypeData();
         cardTypeData.setName(worldlinePaymentInfoModel.getCardBrand());
         worldlinePaymentInfoData.setCardType(cardTypeData);

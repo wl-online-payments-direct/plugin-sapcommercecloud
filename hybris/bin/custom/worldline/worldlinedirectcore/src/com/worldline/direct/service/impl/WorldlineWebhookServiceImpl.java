@@ -63,7 +63,12 @@ public class WorldlineWebhookServiceImpl implements WorldlineWebhookService {
     @Override
     public void processWebhooksEvent(WebhooksEvent webhooksEvent) {
         validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
-        switch (WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM.fromString(webhooksEvent.getType())) {
+        final WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM webhookType = WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM.fromString(webhooksEvent.getType());
+        if (webhookType == null) {
+            LOGGER.warn("[WORLDLINE] Unsupported webhook type {}", webhooksEvent.getType());
+            return;
+        }
+        switch (webhookType) {
             case PAYMENT_CREATED:
             case PAYMENT_REDIRECTED:
             case PAYMENT_AUTH_REQUESTED:
@@ -84,6 +89,15 @@ public class WorldlineWebhookServiceImpl implements WorldlineWebhookService {
                 break;
             case PAYMENT_REFUNDED:
                 worldlineTransactionService.processRefundedEvent(webhooksEvent);
+                break;
+            case PAYMENT_LINK_CREATED:
+            case PAYMENT_LINK_CLICKED:
+            case PAYMENT_LINK_PAID:
+            case PAYMENT_LINK_CANCELLED:
+            case PAYMENT_LINK_EXPIRED:
+            case PAYMENT_LINK_PAYMENT_REJECTED:
+            case PAYMENT_LINK_PAYMENT_CANCELLED:
+                worldlineTransactionService.processPaymentLinkEvent(webhooksEvent);
                 break;
             default:
                 break;

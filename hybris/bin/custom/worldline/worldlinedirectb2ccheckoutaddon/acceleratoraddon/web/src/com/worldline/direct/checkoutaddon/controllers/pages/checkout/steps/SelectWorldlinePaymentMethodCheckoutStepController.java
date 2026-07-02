@@ -3,6 +3,7 @@ package com.worldline.direct.checkoutaddon.controllers.pages.checkout.steps;
 import com.onlinepayments.domain.CreateHostedTokenizationResponse;
 import com.onlinepayments.domain.PaymentProduct;
 import com.onlinepayments.domain.PaymentProduct320SpecificData;
+import com.onlinepayments.domain.PaymentProductDisplayHints;
 import com.worldline.direct.checkoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.checkoutaddon.controllers.utils.WorldlineAddressDataUtil;
 import com.worldline.direct.checkoutaddon.forms.WorldlineAddressForm;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_APPLEPAY;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
@@ -110,6 +112,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS).get();
         List<PaymentProduct> filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS, WorldlinePaymentProductFilterEnum.NAMES, WorldlinePaymentProductFilterEnum.SORT).get();
         filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(filteredPaymentProducts, cartData).get();
+        addPayByLinkPaymentProductForAssistedServiceSession(filteredPaymentProducts);
         model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
         model.addAttribute("paymentProducts", filteredPaymentProducts);
         model.addAttribute("isCardPaymentMethodExisting", worldlineCheckoutFacade.checkForCardPaymentMethods(filteredPaymentProducts));
@@ -267,6 +270,25 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
             return cartData.getDeliveryAddress().getCountry().getIsocode();
         }
         return StringUtils.EMPTY;
+    }
+
+    protected void addPayByLinkPaymentProductForAssistedServiceSession(List<PaymentProduct> paymentProducts) {
+        if (isAssistedServiceSession()) {
+            paymentProducts.add(createPayByLinkPaymentProduct());
+        }
+    }
+
+    protected PaymentProduct createPayByLinkPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(PAYMENT_METHOD_PAY_BY_LINK);
+        paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel(getMessageSource().getMessage("checkout.multi.paymentLink.paymentMethod", null, getI18nService().getCurrentLocale()));
+        return paymentProduct;
+    }
+
+    protected boolean isAssistedServiceSession() {
+        return sessionService.getAttribute("ASM") != null;
     }
 
     /**

@@ -13,6 +13,7 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final int PAYMENT_METHOD_HCP = -2;
 
     public static final int PAYMENT_METHOD_GROUP_CARDS = -3;
+    public static final int PAYMENT_METHOD_PAY_BY_LINK = -4;
 
     public static final int PAYMENT_METHOD_IDEAL = 809;
     public static final int PAYMENT_METHOD_PAYPAL = 840;
@@ -206,7 +207,14 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
         PAYMENT_REJECTED_CAPTURE("payment.rejected_capture"),
         PAYMENT_CANCELLED("payment.cancelled"),
         PAYMENT_REFUNDED("payment.refunded"),
-        PAYMENT_REFUND_REQUESTED("refund.refund_requested");
+        PAYMENT_REFUND_REQUESTED("refund.refund_requested"),
+        PAYMENT_LINK_CREATED("paymentlink.created"),
+        PAYMENT_LINK_CLICKED("paymentlink.clicked"),
+        PAYMENT_LINK_PAID("paymentlink.paid"),
+        PAYMENT_LINK_CANCELLED("paymentlink.cancelled"),
+        PAYMENT_LINK_EXPIRED("paymentlink.expired"),
+        PAYMENT_LINK_PAYMENT_REJECTED("paymentlink.payment.rejected"),
+        PAYMENT_LINK_PAYMENT_CANCELLED("paymentlink.payment.cancelled");
 
         WEBHOOK_TYPE_ENUM(String value) {
             this.value = value;

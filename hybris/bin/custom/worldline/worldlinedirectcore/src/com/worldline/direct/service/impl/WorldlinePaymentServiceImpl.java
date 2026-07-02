@@ -49,6 +49,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     protected WorldlineClientFactory worldlineClientFactory;
     protected Converter<AbstractOrderModel, CreatePaymentRequest> worldlineHostedTokenizationParamConverter;
     protected Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter;
+    protected Converter<AbstractOrderModel, CreatePaymentLinkRequest> worldlinePaymentLinkParamConverter;
     protected Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter;
     private WorldlinePaymentModeService worldlinePaymentModeService;
 
@@ -255,6 +256,55 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             return null;
         }
 
+    }
+
+    @Override
+    public PaymentLinkResponse createPaymentLink(OrderModel orderForCode) {
+        validateParameterNotNull(orderForCode, "order cannot be null");
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
+            final CreatePaymentLinkRequest params = worldlinePaymentLinkParamConverter.convert(orderForCode);
+            final PaymentLinkResponse paymentLink = merchant.paymentLinks().createPaymentLink(params);
+
+            WorldlineLogUtils.logAction(LOGGER, "createPaymentLink", params, paymentLink);
+
+            return paymentLink;
+        } catch (Exception e) {
+            LOGGER.error("[ WORLDLINE ] Errors during createPaymentLink ", e);
+            return null;
+        }
+    }
+
+    @Override
+    public PaymentLinkResponse getPaymentLink(String paymentLinkId) {
+        validateParameterNotNullStandardMessage("paymentLinkId", paymentLinkId);
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
+            final PaymentLinkResponse paymentLink = merchant.paymentLinks().getPaymentLinkById(paymentLinkId);
+
+            WorldlineLogUtils.logAction(LOGGER, "getPaymentLink", paymentLinkId, paymentLink);
+
+            return paymentLink;
+        } catch (Exception e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getPaymentLink ", e);
+            return null;
+        }
+    }
+
+    @Override
+    public void cancelPaymentLink(String paymentLinkId) {
+        validateParameterNotNullStandardMessage("paymentLinkId", paymentLinkId);
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
+            merchant.paymentLinks().cancelPaymentLinkById(paymentLinkId);
+
+            WorldlineLogUtils.logAction(LOGGER, "cancelPaymentLink", paymentLinkId, "Payment link cancelled!");
+        } catch (Exception e) {
+            LOGGER.error("[ WORLDLINE ] Errors during cancelPaymentLink ", e);
+        }
     }
 
     @Override
@@ -725,6 +775,10 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     public void setWorldlineHostedCheckoutParamConverter(Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter) {
         this.worldlineHostedCheckoutParamConverter = worldlineHostedCheckoutParamConverter;
+    }
+
+    public void setWorldlinePaymentLinkParamConverter(Converter<AbstractOrderModel, CreatePaymentLinkRequest> worldlinePaymentLinkParamConverter) {
+        this.worldlinePaymentLinkParamConverter = worldlinePaymentLinkParamConverter;
     }
 
     public void setWorldlineBrowserCustomerDeviceConverter(Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter) {
