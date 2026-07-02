@@ -58,7 +58,7 @@ public class WorldlinePlaceOrderUtils {
                 CreateHostedCheckoutResponse hostedCheckoutResponse = worldlineCheckoutFacade.createHostedCheckout(abstractOrderData.getCode(), browserData);
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
             case PAY_BY_LINK:
-                storeHOPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
+                storePaymentLinkReturnUrlInSession(getOrderCode(abstractOrderData));
                 worldlineCheckoutFacade.createPaymentLink(abstractOrderData.getCode());
                 return redirectToOrderConfirmationPage(abstractOrderData);
             case HOSTED_TOKENIZATION:
@@ -158,6 +158,13 @@ public class WorldlinePlaceOrderUtils {
               true, WorldlineWebConstants.URL.Checkout.Payment.HTP.root + "/" + orderType +
                     WorldlineWebConstants.URL.Checkout.Payment.HTP.handleResponse + code);
         sessionService.setAttribute(HOSTED_TOKENIZATION_RETURN_URL, returnUrl);
+    }
+
+    private void storePaymentLinkReturnUrlInSession(String code) {
+        final String returnUrl = siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
+                true, WorldlineWebConstants.URL.Checkout.Payment.PayByLink.root +
+                        WorldlineWebConstants.URL.Checkout.Payment.PayByLink.handleResponse + code);
+        sessionService.setAttribute(HOSTED_CHECKOUT_RETURN_URL, returnUrl);
     }
 
     protected String getOrderCode(AbstractOrderData orderData) {

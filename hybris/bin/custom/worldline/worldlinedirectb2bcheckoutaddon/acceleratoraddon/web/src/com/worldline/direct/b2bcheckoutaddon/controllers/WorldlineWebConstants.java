@@ -45,6 +45,12 @@ public interface WorldlineWebConstants {
                     String handleResponse = "/response/";
                 }
 
+                interface PayByLink {
+                    String root = Checkout.root + "/payment-link";
+                    String handleResponse = "/response/";
+                    String guest = "/guest/";
+                }
+
             }
 
             interface DeliveryAddress {

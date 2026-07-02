@@ -266,10 +266,15 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
             if (StringUtils.isBlank(paymentInfo.getPaymentLinkPaymentId())) {
                 order.setPaymentStatus(PaymentStatus.WORLDLINE_CANCELED);
                 modelService.save(order);
+                worldlineBusinessProcessService.triggerOrderProcessEvent(order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
             }
         }
 
         modelService.save(paymentInfo);
+
+        if (webhooksEvent.getPayment() != null) {
+            processAuthorisedEvent(webhooksEvent);
+        }
     }
 
     @Override
