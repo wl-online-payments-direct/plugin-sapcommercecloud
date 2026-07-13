@@ -8,6 +8,7 @@ import com.onlinepayments.domain.PaymentResponse;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.model.WorldlineRecurringTokenModel;
+import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
@@ -23,6 +24,7 @@ import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 @UnitTest
 public class WorldlineCheckoutFacadeImplPaymentOutputTest {
@@ -80,6 +82,29 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
         assertSame(order, modelService.refreshedModel);
     }
 
+    @Test
+    public void savePaymentTokenUsesGooglePayRecurringReferenceWhen3dsResponseAlsoContainsCardOutputWithoutToken() {
+        CustomerModel customer = new CustomerModel();
+        CartModel order = new CartModel();
+        WorldlinePaymentInfoModel paymentInfo = new WorldlinePaymentInfoModel();
+        WorldlineRecurringTokenModel recurringToken = new WorldlineRecurringTokenModel();
+        BaseStoreModel baseStore = new BaseStoreModel();
+        baseStore.setUid("store-id");
+        TestModelService modelService = new TestModelService(recurringToken);
+        order.setPaymentInfo(paymentInfo);
+
+        facade.setModelService(modelService.proxy());
+        facade.setBaseStoreService(baseStoreService(baseStore));
+        facade.setCheckoutCustomerStrategy(checkoutCustomerStrategy(customer));
+        facade.setWorldlinePaymentService(paymentServiceThatFailsOnGetToken());
+
+        facade.savePaymentToken(order, googlePayPaymentResponseWithCardOutputWithoutToken(), Boolean.TRUE, "cronjob-id");
+
+        assertEquals("payment-id", recurringToken.getInitialPaymentId());
+        assertSame(recurringToken, paymentInfo.getWorldlineRecurringToken());
+        assertSame(order, modelService.refreshedModel);
+    }
+
     private CardPaymentMethodSpecificOutput cardPaymentMethodSpecificOutput(Integer paymentProductId) {
         CardPaymentMethodSpecificOutput output = new CardPaymentMethodSpecificOutput();
         output.setPaymentProductId(paymentProductId);
@@ -107,6 +132,25 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
         paymentResponse.setId("payment-id");
         paymentResponse.setPaymentOutput(paymentOutput);
         return paymentResponse;
+    }
+
+    private PaymentResponse googlePayPaymentResponseWithCardOutputWithoutToken() {
+        PaymentResponse paymentResponse = googlePayPaymentResponse();
+        paymentResponse.getPaymentOutput().setCardPaymentMethodSpecificOutput(
+              cardPaymentMethodSpecificOutput(WorldlinedirectcoreConstants.PAYMENT_METHOD_VISA));
+        return paymentResponse;
+    }
+
+    private WorldlinePaymentService paymentServiceThatFailsOnGetToken() {
+        return (WorldlinePaymentService) Proxy.newProxyInstance(
+              WorldlinePaymentService.class.getClassLoader(),
+              new Class[]{WorldlinePaymentService.class},
+              (proxy, method, args) -> {
+                  if ("getToken".equals(method.getName())) {
+                      fail("Google Pay recurring token saving must not call getToken for card output without token");
+                  }
+                  return defaultValue(method.getReturnType());
+              });
     }
 
     private static class TestableWorldlineCheckoutFacadeImpl extends WorldlineCheckoutFacadeImpl {
