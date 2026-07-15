@@ -1,10 +1,17 @@
 package com.worldline.direct.facade.impl;
 
 import com.onlinepayments.domain.CardPaymentMethodSpecificOutput;
+import com.onlinepayments.domain.AmountOfMoney;
+import com.onlinepayments.domain.CardEssentials;
+import com.onlinepayments.domain.CardFraudResults;
 import com.onlinepayments.domain.MobilePaymentData;
 import com.onlinepayments.domain.MobilePaymentMethodSpecificOutput;
 import com.onlinepayments.domain.PaymentOutput;
+import com.onlinepayments.domain.PaymentReferences;
 import com.onlinepayments.domain.PaymentResponse;
+import com.onlinepayments.domain.PaymentStatusOutput;
+import com.onlinepayments.domain.RedirectPaymentMethodSpecificOutput;
+import com.onlinepayments.domain.ThreeDSecureResults;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.model.WorldlineRecurringTokenModel;
@@ -53,6 +60,18 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
     }
 
     @Test
+    public void getPaymentProductIdUsesRedirectOutputWhenRedirectOutputIdentifiesProduct() {
+        PaymentOutput paymentOutput = new PaymentOutput();
+        RedirectPaymentMethodSpecificOutput redirectOutput = new RedirectPaymentMethodSpecificOutput();
+        redirectOutput.setPaymentProductId(840);
+        paymentOutput.setRedirectPaymentMethodSpecificOutput(redirectOutput);
+
+        Integer paymentProductId = facade.getPaymentProductId(paymentOutput);
+
+        assertEquals(Integer.valueOf(840), paymentProductId);
+    }
+
+    @Test
     public void savePaymentTokenAssignsCheckoutCustomerToGooglePayRecurringToken() {
         CustomerModel customer = new CustomerModel();
         CartModel order = new CartModel();
@@ -80,6 +99,35 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
         assertSame(paymentInfo, modelService.savedModels[0]);
         assertSame(recurringToken, modelService.savedModels[1]);
         assertSame(order, modelService.refreshedModel);
+    }
+
+    @Test
+    public void updatePaymentInfoStoresCardPaymentDetailsReturnedByWorldline() {
+        CartModel order = new CartModel();
+        WorldlinePaymentInfoModel paymentInfo = new WorldlinePaymentInfoModel();
+        paymentInfo.setId(WorldlinedirectcoreConstants.PAYMENT_METHOD_VISA);
+        TestModelService modelService = new TestModelService(new WorldlineRecurringTokenModel());
+        order.setPaymentInfo(paymentInfo);
+        facade.setModelService(modelService.proxy());
+
+        facade.updatePaymentInfo(order, cardPaymentResponse());
+
+        assertEquals("3265460443", paymentInfo.getWorldlinePaymentId());
+        assertEquals("PENDING_CAPTURE", paymentInfo.getWorldlineStatus());
+        assertEquals(Integer.valueOf(5), paymentInfo.getWorldlineStatusCode());
+        assertEquals("merchant-ref", paymentInfo.getWorldlineMerchantReference());
+        assertEquals("card", paymentInfo.getWorldlinePaymentMethod());
+        assertEquals(Integer.valueOf(WorldlinedirectcoreConstants.PAYMENT_METHOD_VISA), paymentInfo.getWorldlinePaymentProductId());
+        assertEquals(Long.valueOf(12345L), paymentInfo.getWorldlineAmount());
+        assertEquals("EUR", paymentInfo.getWorldlineCurrency());
+        assertEquals(Long.valueOf(12000L), paymentInfo.getWorldlineAcquiredAmount());
+        assertEquals("EUR", paymentInfo.getWorldlineAcquiredCurrency());
+        assertEquals("411111", paymentInfo.getCardBin());
+        assertEquals("1111", paymentInfo.getCardLastFour());
+        assertEquals("accepted", paymentInfo.getFraudResult());
+        assertEquals("issuer", paymentInfo.getLiability());
+        assertEquals("low-value", paymentInfo.getAppliedExemption());
+        assertEquals("Y", paymentInfo.getAuthenticationStatus());
     }
 
     @Test
@@ -134,6 +182,53 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
         return paymentResponse;
     }
 
+    private PaymentResponse cardPaymentResponse() {
+        AmountOfMoney amount = new AmountOfMoney();
+        amount.setAmount(12345L);
+        amount.setCurrencyCode("EUR");
+
+        AmountOfMoney acquiredAmount = new AmountOfMoney();
+        acquiredAmount.setAmount(12000L);
+        acquiredAmount.setCurrencyCode("EUR");
+
+        PaymentReferences references = new PaymentReferences();
+        references.setMerchantReference("merchant-ref");
+
+        CardEssentials card = new CardEssentials();
+        card.setBin("411111");
+        card.setCardNumber("4111111111111111");
+
+        CardFraudResults fraudResults = new CardFraudResults();
+        fraudResults.setFraudServiceResult("accepted");
+
+        ThreeDSecureResults threeDSecureResults = new ThreeDSecureResults();
+        threeDSecureResults.setLiability("issuer");
+        threeDSecureResults.setAppliedExemption("low-value");
+        threeDSecureResults.setAuthenticationStatus("Y");
+
+        CardPaymentMethodSpecificOutput cardOutput = cardPaymentMethodSpecificOutput(WorldlinedirectcoreConstants.PAYMENT_METHOD_VISA);
+        cardOutput.setCard(card);
+        cardOutput.setFraudResults(fraudResults);
+        cardOutput.setThreeDSecureResults(threeDSecureResults);
+
+        PaymentOutput paymentOutput = new PaymentOutput();
+        paymentOutput.setAmountOfMoney(amount);
+        paymentOutput.setAcquiredAmount(acquiredAmount);
+        paymentOutput.setReferences(references);
+        paymentOutput.setPaymentMethod("card");
+        paymentOutput.setCardPaymentMethodSpecificOutput(cardOutput);
+
+        PaymentStatusOutput statusOutput = new PaymentStatusOutput();
+        statusOutput.setStatusCode(5);
+
+        PaymentResponse paymentResponse = new PaymentResponse();
+        paymentResponse.setId("3265460443");
+        paymentResponse.setStatus("PENDING_CAPTURE");
+        paymentResponse.setStatusOutput(statusOutput);
+        paymentResponse.setPaymentOutput(paymentOutput);
+        return paymentResponse;
+    }
+
     private PaymentResponse googlePayPaymentResponseWithCardOutputWithoutToken() {
         PaymentResponse paymentResponse = googlePayPaymentResponse();
         paymentResponse.getPaymentOutput().setCardPaymentMethodSpecificOutput(
@@ -156,6 +251,10 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
     private static class TestableWorldlineCheckoutFacadeImpl extends WorldlineCheckoutFacadeImpl {
         Integer getPaymentProductId(PaymentOutput paymentOutput) {
             return getPaymentProductIdFromPaymentOutput(paymentOutput);
+        }
+
+        void updatePaymentInfo(AbstractOrderModel orderModel, PaymentResponse paymentResponse) {
+            updatePaymentInfoIfNeeded(orderModel, paymentResponse);
         }
     }
 
