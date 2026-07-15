@@ -296,6 +296,11 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
 
     protected void savePaymentToken(AbstractOrderModel orderModel, PaymentResponse paymentData, Boolean isRecurring, String cronjobId) {
         WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
+        if (BooleanUtils.isTrue(isRecurring) && paymentData.getPaymentOutput().getMobilePaymentMethodSpecificOutput() != null) {
+            saveGooglePayRecurringReference(paymentInfoModel, paymentData, cronjobId);
+            modelService.refresh(orderModel);
+            return;
+        }
         if (paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
             if (isRecurring) {
                 final TokenResponse tokenResponse = worldlinePaymentService.getToken(
@@ -306,12 +311,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, paymentData);
             }
 
-        }
-        if (paymentData.getPaymentOutput().getMobilePaymentMethodSpecificOutput() != null) {
-            if (isRecurring) {
-                saveGooglePayRecurringReference(paymentInfoModel, paymentData, cronjobId);
-                modelService.refresh(orderModel);
-            }
         }
     }
 
