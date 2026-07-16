@@ -174,10 +174,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     @SuppressWarnings("all")
     public CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(orderForCode, "order cannot be null");
+        CreatePaymentRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(orderForCode);
+            params = worldlineHostedTokenizationParamConverter.convert(orderForCode);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
 
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
@@ -186,9 +187,10 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug("[ WORLDLINE ] Errors during getting createPayment ", e.getMessage());
+            logCreatePaymentFailure(LOGGER, "createPaymentForHostedTokenization", params, e);
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createPaymentForHostedTokenization", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
@@ -467,23 +469,46 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     @Override
     public CreatePaymentResponse createPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null");
+        CreatePaymentRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
+            params = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createPayment", params, payment);
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug("[ WORLDLINE ] Errors during getting createPayment ", e.getMessage());
+            logCreatePaymentFailure(LOGGER, "createPayment", params, e);
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createPayment", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
         return null;
+    }
+
+    protected void logCreatePaymentFailure(final Logger logger, final String action, final CreatePaymentRequest params, final Exception exception) {
+        WorldlineLogUtils.logFailedAction(logger, action, params, exception);
+        if (logger.isDebugEnabled() && exception instanceof ApiException) {
+            final ApiException apiException = (ApiException) exception;
+            logger.debug("[ WORLDLINE ] {} API failure statusCode={}, errorId={}, errors={}",
+                    action,
+                    apiException.getStatusCode(),
+                    apiException.getErrorId(),
+                    WorldlineLogUtils.toObfuscatedJson(apiException.getErrors()));
+            logger.debug("[ WORLDLINE ] {} API failure responseBody={}",
+                    action,
+                    WorldlineLogUtils.obfuscate(apiException.getResponseBody()));
+        }
+        if (logger.isDebugEnabled() && exception instanceof DeclinedPaymentException) {
+            final DeclinedPaymentException declinedPaymentException = (DeclinedPaymentException) exception;
+            logger.debug("[ WORLDLINE ] {} declined payment response={}",
+                    action,
+                    WorldlineLogUtils.toObfuscatedJson(declinedPaymentException.getCreatePaymentResponse()));
+        }
     }
 
     @Override

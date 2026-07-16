@@ -1,6 +1,9 @@
 package com.worldline.direct.populator.hostedtokenization;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.onlinepayments.domain.CreatePaymentRequest;
+import com.onlinepayments.json.DefaultMarshaller;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
@@ -19,13 +22,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @UnitTest
 public class WorldlineHostedTokenizationMobilePopulatorTest {
 
-    private static final String ENCRYPTED_PAYMENT_DATA = "{\"signature\":\"abc\"}";
+    private static final String ENCRYPTED_PAYMENT_DATA = "{\"signature\":\"signature\",\"protocolVersion\":\"ECv2\",\"signedMessage\":\"{\\\"encryptedMessage\\\":\\\"abc\\\",\\\"ephemeralPublicKey\\\":\\\"def\\\",\\\"tag\\\":\\\"ghi\\\"}\"}";
 
     private final Map<String, Object> sessionAttributes = new HashMap<>();
     private final WorldlineConfigurationModel worldlineConfiguration = new WorldlineConfigurationModel();
@@ -54,6 +59,51 @@ public class WorldlineHostedTokenizationMobilePopulatorTest {
     }
 
     @Test
+    public void populateRequiresApprovalWhenGooglePayUsesThreeDSecure() {
+        sessionAttributes.put(WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY, ENCRYPTED_PAYMENT_DATA);
+
+        CreatePaymentRequest request = populateGooglePayRequest(Boolean.TRUE);
+
+        assertNull(request.getMobilePaymentMethodSpecificInput().getAuthorizationMode());
+        assertEquals(Boolean.TRUE, request.getMobilePaymentMethodSpecificInput().getRequiresApproval());
+    }
+
+    @Test
+    public void populateOmitsSaleAuthorizationFlagsForGooglePayWithoutThreeDSecure() {
+        sessionAttributes.put(WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY, ENCRYPTED_PAYMENT_DATA);
+        sessionAttributes.put(WorldlinedirectcoreConstants.GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY, Boolean.TRUE);
+
+        CreatePaymentRequest request = populateGooglePayRequest(Boolean.TRUE);
+
+        assertNull(request.getMobilePaymentMethodSpecificInput().getAuthorizationMode());
+        assertNull(request.getMobilePaymentMethodSpecificInput().getRequiresApproval());
+    }
+
+    @Test
+    public void populateOmitsRecurringOnlyFieldsForOneOffGooglePayPayment() {
+        sessionAttributes.put(WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY, ENCRYPTED_PAYMENT_DATA);
+
+        CreatePaymentRequest request = populateGooglePayRequest(Boolean.FALSE);
+
+        JsonObject productInput = serializedProduct320Input(request);
+        assertFalse(productInput.has("isRecurring"));
+        assertFalse(productInput.has("tokenize"));
+    }
+
+    @Test
+    public void populateIncludesRecurringFieldsForInitialRecurringGooglePayPayment() {
+        sessionAttributes.put(WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY, ENCRYPTED_PAYMENT_DATA);
+
+        CreatePaymentRequest request = populateGooglePayRequest(Boolean.TRUE);
+
+        JsonObject productInput = serializedProduct320Input(request);
+        assertTrue(productInput.get("isRecurring").getAsBoolean());
+        assertTrue(productInput.get("tokenize").getAsBoolean());
+        assertEquals("first", productInput.getAsJsonObject("recurring")
+              .get("recurringPaymentSequenceIndicator").getAsString());
+    }
+
+    @Test
     public void populateSkipsThreeDSecureWhenServerDetectedMobileDevice() {
         sessionAttributes.put(WorldlinedirectcoreConstants.GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY, Boolean.TRUE);
 
@@ -79,6 +129,12 @@ public class WorldlineHostedTokenizationMobilePopulatorTest {
         CreatePaymentRequest request = new CreatePaymentRequest();
         populator.populate(order(recurringToken), request);
         return request;
+    }
+
+    private JsonObject serializedProduct320Input(CreatePaymentRequest request) {
+        return new JsonParser().parse(DefaultMarshaller.INSTANCE.marshal(request)).getAsJsonObject()
+              .getAsJsonObject("mobilePaymentMethodSpecificInput")
+              .getAsJsonObject("paymentProduct320SpecificInput");
     }
 
     private AbstractOrderModel order(Boolean recurringToken) {

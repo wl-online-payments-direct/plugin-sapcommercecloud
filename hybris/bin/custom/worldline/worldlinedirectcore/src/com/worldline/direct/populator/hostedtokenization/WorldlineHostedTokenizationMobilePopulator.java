@@ -19,7 +19,6 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
 
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY;
@@ -49,12 +48,12 @@ public class WorldlineHostedTokenizationMobilePopulator implements Populator<Abs
         MobilePaymentMethodSpecificInput mobileInput = new MobilePaymentMethodSpecificInput();
         mobileInput.setPaymentProductId(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY);
         mobileInput.setEncryptedPaymentData(sessionService.getAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY));
-        mobileInput.setPaymentProduct320SpecificInput(createProduct320SpecificInput(abstractOrderModel, paymentInfo));
+        MobilePaymentProduct320SpecificInput product320SpecificInput = createProduct320SpecificInput(abstractOrderModel, paymentInfo);
+        mobileInput.setPaymentProduct320SpecificInput(product320SpecificInput);
 
-        String authorizationMode = getAuthorizationMode(paymentInfo);
-        if (StringUtils.isNotBlank(authorizationMode)) {
-            mobileInput.setAuthorizationMode(authorizationMode);
-            mobileInput.setRequiresApproval(!OperationCodesEnum.SALE.getCode().equals(authorizationMode));
+        Boolean requiresApproval = getRequiresApproval(paymentInfo, product320SpecificInput);
+        if (requiresApproval != null) {
+            mobileInput.setRequiresApproval(requiresApproval);
         }
 
         createPaymentRequest.setMobilePaymentMethodSpecificInput(mobileInput);
@@ -62,13 +61,15 @@ public class WorldlineHostedTokenizationMobilePopulator implements Populator<Abs
 
     private MobilePaymentProduct320SpecificInput createProduct320SpecificInput(AbstractOrderModel order, WorldlinePaymentInfoModel paymentInfo) {
         MobilePaymentProduct320SpecificInput productInput = new MobilePaymentProduct320SpecificInput();
-        productInput.setIsRecurring(paymentInfo.isRecurringToken());
-        productInput.setTokenize(paymentInfo.isRecurringToken() || order.getTotalPrice() == 0d);
 
         if (paymentInfo.isRecurringToken()) {
+            productInput.setIsRecurring(Boolean.TRUE);
+            productInput.setTokenize(Boolean.TRUE);
             Product320Recurring recurring = new Product320Recurring();
             recurring.setRecurringPaymentSequenceIndicator(RECURRING_FIRST);
             productInput.setRecurring(recurring);
+        } else if (order.getTotalPrice() == 0d) {
+            productInput.setTokenize(Boolean.TRUE);
         }
 
         if (!BooleanUtils.isTrue(sessionService.getAttribute(GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY))) {
@@ -84,15 +85,19 @@ public class WorldlineHostedTokenizationMobilePopulator implements Populator<Abs
         return productInput;
     }
 
-    private String getAuthorizationMode(WorldlinePaymentInfoModel paymentInfo) {
+    private Boolean getRequiresApproval(WorldlinePaymentInfoModel paymentInfo, MobilePaymentProduct320SpecificInput product320SpecificInput) {
+        if (product320SpecificInput.getThreeDSecure() != null) {
+            return Boolean.TRUE;
+        }
         WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
         if (worldlinePaymentModeService.isSaleOnly(String.valueOf(paymentInfo.getId()))) {
-            return OperationCodesEnum.SALE.getCode();
+            return null;
         }
-        if (configuration.getDefaultOperationCode() != null) {
-            return configuration.getDefaultOperationCode().getCode();
+        if (configuration.getDefaultOperationCode() != null
+              && OperationCodesEnum.FINAL_AUTHORIZATION.getCode().equals(configuration.getDefaultOperationCode().getCode())) {
+            return Boolean.TRUE;
         }
-        return StringUtils.EMPTY;
+        return null;
     }
 
     public void setSessionService(SessionService sessionService) {

@@ -97,10 +97,11 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
         validateParameterNotNullStandardMessage("browserData", worldlineHostedTokenizationData.getBrowserData());
         validateParameterNotNull(orderModel, "orderModel cannot be null");
         validateParameterNotNull(orderModel.getSchedulingCronJob(), "cartToOrderCronJob cannot be null");
+        CreatePaymentRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(orderModel);
+            params = worldlineHostedTokenizationParamConverter.convert(orderModel);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
 //            params.getRedirectPaymentMethodSpecificInput().getRedirectionData().setReturnUrl(siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
 //                    true, "/checkout/multi/worldline/hosted-tokenization/handle3ds/replenishment/" + cartToOrderCronJob.getCode()));
@@ -119,9 +120,10 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug(String.format("[ WORLDLINE ] Errors during getting createPayment %s", e.getMessage()));
+            logCreatePaymentFailure(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, e);
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
@@ -131,10 +133,11 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
     public CreatePaymentResponse createRecurringPaymentForScheduledReplenishmentHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(cartToOrderCronJob, "cartToOrderCronJob cannot be null");
         validateParameterNotNull(cartToOrderCronJob.getCart(), "cartToOrderCronJob.cart cannot be null");
+        CreatePaymentRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
+            params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
             params.getOrder().getReferences().setMerchantReference(cartToOrderCronJob.getCode());
 
@@ -153,9 +156,10 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug(String.format("[ WORLDLINE ] Errors during getting createPayment %s", e.getMessage()));
+            logCreatePaymentFailure(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, e);
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
