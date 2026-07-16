@@ -7,6 +7,7 @@ import com.worldline.direct.dao.WorldlineTransactionDao;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
 import com.worldline.direct.service.WorldlineTransactionService;
 import com.worldline.direct.util.WorldlineAmountUtils;
+import com.worldline.direct.util.WorldlinePaymentDetailsUtils;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
@@ -114,8 +115,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         String merchantReference = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
         AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(merchantReference);
 
-        // Update 3DS Parameters from webhook
-        update3DSParameters(webhooksEvent, order, merchantReference);
+        updatePaymentDetails(webhooksEvent, order);
 
         final boolean alreadyProcessed = paymentTransaction.getEntries().stream()
                 .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
@@ -200,8 +200,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         String merchantReference = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
         AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(merchantReference);
 
-        // Update 3DS Parameters from webhook
-        update3DSParameters(webhooksEvent, order, merchantReference);
+        updatePaymentDetails(webhooksEvent, order);
 
         PaymentTransactionModel paymentTransaction;
         try {
@@ -392,19 +391,10 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         }
     }
 
-    private void update3DSParameters(WebhooksEvent webhooksEvent, AbstractOrderModel order, String merchantReference) {
+    private void updatePaymentDetails(WebhooksEvent webhooksEvent, AbstractOrderModel order) {
         if(order.getPaymentInfo() instanceof WorldlinePaymentInfoModel worldlinePaymentInfo) {
-            if(webhooksEvent.getPayment().getPaymentOutput() != null && webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput() != null && webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput().getThreeDSecureResults() != null) {
-                ThreeDSecureResults threeDSecureResults = webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput().getThreeDSecureResults();
-                if(StringUtils.isNotBlank(threeDSecureResults.getAppliedExemption()) && StringUtils.isBlank(worldlinePaymentInfo.getAppliedExemption())) {
-                    worldlinePaymentInfo.setAppliedExemption(threeDSecureResults.getAppliedExemption());
-                    modelService.save(worldlinePaymentInfo);
-                }
-                if(StringUtils.isNotBlank(threeDSecureResults.getLiability()) && StringUtils.isBlank(worldlinePaymentInfo.getLiability())) {
-                    worldlinePaymentInfo.setLiability(threeDSecureResults.getLiability());
-                    modelService.save(worldlinePaymentInfo);
-                }
-            }
+            WorldlinePaymentDetailsUtils.updatePaymentDetails(worldlinePaymentInfo, webhooksEvent.getPayment());
+            modelService.save(worldlinePaymentInfo);
         }
     }
 

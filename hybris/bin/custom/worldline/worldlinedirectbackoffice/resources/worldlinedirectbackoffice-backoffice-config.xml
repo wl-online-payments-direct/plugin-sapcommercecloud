@@ -336,6 +336,8 @@
 			<lv:list-view >
 				<lv:column qualifier="id" />
 				<lv:column qualifier="paymentMethod" />
+				<lv:column qualifier="worldlinePaymentId" />
+				<lv:column qualifier="worldlineStatus" />
 				<lv:column qualifier="worldlineCheckoutType" />
 			</lv:list-view>
 		</context>
@@ -350,6 +352,10 @@
 				<as:field-list>
 					<as:field name="id" operator="contains" selected="true"/>
 					<as:field name="paymentMethod" operator="contains" selected="true"/>
+					<as:field name="worldlinePaymentId" operator="contains" selected="true"/>
+					<as:field name="worldlineStatus" operator="contains" selected="true"/>
+					<as:field name="worldlineStatusCode" operator="equals"/>
+					<as:field name="worldlineMerchantReference" operator="contains"/>
 					<as:field name="worldlineCheckoutType" operator="equals" selected="true"/>
 					<as:field name="creationTime" operator="greaterOrEquals"/>
 					<as:field name="hostedTokenizationId" operator="contains"/>
@@ -373,6 +379,26 @@
 						<ea:attribute qualifier="type"/>
 						<ea:attribute qualifier="worldlineCheckoutType"/>
 					</ea:section>
+					<ea:section name="hmc.worldline.worldlineTransactionDetails">
+						<ea:attribute qualifier="worldlinePaymentId" readonly="true"/>
+						<ea:attribute qualifier="worldlineStatus" readonly="true"/>
+						<ea:attribute qualifier="worldlineStatusCode" readonly="true"/>
+						<ea:attribute qualifier="worldlineMerchantReference" readonly="true"/>
+						<ea:attribute qualifier="worldlinePaymentMethod" readonly="true"/>
+						<ea:attribute qualifier="worldlinePaymentProductId" readonly="true"/>
+						<ea:attribute qualifier="worldlineAmount" readonly="true"/>
+						<ea:attribute qualifier="worldlineCurrency" readonly="true"/>
+						<ea:attribute qualifier="worldlineAcquiredAmount" readonly="true"/>
+						<ea:attribute qualifier="worldlineAcquiredCurrency" readonly="true"/>
+						<ea:attribute qualifier="cardBin" readonly="true"/>
+						<ea:attribute qualifier="cardLastFour" readonly="true"/>
+					</ea:section>
+					<ea:section name="hmc.worldline.worldlineFraudAnd3ds">
+						<ea:attribute qualifier="fraudResult" readonly="true"/>
+						<ea:attribute qualifier="liability" readonly="true"/>
+						<ea:attribute qualifier="appliedExemption" readonly="true"/>
+						<ea:attribute qualifier="authenticationStatus" readonly="true"/>
+					</ea:section>
 					<ea:section name="hmc.worldline.worldlineSavedPaymentInfo">
 						<ea:attribute qualifier="token"/>
 						<ea:attribute qualifier="cardBrand"/>
@@ -382,8 +408,6 @@
 						<ea:attribute qualifier="usedSavedPayment"/>
 						<ea:attribute qualifier="recurringToken"/>
 						<ea:attribute qualifier="worldlineRecurringToken"/>
-						<ea:attribute qualifier="liability" />
-						<ea:attribute qualifier="appliedExemption" />
 						<ea:attribute qualifier="mealvoucherBrand" />
 					</ea:section>
 				</ea:tab>
@@ -514,6 +538,86 @@
 			<et:type-node code="WorldlineMandate" id="customersupportbackoffice.worldline.worldlineMandate"/>
 			<et:type-node code="WorldlineRecurringToken" id="customersupportbackoffice.worldline.worldlineRecurringToken"/>
 		</et:explorer-tree>
+	</context>
+
+	<context merge-by="type" parent="PaymentInfo" type="WorldlinePaymentInfo" component="cs-editor-area">
+		<ea:editorArea>
+			<ea:tab name="hmc.addresses" merge-mode="remove"/>
+			<ea:tab name="hmc.administration" merge-mode="remove"/>
+			<ea:tab name="hmc.worldline">
+				<ea:section name="hmc.worldline.worldlineTransactionDetails">
+					<ea:attribute qualifier="worldlinePaymentId" readonly="true"/>
+					<ea:attribute qualifier="worldlineStatus" readonly="true"/>
+					<ea:attribute qualifier="worldlineStatusCode" readonly="true"/>
+					<ea:attribute qualifier="worldlinePaymentMethod" readonly="true"/>
+					<ea:attribute qualifier="worldlinePaymentProductId" readonly="true"/>
+					<ea:attribute qualifier="worldlineAmount" readonly="true"/>
+					<ea:attribute qualifier="worldlineCurrency" readonly="true"/>
+					<ea:attribute qualifier="worldlineAcquiredAmount" readonly="true"/>
+					<ea:attribute qualifier="worldlineAcquiredCurrency" readonly="true"/>
+					<ea:attribute qualifier="cardBin" readonly="true"/>
+					<ea:attribute qualifier="cardLastFour" readonly="true"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineFraudAnd3ds">
+					<ea:attribute qualifier="fraudResult" readonly="true"/>
+					<ea:attribute qualifier="liability" readonly="true"/>
+					<ea:attribute qualifier="appliedExemption" readonly="true"/>
+					<ea:attribute qualifier="authenticationStatus" readonly="true"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+
+	<context merge-by="module" parent="GenericItem" type="PaymentTransaction" component="cs-editor-area">
+		<ea:editorArea>
+			<ea:tab name="customersupportbackoffice.tab.general">
+				<ea:section name="customersupportbackoffice.section.order.general.properties">
+					<ea:attribute qualifier="code" readonly="true"/>
+					<ea:attribute qualifier="info" readonly="true">
+						<ea:editor-parameter>
+							<ea:name>disableDisplayingDetails</ea:name>
+							<ea:value>false</ea:value>
+						</ea:editor-parameter>
+						<ea:editor-parameter>
+							<ea:name>referenceSelected/editorArea/editorAreaConfigCtx</ea:name>
+							<ea:value>cs-editor-area</ea:value>
+						</ea:editor-parameter>
+					</ea:attribute>
+					<ea:attribute qualifier="paymentProvider" readonly="true"/>
+					<ea:attribute qualifier="plannedAmount" readonly="true">
+						<ea:editor-parameter>
+							<ea:name>numberFormat</ea:name>
+							<ea:value>###.00</ea:value>
+						</ea:editor-parameter>
+					</ea:attribute>
+					<ea:attribute qualifier="requestId" readonly="true"/>
+				</ea:section>
+				<ea:section name="customersupportbackoffice.section.paymenttransactions.entries">
+					<ea:panel name="customersupport_backoffice_paymentTransactionsEntries_panel">
+						<ea:attribute editor="com.hybris.cockpitng.editor.extendedmultireferenceeditor"
+									  qualifier="entries" readonly="true">
+							<ea:editor-parameter>
+								<ea:name>listConfigContext</ea:name>
+								<ea:value>referenceListViewPaymentTransactionEntries
+								</ea:value>
+							</ea:editor-parameter>
+							<ea:editor-parameter>
+								<ea:name>disableDisplayingDetails</ea:name>
+								<ea:value>true</ea:value>
+							</ea:editor-parameter>
+							<ea:editor-parameter>
+								<ea:name>disableRemoveReference</ea:name>
+								<ea:value>true</ea:value>
+							</ea:editor-parameter>
+							<ea:editor-parameter>
+								<ea:name>isNestedObjectCreationDisabled</ea:name>
+								<ea:value>true</ea:value>
+							</ea:editor-parameter>
+						</ea:attribute>
+					</ea:panel>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
 	</context>
 
 	<context component="cs-editor-area" merge-by="type" parent="GenericItem" type="WorldlineRecurringToken" module="customersupportbackoffice"
