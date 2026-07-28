@@ -30,7 +30,6 @@ public class WorldlinePaymentProductFilterByCheckoutStrategy implements Worldlin
 
         switch (worldlineCheckoutType) {
             case HOSTED_CHECKOUT:
-
                 paymentProducts = paymentProducts.stream()
                         .filter(paymentProduct -> worldlineHostedCheckoutPaymentProductsEvaluatorList.stream().anyMatch(pr -> pr.evaluate().test(paymentProduct)))
                         .collect(Collectors.toList());

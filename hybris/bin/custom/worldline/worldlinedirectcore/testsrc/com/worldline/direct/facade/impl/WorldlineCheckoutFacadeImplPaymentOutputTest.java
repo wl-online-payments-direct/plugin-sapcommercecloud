@@ -7,14 +7,18 @@ import com.onlinepayments.domain.CardFraudResults;
 import com.onlinepayments.domain.MobilePaymentData;
 import com.onlinepayments.domain.MobilePaymentMethodSpecificOutput;
 import com.onlinepayments.domain.PaymentOutput;
+import com.onlinepayments.domain.PaymentProduct;
 import com.onlinepayments.domain.PaymentReferences;
 import com.onlinepayments.domain.PaymentResponse;
 import com.onlinepayments.domain.PaymentStatusOutput;
 import com.onlinepayments.domain.RedirectPaymentMethodSpecificOutput;
 import com.onlinepayments.domain.ThreeDSecureResults;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.direct.model.WorldlineRecurringTokenModel;
+import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.WorldlinePaymentService;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
@@ -23,6 +27,7 @@ import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.servicelayer.session.SessionService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 import org.junit.Test;
@@ -99,6 +104,24 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
         assertSame(paymentInfo, modelService.savedModels[0]);
         assertSame(recurringToken, modelService.savedModels[1]);
         assertSame(order, modelService.refreshedModel);
+    }
+
+    @Test
+    public void fillWorldlinePaymentInfoDataAllowsPayByLinkDuringAssistedService() throws WorldlineNonValidPaymentProductException {
+        facade.setSessionService(sessionService(Boolean.TRUE));
+
+        WorldlinePaymentInfoData paymentInfoData = new WorldlinePaymentInfoData();
+        facade.fillWorldlinePaymentInfoData(paymentInfoData, null, WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK, null);
+
+        assertEquals(Integer.valueOf(WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK), paymentInfoData.getId());
+        assertEquals(WorldlineCheckoutTypesEnum.PAY_BY_LINK, paymentInfoData.getWorldlineCheckoutType());
+    }
+
+    @Test(expected = WorldlineNonValidPaymentProductException.class)
+    public void fillWorldlinePaymentInfoDataRejectsPayByLinkOutsideAssistedService() throws WorldlineNonValidPaymentProductException {
+        facade.setSessionService(sessionService(Boolean.FALSE));
+
+        facade.fillWorldlinePaymentInfoData(new WorldlinePaymentInfoData(), null, WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK, null);
     }
 
     @Test
@@ -253,6 +276,17 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
             return getPaymentProductIdFromPaymentOutput(paymentOutput);
         }
 
+        @Override
+        public PaymentProduct getPaymentMethodById(int paymentId) {
+            if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK) {
+                return super.getPaymentMethodById(paymentId);
+            }
+            PaymentProduct paymentProduct = new PaymentProduct();
+            paymentProduct.setId(paymentId);
+            paymentProduct.setPaymentMethod(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
+            return paymentProduct;
+        }
+
         void updatePaymentInfo(AbstractOrderModel orderModel, PaymentResponse paymentResponse) {
             updatePaymentInfoIfNeeded(orderModel, paymentResponse);
         }
@@ -269,7 +303,19 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
         return (CheckoutCustomerStrategy) Proxy.newProxyInstance(
               CheckoutCustomerStrategy.class.getClassLoader(),
               new Class[]{CheckoutCustomerStrategy.class},
-              (proxy, method, args) -> "getCurrentUserForCheckout".equals(method.getName()) ? customer : defaultValue(method.getReturnType()));
+                  (proxy, method, args) -> "getCurrentUserForCheckout".equals(method.getName()) ? customer : defaultValue(method.getReturnType()));
+    }
+
+    private SessionService sessionService(Boolean assistedServiceSession) {
+        return (SessionService) Proxy.newProxyInstance(
+              SessionService.class.getClassLoader(),
+              new Class[]{SessionService.class},
+              (proxy, method, args) -> {
+                  if ("getAttribute".equals(method.getName()) && "ASM".equals(args[0])) {
+                      return assistedServiceSession ? new Object() : null;
+                  }
+                  return defaultValue(method.getReturnType());
+              });
     }
 
     private static class TestModelService {

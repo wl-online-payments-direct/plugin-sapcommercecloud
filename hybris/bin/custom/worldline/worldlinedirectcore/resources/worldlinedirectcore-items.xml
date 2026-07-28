@@ -16,6 +16,7 @@
             <value code="HOSTED_CHECKOUT"/>
             <value code="HOSTED_TOKENIZATION"/>
             <value code="GOOGLE_PAY"/>
+            <value code="PAY_BY_LINK"/>
         </enumtype>
         <enumtype generate="true" code="WorldlineGooglePayEnvironment" autocreate="true">
             <description>Google Pay API environment</description>
@@ -235,6 +236,12 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
+                <attribute qualifier="paymentLinkExpirationHours" type="java.lang.Integer">
+                    <description>Pay By Link expiry in hours. Worldline API requires a value between 24 hours and 6 months.</description>
+                    <persistence type="property" />
+                    <modifiers read="true" write="true" optional="false" />
+                    <defaultvalue>Integer.valueOf(168)</defaultvalue>
+                </attribute>
             </attributes>
         </itemtype>
 
@@ -432,6 +439,38 @@
                 <attribute qualifier="googlePayMobileDevice" type="java.lang.Boolean">
                     <persistence type="property" />
                     <modifiers optional="true" search="false" />
+                </attribute>
+                <attribute qualifier="paymentLinkId" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkRedirectionUrl" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property">
+                        <columntype>
+                            <value>HYBRIS.LONG_STRING</value>
+                        </columntype>
+                    </persistence>
+                </attribute>
+                <attribute qualifier="paymentLinkExpirationDate" type="java.util.Date">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkStatus" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkPaymentId" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkLastEvent" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkReusable" type="java.lang.Boolean">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
                 </attribute>
             </attributes>
         </itemtype>

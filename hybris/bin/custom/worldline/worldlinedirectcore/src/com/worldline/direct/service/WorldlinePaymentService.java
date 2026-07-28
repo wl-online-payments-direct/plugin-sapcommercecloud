@@ -39,6 +39,12 @@ public interface WorldlinePaymentService {
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
 
+    PaymentLinkResponse createPaymentLink(OrderModel orderForCode);
+
+    PaymentLinkResponse getPaymentLink(String paymentLinkId);
+
+    void cancelPaymentLink(String paymentLinkId);
+
     CaptureResponse capturePayment(String storeId, String paymentId, BigDecimal plannedAmount, String currencyISOcode, Boolean isFinal);
 
     PaymentResponse getPayment(String storeId, String paymentId);

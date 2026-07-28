@@ -2,6 +2,7 @@
 <%@ attribute name="order" required="true" type="de.hybris.platform.commercefacades.order.data.AbstractOrderData" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 <div class="label-order">
@@ -10,5 +11,11 @@
 <div class="value-order">
     ${fn:escapeXml(order.worldlinePaymentInfo.paymentMethod)}<br/>
     ${fn:escapeXml(order.worldlinePaymentInfo.cardholderName)}
+    <c:if test="${not empty order.worldlinePaymentInfo.paymentLinkRedirectionUrl}">
+        <br/>
+        <spring:theme code="checkout.multi.paymentLink.payLink"/>:
+        <a href="${fn:escapeXml(order.worldlinePaymentInfo.paymentLinkRedirectionUrl)}">
+            ${fn:escapeXml(order.worldlinePaymentInfo.paymentLinkRedirectionUrl)}
+        </a>
+    </c:if>
 </div>
-

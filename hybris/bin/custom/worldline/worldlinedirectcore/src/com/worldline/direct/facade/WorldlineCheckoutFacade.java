@@ -43,6 +43,8 @@ public interface WorldlineCheckoutFacade {
 
     CreateHostedCheckoutResponse createHostedCheckout(String orderCode, BrowserData browserData) throws InvalidCartException;
 
+    PaymentLinkResponse createPaymentLink(String orderCode) throws InvalidCartException;
+
     void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId, Boolean isRecurring) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
     void handlePaymentResponse(OrderModel abstractOrderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;

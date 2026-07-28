@@ -28,6 +28,13 @@
         <property name="mandateDetail" type="com.worldline.direct.order.data.WorldlineMandateDetail"/>
         <property name="googlePayEncryptedPaymentData" type="String"/>
         <property name="googlePayMobileDevice" type="Boolean"/>
+        <property name="paymentLinkId" type="String"/>
+        <property name="paymentLinkRedirectionUrl" type="String"/>
+        <property name="paymentLinkExpirationDate" type="java.util.Date"/>
+        <property name="paymentLinkStatus" type="String"/>
+        <property name="paymentLinkPaymentId" type="String"/>
+        <property name="paymentLinkLastEvent" type="String"/>
+        <property name="paymentLinkReusable" type="Boolean"/>
         <property name="worldlinePaymentId" type="String"/>
         <property name="worldlineStatus" type="String"/>
         <property name="worldlineStatusCode" type="Integer"/>

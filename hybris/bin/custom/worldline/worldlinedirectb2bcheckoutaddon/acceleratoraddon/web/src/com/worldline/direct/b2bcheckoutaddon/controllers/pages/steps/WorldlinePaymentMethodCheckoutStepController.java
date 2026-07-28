@@ -6,6 +6,7 @@ package com.worldline.direct.b2bcheckoutaddon.controllers.pages.steps;
 
 import com.onlinepayments.domain.CreateHostedTokenizationResponse;
 import com.onlinepayments.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProductDisplayHints;
 import com.worldline.direct.b2bcheckoutaddon.constants.WorldlineCheckoutConstants;
 import com.worldline.direct.b2bcheckoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.direct.b2bcheckoutaddon.forms.WorldlineAddressForm;
@@ -34,6 +35,7 @@ import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commercefacades.user.data.CountryData;
 import de.hybris.platform.commerceservices.enums.CountryType;
+import de.hybris.platform.servicelayer.session.SessionService;
 import de.hybris.platform.util.Config;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.log4j.Logger;
@@ -54,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_APPLEPAY;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 
@@ -90,6 +93,8 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
 
     @Resource(name = "worldlineConfigurationService")
     private WorldlineConfigurationService worldlineConfigurationService;
+    @Resource(name = "sessionService")
+    private SessionService sessionService;
 
     @ModelAttribute("billingCountries")
     public Collection<CountryData> getBillingCountries() {
@@ -114,6 +119,7 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
         final List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS).get();
         List<PaymentProduct> filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS, WorldlinePaymentProductFilterEnum.NAMES, WorldlinePaymentProductFilterEnum.SORT).get();
         filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(filteredPaymentProducts, cartData).get();
+        addPayByLinkPaymentProductForAssistedServiceSession(filteredPaymentProducts);
 
         model.addAttribute("paymentProducts", filteredPaymentProducts);
         model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
@@ -223,6 +229,24 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
         return Config.getParameter("worldline.hosted.tokenization.js");
     }
 
+    protected void addPayByLinkPaymentProductForAssistedServiceSession(List<PaymentProduct> paymentProducts) {
+        if (isAssistedServiceSession()) {
+            paymentProducts.add(createPayByLinkPaymentProduct());
+        }
+    }
+
+    protected PaymentProduct createPayByLinkPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(PAYMENT_METHOD_PAY_BY_LINK);
+        paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel(getMessageSource().getMessage("checkout.multi.paymentLink.paymentMethod", null, getI18nService().getCurrentLocale()));
+        return paymentProduct;
+    }
+
+    protected boolean isAssistedServiceSession() {
+        return sessionService.getAttribute("ASM") != null;
+    }
 
     @RequestMapping(value = "/back", method = RequestMethod.GET)
     @RequireHardLogIn

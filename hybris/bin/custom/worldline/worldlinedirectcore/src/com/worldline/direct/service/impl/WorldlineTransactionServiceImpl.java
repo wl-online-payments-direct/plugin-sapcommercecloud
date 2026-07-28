@@ -232,6 +232,51 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
     }
 
     @Override
+    public void processPaymentLinkEvent(WebhooksEvent webhooksEvent) {
+        validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
+        validateParameterNotNullStandardMessage("webhooksEvent.paymentLink", webhooksEvent.getPaymentLink());
+        LOGGER.debug("[WORLDLINE] Process {} EVENT id : {}", webhooksEvent.getType(), webhooksEvent.getId());
+
+        final PaymentLinkResponse paymentLink = webhooksEvent.getPaymentLink();
+        if (paymentLink.getPaymentLinkOrder() == null || StringUtils.isBlank(paymentLink.getPaymentLinkOrder().getMerchantReference())) {
+            LOGGER.warn("[WORLDLINE] Payment link webhook {} does not contain merchant reference", webhooksEvent.getId());
+            return;
+        }
+
+        final AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(paymentLink.getPaymentLinkOrder().getMerchantReference());
+        if (!(order.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
+            return;
+        }
+
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) order.getPaymentInfo();
+        paymentInfo.setPaymentLinkId(paymentLink.getPaymentLinkId());
+        paymentInfo.setPaymentLinkStatus(paymentLink.getStatus());
+        paymentInfo.setPaymentLinkPaymentId(paymentLink.getPaymentId());
+        paymentInfo.setPaymentLinkReusable(paymentLink.getIsReusableLink());
+        paymentInfo.setPaymentLinkLastEvent(webhooksEvent.getType());
+        paymentInfo.setPaymentLinkRedirectionUrl(paymentLink.getRedirectionUrl());
+        if (paymentLink.getExpirationDate() != null) {
+            paymentInfo.setPaymentLinkExpirationDate(java.util.Date.from(paymentLink.getExpirationDate().toInstant()));
+        }
+
+        final WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM webhookType = WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM.fromString(webhooksEvent.getType());
+        if (webhookType == WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM.PAYMENT_LINK_CANCELLED
+                || webhookType == WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM.PAYMENT_LINK_EXPIRED) {
+            if (StringUtils.isBlank(paymentInfo.getPaymentLinkPaymentId())) {
+                order.setPaymentStatus(PaymentStatus.WORLDLINE_CANCELED);
+                modelService.save(order);
+                worldlineBusinessProcessService.triggerOrderProcessEvent(order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
+            }
+        }
+
+        modelService.save(paymentInfo);
+
+        if (webhooksEvent.getPayment() != null) {
+            processAuthorisedEvent(webhooksEvent);
+        }
+    }
+
+    @Override
     public void savePaymentCost(AbstractOrderModel orderModel, Double surcharge) {
         orderModel.setPaymentCost(surcharge);
         try {

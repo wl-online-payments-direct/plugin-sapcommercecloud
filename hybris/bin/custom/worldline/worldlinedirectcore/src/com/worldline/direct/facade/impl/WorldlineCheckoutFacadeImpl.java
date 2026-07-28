@@ -84,6 +84,7 @@ import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMEN
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineCheckoutFacadeImpl.class);
     private static final Pattern GOOGLE_PAY_PHONE_USER_AGENT_PATTERN = Pattern.compile(".*(iPhone|iPod|Android.*Mobile|Windows Phone|BlackBerry|IEMobile|Opera Mini).*", Pattern.CASE_INSENSITIVE);
+    private static final String PAY_BY_LINK_LABEL = "Pay by link";
 
     protected CommonI18NService commonI18NService;
     protected ModelService modelService;
@@ -145,6 +146,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             return createHcpGroupedCardPaymentProduct();
         } else if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_GROUP_CARDS) {
             return createGroupCartPaymentProduct();
+        } else if (paymentId == WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK) {
+            return createPayByLinkPaymentProduct();
         }
         final CartData cartData = checkoutFacade.getCheckoutCart();
         final PriceData totalPrice = cartData.getTotalPrice();
@@ -177,6 +180,19 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                                              String savedPaymentCode,
                                              Integer paymentId,
                                              String hostedTokenizationId) throws WorldlineNonValidPaymentProductException {
+
+        if (WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK == paymentId) {
+            if (!isAssistedServiceSession()) {
+                throw new WorldlineNonValidPaymentProductException(paymentId);
+            }
+            final PaymentProduct paymentProduct = createPayByLinkPaymentProduct();
+            worldlinePaymentInfoData.setSavedPayment(StringUtils.EMPTY);
+            worldlinePaymentInfoData.setId(paymentProduct.getId());
+            worldlinePaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
+            worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
+            worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.PAY_BY_LINK);
+            return;
+        }
 
         final PaymentProduct paymentProduct = getPaymentMethodById(paymentId);
         if (BooleanUtils.isTrue(isValidPaymentMethod(paymentProduct))) {
@@ -263,6 +279,31 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         storeReturnMac(orderForCode, hostedCheckout.getRETURNMAC());
         hostedCheckout.setPartialRedirectUrl(WorldlineUrlUtils.buildFullURL(hostedCheckout.getPartialRedirectUrl()));
         return hostedCheckout;
+    }
+
+    @Override
+    public PaymentLinkResponse createPaymentLink(String orderCode) throws InvalidCartException {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        final PaymentLinkResponse paymentLink = worldlinePaymentService.createPaymentLink(orderForCode);
+        storePaymentLink(orderForCode, paymentLink);
+        return paymentLink;
+    }
+
+    protected void storePaymentLink(OrderModel orderModel, PaymentLinkResponse paymentLink) {
+        if (paymentLink == null || !(orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
+            return;
+        }
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
+        paymentInfo.setPaymentLinkId(paymentLink.getPaymentLinkId());
+        paymentInfo.setPaymentLinkRedirectionUrl(paymentLink.getRedirectionUrl());
+        paymentInfo.setPaymentLinkStatus(paymentLink.getStatus());
+        paymentInfo.setPaymentLinkPaymentId(paymentLink.getPaymentId());
+        paymentInfo.setPaymentLinkReusable(paymentLink.getIsReusableLink());
+        if (paymentLink.getExpirationDate() != null) {
+            paymentInfo.setPaymentLinkExpirationDate(Date.from(paymentLink.getExpirationDate().toInstant()));
+        }
+        orderModel.setPaymentStatus(PaymentStatus.WORLDLINE_WAITING_AUTH);
+        modelService.saveAll(paymentInfo, orderModel);
     }
 
 
@@ -843,6 +884,19 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getURL());
         }
         return paymentProduct;
+    }
+
+    private PaymentProduct createPayByLinkPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(WorldlinedirectcoreConstants.PAYMENT_METHOD_PAY_BY_LINK);
+        paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel(PAY_BY_LINK_LABEL);
+        return paymentProduct;
+    }
+
+    protected boolean isAssistedServiceSession() {
+        return sessionService.getAttribute("ASM") != null;
     }
 
 

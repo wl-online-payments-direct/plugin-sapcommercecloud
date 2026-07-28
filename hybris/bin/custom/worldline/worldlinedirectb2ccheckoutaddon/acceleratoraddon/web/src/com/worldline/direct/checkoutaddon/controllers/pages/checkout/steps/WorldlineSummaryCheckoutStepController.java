@@ -212,7 +212,8 @@ public class WorldlineSummaryCheckoutStepController extends AbstractCheckoutStep
                 if (
                         (abstractOrderData instanceof OrderData && CheckoutPaymentType.CARD.getCode().equals(((OrderData) abstractOrderData).getPaymentType().getCode()))
                                 || (abstractOrderData instanceof ScheduledCartData && CheckoutPaymentType.CARD.getCode().equals(((ScheduledCartData) abstractOrderData).getPaymentType().getCode()))
-                                || WorldlineCheckoutTypesEnum.GOOGLE_PAY.equals(worldlinePaymentInfo.getWorldlineCheckoutType())) {
+                                || WorldlineCheckoutTypesEnum.GOOGLE_PAY.equals(worldlinePaymentInfo.getWorldlineCheckoutType())
+                                || WorldlineCheckoutTypesEnum.PAY_BY_LINK.equals(worldlinePaymentInfo.getWorldlineCheckoutType())) {
                     if (BooleanUtils.isTrue(placeOrderData.getReplenishmentOrder())) {
                         redirect = worldlinePlaceOrderUtils.submitReplenishmentOrder(abstractOrderData, browserData, redirectModel);
                     } else {

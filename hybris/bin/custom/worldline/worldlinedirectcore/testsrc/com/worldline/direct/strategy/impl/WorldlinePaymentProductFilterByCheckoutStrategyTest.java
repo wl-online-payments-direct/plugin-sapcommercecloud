@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @UnitTest
@@ -37,6 +38,25 @@ public class WorldlinePaymentProductFilterByCheckoutStrategyTest {
 
         List<Integer> filteredProductIds = filteredProducts.stream().map(PaymentProduct::getId).collect(Collectors.toList());
         assertTrue(filteredProductIds.contains(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY));
+    }
+
+    @Test
+    public void payByLinkStoreConfigurationDoesNotActAsHostedCheckoutMode() {
+        WorldlinePaymentProductFilterByCheckoutStrategy strategy = new WorldlinePaymentProductFilterByCheckoutStrategy();
+        strategy.setBaseStoreService(baseStoreService(WorldlineCheckoutTypesEnum.PAY_BY_LINK));
+        strategy.setWorldlineHostedCheckoutPaymentProductsEvaluatorList(Arrays.asList(
+              new WorldlineHostedCheckoutPaymentProductsEvaluator(),
+              evaluatorFor(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY)));
+        strategy.setWorldlineHostedTokenizationPaymentProductsEvaluatorList(Arrays.asList());
+
+        List<PaymentProduct> filteredProducts = strategy.filter(Arrays.asList(
+              paymentProduct(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY, WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.MOBILE.getValue()),
+              paymentProduct(9999, "unsupported")));
+
+        List<Integer> filteredProductIds = filteredProducts.stream().map(PaymentProduct::getId).collect(Collectors.toList());
+        assertFalse(filteredProductIds.contains(WorldlinedirectcoreConstants.PAYMENT_METHOD_HCP));
+        assertTrue(filteredProductIds.contains(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY));
+        assertTrue(filteredProductIds.contains(9999));
     }
 
     private WorldlinePaymentProductEvaluator evaluatorFor(Integer paymentProductId) {
