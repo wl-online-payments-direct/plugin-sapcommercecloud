@@ -6,6 +6,8 @@ import com.onlinepayments.domain.CreatePaymentLinkRequest;
 import com.onlinepayments.domain.HostedCheckoutSpecificInput;
 import com.onlinepayments.domain.Order;
 import com.onlinepayments.domain.OrderReferences;
+import com.onlinepayments.domain.RedirectPaymentMethodSpecificInput;
+import com.onlinepayments.domain.RedirectionData;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
@@ -44,6 +46,25 @@ public class WorldlinePaymentLinkPopulatorTest {
         assertNotNull(expirationDate);
         long hoursUntilExpiration = ChronoUnit.HOURS.between(ZonedDateTime.now(), expirationDate);
         assertTrue(hoursUntilExpiration >= 71L && hoursUntilExpiration <= 72L);
+    }
+
+    @Test
+    public void populateNeverSendsReturnUrlBecauseCustomerIsNotRedirectedBack() {
+        WorldlinePaymentLinkPopulator populator = new WorldlinePaymentLinkPopulator();
+        CreateHostedCheckoutRequest hostedCheckoutRequest = hostedCheckoutRequest();
+        hostedCheckoutRequest.getHostedCheckoutSpecificInput().setReturnUrl("https://shop.example/worldline/payment-link/return/ORDER-100");
+        RedirectPaymentMethodSpecificInput redirectInput = new RedirectPaymentMethodSpecificInput();
+        RedirectionData redirectionData = new RedirectionData();
+        redirectionData.setReturnUrl("https://shop.example/worldline/payment-link/return/ORDER-100");
+        redirectInput.setRedirectionData(redirectionData);
+        hostedCheckoutRequest.setRedirectPaymentMethodSpecificInput(redirectInput);
+        populator.setWorldlineHostedCheckoutParamConverter(converter(hostedCheckoutRequest));
+
+        CreatePaymentLinkRequest paymentLinkRequest = new CreatePaymentLinkRequest();
+        populator.populate(order(168), paymentLinkRequest);
+
+        assertNull(paymentLinkRequest.getHostedCheckoutSpecificInput().getReturnUrl());
+        assertNull(paymentLinkRequest.getRedirectPaymentMethodSpecificInput().getRedirectionData().getReturnUrl());
     }
 
     @Test

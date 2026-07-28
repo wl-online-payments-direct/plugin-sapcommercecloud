@@ -6,6 +6,7 @@ import com.onlinepayments.domain.HostedCheckoutSpecificInput;
 import com.onlinepayments.domain.Order;
 import com.onlinepayments.domain.PaymentLinkOrderInput;
 import com.onlinepayments.domain.PaymentLinkSpecificInput;
+import com.onlinepayments.domain.RedirectPaymentMethodSpecificInput;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
@@ -37,7 +38,7 @@ public class WorldlinePaymentLinkPopulator implements Populator<AbstractOrderMod
         createPaymentLinkRequest.setPaymentLinkOrder(getPaymentLinkOrder(order));
         createPaymentLinkRequest.setHostedCheckoutSpecificInput(getHostedCheckoutSpecificInput(hostedCheckoutRequest));
         createPaymentLinkRequest.setCardPaymentMethodSpecificInput(hostedCheckoutRequest.getCardPaymentMethodSpecificInput());
-        createPaymentLinkRequest.setRedirectPaymentMethodSpecificInput(hostedCheckoutRequest.getRedirectPaymentMethodSpecificInput());
+        createPaymentLinkRequest.setRedirectPaymentMethodSpecificInput(getRedirectPaymentMethodSpecificInput(hostedCheckoutRequest));
         createPaymentLinkRequest.setMobilePaymentMethodSpecificInput(hostedCheckoutRequest.getMobilePaymentMethodSpecificInput());
         createPaymentLinkRequest.setSepaDirectDebitPaymentMethodSpecificInput(hostedCheckoutRequest.getSepaDirectDebitPaymentMethodSpecificInput());
         createPaymentLinkRequest.setFraudFields(hostedCheckoutRequest.getFraudFields());
@@ -51,8 +52,20 @@ public class WorldlinePaymentLinkPopulator implements Populator<AbstractOrderMod
         final HostedCheckoutSpecificInput hostedCheckoutSpecificInput = hostedCheckoutRequest.getHostedCheckoutSpecificInput();
         if (hostedCheckoutSpecificInput != null) {
             hostedCheckoutSpecificInput.setTokens(null);
+            // Pay by Link never redirects the customer back to the storefront; the order is
+            // unlocked purely via webhooks, so no returnUrl must be sent to Worldline.
+            hostedCheckoutSpecificInput.setReturnUrl(null);
         }
         return hostedCheckoutSpecificInput;
+    }
+
+    protected RedirectPaymentMethodSpecificInput getRedirectPaymentMethodSpecificInput(CreateHostedCheckoutRequest hostedCheckoutRequest) {
+        final RedirectPaymentMethodSpecificInput redirectPaymentMethodSpecificInput = hostedCheckoutRequest.getRedirectPaymentMethodSpecificInput();
+        if (redirectPaymentMethodSpecificInput != null && redirectPaymentMethodSpecificInput.getRedirectionData() != null) {
+            // See getHostedCheckoutSpecificInput: no returnUrl for Pay by Link.
+            redirectPaymentMethodSpecificInput.getRedirectionData().setReturnUrl(null);
+        }
+        return redirectPaymentMethodSpecificInput;
     }
 
     protected PaymentLinkOrderInput getPaymentLinkOrder(Order order) {
