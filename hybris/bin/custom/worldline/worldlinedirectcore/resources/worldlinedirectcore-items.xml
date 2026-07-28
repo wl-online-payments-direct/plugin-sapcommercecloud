@@ -362,6 +362,62 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
+                <attribute qualifier="worldlinePaymentId" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineStatus" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineStatusCode" type="java.lang.Integer">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineMerchantReference" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlinePaymentMethod" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlinePaymentProductId" type="java.lang.Integer">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineAmount" type="java.lang.Long">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="worldlineCurrency" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineAcquiredAmount" type="java.lang.Long">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="worldlineAcquiredCurrency" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="cardBin" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="cardLastFour" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="fraudResult" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="authenticationStatus" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
                 <attribute qualifier="mealvoucherBrand" type="java.lang.String">
                     <persistence type="property" />
                     <modifiers optional="true" />

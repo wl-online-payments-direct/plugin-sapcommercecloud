@@ -35,6 +35,22 @@
         <property name="paymentLinkPaymentId" type="String"/>
         <property name="paymentLinkLastEvent" type="String"/>
         <property name="paymentLinkReusable" type="Boolean"/>
+        <property name="worldlinePaymentId" type="String"/>
+        <property name="worldlineStatus" type="String"/>
+        <property name="worldlineStatusCode" type="Integer"/>
+        <property name="worldlineMerchantReference" type="String"/>
+        <property name="worldlinePaymentMethod" type="String"/>
+        <property name="worldlinePaymentProductId" type="Integer"/>
+        <property name="worldlineAmount" type="Long"/>
+        <property name="worldlineCurrency" type="String"/>
+        <property name="worldlineAcquiredAmount" type="Long"/>
+        <property name="worldlineAcquiredCurrency" type="String"/>
+        <property name="cardBin" type="String"/>
+        <property name="cardLastFour" type="String"/>
+        <property name="fraudResult" type="String"/>
+        <property name="liability" type="String"/>
+        <property name="appliedExemption" type="String"/>
+        <property name="authenticationStatus" type="String"/>
 
     </bean>
 
