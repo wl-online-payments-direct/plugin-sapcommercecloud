@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2018 SAP SE or an SAP affiliate company.
+ All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<widget xmlns="http://www.zkoss.org/2005/zul" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.hybris.com/schema/cockpitng/zul/zul.xsd"
+        sclass="oms-widget-werorefund-configuration"
+        id="werorefundreasonview" height="100%" width="100%">
+
+    <separator width="100%" sclass="oms-widget-werorefund-configuration--separator"/>
+
+    <hlayout sclass="oms-widget-werorefund-header">
+        <hbox sclass="oms-widget-werorefund-body">
+            <vbox>
+                <label value="${labels.worldline.werorefund.ordernumber}" width="140px" />
+                <textbox sclass="oms-widget-werorefund-input-text-box" readonly="true" id="orderNumber" width="140px" />
+            </vbox>
+        </hbox>
+        <hbox sclass="oms-widget-werorefund-body">
+            <vbox>
+                <label value="${labels.worldline.werorefund.customer}" width="100%" />
+                <textbox sclass="oms-widget-werorefund-input-text-box" readonly="true" id="customerName" width="240px" />
+            </vbox>
+        </hbox>
+    </hlayout>
+
+    <separator width="100%" sclass="oms-widget-werorefund-configuration--separator"/>
+
+    <hlayout width="100%" sclass="oms-widget-werorefund-list">
+        <hbox sclass="oms-widget-werorefund-body">
+            <vbox>
+                <label value="${labels.worldline.werorefund.reason}" width="240px" class="oms-widget-werorefund--reason-label"/>
+                <combobox id="refundReasonCombobox" width="300px" readonly="true"
+                          constraint="no empty: A refund reason must be selected">
+                </combobox>
+            </vbox>
+        </hbox>
+    </hlayout>
+
+    <!-- Buttons -->
+    <div class="oms-widget-werorefund-configuration-footer oms-widget-footer">
+        <button id="cancelrefund"
+                label="${labels.worldline.werorefund.button.cancel}"
+                sclass="oms-widget-werorefund-configuration-button oms-widget-werorefund-configuration-revert-button" />
+        <button id="confirmrefund"
+                label="${labels.worldline.werorefund.button.confirm}"
+                sclass="y-btn-primary oms-widget-werorefund-configuration-button oms-widget-werorefund-configuration-save-button" />
+    </div>
+
+</widget>

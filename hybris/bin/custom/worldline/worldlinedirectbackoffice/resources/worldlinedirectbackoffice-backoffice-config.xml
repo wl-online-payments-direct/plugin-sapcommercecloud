@@ -109,6 +109,12 @@
 				<ea:section name="hmc.worldline.worldlineIntersolveConfig">
 					<ea:attribute qualifier="intersolveTimeout"/>
 				</ea:section>
+				<ea:section name="hmc.worldline.worldlineWeroConfig">
+					<ea:attribute qualifier="weroCaptureTrigger"/>
+				</ea:section>
+				<ea:section name="hmc.worldline.worldlineMerchantConfig">
+					<ea:attribute qualifier="merchantName"/>
+				</ea:section>
 			</ea:tab>
 			<ea:tab name="hmc.worldline.3dsecure">
 				<ea:section name="hmc.worldline.3dsecure.basic">
@@ -519,6 +525,29 @@
 				<y:action action-id="com.worldline.direct.actions.worldlinemanualpaymentreverseauthaction" property="currentObject"/>
 			</y:group>
 		</y:actions>
+	</context>
+
+	<!-- RefundEntry editor area - show Wero refund reason during return flow -->
+	<context merge-by="type" parent="AbstractReturnEntry" type="RefundEntry" component="editor-area">
+		<ea:editorArea name="">
+			<ea:tab name="hmc.worldline" merge-mode="MERGE">
+				<ea:section name="hmc.worldline.worldlineWeroRefund">
+					<ea:attribute qualifier="weroRefundReason"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
+	</context>
+
+	<context merge-by="type" parent="AbstractReturnEntry" type="RefundEntry" component="cs-editor-area"
+			 module="customersupportbackoffice"
+			 principal="customersupportadministratorrole,customersupportmanagerrole,customersupportagentrole">
+		<ea:editorArea name="">
+			<ea:tab name="hmc.worldline" merge-mode="MERGE">
+				<ea:section name="hmc.worldline.worldlineWeroRefund">
+					<ea:attribute qualifier="weroRefundReason"/>
+				</ea:section>
+			</ea:tab>
+		</ea:editorArea>
 	</context>
 
 	<context component="cseditorareaactions" type="ReturnRequest" merge-by="type">

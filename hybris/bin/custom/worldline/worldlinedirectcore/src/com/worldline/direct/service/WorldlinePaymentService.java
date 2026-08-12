@@ -59,6 +59,8 @@ public interface WorldlinePaymentService {
 
     RefundResponse refundPayment(String storeId, String paymentId, BigDecimal returnAmount, String currencyISOCode);
 
+    RefundResponse refundPayment(String storeId, String paymentId, BigDecimal returnAmount, String currencyISOCode, String weroRefundReason);
+
     TokenResponse getToken(String tokenId);
 
     void deleteToken(String tokenId);

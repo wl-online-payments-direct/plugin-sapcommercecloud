@@ -28,8 +28,34 @@
         </widget>
     </widget-extension>
 
-    <!-- Action widget connection -->
+    <widget-extension widgetId="backofficeMainSlot">
+        <widget id="omsWorldlineWeroRefundReasonPopup" widgetDefinitionId="com.worldline.direct.widgets.order.werorefundreasonwidget" slotId="cockpitWidgetChildrenInvisible"
+                title="Wero Refund Reason" template="true">
+
+            <instance-settings socketEventRoutingMode="LAST_USED">
+                <create onInit="false" reuseExisting="true">
+                    <all-incoming-events/>
+                </create>
+                <close>
+                    <all-outgoing-events/>
+                </close>
+                <select onInit="false">
+                    <all-incoming-events/>
+                </select>
+            </instance-settings>
+
+            <setting key="widgetStyleClass" type="String"></setting>
+            <setting key="__externalLocationPath" type="String">extension://worldlinedirectcustomersupportbackoffice</setting>
+            <setting key="widgetStyleAttribute" type="String"></setting>
+            <setting key="_width" type="String">600px</setting>
+            <setting key="_height" type="String">400px</setting>
+            <virtual-sockets />
+        </widget>
+    </widget-extension>
+
+    <!-- Action widget connections -->
     <widget-connection sourceWidgetId="STUB_com.worldline.direct.actions.worldlinemanualpaymentcaptureaction" outputId="capturePaymentContext" targetWidgetId="omsWorldlinePartialCapturePopup" inputId="inputObject"/>
+    <widget-connection sourceWidgetId="STUB_com.worldline.direct.actions.worldlinemanualpaymentrefundaction" outputId="weroRefundContext" targetWidgetId="omsWorldlineWeroRefundReasonPopup" inputId="inputObject"/>
 
     <widget-connection sourceWidgetId="STUB_com.worldline.direct.backoffice.action.featurerequest"
                        outputId="featureRequestWizardContext"

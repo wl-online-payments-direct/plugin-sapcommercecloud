@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.onlinepayments.domain.*;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.OperationCodesEnum;
+import com.worldline.direct.enums.WeroCaptureTrigger;
 import com.worldline.direct.model.OneyPaymentModeModel;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.service.WorldlineConfigurationService;
@@ -14,6 +15,9 @@ import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator.HOSTED_CHECKOUT_RETURN_URL;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
@@ -23,6 +27,8 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
     private SessionService sessionService;
     private WorldlineConfigurationService worldlineConfigurationService;
     private WorldlinePaymentModeService worldlinePaymentModeService;
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(WorldlineHostedCheckoutRedirectPopulator.class);
 
     @Override
     public void populate(AbstractOrderModel abstractOrderModel, CreateHostedCheckoutRequest createHostedCheckoutRequest) throws ConversionException {
@@ -63,6 +69,14 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 redirectPaymentProduct5403SpecificInput.setCompleteRemainingPaymentAmount(true);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5403SpecificInput(redirectPaymentProduct5403SpecificInput);
                 break;
+            case WorldlinedirectcoreConstants.PAYMENT_METHOD_WERO:
+                String weroCaptureTrigger = getWeroCaptureTrigger();
+                if (StringUtils.isNotBlank(weroCaptureTrigger)) {
+                    RedirectPaymentProduct900SpecificInput redirectPaymentProduct900SpecificInput = new RedirectPaymentProduct900SpecificInput();
+                    redirectPaymentProduct900SpecificInput.setCaptureTrigger(weroCaptureTrigger);
+                    redirectPaymentMethodSpecificInput.setPaymentProduct900SpecificInput(redirectPaymentProduct900SpecificInput);
+                }
+                break;
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_MEALVOUCHER:
                 RedirectPaymentProduct5402SpecificInput redirectPaymentProduct5402SpecificInput = new RedirectPaymentProduct5402SpecificInput();
                 redirectPaymentProduct5402SpecificInput.setCompleteRemainingPaymentAmount(true);
@@ -82,6 +96,20 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
         return redirectPaymentMethodSpecificInput;
     }
 
+    private String getWeroCaptureTrigger() {
+        WorldlineConfigurationModel worldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (worldlineConfiguration == null) {
+            return StringUtils.EMPTY;
+        }
+        WeroCaptureTrigger weroCaptureTrigger = worldlineConfiguration.getWeroCaptureTrigger();
+        if (weroCaptureTrigger == null) {
+            LOGGER.warn("No Wero capture trigger set, but Wero is being used. Please set this against your " +
+                    "WorldlineConfiguration! The field will be omitted for this transaction, which Worldline " +
+                    "rejects when the payment requires approval (authorisation mode).");
+            return StringUtils.EMPTY;
+        }
+        return weroCaptureTrigger.getCode();
+    }
     private Boolean requiresApproval(String paymentModeId) {
         // Find out if this payment mode is 'sale only' (e.g. does not support auth)
         if (worldlinePaymentModeService.isSaleOnly(paymentModeId)) {

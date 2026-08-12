@@ -72,6 +72,25 @@
             <value code="LOW_VALUE" />
             <value code="TRANSACTION_RISK_ANALYSIS" />
         </enumtype>
+        <!-- Codes must match the values Worldline accepts for
+             redirectPaymentMethodSpecificInput.paymentProduct900SpecificInput.captureTrigger -->
+        <enumtype code="WeroCaptureTrigger">
+            <value code="shipping" />
+            <value code="delivery" />
+            <value code="availability" />
+            <value code="serviceFulfilment" />
+            <value code="other" />
+        </enumtype>
+        <!-- Codes must match the values Worldline accepts for
+             refundRedirectPaymentMethodSpecificInput.refundRedirectPaymentProduct900SpecificInput.refundReason -->
+        <enumtype code="WeroRefundReason">
+            <value code="WrongAmountCorrection" />
+            <value code="ReturnedGoods" />
+            <value code="PreDisputeRefund" />
+            <value code="SubscriptionRefund" />
+            <value code="ServiceLateCancellation" />
+            <value code="Other" />
+        </enumtype>
     </enumtypes>
 
     <itemtypes>
@@ -214,6 +233,18 @@
                     <persistence type="property" />
                     <modifiers optional="false" />
                     <defaultvalue>java.math.BigDecimal.ZERO</defaultvalue>
+                </attribute>
+                <attribute qualifier="merchantName" type="java.lang.String">
+                    <description>The name of the merchant, sent in order.references.descriptor.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="weroCaptureTrigger" type="WeroCaptureTrigger">
+                    <description>The Capture Trigger this merchant will use. Note that this attribute does not control
+                    the actual capturing of orders, it is expected that the merchant will implement this according
+                    to their own requirements.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
                 </attribute>
                 <attribute qualifier="googlePayMerchantId" type="java.lang.String">
                     <description>Merchant ID from the Google Pay Business Console.</description>
@@ -789,6 +820,15 @@
                 <attribute qualifier="annotation" type="java.lang.Class" redeclare="true">
                     <modifiers write="false" initial="true" optional="false"/>
                     <defaultvalue>com.worldline.direct.constraints.WorldlineConfigurationValid.class</defaultvalue>
+                </attribute>
+            </attributes>
+        </itemtype>
+        <itemtype code="RefundEntry" autocreate="false" generate="false">
+            <attributes>
+                <attribute qualifier="weroRefundReason" type="WeroRefundReason">
+                    <description> The reason for the refund if paying by Wero.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
                 </attribute>
             </attributes>
         </itemtype>

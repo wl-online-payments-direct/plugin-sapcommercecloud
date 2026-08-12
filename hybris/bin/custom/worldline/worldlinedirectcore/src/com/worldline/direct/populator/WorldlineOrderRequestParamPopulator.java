@@ -13,6 +13,7 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.util.TaxValue;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -80,8 +81,13 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
 
         WorldlineConfigurationModel worldlineConfiguration = abstractOrderModel.getStore().getWorldlineConfiguration();
         if (worldlineConfiguration != null) {
-            String merchantDescriptor = worldlineConfiguration.getMerchantID();
-            if (merchantDescriptor.length() > 15) {
+            String merchantDescriptor;
+            if (!StringUtils.isBlank(worldlineConfiguration.getMerchantName())) {
+                merchantDescriptor = worldlineConfiguration.getMerchantName();
+            } else {
+                merchantDescriptor = worldlineConfiguration.getMerchantID();
+            }
+            if (merchantDescriptor != null && merchantDescriptor.length() > 15) {
                 merchantDescriptor = merchantDescriptor.substring(0, 14);
             }
             orderReferences.setDescriptor(merchantDescriptor);

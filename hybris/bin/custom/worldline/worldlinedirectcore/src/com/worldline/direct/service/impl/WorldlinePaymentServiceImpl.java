@@ -751,6 +751,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     @Override
     public RefundResponse refundPayment(String storeId, String paymentId, BigDecimal returnAmount, String currencyISOCode) {
+        return refundPayment(storeId, paymentId, returnAmount, currencyISOCode, null);
+    }
+
+    @Override
+    public RefundResponse refundPayment(String storeId, String paymentId, BigDecimal returnAmount, String currencyISOCode, String weroRefundReason) {
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(storeId, getMerchantId(storeId));
             RefundRequest refundRequest = new RefundRequest();
@@ -758,6 +763,15 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             amountOfMoney.setCurrencyCode(currencyISOCode);
             amountOfMoney.setAmount(worldlineAmountUtils.createAmount(returnAmount, currencyISOCode));
             refundRequest.setAmountOfMoney(amountOfMoney);
+
+            if (StringUtils.isNotBlank(weroRefundReason)) {
+                RefundRedirectPaymentProduct900SpecificInput product900Input = new RefundRedirectPaymentProduct900SpecificInput();
+                product900Input.setRefundReason(weroRefundReason);
+                RefundRedirectPaymentMethodSpecificInput redirectInput = new RefundRedirectPaymentMethodSpecificInput();
+                redirectInput.setRefundRedirectPaymentProduct900SpecificInput(product900Input);
+                refundRequest.setRefundRedirectPaymentMethodSpecificInput(redirectInput);
+            }
+
             RefundResponse refundResponse =
                     merchant.payments().refundPayment(paymentId, refundRequest);
             WorldlineLogUtils.logAction(LOGGER, "refundPayment", paymentId, refundResponse);
