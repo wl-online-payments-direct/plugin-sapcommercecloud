@@ -70,13 +70,13 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 redirectPaymentMethodSpecificInput.setPaymentProduct5403SpecificInput(redirectPaymentProduct5403SpecificInput);
                 break;
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_WERO:
-                // TODO: RedirectPaymentProduct900SpecificInput is not yet available in the SDK.
-                //  Once available, uncomment and set captureTrigger:
-                //  RedirectPaymentProduct900SpecificInput product900Input = new RedirectPaymentProduct900SpecificInput();
-                //  product900Input.setCaptureTrigger(getWeroCaptureTrigger());
-                //  redirectPaymentMethodSpecificInput.setPaymentProduct900SpecificInput(product900Input);
+                String weroCaptureTrigger = getWeroCaptureTrigger();
+                if (StringUtils.isNotBlank(weroCaptureTrigger)) {
+                    RedirectPaymentProduct900SpecificInput redirectPaymentProduct900SpecificInput = new RedirectPaymentProduct900SpecificInput();
+                    redirectPaymentProduct900SpecificInput.setCaptureTrigger(weroCaptureTrigger);
+                    redirectPaymentMethodSpecificInput.setPaymentProduct900SpecificInput(redirectPaymentProduct900SpecificInput);
+                }
                 break;
-
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_MEALVOUCHER:
                 RedirectPaymentProduct5402SpecificInput redirectPaymentProduct5402SpecificInput = new RedirectPaymentProduct5402SpecificInput();
                 redirectPaymentProduct5402SpecificInput.setCompleteRemainingPaymentAmount(true);
@@ -103,8 +103,9 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
         }
         WeroCaptureTrigger weroCaptureTrigger = worldlineConfiguration.getWeroCaptureTrigger();
         if (weroCaptureTrigger == null) {
-            LOGGER.warn("No Wero capture trigger set, but Wero is being used. Please set this against your" +
-                    "WorldlineConfiguration! Blank value will be sent for this transaction.");
+            LOGGER.warn("No Wero capture trigger set, but Wero is being used. Please set this against your " +
+                    "WorldlineConfiguration! The field will be omitted for this transaction, which Worldline " +
+                    "rejects when the payment requires approval (authorisation mode).");
             return StringUtils.EMPTY;
         }
         return weroCaptureTrigger.getCode();

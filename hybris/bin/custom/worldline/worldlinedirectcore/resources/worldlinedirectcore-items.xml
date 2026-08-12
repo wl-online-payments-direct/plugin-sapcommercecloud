@@ -72,15 +72,20 @@
             <value code="LOW_VALUE" />
             <value code="TRANSACTION_RISK_ANALYSIS" />
         </enumtype>
+        <!-- Codes must match the values Worldline accepts for
+             redirectPaymentMethodSpecificInput.paymentProduct900SpecificInput.captureTrigger -->
         <enumtype code="WeroCaptureTrigger">
-            <value code="SHIPPING" />
-            <value code="DELIVERY" />
-            <value code="AVAILABILITY" />
-            <value code="SERVICEFULFILMENT" />
-            <value code="OTHER" />
+            <value code="shipping" />
+            <value code="delivery" />
+            <value code="availability" />
+            <value code="serviceFulfilment" />
+            <value code="other" />
         </enumtype>
+        <!-- Codes must match the values Worldline accepts for
+             refundRedirectPaymentMethodSpecificInput.refundRedirectPaymentProduct900SpecificInput.refundReason -->
         <enumtype code="WeroRefundReason">
             <value code="WrongAmountCorrection" />
+            <value code="ReturnedGoods" />
             <value code="PreDisputeRefund" />
             <value code="SubscriptionRefund" />
             <value code="ServiceLateCancellation" />
