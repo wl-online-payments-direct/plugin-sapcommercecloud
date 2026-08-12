@@ -1,18 +1,22 @@
 package com.worldline.direct.populator;
 
 import com.onlinepayments.domain.*;
-import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.util.WorldlineAmountUtils;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.c2l.CurrencyModel;
+import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
+import de.hybris.platform.util.TaxValue;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.math.BigDecimal;
+import java.util.Collection;
 
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ADDRESS_INDICATEUR.NEW;
 import static com.worldline.direct.constants.WorldlinedirectcoreConstants.ADDRESS_INDICATEUR.SAME_AS_BILLING;
@@ -65,8 +69,9 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
             shipping.setShippingCost(worldlineAmountUtils.createAmount(abstractOrderModel.getDeliveryCost(), abstractOrderModel.getCurrency().getIsocode()));
         }
         shipping.setAddressIndicator(BooleanUtils.isTrue(deliveryAddress.getShippingAddress()) ? SAME_AS_BILLING : NEW);
-        shipping.setShippingCost(getShippingCostsForOrder(abstractOrderModel));
-        shipping.setShippingCostTax(WorldlinedirectcoreConstants.DEFAULT_SHIPPING_TAX);
+        long shippingCostTax = getShippingTaxForOrder(abstractOrderModel);
+        shipping.setShippingCost(getShippingCostsForOrder(abstractOrderModel, shippingCostTax));
+        shipping.setShippingCostTax(shippingCostTax);
         return shipping;
     }
 
@@ -94,9 +99,9 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
         final AmountOfMoney amountOfMoney = new AmountOfMoney();
         final String currencyCode = abstractOrderModel.getCurrency().getIsocode();
         final long amount;
-        double totalAmountToSend = abstractOrderModel.getTotalPrice();
+        BigDecimal totalAmountToSend = getTotalAmountToSend(abstractOrderModel);
         if (abstractOrderModel.getPaymentCost() > 0.0d) {// subtract the surcharge so the amount that is sent to WL is the one expected /HTP/ first transaction
-            totalAmountToSend -= abstractOrderModel.getPaymentCost();
+            totalAmountToSend = totalAmountToSend.subtract(BigDecimal.valueOf(abstractOrderModel.getPaymentCost()));
         }
 
         amount = worldlineAmountUtils.createAmount(totalAmountToSend, abstractOrderModel.getCurrency().getIsocode());
@@ -108,6 +113,59 @@ public class WorldlineOrderRequestParamPopulator implements Populator<AbstractOr
 
     private long getShippingCostsForOrder(AbstractOrderModel order) {
         return worldlineAmountUtils.createAmount(order.getDeliveryCost(), order.getCurrency().getIsocode());
+    }
+
+    private long getShippingCostsForOrder(AbstractOrderModel order, long shippingCostTax) {
+        if (Boolean.TRUE.equals(order.getNet())) {
+            return getShippingCostsForOrder(order);
+        }
+        long shippingCost = getShippingCostsForOrder(order) - shippingCostTax;
+        return Math.max(0L, shippingCost);
+    }
+
+    private BigDecimal getTotalAmountToSend(AbstractOrderModel order) {
+        BigDecimal totalAmount = BigDecimal.valueOf(order.getTotalPrice());
+        if (Boolean.TRUE.equals(order.getNet())) {
+            totalAmount = totalAmount.add(getTotalTax(order));
+        }
+        return totalAmount;
+    }
+
+    private long getShippingTaxForOrder(AbstractOrderModel order) {
+        BigDecimal shippingTax = getTotalTax(order).subtract(getEntryTaxTotal(order));
+        if (shippingTax.compareTo(BigDecimal.ZERO) < 0) {
+            shippingTax = BigDecimal.ZERO;
+        }
+        return worldlineAmountUtils.createAmount(shippingTax, order.getCurrency().getIsocode());
+    }
+
+    private BigDecimal getTotalTax(AbstractOrderModel order) {
+        Double totalTax = order.getTotalTax();
+        return totalTax == null ? BigDecimal.ZERO : BigDecimal.valueOf(totalTax);
+    }
+
+    private BigDecimal getEntryTaxTotal(AbstractOrderModel order) {
+        BigDecimal entryTaxTotal = BigDecimal.ZERO;
+        Collection<AbstractOrderEntryModel> entries = order.getEntries();
+        if (entries == null) {
+            return entryTaxTotal;
+        }
+        for (AbstractOrderEntryModel entry : entries) {
+            entryTaxTotal = entryTaxTotal.add(getEntryTaxTotal(entry));
+        }
+        return entryTaxTotal;
+    }
+
+    private BigDecimal getEntryTaxTotal(AbstractOrderEntryModel entry) {
+        BigDecimal entryTaxTotal = BigDecimal.ZERO;
+        Collection<TaxValue> taxValues = entry.getTaxValues();
+        if (taxValues == null) {
+            return entryTaxTotal;
+        }
+        for (TaxValue taxValue : taxValues) {
+            entryTaxTotal = entryTaxTotal.add(BigDecimal.valueOf(taxValue.getAppliedValue()));
+        }
+        return entryTaxTotal;
     }
 
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {

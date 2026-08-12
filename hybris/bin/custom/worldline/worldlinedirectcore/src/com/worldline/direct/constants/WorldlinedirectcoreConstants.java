@@ -13,10 +13,12 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final int PAYMENT_METHOD_HCP = -2;
 
     public static final int PAYMENT_METHOD_GROUP_CARDS = -3;
+    public static final int PAYMENT_METHOD_PAY_BY_LINK = -4;
 
     public static final int PAYMENT_METHOD_IDEAL = 809;
     public static final int PAYMENT_METHOD_PAYPAL = 840;
     public static final int PAYMENT_METHOD_APPLEPAY = 302;
+    public static final int PAYMENT_METHOD_GOOGLEPAY = 320;
     public static final int PAYMENT_METHOD_KLARNA_PAY_AFTER = 3302;
     public static final int PAYMENT_METHOD_KLARNA_PAY_NOW = 3301;
     public static final int PAYMENT_METHOD_SEPA = 771;
@@ -42,6 +44,8 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
     public static final String PAYMENT_PROVIDER = "WORLDLINE";
     public static final String WORLDLINE_EVENT_PAYMENT = "worldline_payment_received";
     public static final String WORLDLINE_EVENT_REFUND = "worldline_refund_received";
+    public static final String GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY = "worldlineGooglePayEncryptedPaymentData";
+    public static final String GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY = "worldlineGooglePayMobileDevice";
 
     public static final int DEFAULT_INTERSOLVE_TIMEOUT = 180;
 
@@ -204,7 +208,14 @@ public final class WorldlinedirectcoreConstants extends GeneratedWorldlinedirect
         PAYMENT_REJECTED_CAPTURE("payment.rejected_capture"),
         PAYMENT_CANCELLED("payment.cancelled"),
         PAYMENT_REFUNDED("payment.refunded"),
-        PAYMENT_REFUND_REQUESTED("refund.refund_requested");
+        PAYMENT_REFUND_REQUESTED("refund.refund_requested"),
+        PAYMENT_LINK_CREATED("paymentlink.created"),
+        PAYMENT_LINK_CLICKED("paymentlink.clicked"),
+        PAYMENT_LINK_PAID("paymentlink.paid"),
+        PAYMENT_LINK_CANCELLED("paymentlink.cancelled"),
+        PAYMENT_LINK_EXPIRED("paymentlink.expired"),
+        PAYMENT_LINK_PAYMENT_REJECTED("paymentlink.payment.rejected"),
+        PAYMENT_LINK_PAYMENT_CANCELLED("paymentlink.payment.cancelled");
 
         WEBHOOK_TYPE_ENUM(String value) {
             this.value = value;

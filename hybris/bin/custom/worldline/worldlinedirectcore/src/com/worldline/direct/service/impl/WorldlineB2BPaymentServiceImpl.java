@@ -10,8 +10,8 @@ import com.worldline.direct.order.data.WorldlineHostedTokenizationData;
 import com.worldline.direct.service.WorldlineB2BPaymentService;
 import com.worldline.direct.util.WorldlineLogUtils;
 import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
-import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.site.BaseSiteService;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             }
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
             if (!worldlineConfigurationService.getWorldlineConfiguration(cartToOrderCronJobModel.getCart().getStore()).isFirstRecurringPayment()) {
-                params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, cartToOrderCronJobModel.getCart().getCurrency().getIsocode()));
+                applyZeroAmountForTokenizedRecurringHostedCheckout(params, cartToOrderCronJobModel.getCart(), false);
             }
             WorldlineLogUtils.logAction(LOGGER, "createHostedCheckout", params, "RESULT");
             final CreateHostedCheckoutResponse hostedCheckout = merchant.hostedCheckout().createHostedCheckout(params);
@@ -76,8 +76,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
             }
             params.getHostedCheckoutSpecificInput().withIsRecurring(true);
             if (!orderModel.getStore().getWorldlineConfiguration().isFirstRecurringPayment()) {
-                params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, orderModel.getCurrency().getIsocode()));
-                params.getOrder().setShoppingCart(null);
+                applyZeroAmountForTokenizedRecurringHostedCheckout(params, orderModel, true);
             }
 
             final CreateHostedCheckoutResponse hostedCheckout = merchant.hostedCheckout().createHostedCheckout(params);
@@ -98,10 +97,11 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
         validateParameterNotNullStandardMessage("browserData", worldlineHostedTokenizationData.getBrowserData());
         validateParameterNotNull(orderModel, "orderModel cannot be null");
         validateParameterNotNull(orderModel.getSchedulingCronJob(), "cartToOrderCronJob cannot be null");
+        CreatePaymentRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(orderModel);
+            params = worldlineHostedTokenizationParamConverter.convert(orderModel);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
 //            params.getRedirectPaymentMethodSpecificInput().getRedirectionData().setReturnUrl(siteBaseUrlResolutionService.getWebsiteUrlForSite(baseSiteService.getCurrentBaseSite(),
 //                    true, "/checkout/multi/worldline/hosted-tokenization/handle3ds/replenishment/" + cartToOrderCronJob.getCode()));
@@ -111,8 +111,7 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
                 mandate.setRecurrenceType(WorldlinedirectcoreConstants.SEPA_RECURRING_TYPE.RECURRING.getValue());
             }
             if (!orderModel.getStore().getWorldlineConfiguration().isFirstRecurringPayment()) {
-                params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, orderModel.getCurrency().getIsocode()));
-                params.getOrder().setShoppingCart(null);
+                applyZeroAmountForTokenizedRecurringSetup(params, orderModel, true);
             }
 
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
@@ -121,9 +120,10 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug(String.format("[ WORLDLINE ] Errors during getting createPayment %s", e.getMessage()));
+            logCreatePaymentFailure(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, e);
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createPaymentForImmediateReplenishmentHostedTokenization", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
@@ -133,17 +133,16 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
     public CreatePaymentResponse createRecurringPaymentForScheduledReplenishmentHostedTokenization(CartToOrderCronJobModel cartToOrderCronJob, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(cartToOrderCronJob, "cartToOrderCronJob cannot be null");
         validateParameterNotNull(cartToOrderCronJob.getCart(), "cartToOrderCronJob.cart cannot be null");
+        CreatePaymentRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
+            params = worldlineHostedTokenizationParamConverter.convert(cartToOrderCronJob.getCart());
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
             params.getOrder().getReferences().setMerchantReference(cartToOrderCronJob.getCode());
 
-
-            WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cartToOrderCronJob.getCart().getPaymentInfo();
             if (!worldlineConfigurationService.getWorldlineConfiguration(cartToOrderCronJob.getCart().getStore()).isFirstRecurringPayment()) {
-                params.getOrder().getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, cartToOrderCronJob.getCart().getCurrency().getIsocode()));
+                applyZeroAmountForTokenizedRecurringSetup(params, cartToOrderCronJob.getCart(), false);
             }
 
             if (params.getSepaDirectDebitPaymentMethodSpecificInput() != null) {
@@ -157,13 +156,59 @@ public class WorldlineB2BPaymentServiceImpl extends WorldlinePaymentServiceImpl 
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug(String.format("[ WORLDLINE ] Errors during getting createPayment %s", e.getMessage()));
+            logCreatePaymentFailure(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, e);
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createPaymentForScheduledReplenishmentHostedTokenization", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
         return null;
+    }
+
+    boolean applyZeroAmountForTokenizedRecurringHostedCheckout(CreateHostedCheckoutRequest params, AbstractOrderModel orderModel, boolean removeShoppingCart) {
+        if (params.getCardPaymentMethodSpecificInput() != null) {
+            params.getCardPaymentMethodSpecificInput().setTokenize(true);
+            applyZeroAmount(params.getOrder(), orderModel, removeShoppingCart);
+            return true;
+        }
+        if (isTokenizedHostedCheckoutGooglePayRequest(params)) {
+            applyZeroAmount(params.getOrder(), orderModel, removeShoppingCart);
+            return true;
+        }
+        return false;
+    }
+
+    boolean applyZeroAmountForTokenizedRecurringSetup(CreatePaymentRequest params, AbstractOrderModel orderModel, boolean removeShoppingCart) {
+        if (params.getCardPaymentMethodSpecificInput() != null) {
+            params.getCardPaymentMethodSpecificInput().setTokenize(true);
+            applyZeroAmount(params.getOrder(), orderModel, removeShoppingCart);
+            return true;
+        }
+        if (isTokenizedGooglePayRequest(params)) {
+            applyZeroAmount(params.getOrder(), orderModel, removeShoppingCart);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isTokenizedHostedCheckoutGooglePayRequest(CreateHostedCheckoutRequest params) {
+        return params.getMobilePaymentMethodSpecificInput() != null
+                && params.getMobilePaymentMethodSpecificInput().getPaymentProduct320SpecificInput() != null
+                && Boolean.TRUE.equals(params.getMobilePaymentMethodSpecificInput().getPaymentProduct320SpecificInput().getTokenize());
+    }
+
+    private boolean isTokenizedGooglePayRequest(CreatePaymentRequest params) {
+        return params.getMobilePaymentMethodSpecificInput() != null
+                && params.getMobilePaymentMethodSpecificInput().getPaymentProduct320SpecificInput() != null
+                && Boolean.TRUE.equals(params.getMobilePaymentMethodSpecificInput().getPaymentProduct320SpecificInput().getTokenize());
+    }
+
+    private void applyZeroAmount(Order order, AbstractOrderModel orderModel, boolean removeShoppingCart) {
+        order.getAmountOfMoney().setAmount(worldlineAmountUtils.createAmount(0.0d, orderModel.getCurrency().getIsocode()));
+        if (removeShoppingCart) {
+            order.setShoppingCart(null);
+        }
     }
 
     public void setSiteBaseUrlResolutionService(SiteBaseUrlResolutionService siteBaseUrlResolutionService) {

@@ -15,6 +15,13 @@
             <description>Checkout types for card payments</description>
             <value code="HOSTED_CHECKOUT"/>
             <value code="HOSTED_TOKENIZATION"/>
+            <value code="GOOGLE_PAY"/>
+            <value code="PAY_BY_LINK"/>
+        </enumtype>
+        <enumtype generate="true" code="WorldlineGooglePayEnvironment" autocreate="true">
+            <description>Google Pay API environment</description>
+            <value code="TEST"/>
+            <value code="PRODUCTION"/>
         </enumtype>
         <enumtype generate="true" code="OperationCodesEnum" autocreate="true">
             <description>Checkout types for card payments</description>
@@ -55,12 +62,13 @@
             <value code="YEARLY" />
         </enumtype>
         <enumtype code="WorldlineMealvouchersProductType">
-            <value code="FOOD_AND_DRINK" />
-            <value code="HOME_AND_GARDEN" />
-            <value code="GIFT_AND_FLOWERS" />
+            <value code="FoodAndDrink" />
+            <value code="HomeAndGarden" />
+            <value code="GiftAndFlowers" />
         </enumtype>
         <enumtype code="WorldlineExemptionType">
             <value code="NO_3DS_EXEMPTION" />
+            <value code="NO_CHALLENGE_REQUEST" />
             <value code="LOW_VALUE" />
             <value code="TRANSACTION_RISK_ANALYSIS" />
         </enumtype>
@@ -213,7 +221,7 @@
                     <description>Type of 3DS Exemption for EUR only</description>
                     <persistence type="property" />
                     <modifiers optional="false" />
-                    <defaultvalue>em().getEnumerationValue("WorldlineExemptionType","NO_3DS_EXEMPTION")</defaultvalue>
+                    <defaultvalue>em().getEnumerationValue("WorldlineExemptionType","NO_CHALLENGE_REQUEST")</defaultvalue>
                 </attribute>
                 <attribute qualifier="exemptionLimit3DS" type="java.math.BigDecimal">
                     <description>Max transaction value for 3DS exemptions.</description>
@@ -232,6 +240,33 @@
                     to their own requirements.</description>
                     <persistence type="property" />
                     <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="googlePayMerchantId" type="java.lang.String">
+                    <description>Merchant ID from the Google Pay Business Console.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="googlePayMerchantName" type="java.lang.String">
+                    <description>Merchant name rendered in the Google Pay payment sheet.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="googlePayEnvironment" type="WorldlineGooglePayEnvironment">
+                    <description>Google Pay API environment.</description>
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>em().getEnumerationValue("WorldlineGooglePayEnvironment","TEST")</defaultvalue>
+                </attribute>
+                <attribute qualifier="googlePayAcquirerCountry" type="java.lang.String">
+                    <description>Acquiring bank country/region code sent to Google Pay TransactionInfo.countryCode.</description>
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="paymentLinkExpirationHours" type="java.lang.Integer">
+                    <description>Pay By Link expiry in hours. Worldline API requires a value between 24 hours and 6 months.</description>
+                    <persistence type="property" />
+                    <modifiers read="true" write="true" optional="false" />
+                    <defaultvalue>Integer.valueOf(168)</defaultvalue>
                 </attribute>
             </attributes>
         </itemtype>
@@ -353,9 +388,115 @@
                     <persistence type="property" />
                     <modifiers optional="true" />
                 </attribute>
+                <attribute qualifier="worldlinePaymentId" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineStatus" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineStatusCode" type="java.lang.Integer">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineMerchantReference" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlinePaymentMethod" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlinePaymentProductId" type="java.lang.Integer">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineAmount" type="java.lang.Long">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="worldlineCurrency" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="worldlineAcquiredAmount" type="java.lang.Long">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="worldlineAcquiredCurrency" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="cardBin" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="cardLastFour" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="fraudResult" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="authenticationStatus" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
                 <attribute qualifier="mealvoucherBrand" type="java.lang.String">
                     <persistence type="property" />
                     <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="googlePayEncryptedPaymentData" type="java.lang.String">
+                    <persistence type="property">
+                        <columntype database="oracle">
+                            <value>clob</value>
+                        </columntype>
+                        <columntype database="sap">
+                            <value>NCLOB</value>
+                        </columntype>
+                        <columntype>
+                            <value>HYBRIS.LONG_STRING</value>
+                        </columntype>
+                    </persistence>
+                    <modifiers optional="true" search="false" />
+                </attribute>
+                <attribute qualifier="googlePayMobileDevice" type="java.lang.Boolean">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="false" />
+                </attribute>
+                <attribute qualifier="paymentLinkId" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkRedirectionUrl" type="java.lang.String">
+                    <modifiers read="true" write="true" search="false" optional="true"/>
+                    <persistence type="property">
+                        <columntype>
+                            <value>HYBRIS.LONG_STRING</value>
+                        </columntype>
+                    </persistence>
+                </attribute>
+                <attribute qualifier="paymentLinkExpirationDate" type="java.util.Date">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkStatus" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkPaymentId" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkLastEvent" type="java.lang.String">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="paymentLinkReusable" type="java.lang.Boolean">
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
                 </attribute>
             </attributes>
         </itemtype>
@@ -387,6 +528,11 @@
                 <attribute qualifier="subscriptionID" type="java.lang.String">
                     <persistence type="property"/>
                     <modifiers read="true" search="true"/>
+                </attribute>
+                <attribute qualifier="initialPaymentId" type="java.lang.String">
+                    <description>Worldline payment id from the initial card payment in the recurring series.</description>
+                    <modifiers read="true" write="true" search="true" optional="true"/>
+                    <persistence type="property"/>
                 </attribute>
                 <attribute qualifier="customer" type="Customer">
                     <description>The customer who is using the token for recurring payments</description>

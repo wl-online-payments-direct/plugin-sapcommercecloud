@@ -26,7 +26,44 @@
         <property name="defaultPayment" type="boolean"/>
         <property name="cardType" type="de.hybris.platform.commercefacades.order.data.CardTypeData"/>
         <property name="mandateDetail" type="com.worldline.direct.order.data.WorldlineMandateDetail"/>
+        <property name="googlePayEncryptedPaymentData" type="String"/>
+        <property name="googlePayMobileDevice" type="Boolean"/>
+        <property name="paymentLinkId" type="String"/>
+        <property name="paymentLinkRedirectionUrl" type="String"/>
+        <property name="paymentLinkExpirationDate" type="java.util.Date"/>
+        <property name="paymentLinkStatus" type="String"/>
+        <property name="paymentLinkPaymentId" type="String"/>
+        <property name="paymentLinkLastEvent" type="String"/>
+        <property name="paymentLinkReusable" type="Boolean"/>
+        <property name="worldlinePaymentId" type="String"/>
+        <property name="worldlineStatus" type="String"/>
+        <property name="worldlineStatusCode" type="Integer"/>
+        <property name="worldlineMerchantReference" type="String"/>
+        <property name="worldlinePaymentMethod" type="String"/>
+        <property name="worldlinePaymentProductId" type="Integer"/>
+        <property name="worldlineAmount" type="Long"/>
+        <property name="worldlineCurrency" type="String"/>
+        <property name="worldlineAcquiredAmount" type="Long"/>
+        <property name="worldlineAcquiredCurrency" type="String"/>
+        <property name="cardBin" type="String"/>
+        <property name="cardLastFour" type="String"/>
+        <property name="fraudResult" type="String"/>
+        <property name="liability" type="String"/>
+        <property name="appliedExemption" type="String"/>
+        <property name="authenticationStatus" type="String"/>
 
+    </bean>
+
+    <bean class="com.worldline.direct.order.data.WorldlineGooglePayConfigurationData">
+        <property name="environment" type="String"/>
+        <property name="merchantId" type="String"/>
+        <property name="merchantName" type="String"/>
+        <property name="gateway" type="String"/>
+        <property name="gatewayMerchantId" type="String"/>
+        <property name="networks" type="String"/>
+        <property name="countryCode" type="String"/>
+        <property name="currencyCode" type="String"/>
+        <property name="totalPrice" type="String"/>
     </bean>
 
     <bean class="de.hybris.platform.commercefacades.order.data.CartData">

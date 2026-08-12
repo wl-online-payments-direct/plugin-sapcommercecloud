@@ -51,7 +51,6 @@ public interface WorldlineWebConstants {
                 }
 
 
-
             }
             interface DeliveryAddress {
                 String root = Checkout.root + "/delivery-address";

@@ -20,6 +20,9 @@
         <c:if test="${hostedTokenization!=null}">
         <script src="${hostedTokenizationJs}"></script>
         </c:if>
+        <c:if test="${googlePayConfiguration!=null}">
+        <script src="${googlePayJs}"></script>
+        </c:if>
     </jsp:attribute>
 
     <jsp:body>

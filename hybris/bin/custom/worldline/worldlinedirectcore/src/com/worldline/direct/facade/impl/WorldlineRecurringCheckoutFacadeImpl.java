@@ -94,6 +94,7 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                 paymentResponse = worldlineB2BPaymentService.createRecurringPaymentForImmediateReplenishmentHostedTokenization(order, worldlineHostedTokenizationData);
 
                 if (paymentResponse.getMerchantAction() != null) {
+                    updatePaymentInfoIfNeeded(order, paymentResponse.getPayment());
                     storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
                     throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
                           paymentResponse.getMerchantAction(),
@@ -112,6 +113,40 @@ public class WorldlineRecurringCheckoutFacadeImpl extends WorldlineCheckoutFacad
                 throw new IllegalStateException("Unexpected HostedTokenization error");
         }
         return scheduledCartData;
+    }
+
+    @Override
+    public ScheduledCartData authorizeRecurringPaymentForGooglePay(String code, BrowserData browserData, RecurringPaymentEnum recurringPaymentType)
+          throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+        switch (recurringPaymentType) {
+            case IMMEDIATE:
+                 final OrderModel order = customerAccountService.getOrderForCode(code, baseStoreService.getCurrentBaseStore());
+                 WorldlineHostedTokenizationData paymentData = new WorldlineHostedTokenizationData();
+                 paymentData.setBrowserData(browserData);
+                 CreatePaymentResponse paymentResponse;
+                 try {
+                     storeGooglePayDeviceContext(browserData);
+                     paymentResponse = worldlinePaymentService.createPaymentForHostedTokenization(order, paymentData);
+                 } finally {
+                     clearGooglePayPaymentSessionData();
+                 }
+
+                 if (paymentResponse.getMerchantAction() != null) {
+                    updatePaymentInfoIfNeeded(order, paymentResponse.getPayment());
+                    storeReturnMac(order, paymentResponse.getMerchantAction().getRedirectData().getRETURNMAC());
+                    throw new WorldlineNonAuthorizedPaymentException(paymentResponse.getPayment(),
+                          paymentResponse.getMerchantAction(),
+                          WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
+                }
+                saveSurchargeData(order, paymentResponse.getPayment());
+                savePaymentToken(order, paymentResponse.getPayment(), Boolean.TRUE, order.getSchedulingCronJob().getCode());
+
+                handlePaymentResponse(order, paymentResponse.getPayment());
+                return prepareCronJob(code);
+            default:
+                LOGGER.error("Unexpected Error when creating a Google Pay payment for recurring order: " + code);
+                throw new IllegalStateException("Unexpected Google Pay payment error");
+        }
     }
 
     @Override

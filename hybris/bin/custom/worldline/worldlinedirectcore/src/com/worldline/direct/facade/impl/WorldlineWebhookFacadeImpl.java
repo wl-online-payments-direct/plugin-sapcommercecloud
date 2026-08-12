@@ -47,6 +47,8 @@ public class WorldlineWebhookFacadeImpl implements WorldlineWebhookFacade {
                 orderCode = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
             } else if (webhooksEvent.getRefund() != null) {
                 orderCode = webhooksEvent.getRefund().getRefundOutput().getReferences().getMerchantReference();
+            } else if (webhooksEvent.getPaymentLink() != null && webhooksEvent.getPaymentLink().getPaymentLinkOrder() != null) {
+                orderCode = webhooksEvent.getPaymentLink().getPaymentLinkOrder().getMerchantReference();
             }
             worldlineOrderDao.findWorldlineOrder(orderCode);
         } catch (Exception exception) {

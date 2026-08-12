@@ -19,6 +19,7 @@
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
         <property name="worldlineHostedCheckoutParamConverter" ref="worldlineHostedCheckoutParamConverter"/>
+        <property name="worldlinePaymentLinkParamConverter" ref="worldlinePaymentLinkParamConverter"/>
         <property name="worldlineHostedTokenizationParamConverter" ref="worldlineHostedTokenizationParamConverter"/>
         <property name="worldlineBrowserCustomerDeviceConverter" ref="worldlineBrowserCustomerDeviceConverter"/>
         <property name="baseStoreService" ref="baseStoreService"/>

@@ -4,6 +4,7 @@ import com.onlinepayments.domain.CreatePaymentResponse;
 import com.onlinepayments.domain.GetMandateResponse;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
 import com.worldline.direct.enums.WorldlineRecurringPaymentStatus;
+import com.worldline.direct.enums.WorldlineRecurringType;
 import com.worldline.direct.model.WorldlineMandateModel;
 import com.worldline.direct.model.WorldlineRecurringTokenModel;
 import com.worldline.direct.service.WorldlinePaymentService;
@@ -39,10 +40,13 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                     if (worldlinePaymentInfo.getMandateDetail() != null) {
                         WorldlineMandateModel mandateDetail = worldlinePaymentInfo.getMandateDetail();
                         updateMandate(mandateDetail);
-                        if (WorldlineRecurringPaymentStatus.ACTIVE.equals(mandateDetail.getStatus())) {
+                        if (WorldlineRecurringPaymentStatus.ACTIVE.equals(mandateDetail.getStatus())
+                                && WorldlineRecurringType.RECURRING.equals(mandateDetail.getRecurrenceType())) {
                             CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
                             return Optional.of(createPaymentResponse);
                         } else {
+                            LOG.warn(String.format("cannot create SEPA recurring payment with mandate status = %s and recurrenceType = %s",
+                                    mandateDetail.getStatus(), mandateDetail.getRecurrenceType()));
                             return Optional.empty();
                         }
 
@@ -65,11 +69,12 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
             case PAYMENT_METHOD_DISCOVER:
             case PAYMENT_METHOD_UNIONPAY:
-            case PAYMENT_METHOD_GROUP_CARDS: {
+            case PAYMENT_METHOD_GROUP_CARDS:
+            case PAYMENT_METHOD_GOOGLEPAY: {
                 if (WorldlineRecurringPaymentStatus.ACTIVE.equals(((WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo()).getWorldlineRecurringToken().getStatus())) {
                     try {
-                        CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createPayment(abstractOrderModel);
-                        return Optional.of(createPaymentResponse);
+                        CreatePaymentResponse createPaymentResponse = worldlinePaymentService.createSubsequentPayment(abstractOrderModel);
+                        return Optional.ofNullable(createPaymentResponse);
                     } catch (Exception e) {
                         LOG.error("something went wrong during payment creation", e);
                         throw new Exception(e);
@@ -110,10 +115,13 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                 case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
                 case PAYMENT_METHOD_DISCOVER:
                 case PAYMENT_METHOD_UNIONPAY:
-                case PAYMENT_METHOD_GROUP_CARDS: {
+                case PAYMENT_METHOD_GROUP_CARDS:
+                case PAYMENT_METHOD_GOOGLEPAY: {
                     WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfoModel.getWorldlineRecurringToken();
 
-                    worldlinePaymentService.deleteToken(tokenModel.getToken(), tokenModel.getStoreId());
+                    if (tokenModel.getToken() != null) {
+                        worldlinePaymentService.deleteToken(tokenModel.getToken(), tokenModel.getStoreId());
+                    }
                     tokenModel.setStatus(WorldlineRecurringPaymentStatus.REVOKED);
                     modelService.save(tokenModel);
 
@@ -148,7 +156,16 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
                     break;
                 }
             }
+            updateMandateRecurrenceType(mandateModel, mandate.getMandate().getRecurrenceType());
             modelService.save(mandateModel);
+        }
+    }
+
+    private void updateMandateRecurrenceType(WorldlineMandateModel mandateModel, String recurrenceType) {
+        try {
+            mandateModel.setRecurrenceType(WorldlineRecurringType.valueOf(recurrenceType));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            mandateModel.setRecurrenceType(WorldlineRecurringType.UNKNOWN);
         }
     }
 
@@ -181,10 +198,13 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
             case PAYMENT_METHOD_CARTES_BANCAIRES_FRICTIONLESS:
             case PAYMENT_METHOD_DISCOVER:
             case PAYMENT_METHOD_UNIONPAY:
-            case PAYMENT_METHOD_GROUP_CARDS: {
+            case PAYMENT_METHOD_GROUP_CARDS:
+            case PAYMENT_METHOD_GOOGLEPAY: {
                 WorldlineRecurringTokenModel tokenModel = worldlinePaymentInfo.getWorldlineRecurringToken();
 
-                worldlinePaymentService.deleteToken(tokenModel.getToken());
+                if (tokenModel.getToken() != null) {
+                    worldlinePaymentService.deleteToken(tokenModel.getToken());
+                }
                 tokenModel.setStatus(WorldlineRecurringPaymentStatus.BLOCKED);
                 modelService.save(tokenModel);
                 break;

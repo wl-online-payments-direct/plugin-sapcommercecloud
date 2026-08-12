@@ -7,6 +7,7 @@ import com.worldline.direct.dao.WorldlineTransactionDao;
 import com.worldline.direct.service.WorldlineBusinessProcessService;
 import com.worldline.direct.service.WorldlineTransactionService;
 import com.worldline.direct.util.WorldlineAmountUtils;
+import com.worldline.direct.util.WorldlinePaymentDetailsUtils;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
@@ -114,8 +115,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         String merchantReference = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
         AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(merchantReference);
 
-        // Update 3DS Parameters from webhook
-        update3DSParameters(webhooksEvent, order, merchantReference);
+        updatePaymentDetails(webhooksEvent, order);
 
         final boolean alreadyProcessed = paymentTransaction.getEntries().stream()
                 .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
@@ -200,8 +200,7 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         String merchantReference = webhooksEvent.getPayment().getPaymentOutput().getReferences().getMerchantReference();
         AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(merchantReference);
 
-        // Update 3DS Parameters from webhook
-        update3DSParameters(webhooksEvent, order, merchantReference);
+        updatePaymentDetails(webhooksEvent, order);
 
         PaymentTransactionModel paymentTransaction;
         try {
@@ -230,6 +229,51 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         }
 
 
+    }
+
+    @Override
+    public void processPaymentLinkEvent(WebhooksEvent webhooksEvent) {
+        validateParameterNotNullStandardMessage("webhooksEvent", webhooksEvent);
+        validateParameterNotNullStandardMessage("webhooksEvent.paymentLink", webhooksEvent.getPaymentLink());
+        LOGGER.debug("[WORLDLINE] Process {} EVENT id : {}", webhooksEvent.getType(), webhooksEvent.getId());
+
+        final PaymentLinkResponse paymentLink = webhooksEvent.getPaymentLink();
+        if (paymentLink.getPaymentLinkOrder() == null || StringUtils.isBlank(paymentLink.getPaymentLinkOrder().getMerchantReference())) {
+            LOGGER.warn("[WORLDLINE] Payment link webhook {} does not contain merchant reference", webhooksEvent.getId());
+            return;
+        }
+
+        final AbstractOrderModel order = worldlineOrderDao.findWorldlineOrder(paymentLink.getPaymentLinkOrder().getMerchantReference());
+        if (!(order.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
+            return;
+        }
+
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) order.getPaymentInfo();
+        paymentInfo.setPaymentLinkId(paymentLink.getPaymentLinkId());
+        paymentInfo.setPaymentLinkStatus(paymentLink.getStatus());
+        paymentInfo.setPaymentLinkPaymentId(paymentLink.getPaymentId());
+        paymentInfo.setPaymentLinkReusable(paymentLink.getIsReusableLink());
+        paymentInfo.setPaymentLinkLastEvent(webhooksEvent.getType());
+        paymentInfo.setPaymentLinkRedirectionUrl(paymentLink.getRedirectionUrl());
+        if (paymentLink.getExpirationDate() != null) {
+            paymentInfo.setPaymentLinkExpirationDate(java.util.Date.from(paymentLink.getExpirationDate().toInstant()));
+        }
+
+        final WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM webhookType = WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM.fromString(webhooksEvent.getType());
+        if (webhookType == WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM.PAYMENT_LINK_CANCELLED
+                || webhookType == WorldlinedirectcoreConstants.WEBHOOK_TYPE_ENUM.PAYMENT_LINK_EXPIRED) {
+            if (StringUtils.isBlank(paymentInfo.getPaymentLinkPaymentId())) {
+                order.setPaymentStatus(PaymentStatus.WORLDLINE_CANCELED);
+                modelService.save(order);
+                worldlineBusinessProcessService.triggerOrderProcessEvent(order, WorldlinedirectcoreConstants.WORLDLINE_EVENT_PAYMENT);
+            }
+        }
+
+        modelService.save(paymentInfo);
+
+        if (webhooksEvent.getPayment() != null) {
+            processAuthorisedEvent(webhooksEvent);
+        }
     }
 
     @Override
@@ -392,25 +436,23 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
         }
     }
 
-    private void update3DSParameters(WebhooksEvent webhooksEvent, AbstractOrderModel order, String merchantReference) {
+    private void updatePaymentDetails(WebhooksEvent webhooksEvent, AbstractOrderModel order) {
         if(order.getPaymentInfo() instanceof WorldlinePaymentInfoModel worldlinePaymentInfo) {
-            if(webhooksEvent.getPayment().getPaymentOutput() != null && webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput() != null && webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput().getThreeDSecureResults() != null) {
-                ThreeDSecureResults threeDSecureResults = webhooksEvent.getPayment().getPaymentOutput().getCardPaymentMethodSpecificOutput().getThreeDSecureResults();
-                if(StringUtils.isNotBlank(threeDSecureResults.getAppliedExemption()) && StringUtils.isBlank(worldlinePaymentInfo.getAppliedExemption())) {
-                    worldlinePaymentInfo.setAppliedExemption(threeDSecureResults.getAppliedExemption());
-                    modelService.save(worldlinePaymentInfo);
-                }
-                if(StringUtils.isNotBlank(threeDSecureResults.getLiability()) && StringUtils.isBlank(worldlinePaymentInfo.getLiability())) {
-                    worldlinePaymentInfo.setLiability(threeDSecureResults.getLiability());
-                    modelService.save(worldlinePaymentInfo);
-                }
-            }
+            WorldlinePaymentDetailsUtils.updatePaymentDetails(worldlinePaymentInfo, webhooksEvent.getPayment());
+            modelService.save(worldlinePaymentInfo);
         }
     }
 
     private String getPaymentId(String rawPaymentTransactionId) {
-        String paymentTransactionId = StringUtils.split(rawPaymentTransactionId, "_")[0];
-        if (paymentTransactionId.length() > PAYMENT_ID_LENGTH) {
+        if (StringUtils.isBlank(rawPaymentTransactionId)) {
+            return StringUtils.EMPTY;
+        }
+        String[] parts = StringUtils.split(rawPaymentTransactionId, "_");
+        if (parts == null || parts.length == 0) {
+            return rawPaymentTransactionId;
+        }
+        String paymentTransactionId = parts[0];
+        if (paymentTransactionId.length() >= PAYMENT_ID_LENGTH + PAYMENT_ID_START_STRIP_LENGTH) {
             paymentTransactionId = paymentTransactionId.substring(PAYMENT_ID_START_STRIP_LENGTH, PAYMENT_ID_LENGTH + PAYMENT_ID_START_STRIP_LENGTH);
         }
         return paymentTransactionId;

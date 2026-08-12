@@ -57,11 +57,42 @@ public class WorldlinePlaceOrderUtils {
                 storeHOPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
                 CreateHostedCheckoutResponse hostedCheckoutResponse = worldlineCheckoutFacade.createHostedCheckout(abstractOrderData.getCode(), browserData);
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
+            case PAY_BY_LINK:
+                // No returnUrl is sent for Pay by Link: the customer is never redirected back to the
+                // storefront after paying, and the order is unlocked purely via webhooks.
+                worldlineCheckoutFacade.createPaymentLink(abstractOrderData.getCode());
+                return redirectToOrderConfirmationPage(abstractOrderData);
             case HOSTED_TOKENIZATION:
                 try {
                     storeHTPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
                     WorldlineHostedTokenizationData worldlineHostedTokenizationData = prepareHTPData(abstractOrderData, browserData);
                     worldlineCheckoutFacade.authorisePaymentForHostedTokenization(abstractOrderData.getCode(), worldlineHostedTokenizationData);
+                    return redirectToOrderConfirmationPage(abstractOrderData);
+                } catch (WorldlineNonAuthorizedPaymentException e) {
+                    switch (e.getReason()) {
+                        case NEED_3DS:
+                            return REDIRECT_PREFIX + e.getMerchantAction().getRedirectData().getRedirectURL();
+                        case REJECTED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                    GlobalMessages.ERROR_MESSAGES_HOLDER,
+                                    "checkout.error.payment.rejected");
+                            return REDIRECT_PREFIX +
+                                    WorldlineWebConstants.URL.Checkout.Payment.root +
+                                    WorldlineWebConstants.URL.Checkout.Payment.select;
+                        case CANCELLED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                    GlobalMessages.INFO_MESSAGES_HOLDER,
+                                    "checkout.error.payment.cancelled");
+                            return REDIRECT_PREFIX +
+                                    WorldlineWebConstants.URL.Checkout.Payment.root +
+                                    WorldlineWebConstants.URL.Checkout.Payment.select;
+                    }
+                }
+                break;
+            case GOOGLE_PAY:
+                try {
+                    storeHTPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
+                    worldlineCheckoutFacade.authorisePaymentForGooglePay(abstractOrderData.getCode(), browserData);
                     return redirectToOrderConfirmationPage(abstractOrderData);
                 } catch (WorldlineNonAuthorizedPaymentException e) {
                     switch (e.getReason()) {
@@ -125,6 +156,32 @@ public class WorldlinePlaceOrderUtils {
                                   WorldlineWebConstants.URL.Checkout.Payment.select;
                     }
                 }
+                break;
+            case GOOGLE_PAY:
+                try {
+                    storeHTPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.SCHEDULE_REPLENISHMENT_ORDER);
+                    abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForGooglePay(abstractOrderData.getCode(), browserData, RecurringPaymentEnum.IMMEDIATE);
+                    return redirectToOrderConfirmationPage(abstractOrderData);
+                } catch (WorldlineNonAuthorizedPaymentException e) {
+                    switch (e.getReason()) {
+                        case NEED_3DS:
+                            return REDIRECT_PREFIX + e.getMerchantAction().getRedirectData().getRedirectURL();
+                        case REJECTED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                  GlobalMessages.ERROR_MESSAGES_HOLDER,
+                                  "checkout.error.payment.rejected");
+                            return REDIRECT_PREFIX +
+                                  WorldlineWebConstants.URL.Checkout.Payment.root +
+                                  WorldlineWebConstants.URL.Checkout.Payment.select;
+                        case CANCELLED:
+                            GlobalMessages.addFlashMessage(redirectAttributes,
+                                  GlobalMessages.INFO_MESSAGES_HOLDER,
+                                  "checkout.error.payment.cancelled");
+                            return REDIRECT_PREFIX +
+                                  WorldlineWebConstants.URL.Checkout.Payment.root +
+                                  WorldlineWebConstants.URL.Checkout.Payment.select;
+                    }
+                }
         }
         return StringUtils.EMPTY;
     }
@@ -162,4 +219,5 @@ public class WorldlinePlaceOrderUtils {
             return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(abstractOrderData);
         }
     }
+
 }

@@ -33,6 +33,8 @@ public class WorldlinePaymentDetailsValidator implements Validator {
         if (form.getPaymentProductId() != null) {
             if (WorldlinedirectcoreConstants.PAYMENT_METHOD_HTP == form.getPaymentProductId()) {
                 ValidationUtils.rejectIfEmptyOrWhitespace(errors, "hostedTokenizationId", "checkout.error.hostedTokenization.hostedTokenizationId.missing");
+            } else if (WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY == form.getPaymentProductId()) {
+                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "googlePayEncryptedPaymentData", "checkout.error.googlePay.paymentData.missing");
             }
         }
 

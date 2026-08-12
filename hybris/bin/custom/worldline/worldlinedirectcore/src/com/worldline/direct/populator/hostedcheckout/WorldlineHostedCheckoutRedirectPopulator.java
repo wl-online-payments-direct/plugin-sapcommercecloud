@@ -63,12 +63,14 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 RedirectPaymentProduct5408SpecificInput redirectPaymentProduct5408SpecificInput = new RedirectPaymentProduct5408SpecificInput();
                 redirectPaymentProduct5408SpecificInput.setInstantPaymentOnly(instantPaymentOnly);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5408SpecificInput(redirectPaymentProduct5408SpecificInput);
+                break;
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_CHEQUES_VACANCE_CONNECT:
                 RedirectPaymentProduct5403SpecificInput redirectPaymentProduct5403SpecificInput = new RedirectPaymentProduct5403SpecificInput();
                 redirectPaymentProduct5403SpecificInput.setCompleteRemainingPaymentAmount(true);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5403SpecificInput(redirectPaymentProduct5403SpecificInput);
+                break;
             case WorldlinedirectcoreConstants.PAYMENT_METHOD_WERO:
-                // TODO: RedirectPaymentProduct900SpecificInput is not yet available in SDK 7.0.0.
+                // TODO: RedirectPaymentProduct900SpecificInput is not yet available in the SDK.
                 //  Once available, uncomment and set captureTrigger:
                 //  RedirectPaymentProduct900SpecificInput product900Input = new RedirectPaymentProduct900SpecificInput();
                 //  product900Input.setCaptureTrigger(getWeroCaptureTrigger());
@@ -79,6 +81,7 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 RedirectPaymentProduct5402SpecificInput redirectPaymentProduct5402SpecificInput = new RedirectPaymentProduct5402SpecificInput();
                 redirectPaymentProduct5402SpecificInput.setCompleteRemainingPaymentAmount(true);
                 redirectPaymentMethodSpecificInput.setPaymentProduct5402SpecificInput(redirectPaymentProduct5402SpecificInput);
+                break;
             default:
                 // No Specific parameter needed for this paymentMethod
                 break;

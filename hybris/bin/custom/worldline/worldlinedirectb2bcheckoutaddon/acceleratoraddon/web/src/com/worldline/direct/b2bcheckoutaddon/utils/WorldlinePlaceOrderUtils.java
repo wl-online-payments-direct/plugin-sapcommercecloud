@@ -57,6 +57,11 @@ public class WorldlinePlaceOrderUtils {
                 storeHOPReturnUrlInSession(getOrderCode(abstractOrderData), OrderType.PLACE_ORDER);
                 CreateHostedCheckoutResponse hostedCheckoutResponse = worldlineCheckoutFacade.createHostedCheckout(abstractOrderData.getCode(), browserData);
                 return REDIRECT_PREFIX + hostedCheckoutResponse.getPartialRedirectUrl();
+            case PAY_BY_LINK:
+                // No returnUrl is sent for Pay by Link: the customer is never redirected back to the
+                // storefront after paying, and the order is unlocked purely via webhooks.
+                worldlineCheckoutFacade.createPaymentLink(abstractOrderData.getCode());
+                return redirectToOrderConfirmationPage(abstractOrderData);
             case HOSTED_TOKENIZATION:
                 try {
                     final String hostedTokenizationId = abstractOrderData.getWorldlinePaymentInfo().getHostedTokenizationId();
@@ -167,6 +172,5 @@ public class WorldlinePlaceOrderUtils {
             return REDIRECT_PREFIX + WorldlineWebConstants.URL.Checkout.OrderConfirmation.root + getOrderCode(orderData);
         }
     }
-
 
 }

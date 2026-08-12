@@ -66,6 +66,7 @@
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator">
         <property name="sessionService" ref="sessionService"/>
         <property name="i18NService" ref="i18NService"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
         <property name="worldlineUserFacade" ref="worldlineUserFacade"/>
         <property name="worldlineOrderParamConverter" ref="worldlineOrderParamConverter"/>
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
@@ -74,7 +75,6 @@
     <bean id="worldlineHostedCheckoutCardPopulator"
           class="com.worldline.direct.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator">
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
-        <property name="enumerationService" ref="enumerationService" />
     </bean>
 
 
@@ -108,6 +108,21 @@
         </property>
     </bean>
 
+    <bean id="worldlinePaymentLinkPopulator"
+          class="com.worldline.direct.populator.paymentlink.WorldlinePaymentLinkPopulator">
+        <property name="worldlineHostedCheckoutParamConverter" ref="worldlineHostedCheckoutParamConverter"/>
+        <property name="displayQRCode" value="true"/>
+    </bean>
+
+    <bean id="worldlinePaymentLinkParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.onlinepayments.domain.CreatePaymentLinkRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlinePaymentLinkPopulator"/>
+            </list>
+        </property>
+    </bean>
+
 
     <bean id="worldlineHostedTokenizationBasicPopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator">
@@ -120,7 +135,6 @@
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
         <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
-        <property name="enumerationService" ref="enumerationService" />
     </bean>
     <bean id="worldlineHostedTokenizationRedirectPopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationRedirectPopulator">
@@ -132,6 +146,9 @@
 
     <bean id="worldlineHostedTokenizationMobilePopulator"
           class="com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationMobilePopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
     </bean>
 
 

@@ -31,11 +31,19 @@ public interface WorldlinePaymentService {
 
     CreatePaymentResponse createPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException;
 
+    CreatePaymentResponse createSubsequentPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException;
+
     CreateHostedCheckoutResponse createHostedCheckout(OrderModel orderForCode, BrowserData browserData);
 
     CreateHostedCheckoutResponse createHostedCheckout(CartModel cartModel);
 
     GetHostedCheckoutResponse getHostedCheckout(String hostedCheckoutId);
+
+    PaymentLinkResponse createPaymentLink(OrderModel orderForCode);
+
+    PaymentLinkResponse getPaymentLink(String paymentLinkId);
+
+    void cancelPaymentLink(String paymentLinkId);
 
     CaptureResponse capturePayment(String storeId, String paymentId, BigDecimal plannedAmount, String currencyISOcode, Boolean isFinal);
 

@@ -7,6 +7,7 @@ import com.onlinepayments.merchant.MerchantClient;
 import com.onlinepayments.merchant.products.GetPaymentProductParams;
 import com.onlinepayments.merchant.products.GetPaymentProductsParams;
 import com.worldline.direct.constants.WorldlinedirectcoreConstants;
+import com.worldline.direct.enums.OperationCodesEnum;
 import com.worldline.direct.exception.WorldlineNonAuthorizedPaymentException;
 import com.worldline.direct.factory.WorldlineClientFactory;
 import com.worldline.direct.model.WorldlineConfigurationModel;
@@ -21,6 +22,7 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.PaymentModeModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.store.services.BaseStoreService;
 import org.apache.commons.collections.CollectionUtils;
@@ -39,12 +41,15 @@ import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParamete
 public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlinePaymentServiceImpl.class);
+    private static final String ECOMMERCE = "ECOMMERCE";
+    private static final String SUBSEQUENT_TYPE_RECURRING = "recurring";
 
     protected WorldlineConfigurationService worldlineConfigurationService;
     protected WorldlineAmountUtils worldlineAmountUtils;
     protected WorldlineClientFactory worldlineClientFactory;
     protected Converter<AbstractOrderModel, CreatePaymentRequest> worldlineHostedTokenizationParamConverter;
     protected Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter;
+    protected Converter<AbstractOrderModel, CreatePaymentLinkRequest> worldlinePaymentLinkParamConverter;
     protected Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter;
     private WorldlinePaymentModeService worldlinePaymentModeService;
 
@@ -170,10 +175,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     @SuppressWarnings("all")
     public CreatePaymentResponse createPaymentForHostedTokenization(OrderModel orderForCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(orderForCode, "order cannot be null");
+        CreatePaymentRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(orderForCode);
+            params = worldlineHostedTokenizationParamConverter.convert(orderForCode);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
 
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
@@ -182,9 +188,10 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug("[ WORLDLINE ] Errors during getting createPayment ", e.getMessage());
+            logCreatePaymentFailure(LOGGER, "createPaymentForHostedTokenization", params, e);
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createPaymentForHostedTokenization", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
@@ -251,6 +258,55 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             return null;
         }
 
+    }
+
+    @Override
+    public PaymentLinkResponse createPaymentLink(OrderModel orderForCode) {
+        validateParameterNotNull(orderForCode, "order cannot be null");
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
+            final CreatePaymentLinkRequest params = worldlinePaymentLinkParamConverter.convert(orderForCode);
+            final PaymentLinkResponse paymentLink = merchant.paymentLinks().createPaymentLink(params);
+
+            WorldlineLogUtils.logAction(LOGGER, "createPaymentLink", params, paymentLink);
+
+            return paymentLink;
+        } catch (Exception e) {
+            LOGGER.error("[ WORLDLINE ] Errors during createPaymentLink ", e);
+            return null;
+        }
+    }
+
+    @Override
+    public PaymentLinkResponse getPaymentLink(String paymentLinkId) {
+        validateParameterNotNullStandardMessage("paymentLinkId", paymentLinkId);
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
+            final PaymentLinkResponse paymentLink = merchant.paymentLinks().getPaymentLinkById(paymentLinkId);
+
+            WorldlineLogUtils.logAction(LOGGER, "getPaymentLink", paymentLinkId, paymentLink);
+
+            return paymentLink;
+        } catch (Exception e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getPaymentLink ", e);
+            return null;
+        }
+    }
+
+    @Override
+    public void cancelPaymentLink(String paymentLinkId) {
+        validateParameterNotNullStandardMessage("paymentLinkId", paymentLinkId);
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
+            merchant.paymentLinks().cancelPaymentLinkById(paymentLinkId);
+
+            WorldlineLogUtils.logAction(LOGGER, "cancelPaymentLink", paymentLinkId, "Payment link cancelled!");
+        } catch (Exception e) {
+            LOGGER.error("[ WORLDLINE ] Errors during cancelPaymentLink ", e);
+        }
     }
 
     @Override
@@ -463,23 +519,128 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     @Override
     public CreatePaymentResponse createPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException {
         validateParameterNotNull(abstractOrderModel, "order cannot be null");
+        CreatePaymentRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreatePaymentRequest params = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
+            params = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createPayment", params, payment);
 
             return payment;
         } catch (DeclinedPaymentException e) {
-            LOGGER.debug("[ WORLDLINE ] Errors during getting createPayment ", e.getMessage());
+            logCreatePaymentFailure(LOGGER, "createPayment", params, e);
             throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createPayment", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createPayment ", e);
             //TODO Throw Logical Exception
         }
         return null;
+    }
+
+    protected void logCreatePaymentFailure(final Logger logger, final String action, final CreatePaymentRequest params, final Exception exception) {
+        WorldlineLogUtils.logFailedAction(logger, action, params, exception);
+        if (logger.isDebugEnabled() && exception instanceof ApiException) {
+            final ApiException apiException = (ApiException) exception;
+            logger.debug("[ WORLDLINE ] {} API failure statusCode={}, errorId={}, errors={}",
+                    action,
+                    apiException.getStatusCode(),
+                    apiException.getErrorId(),
+                    WorldlineLogUtils.toObfuscatedJson(apiException.getErrors()));
+            logger.debug("[ WORLDLINE ] {} API failure responseBody={}",
+                    action,
+                    WorldlineLogUtils.obfuscate(apiException.getResponseBody()));
+        }
+        if (logger.isDebugEnabled() && exception instanceof DeclinedPaymentException) {
+            final DeclinedPaymentException declinedPaymentException = (DeclinedPaymentException) exception;
+            logger.debug("[ WORLDLINE ] {} declined payment response={}",
+                    action,
+                    WorldlineLogUtils.toObfuscatedJson(declinedPaymentException.getCreatePaymentResponse()));
+        }
+    }
+
+    @Override
+    public CreatePaymentResponse createSubsequentPayment(AbstractOrderModel abstractOrderModel) throws WorldlineNonAuthorizedPaymentException {
+        validateParameterNotNull(abstractOrderModel, "order cannot be null");
+        validateParameterNotNull(abstractOrderModel.getPaymentInfo(), "order.paymentInfo cannot be null");
+        if (!(abstractOrderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel paymentInfo)
+                || (!StringUtils.equals(WorldlinedirectcoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue(), paymentInfo.getPaymentMethod())
+                && !Integer.valueOf(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY).equals(paymentInfo.getId()))) {
+            throw new IllegalArgumentException("Subsequent payment API is supported only for Worldline card and Google Pay payments");
+        }
+        try {
+            MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
+
+            final CreatePaymentRequest createPaymentRequest = worldlineHostedTokenizationParamConverter.convert(abstractOrderModel);
+            final SubsequentPaymentRequest params = new SubsequentPaymentRequest();
+            params.setOrder(createPaymentRequest.getOrder());
+            params.setSubsequentcardPaymentMethodSpecificInput(createSubsequentCardPaymentMethodSpecificInput(abstractOrderModel, createPaymentRequest));
+
+            final String initialPaymentId = getInitialPaymentId(abstractOrderModel);
+            validateParameterNotNull(initialPaymentId, "worldlineRecurringToken.initialPaymentId cannot be null");
+
+            final SubsequentPaymentResponse subsequentPayment = merchant.subsequent().subsequentPayment(initialPaymentId, params);
+            final CreatePaymentResponse payment = new CreatePaymentResponse();
+            payment.setPayment(subsequentPayment.getPayment());
+
+            WorldlineLogUtils.logAction(LOGGER, "createSubsequentPayment", params, payment);
+
+            return payment;
+        } catch (DeclinedPaymentException e) {
+            LOGGER.debug("[ WORLDLINE ] Errors during getting createSubsequentPayment ", e.getMessage());
+            throw new WorldlineNonAuthorizedPaymentException(WorldlinedirectcoreConstants.UNAUTHORIZED_REASON.REJECTED);
+        } catch (Exception e) {
+            LOGGER.error("[ WORLDLINE ] Errors during getting createSubsequentPayment ", e);
+            //TODO Throw Logical Exception
+        }
+        return null;
+    }
+
+    private SubsequentCardPaymentMethodSpecificInput createSubsequentCardPaymentMethodSpecificInput(AbstractOrderModel abstractOrderModel, CreatePaymentRequest createPaymentRequest) {
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+        validateParameterNotNull(paymentInfo.getWorldlineRecurringToken(), "worldlineRecurringToken cannot be null");
+        validateParameterNotNull(paymentInfo.getWorldlineRecurringToken().getToken(), "worldlineRecurringToken.token cannot be null");
+
+        final SubsequentCardPaymentMethodSpecificInput subsequentCardInput = new SubsequentCardPaymentMethodSpecificInput();
+        subsequentCardInput.setSubsequentType(SUBSEQUENT_TYPE_RECURRING);
+        subsequentCardInput.setTransactionChannel(ECOMMERCE);
+
+        if (createPaymentRequest.getCardPaymentMethodSpecificInput() != null) {
+            final CardPaymentMethodSpecificInput cardInput = createPaymentRequest.getCardPaymentMethodSpecificInput();
+            subsequentCardInput.setAuthorizationMode(cardInput.getAuthorizationMode());
+            subsequentCardInput.setMarketPlace(cardInput.getMarketPlace());
+            subsequentCardInput.setSchemeReferenceData(cardInput.getSchemeReferenceData());
+        } else {
+            final String authorizationMode = getAuthorizationMode(paymentInfo);
+            if (StringUtils.isNotBlank(authorizationMode)) {
+                subsequentCardInput.setAuthorizationMode(authorizationMode);
+            }
+        }
+
+        subsequentCardInput.setToken(paymentInfo.getWorldlineRecurringToken().getToken());
+
+        return subsequentCardInput;
+    }
+
+    private String getInitialPaymentId(AbstractOrderModel abstractOrderModel) {
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
+        if (paymentInfo.getWorldlineRecurringToken() == null) {
+            return null;
+        }
+        return paymentInfo.getWorldlineRecurringToken().getInitialPaymentId();
+    }
+
+    private String getAuthorizationMode(WorldlinePaymentInfoModel paymentInfo) {
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (worldlinePaymentModeService.isSaleOnly(String.valueOf(paymentInfo.getId()))) {
+            return OperationCodesEnum.SALE.getCode();
+        }
+        if (configuration.getDefaultOperationCode() != null) {
+            return configuration.getDefaultOperationCode().getCode();
+        }
+        return StringUtils.EMPTY;
     }
 
     @Override
@@ -653,6 +814,10 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
     public void setWorldlineHostedCheckoutParamConverter(Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter) {
         this.worldlineHostedCheckoutParamConverter = worldlineHostedCheckoutParamConverter;
+    }
+
+    public void setWorldlinePaymentLinkParamConverter(Converter<AbstractOrderModel, CreatePaymentLinkRequest> worldlinePaymentLinkParamConverter) {
+        this.worldlinePaymentLinkParamConverter = worldlinePaymentLinkParamConverter;
     }
 
     public void setWorldlineBrowserCustomerDeviceConverter(Converter<com.worldline.direct.order.data.BrowserData, CustomerDevice> worldlineBrowserCustomerDeviceConverter) {
