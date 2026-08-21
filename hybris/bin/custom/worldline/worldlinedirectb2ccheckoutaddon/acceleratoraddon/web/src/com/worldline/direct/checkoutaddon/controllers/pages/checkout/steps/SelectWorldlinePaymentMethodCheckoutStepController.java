@@ -20,6 +20,7 @@ import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.order.data.WorldlineGooglePayConfigurationData;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
 import com.worldline.direct.service.WorldlineConfigurationService;
+import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep;
@@ -48,6 +49,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -114,7 +116,7 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         filteredPaymentProducts = worldlinePaymentProductFilterStrategyFactory.filter(filteredPaymentProducts, cartData).get();
         addPayByLinkPaymentProductForAssistedServiceSession(filteredPaymentProducts);
         model.addAttribute("applySurcharge",(BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge())));
-        model.addAttribute("paymentProducts", filteredPaymentProducts);
+        addPaymentProductsToModel(model, filteredPaymentProducts);
         model.addAttribute("isCardPaymentMethodExisting", worldlineCheckoutFacade.checkForCardPaymentMethods(filteredPaymentProducts));
         addGooglePayConfiguration(model, filteredPaymentProducts, cartData);
 
@@ -238,6 +240,21 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
     @ModelAttribute("googlePayJs")
     String getGooglePayJs(){
         return Config.getString("worldline.google.pay.js", "https://pay.google.com/gp/p/js/pay.js");
+    }
+
+    /**
+     * Splits the mobile wallets (Google Pay, Apple Pay, ...) into their own model attribute so the storefront can render
+     * them in a dedicated section above the remaining payment methods. When the merchant has not enabled
+     * showMobileWalletsFirst, every payment product stays in the single "paymentProducts" list as before.
+     */
+    private void addPaymentProductsToModel(final Model model, final List<PaymentProduct> paymentProducts) {
+        if (!BooleanUtils.isTrue(worldlineConfigurationService.getCurrentWorldlineConfiguration().isShowMobileWalletsFirst())) {
+            model.addAttribute("mobileWalletPaymentProducts", Collections.emptyList());
+            model.addAttribute("paymentProducts", paymentProducts);
+            return;
+        }
+        model.addAttribute("mobileWalletPaymentProducts", WorldlinePaymentProductUtils.getMobileWallets(paymentProducts));
+        model.addAttribute("paymentProducts", WorldlinePaymentProductUtils.getNonMobileWallets(paymentProducts));
     }
 
     private void addGooglePayConfiguration(final Model model, List<PaymentProduct> paymentProducts, CartData cartData) {

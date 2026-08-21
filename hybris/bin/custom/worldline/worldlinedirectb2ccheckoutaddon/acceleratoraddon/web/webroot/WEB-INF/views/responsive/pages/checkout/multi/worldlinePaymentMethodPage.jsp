@@ -39,13 +39,27 @@
                             <div class="checkout-paymentmethod">
                                 <div class="checkout-indent">
 
-                                    <div class="headline"><spring:theme code="checkout.multi.worldlinePaymentMethod.paymentMethod.subtitle"/></div>
-
                                     <form:form id="worldlineSelectPaymentForm" name="worldlineSelectPaymentForm"
                                                modelAttribute="worldlinePaymentDetailsForm" method="POST"
                                                action="${selectPaymentMethod}">
                                         <c:set var="tab_index" value="1" scope="page"/>
-                                        <worldline:paymentProductSelector paymentProducts="${paymentProducts}"/>
+                                        <c:set var="hasMobileWallets" value="${not empty mobileWalletPaymentProducts}"/>
+
+                                        <c:if test="${hasMobileWallets}">
+                                            <div class="headline"><spring:theme code="checkout.multi.worldlinePaymentMethod.mobileWallet.subtitle"/></div>
+                                            <worldline:paymentProductSelector containerId="worldline_mobile_wallet_payment_products"
+                                                                              paymentProducts="${mobileWalletPaymentProducts}"
+                                                                              showMessages="false"/>
+                                            <hr class="worldline_mobile_wallet_separator"/>
+                                        </c:if>
+
+                                        <c:if test="${!hasMobileWallets or not empty paymentProducts}">
+                                            <div class="headline">
+                                                <spring:theme code="${hasMobileWallets ? 'checkout.multi.worldlinePaymentMethod.otherPaymentMethod.subtitle' : 'checkout.multi.worldlinePaymentMethod.paymentMethod.subtitle'}"/>
+                                            </div>
+                                            <worldline:paymentProductSelector paymentProducts="${paymentProducts}"
+                                                                              tabindex="${fn:length(mobileWalletPaymentProducts)}"/>
+                                        </c:if>
 
                                         <div class="headline">
                                             <spring:theme
