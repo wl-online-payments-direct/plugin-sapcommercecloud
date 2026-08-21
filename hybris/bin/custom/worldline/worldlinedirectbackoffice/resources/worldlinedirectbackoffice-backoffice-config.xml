@@ -101,6 +101,7 @@
 				<ea:section name="hmc.worldline.worldlineUnboundConfig">
 					<ea:attribute qualifier="submitOrderPromotion"/>
 					<ea:attribute qualifier="applySurcharge"/>
+					<ea:attribute qualifier="showMobileWalletsFirst"/>
 					<ea:attribute qualifier="paymentModeSort" />
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineBankTransferConfig">

@@ -171,6 +171,12 @@
                     <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
                     <description>Apply Surcharge for all transactions.</description>
                 </attribute>
+                <attribute qualifier="showMobileWalletsFirst" type="boolean">
+                    <persistence type="property" />
+                    <modifiers optional="false" />
+                    <defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Display mobile wallet payment methods in their own section at the top of the payment methods page.</description>
+                </attribute>
                 <attribute qualifier="instantBankTransfers" type="boolean">
                     <persistence type="property" />
                     <modifiers optional="false" />
