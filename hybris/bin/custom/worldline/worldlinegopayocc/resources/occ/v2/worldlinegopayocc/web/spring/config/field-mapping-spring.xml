@@ -100,6 +100,17 @@
         </property>
     </bean>
 
+    <bean parent="fieldSetLevelMapping" id="worldlineGooglePayConfigurationMapping">
+        <property name="dtoClass" value="com.worldline.gopay.payment.dto.WorldlineGooglePayConfigurationWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="environment,merchantId,merchantName,gateway,gatewayMerchantId,networks,countryCode,currencyCode,totalPrice"/>
+                <entry key="DEFAULT" value="BASIC"/>
+                <entry key="FULL" value="DEFAULT"/>
+            </map>
+        </property>
+    </bean>
+
     <bean parent="fieldSetLevelMapping" id="hostedTokenizationFieldSetLevelMapping">
         <property name="dtoClass" value="com.worldline.gopay.payment.dto.HostedTokenizationResponseWsDTO"/>
         <property name="levelMapping">

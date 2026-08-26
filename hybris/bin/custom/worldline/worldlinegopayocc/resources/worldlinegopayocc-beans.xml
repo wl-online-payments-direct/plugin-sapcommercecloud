@@ -38,6 +38,17 @@
         <property name="logo" type="String"/>
     </bean>
 
+    <bean class="com.worldline.gopay.payment.dto.WorldlineGooglePayConfigurationWsDTO">
+        <property name="environment" type="String"/>
+        <property name="merchantId" type="String"/>
+        <property name="merchantName" type="String"/>
+        <property name="gateway" type="String"/>
+        <property name="gatewayMerchantId" type="String"/>
+        <property name="networks" type="String"/>
+        <property name="countryCode" type="String"/>
+        <property name="currencyCode" type="String"/>
+        <property name="totalPrice" type="String"/>
+    </bean>
 
     <bean class="com.worldline.gopay.payment.dto.PaymentProductWsDTO">
         <description>PaymentProduct</description>
