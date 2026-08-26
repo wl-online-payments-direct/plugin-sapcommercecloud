@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
+
+    <bean class="com.worldline.gopay.order.data.WorldlinePaymentInfoData">
+        <property name="code" type="String"/>
+        <property name="id" type="Integer"/>
+        <property name="paymentMethod" type="String"/>
+        <property name="paymentMethodImageUrl" type="String"/>
+        <property name="savedPayment" type="String"/>
+        <property name="saved" type="boolean"/>
+        <property name="recurring" type="boolean"/>
+        <property name="recurringToken" type="com.worldline.gopay.order.data.WorldlineRecurringTokenData"/>
+        <property name="hostedTokenizationId" type="String"/>
+        <property name="worldlineCheckoutType" type="com.worldline.gopay.enums.WorldlineCheckoutTypesEnum"/>
+        <property name="token" type="String"/>
+        <property name="cardBrand" type="String"/>
+        <property name="alias" type="String"/>
+        <property name="type" type="String"/>
+        <property name="cardholderName" type="String"/>
+        <property name="expiryDate" type="String"/>
+        <property name="expiryMonth" type="String"/>
+        <property name="expiryYear" type="String"/>
+        <property name="billingAddress" type="de.hybris.platform.commercefacades.user.data.AddressData"/>
+        <property name="returnMAC" type="String"/>
+        <property name="defaultPayment" type="boolean"/>
+        <property name="cardType" type="de.hybris.platform.commercefacades.order.data.CardTypeData"/>
+        <property name="mandateDetail" type="com.worldline.gopay.order.data.WorldlineMandateDetail"/>
+        <property name="googlePayEncryptedPaymentData" type="String"/>
+        <property name="googlePayMobileDevice" type="Boolean"/>
+        <property name="paymentLinkId" type="String"/>
+        <property name="paymentLinkRedirectionUrl" type="String"/>
+        <property name="paymentLinkExpirationDate" type="java.util.Date"/>
+        <property name="paymentLinkStatus" type="String"/>
+        <property name="paymentLinkPaymentId" type="String"/>
+        <property name="paymentLinkLastEvent" type="String"/>
+        <property name="paymentLinkReusable" type="Boolean"/>
+        <property name="worldlinePaymentId" type="String"/>
+        <property name="worldlineStatus" type="String"/>
+        <property name="worldlineStatusCode" type="Integer"/>
+        <property name="worldlineMerchantReference" type="String"/>
+        <property name="worldlinePaymentMethod" type="String"/>
+        <property name="worldlinePaymentProductId" type="Integer"/>
+        <property name="worldlineAmount" type="Long"/>
+        <property name="worldlineCurrency" type="String"/>
+        <property name="worldlineAcquiredAmount" type="Long"/>
+        <property name="worldlineAcquiredCurrency" type="String"/>
+        <property name="cardBin" type="String"/>
+        <property name="cardLastFour" type="String"/>
+        <property name="fraudResult" type="String"/>
+        <property name="liability" type="String"/>
+        <property name="appliedExemption" type="String"/>
+        <property name="authenticationStatus" type="String"/>
+
+    </bean>
+
+    <bean class="com.worldline.gopay.order.data.WorldlineGooglePayConfigurationData">
+        <property name="environment" type="String"/>
+        <property name="merchantId" type="String"/>
+        <property name="merchantName" type="String"/>
+        <property name="gateway" type="String"/>
+        <property name="gatewayMerchantId" type="String"/>
+        <property name="networks" type="String"/>
+        <property name="countryCode" type="String"/>
+        <property name="currencyCode" type="String"/>
+        <property name="totalPrice" type="String"/>
+    </bean>
+
+    <bean class="de.hybris.platform.commercefacades.order.data.CartData">
+        <property name="worldlinePaymentInfo" type="com.worldline.gopay.order.data.WorldlinePaymentInfoData"/>
+        <property name="replenishmentOrder" type="boolean" />
+        <property name="replenishmentStartDate" type="java.util.Date" />
+        <property name="replenishmentRecurrence" type="de.hybris.platform.b2bacceleratorfacades.order.data.B2BReplenishmentRecurrenceEnum" />
+        <property name="nDaysOfWeek" type="java.util.List&lt;de.hybris.platform.cronjob.enums.DayOfWeek>"/>
+        <property name="nDays" type="String" />
+        <property name="nWeeks" type="String" />
+        <property name="nthDayOfMonth" type="String" />
+        <property name="nMonths" type="String"/>
+        <property name="nYear" type="String"/>
+        <property name="replenishmentEndDate" type="java.util.Date"/>
+
+    </bean>
+
+    <bean class="de.hybris.platform.commercefacades.product.data.ProductData">
+        <property name="worldlineMealvoucherProductType" type="String"/>
+    </bean>
+
+    <bean class="de.hybris.platform.commercefacades.order.data.AbstractOrderData">
+        <property name="worldlinePaymentInfo" type="com.worldline.gopay.order.data.WorldlinePaymentInfoData"/>
+        <property name="surcharge" type="de.hybris.platform.commercefacades.product.data.PriceData"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.order.data.WorldlineHostedTokenizationData">
+        <property name="returnUrl" type="String"/>
+        <property name="hostedTokenizationId" type="String"/>
+        <property name="browserData" type="com.worldline.gopay.order.data.BrowserData"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.order.data.BrowserData">
+        <property name="screenHeight" type="String"/>
+        <property name="screenWidth" type="String"/>
+        <property name="navigatorJavaEnabled" type="Boolean"/>
+        <property name="navigatorJavaScriptEnabled" type="Boolean"/>
+        <property name="timezoneOffsetUtcMinutes" type="String"/>
+        <property name="colorDepth" type="Integer"/>
+        <property name="acceptHeader" type="String"/>
+        <property name="userAgent" type="String"/>
+        <property name="locale" type="String"/>
+        <property name="ipAddress" type="String"/>
+    </bean>
+
+    <bean class="de.hybris.platform.b2bacceleratorfacades.order.data.TriggerData">
+        <property name="active" type="boolean"/>
+        <property name="year" type="java.lang.Integer"/>
+        <property name="dateRange" type="de.hybris.platform.util.StandardDateRange"/>
+    </bean>
+    <bean class="de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData">
+        <property name="nMonths" type="String"/>
+        <property name="nYear" type="String"/>
+        <property name="replenishmentEndDate" type="java.util.Date"/>
+        <property name="cardDetailsCheck" type="boolean"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.order.data.WorldlineMandateDetail">
+        <property name="alias" type="String"/>
+        <property name="customerReference" type="String"/>
+        <property name="recurrenceType" type="String"/>
+        <property name="status" type="String"/>
+        <property name="uniqueMandateReference" type="String"/>
+        <property name="customer" type="com.worldline.gopay.customer.data.WorldlineMandateCustomer"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.customer.data.WorldlineMandateCustomer">
+        <property name="iban" type="String"/>
+        <property name="companyName" type="String"/>
+        <property name="emailAddress" type="String"/>
+        <property name="address" type="com.worldline.gopay.address.data.WorldlineMandateAddress"/>
+        <property name="personalInformation" type="com.worldline.gopay.contact.data.WorldlinePersonalInformation"/>
+    </bean>
+    <bean class="com.worldline.gopay.address.data.WorldlineMandateAddress">
+        <property name="city" type="String"/>
+        <property name="country" type="String"/>
+        <property name="HouseNumber" type="String"/>
+        <property name="street" type="String"/>
+        <property name="zip" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.contact.data.WorldlinePersonalInformation">
+        <property name="firstName" type="String"/>
+        <property name="lastName" type="String"/>
+        <property name="title" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.order.data.WorldlineRecurringTokenData">
+        <property name="recurringToken" type="String"/>
+        <property name="status" type="String"/>
+        <property name="subscriptionId" type="String"/>
+        <property name="alias" type="String"/>
+        <property name="cardholderName" type="String"/>
+        <property name="expiryDate" type="String"/>
+        <property name="expiryMonth" type="String"/>
+        <property name="expiryYear" type="String"/>
+        <property name="customer" type="de.hybris.platform.core.model.user.CustomerModel"/>
+    </bean>
+
+</beans>

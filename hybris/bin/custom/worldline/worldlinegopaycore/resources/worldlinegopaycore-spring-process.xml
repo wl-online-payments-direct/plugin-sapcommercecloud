@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Project: Groupe Seb E-Commerce
+  ~ Copyright 2022 Groupe Seb
+  ~  Client: Groupe Seb
+  ~
+  ~ Created by mbettioui
+  ~ Updated 4/12/22, 10:10 PM
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="worldlineCheckAuthorizedPaymentAction"
+          class="com.worldline.gopay.actions.order.WorldlineCheckAuthorizedPaymentAction" parent="abstractAction"/>
+
+    <bean id="worldlineCheckCapturedPaymentAction"
+          class="com.worldline.gopay.actions.order.WorldlineCheckCapturedPaymentAction" parent="abstractAction">
+    </bean>
+
+    <bean id="worldlineCaptureRefundPaymentAction"
+          class="com.worldline.gopay.actions.returns.WorldlineCaptureRefundPaymentAction" parent="abstractAction">
+    </bean>
+
+    <bean id="worldlineRequestPaymentAction"
+          class="com.worldline.gopay.actions.replenishment.WorldlineRequestPaymentAction" parent="abstractAction">
+        <property name="worldlineRecurringService" ref="worldlineRecurringService"/>
+        <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="impersonationService" ref="impersonationService"/>
+        <property name="worldlineCheckoutFacade" ref="worldlineCheckoutFacade"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlineTransactionService" ref="worldlineTransactionService"/>
+    </bean>
+
+    <bean name="worldlinePlaceOrderAction"
+          class="com.worldline.gopay.actions.replenishment.WorldlinePlaceOrderAction"
+          parent="abstractAction" >
+        <property name="b2bCommerceCheckoutService" ref="b2bCommerceCheckoutService"/>
+        <property name="b2cCommerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="impersonationService" ref="impersonationService"/>
+    </bean>
+
+
+    <alias name="worldlineCheckPaymentInfoOrderAction" alias="checkCreditCardOrderAction"/>
+    <bean id="worldlineCheckPaymentInfoOrderAction"
+          class="com.worldline.gopay.actions.approval.WorldlineCheckPaymentInfoOrderAction"
+          parent="abstractAction"
+    />
+
+
+    <bean id="worldlineSendPaymentFailedNotificationAction"
+          class="com.worldline.gopay.actions.replenishment.WorldlineSendPaymentFailedNotifications"
+          parent="abstractAction">
+        <property name="eventService" ref="eventService"/>
+    </bean>
+
+    <bean id="worldlineSendCartNonValidEmailFailure"
+          class="com.worldline.gopay.actions.replenishment.WorldlineSendCartNonValidEmailFailure"
+          parent="abstractAction">
+        <property name="eventService" ref="eventService"/>
+    </bean>
+    <bean id="worldlineValidateCartAction"
+          class="com.worldline.gopay.actions.replenishment.WorldlineValidateCartAction"
+          parent="abstractAction">
+        <property name="cartService" ref="cartService"/>
+        <property name="cartFacade" ref="cartFacade"/>
+        <property name="impersonationService" ref="impersonationService"/>
+    </bean>
+
+</beans>

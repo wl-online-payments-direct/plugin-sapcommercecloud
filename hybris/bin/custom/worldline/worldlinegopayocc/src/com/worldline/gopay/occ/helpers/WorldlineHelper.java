@@ -1,0 +1,88 @@
+package com.worldline.gopay.occ.helpers;
+
+import com.google.common.collect.Iterables;
+import com.onlinepayments.domain.PaymentProduct;
+import com.worldline.gopay.enums.OrderType;
+import com.worldline.gopay.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.gopay.enums.WorldlinePaymentProductFilterEnum;
+import com.worldline.gopay.facade.WorldlineCheckoutFacade;
+import com.worldline.gopay.facade.WorldlineUserFacade;
+import com.worldline.gopay.factory.WorldlinePaymentProductFilterStrategyFactory;
+import com.worldline.gopay.order.data.WorldlinePaymentInfoData;
+import com.worldline.gopay.payment.dto.HostedTokenizationResponseWsDTO;
+import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO;
+import de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO;
+import de.hybris.platform.store.BaseStoreModel;
+import de.hybris.platform.store.services.BaseStoreService;
+import de.hybris.platform.util.Config;
+import de.hybris.platform.webservicescommons.mapping.DataMapper;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerMapping;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
+
+import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_IDEAL;
+
+@Component("worldlineHelper")
+public class WorldlineHelper {
+    @Resource(name = "dataMapper")
+    private DataMapper dataMapper;
+
+    @Resource(name = "worldlineCheckoutFacade")
+    private WorldlineCheckoutFacade worldlineCheckoutFacade;
+
+    @Resource(name = "worldlineUserFacade")
+    private WorldlineUserFacade worldlineUserFacade;
+
+    @Resource(name = "worldlinePaymentProductFilterStrategyFactory")
+    private WorldlinePaymentProductFilterStrategyFactory worldlinePaymentProductFilterStrategyFactory;
+
+    @Resource(name = "baseStoreService")
+    private BaseStoreService baseStoreService;
+
+    private static final String HOP_URL = "hostedcheckout";
+    private static final String HTP_URL = "hostedtokenization-3ds";
+
+    private int getIdealIndex(List<PaymentProduct> availablePaymentMethods) {
+        return Iterables.indexOf(availablePaymentMethods, paymentProduct -> PAYMENT_METHOD_IDEAL == paymentProduct.getId());
+    }
+
+    public void fillSavedPaymentDetails(HostedTokenizationResponseWsDTO hostedTokenizationResponseWsDTO, String fields) {
+        List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS, WorldlinePaymentProductFilterEnum.NAMES, WorldlinePaymentProductFilterEnum.SORT).get();
+        final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfosForPaymentProducts(availablePaymentMethods, Boolean.TRUE);
+        final PaymentDetailsListWsDTO paymentDetailsListWsDTO = new PaymentDetailsListWsDTO();
+        paymentDetailsListWsDTO.setPayments(getDataMapper().mapAsList(worldlinePaymentInfos, PaymentDetailsWsDTO.class, fields));
+        hostedTokenizationResponseWsDTO.setSavedPaymentDetails(paymentDetailsListWsDTO);
+    }
+
+    public String buildReturnURL(HttpServletRequest request, String key) {
+        final String returnURL = Config.getParameter(key);
+        final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        return String.format(returnURL, uriVars.get("baseSiteId"), uriVars.get("userId"), "_orderCode_", request.getParameter("cartId"));
+    }
+    public String buildRecurringReturnURL(HttpServletRequest request, OrderType orderType, WorldlineCheckoutTypesEnum checkoutType) {
+        final BaseStoreModel currentBasestore = baseStoreService.getCurrentBaseStore();
+        final String returnURL = currentBasestore.getReturnUrl();
+        final Map<String, String> uriVars = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        switch (checkoutType) {
+            case HOSTED_CHECKOUT:
+                return String.format(returnURL, uriVars.get("baseSiteId"), HOP_URL, uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
+            case HOSTED_TOKENIZATION:
+            default:
+                return String.format(returnURL, uriVars.get("baseSiteId"), HTP_URL, uriVars.get("userId"), "_orderCode_", orderType, request.getParameter("cartId"));
+        }
+    }
+
+
+    protected DataMapper getDataMapper() {
+        return dataMapper;
+    }
+
+    protected void setDataMapper(final DataMapper dataMapper) {
+        this.dataMapper = dataMapper;
+    }
+
+}
