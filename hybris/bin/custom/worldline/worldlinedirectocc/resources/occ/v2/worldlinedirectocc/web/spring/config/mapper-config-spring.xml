@@ -7,6 +7,5 @@
 		http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean class="com.worldline.direct.occ.mapping.mappers.WorldlineB2BPlaceOrderDataMapper" parent="abstractCustomMapper" />
-
 	
 </beans>
