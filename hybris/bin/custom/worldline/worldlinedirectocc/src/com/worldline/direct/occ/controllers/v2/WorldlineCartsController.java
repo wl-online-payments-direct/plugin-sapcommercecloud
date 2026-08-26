@@ -4,19 +4,18 @@ package com.worldline.direct.occ.controllers.v2;
 import com.onlinepayments.domain.CreateHostedTokenizationResponse;
 import com.onlinepayments.domain.GetPaymentProductsResponse;
 import com.onlinepayments.domain.PaymentProduct;
+import com.onlinepayments.domain.PaymentProduct320SpecificData;
 import com.worldline.direct.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.direct.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.direct.facade.WorldlineCheckoutFacade;
 import com.worldline.direct.facade.WorldlineRecurringCheckoutFacade;
 import com.worldline.direct.facade.WorldlineUserFacade;
 import com.worldline.direct.factory.WorldlinePaymentProductFilterStrategyFactory;
+import com.worldline.direct.model.WorldlineConfigurationModel;
 import com.worldline.direct.occ.controllers.v2.validator.WorldlinePaymentDetailsWsDTOValidator;
 import com.worldline.direct.occ.helpers.WorldlineHelper;
 import com.worldline.direct.order.data.WorldlinePaymentInfoData;
-import com.worldline.direct.payment.dto.HostedTokenizationResponseWsDTO;
-import com.worldline.direct.payment.dto.PaymentProductListWsDTO;
-import com.worldline.direct.payment.dto.WorldlineCheckoutTypeWsDTO;
-import com.worldline.direct.payment.dto.WorldlinePaymentDetailsWsDTO;
+import com.worldline.direct.payment.dto.*;
 import com.worldline.direct.service.WorldlineConfigurationService;
 import com.worldline.direct.util.WorldlinePaymentProductUtils;
 import de.hybris.platform.b2bwebservicescommons.dto.order.DayOfWeekWsDTO;
@@ -40,6 +39,7 @@ import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -54,6 +54,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.worldline.direct.occ.controllers.v2.WorldlineB2BOrdersController.OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM;
 
@@ -62,6 +63,8 @@ import static com.worldline.direct.occ.controllers.v2.WorldlineB2BOrdersControll
 @Tag(name = "Worldline Carts")
 public class WorldlineCartsController extends WorldlineBaseController {
     private final static Logger LOGGER = LoggerFactory.getLogger(WorldlineCartsController.class);
+
+    private static final Integer GOOGLE_PAY_PRODUCT_ID = 320;
 
     @Resource(name = "dataMapper")
     private DataMapper dataMapper;
@@ -117,8 +120,40 @@ public class WorldlineCartsController extends WorldlineBaseController {
         productsResponse.setPaymentProducts(availablePaymentMethods);
         final PaymentProductListWsDTO paymentProductListWsDTO = getDataMapper()
                 .map(productsResponse, PaymentProductListWsDTO.class, fields);
+
         return paymentProductListWsDTO;
     }
+
+    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
+    @GetMapping(value = "/{cartId}/googlePayData")
+    @ResponseBody
+    @Operation(operationId = "getGooglePayData", summary = "Get all data for GooglePay payment method.", description =
+            "Returns GooglePay data that is needed for displaying the payment method.")
+    @ApiBaseSiteIdUserIdAndCartIdParam
+    public WorldlineGooglePayConfigurationWsDTO getGooglePayData(
+            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
+
+        final CartData cartData = cartFacade.getSessionCart();
+
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+            PaymentProduct googlePay = worldlineCheckoutFacade.getPaymentMethodById(GOOGLE_PAY_PRODUCT_ID);
+        PaymentProduct320SpecificData product320SpecificData = googlePay.getPaymentProduct320SpecificData();
+        WorldlineGooglePayConfigurationWsDTO googlePayConfiguration = new WorldlineGooglePayConfigurationWsDTO();
+        googlePayConfiguration.setEnvironment(configuration.getGooglePayEnvironment() != null ? configuration.getGooglePayEnvironment().getCode() : "TEST");
+        googlePayConfiguration.setMerchantId(configuration.getGooglePayMerchantId());
+        googlePayConfiguration.setMerchantName(configuration.getGooglePayMerchantName());
+        googlePayConfiguration.setGateway(product320SpecificData != null ? product320SpecificData.getGateway() : StringUtils.EMPTY);
+        googlePayConfiguration.setGatewayMerchantId(configuration.getMerchantID());
+        googlePayConfiguration.setNetworks(product320SpecificData != null && product320SpecificData.getNetworks() != null
+                ? product320SpecificData.getNetworks().stream().collect(Collectors.joining(","))
+                : StringUtils.EMPTY);
+        googlePayConfiguration.setCountryCode(StringUtils.defaultIfBlank(configuration.getGooglePayAcquirerCountry(), getCountryCode(cartData)));
+        googlePayConfiguration.setCurrencyCode(cartData.getTotalPrice().getCurrencyIso());
+        googlePayConfiguration.setTotalPrice(cartData.getTotalPrice().getValue().toPlainString());
+
+        return googlePayConfiguration;
+    }
+
 
     @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @GetMapping(value = "/{cartId}/worldlinePaymentdetails")
@@ -330,6 +365,13 @@ public class WorldlineCartsController extends WorldlineBaseController {
 
     protected void validateScheduleReplenishmentForm(ScheduleReplenishmentFormWsDTO scheduleReplenishmentForm) {
         validate(scheduleReplenishmentForm, OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM, scheduleReplenishmentFormWsDTOValidator);
+    }
+
+    private String getCountryCode(CartData cartData) {
+        if (cartData.getDeliveryAddress() != null && cartData.getDeliveryAddress().getCountry() != null) {
+            return cartData.getDeliveryAddress().getCountry().getIsocode();
+        }
+        return StringUtils.EMPTY;
     }
 
     public DataMapper getDataMapper() {
