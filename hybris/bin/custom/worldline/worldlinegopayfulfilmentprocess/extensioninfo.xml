@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+--><extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+           
+    
+    <extension abstractclassprefix="Generated" classprefix="Worldlinegopayfulfilmentprocess" jaloLogicFree="true" managername="WorldlinegopayfulfilmentprocessManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="worldlinegopayfulfilmentprocess" usemaven="false">
+
+        <requires-extension name="worldlinegopaycore"/>
+        
+        <coremodule generated="true" manager="com.worldline.gopay.jalo.WorldlinegopayfulfilmentprocessManager" packageroot="com.worldline.gopay"/>
+    </extension>
+        
+
+</extensioninfo>

@@ -6,9 +6,10 @@ export LC_CTYPE=C LANG=C
 # ==============================================================================
 # CAWL Conversion Script for SAP Commerce Cloud (Hybris)
 # ==============================================================================
-# This script converts the Worldline Direct payment plugin codebase into the
+# This script converts the Worldline GoPay payment plugin codebase into the
 # CAWL-branded variant. It renames packages, directories, files, and performs
-# text replacements so there is ZERO mention of "Worldline" in the output.
+# text replacements so there is ZERO mention of "Worldline" or the "GoPay"
+# product brand in the output.
 #
 # Usage:
 #   ./cawl.sh [source_dir] [dest_dir]
@@ -85,17 +86,27 @@ echo "  Removed stale .class and gensrc/ files."
 # sed processes them first and avoids partial matches.
 #
 # Pattern ordering rationale:
-#   1. "worldlinedirect" before "worldline" (extension names)
-#   2. "Worldlinedirect" before "Worldline" (Constants class prefixes)
-#   3. "WORLDLINE_DIRECT" / "WORLDLINE" (uppercase constants & enum values)
-#   4. "worldline" / "Worldline" (everything else)
-#   5. Brand-specific strings (emails, labels)
+#   1. "Worldline GoPay" before everything (the product brand, contains
+#      "Worldline" - if the generic pass ran first it would leave "CAWL GoPay")
+#   2. "worldlinegopay" before "worldline" (extension names)
+#   3. "Worldlinegopay" before "Worldline" (Constants class prefixes)
+#   4. "WORLDLINE_DIRECT" / "WORLDLINE" (uppercase constants & enum values)
+#   5. "worldline" / "Worldline" (everything else)
+#   6. "GoPay" / "gopay" AFTER the generic pass - these are the product-brand
+#      remnants left inside identifiers such as the package com.worldline.gopay
+#      and the type WorldlineGoPayCheckoutFacade. They map to Direct/direct so
+#      that the CAWL output keeps its established com.cawl.direct package and
+#      cawl.direct.* property keys.
+#   7. Brand-specific strings (emails, labels)
 # ------------------------------------------------------------------------------
 
 declare -a PATTERNS=(
+    # --- Product brand (MUST be first: it contains "Worldline") ---
+    "Worldline GoPay"
+
     # --- Extension / compound names (most specific first) ---
-    "worldlinedirect"
-    "Worldlinedirect"
+    "worldlinegopay"
+    "Worldlinegopay"
     "WORLDLINE_DIRECT"
 
     # --- All-caps (enum values, constants like WORLDLINE_WAITING_AUTH) ---
@@ -109,6 +120,12 @@ declare -a PATTERNS=(
     "worldline"
     "Worldline"
 
+    # --- Product-brand remnants inside identifiers (must come AFTER the
+    #     generic patterns, otherwise "Worldline GoPay" would be split) ---
+    "GoPay"
+    "GOPAY"
+    "gopay"
+
     # --- Email addresses (must come after generic patterns to override) ---
     # These are applied in the sed script AFTER the generic patterns, so the
     # generic pass will have already changed them. We fix them here.
@@ -117,6 +134,9 @@ declare -a PATTERNS=(
 )
 
 declare -a REPLACEMENTS=(
+    # --- Product brand ---
+    "CAWL"
+
     # --- Extension / compound names ---
     "cawl"
     "Cawl"
@@ -132,6 +152,11 @@ declare -a REPLACEMENTS=(
     # --- Generic lowercase & PascalCase ---
     "cawl"
     "CAWL"
+
+    # --- Product-brand remnants inside identifiers ---
+    "Direct"
+    "DIRECT"
+    "direct"
 
     # --- Email addresses (restore to CAWL-branded emails) ---
     "isvpartners@cawl.com"
@@ -207,24 +232,25 @@ done
 # ------------------------------------------------------------------------------
 # 5. Rename Java package directories
 # ------------------------------------------------------------------------------
-# The Java package com.worldline.direct lives under:
-#   src/com/worldline/direct/
-#   testsrc/com/worldline/direct/
-#   web/src/com/worldline/direct/
-#   backoffice/src/com/worldline/direct/
+# The Java package com.worldline.gopay lives under:
+#   src/com/worldline/gopay/
+#   testsrc/com/worldline/gopay/
+#   web/src/com/worldline/gopay/
+#   backoffice/src/com/worldline/gopay/
 #
-# After step 4, "worldline" dirs are already renamed to "cawl", so the
-# directory structure should already be com/cawl/direct/. Verify and report.
+# After step 4 the "worldline" dirs are renamed to "cawl" and the "gopay" dirs
+# to "direct", so the directory structure should already be com/cawl/direct/.
+# Verify and report.
 
 echo ""
 echo "=== Step 4: Verifying package directory structure ==="
 
-remaining_worldline_dirs=$(find . -type d -name "*worldline*" 2>/dev/null || true)
+remaining_worldline_dirs=$(find . -type d \( -name "*worldline*" -o -name "*gopay*" -o -name "*GoPay*" \) 2>/dev/null || true)
 if [[ -n "$remaining_worldline_dirs" ]]; then
-    echo "  WARNING: Found remaining directories with 'worldline':"
+    echo "  WARNING: Found remaining directories with 'worldline' or 'gopay':"
     echo "$remaining_worldline_dirs" | while IFS= read -r d; do echo "    $d"; done
 else
-    echo "  OK: No directories containing 'worldline' remain."
+    echo "  OK: No directories containing 'worldline' or 'gopay' remain."
 fi
 
 # ------------------------------------------------------------------------------
@@ -307,6 +333,34 @@ find . -type f -name "*.java" \
         -e 's/\/cawl\([A-Z]\)/\/CAWL\1/g' {} +
 
 echo "  Fixed CAWL acronym casing in config files and Java string literals."
+
+# ------------------------------------------------------------------------------
+# 6c. Drop self-referential deprecated property aliases
+# ------------------------------------------------------------------------------
+# The source plugin keeps backward-compatible aliases of the form
+#   worldline.gopay.api.connectTimeout=${worldline.direct.api.connectTimeout}
+# so that merchants upgrading from the pre-GoPay naming keep their overrides.
+# Both halves collapse onto the same name in the CAWL variant (worldline->cawl
+# and gopay->direct), which would leave a circular reference:
+#   cawl.direct.api.connectTimeout=${cawl.direct.api.connectTimeout}
+# The CAWL variant has no legacy merchants, so the alias is simply dropped and
+# the remaining line (which carries the real default value) becomes canonical.
+echo ""
+echo "=== Step 5c: Removing self-referential property aliases ==="
+
+find . -type f -name "*.properties" | while IFS= read -r pf; do
+    tmp="${pf}.tmp$$"
+    awk '''{
+        if ($0 ~ /^[A-Za-z0-9_.]+=\$\{[A-Za-z0-9_.]+\}$/) {
+            k = substr($0, 1, index($0, "=") - 1)
+            v = substr($0, index($0, "=") + 1)
+            if (v == "${" k "}") { print "  DROPPED: " $0 > "/dev/stderr"; next }
+        }
+        print
+    }''' "$pf" > "$tmp" && mv "$tmp" "$pf"
+done
+
+echo "  Self-referential aliases removed."
 
 # Pass 3: Rename files whose names contain cawl[A-Z] to CAWL[A-Z]
 # e.g. cawlReplenishmentScheduleForm.tag -> CAWLReplenishmentScheduleForm.tag
@@ -406,9 +460,9 @@ else
     if [[ -f "$DEPS_XML" ]]; then
         sed "${SED_INPLACE[@]}" \
             -e 's|<groupId>com\.cawl-solutions</groupId>|<groupId>com.worldline-solutions</groupId>|' \
-            -e 's|<cawl\.direct\.version>|<worldline.direct.version>|' \
-            -e 's|</cawl\.direct\.version>|</worldline.direct.version>|' \
-            -e 's|\${cawl\.direct\.version}|${worldline.direct.version}|' \
+            -e 's|<cawl\.direct\.version>|<worldline.gopay.version>|' \
+            -e 's|</cawl\.direct\.version>|</worldline.gopay.version>|' \
+            -e 's|\${cawl\.direct\.version}|${worldline.gopay.version}|' \
             "$DEPS_XML"
         echo "  Restored: $DEPS_XML"
     fi
@@ -427,7 +481,7 @@ fi
 echo ""
 echo "=== Step 7: Verification ==="
 
-remaining_files=$(grep -rl "worldline\|Worldline\|WORLDLINE" . \
+remaining_files=$(grep -rl "worldline\|Worldline\|WORLDLINE\|gopay\|GoPay\|GOPAY" . \
     --include="*.java" \
     --include="*.xml" \
     --include="*.properties" \
@@ -441,10 +495,10 @@ remaining_files=$(grep -rl "worldline\|Worldline\|WORLDLINE" . \
     2>/dev/null || true)
 
 if [[ -n "$remaining_files" ]]; then
-    echo "  WARNING: The following files still contain 'worldline' references:"
+    echo "  WARNING: The following files still contain 'worldline' or 'gopay' references:"
     echo "$remaining_files" | while IFS= read -r f; do
         echo "    $f"
-        grep -n "worldline\|Worldline\|WORLDLINE" "$f" | head -5 | while IFS= read -r line; do
+        grep -n "worldline\|Worldline\|WORLDLINE\|gopay\|GoPay\|GOPAY" "$f" | head -5 | while IFS= read -r line; do
             echo "      $line"
         done
     done
@@ -452,16 +506,16 @@ if [[ -n "$remaining_files" ]]; then
     echo "  These may be false positives (e.g. external SDK references) or may"
     echo "  need manual attention or handling via the overwrites mechanism."
 else
-    echo "  SUCCESS: No remaining 'worldline' references found in source files."
+    echo "  SUCCESS: No remaining 'worldline' or 'gopay' references found in source files."
 fi
 
-remaining_worldline_files=$(find . -name "*worldline*" -o -name "*Worldline*" 2>/dev/null || true)
+remaining_worldline_files=$(find . \( -name "*worldline*" -o -name "*Worldline*" -o -name "*gopay*" -o -name "*GoPay*" \) 2>/dev/null || true)
 if [[ -n "$remaining_worldline_files" ]]; then
     echo ""
-    echo "  WARNING: Files/dirs still containing 'worldline' in their name:"
+    echo "  WARNING: Files/dirs still containing 'worldline' or 'gopay' in their name:"
     echo "$remaining_worldline_files" | while IFS= read -r f; do echo "    $f"; done
 else
-    echo "  SUCCESS: No files or directories with 'worldline' in their name."
+    echo "  SUCCESS: No files or directories with 'worldline' or 'gopay' in their name."
 fi
 
 # ------------------------------------------------------------------------------

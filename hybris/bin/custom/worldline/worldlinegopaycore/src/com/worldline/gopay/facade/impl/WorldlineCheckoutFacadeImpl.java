@@ -1,0 +1,1032 @@
+package com.worldline.gopay.facade.impl;
+
+import com.onlinepayments.ApiException;
+import com.onlinepayments.domain.*;
+import com.worldline.gopay.constants.WorldlinegopaycoreConstants;
+import com.worldline.gopay.enums.WorldlineCheckoutTypesEnum;
+import com.worldline.gopay.enums.WorldlineRecurringPaymentStatus;
+import com.worldline.gopay.enums.WorldlineRecurringType;
+import com.worldline.gopay.enums.WorldlineReplenishmentOccurrenceEnum;
+import com.worldline.gopay.exception.WorldlineNonAuthorizedPaymentException;
+import com.worldline.gopay.exception.WorldlineNonValidPaymentProductException;
+import com.worldline.gopay.exception.WorldlineNonValidReturnMACException;
+import com.worldline.gopay.facade.WorldlineCheckoutFacade;
+import com.worldline.gopay.facade.WorldlineUserFacade;
+import com.worldline.gopay.model.WorldlineConfigurationModel;
+import com.worldline.gopay.model.WorldlineMandateModel;
+import com.worldline.gopay.model.WorldlineRecurringTokenModel;
+import com.worldline.gopay.order.data.BrowserData;
+import com.worldline.gopay.order.data.WorldlineHostedTokenizationData;
+import com.worldline.gopay.order.data.WorldlinePaymentInfoData;
+import com.worldline.gopay.service.*;
+import com.worldline.gopay.util.WorldlinePaymentDetailsUtils;
+import com.worldline.gopay.util.WorldlinePaymentProductUtils;
+import com.worldline.gopay.util.WorldlineUrlUtils;
+import de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData;
+import de.hybris.platform.commercefacades.order.CheckoutFacade;
+import de.hybris.platform.commercefacades.order.data.AbstractOrderData;
+import de.hybris.platform.commercefacades.order.data.CartData;
+import de.hybris.platform.commercefacades.order.data.OrderData;
+import de.hybris.platform.commercefacades.order.data.PickupOrderEntryGroupData;
+import de.hybris.platform.commercefacades.product.data.PriceData;
+import de.hybris.platform.commercefacades.storelocator.data.PointOfServiceData;
+import de.hybris.platform.commercefacades.user.data.AddressData;
+import de.hybris.platform.commercefacades.user.data.CountryData;
+import de.hybris.platform.commerceservices.customer.CustomerAccountService;
+import de.hybris.platform.commerceservices.order.CommerceCheckoutService;
+import de.hybris.platform.commerceservices.service.data.CommerceCheckoutParameter;
+import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
+import de.hybris.platform.core.enums.PaymentStatus;
+import de.hybris.platform.core.model.c2l.C2LItemModel;
+import de.hybris.platform.core.model.c2l.CountryModel;
+import de.hybris.platform.core.model.c2l.LanguageModel;
+import de.hybris.platform.core.model.order.AbstractOrderModel;
+import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.OrderModel;
+import de.hybris.platform.core.model.order.payment.PaymentInfoModel;
+import de.hybris.platform.core.model.order.payment.PaymentModeModel;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
+import de.hybris.platform.core.model.user.AddressModel;
+import de.hybris.platform.core.model.user.CustomerModel;
+import de.hybris.platform.core.model.user.TitleModel;
+import de.hybris.platform.cronjob.enums.DayOfWeek;
+import de.hybris.platform.order.CartService;
+import de.hybris.platform.order.InvalidCartException;
+import de.hybris.platform.order.PaymentModeService;
+import de.hybris.platform.payment.enums.PaymentTransactionType;
+import de.hybris.platform.payment.model.PaymentTransactionModel;
+import de.hybris.platform.servicelayer.dto.converter.Converter;
+import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
+import de.hybris.platform.servicelayer.i18n.CommonI18NService;
+import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.servicelayer.session.SessionService;
+import de.hybris.platform.servicelayer.user.UserService;
+import de.hybris.platform.store.BaseStoreModel;
+import de.hybris.platform.store.services.BaseStoreService;
+import de.hybris.platform.util.localization.Localization;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
+
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
+import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY;
+import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_GROUP_CARDS;
+import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_HTP;
+
+public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineCheckoutFacadeImpl.class);
+    private static final Pattern GOOGLE_PAY_PHONE_USER_AGENT_PATTERN = Pattern.compile(".*(iPhone|iPod|Android.*Mobile|Windows Phone|BlackBerry|IEMobile|Opera Mini).*", Pattern.CASE_INSENSITIVE);
+    private static final String PAY_BY_LINK_LABEL = "Pay by link";
+
+    protected CommonI18NService commonI18NService;
+    protected ModelService modelService;
+    private List<String> virtualPaymentModes = new ArrayList<>();
+
+    protected Converter<AddressData, AddressModel> addressReverseConverter;
+    protected Converter<OrderModel, OrderData> orderConverter;
+    protected Converter<CartModel, PlaceOrderData> worldlinePlaceOrderConverter;
+
+    protected CartService cartService;
+    protected UserService userService;
+    protected CheckoutFacade checkoutFacade;
+    protected CommerceCheckoutService commerceCheckoutService;
+    protected BaseStoreService baseStoreService;
+    protected CustomerAccountService customerAccountService;
+    protected WorldlineCustomerAccountService worldlineCustomerAccountService;
+    protected CheckoutCustomerStrategy checkoutCustomerStrategy;
+    private PaymentModeService paymentModeService;
+
+    protected WorldlineUserFacade worldlineUserFacade;
+    protected WorldlinePaymentService worldlinePaymentService;
+    protected WorldlineTransactionService worldlineTransactionService;
+    protected WorldlineScheduleOrderService worldlineScheduleOrderService;
+    protected WorldlineBusinessProcessService worldlineBusinessProcessService;
+
+    protected WorldlineConfigurationService worldlineConfigurationService;
+    protected SessionService sessionService;
+
+    @Override
+    public List<PaymentProduct> getAvailablePaymentMethods() {
+        final CartData cartData = checkoutFacade.getCheckoutCart();
+
+        final PriceData totalPrice = cartData.getTotalPrice();
+        List<PaymentProduct> paymentProducts = worldlinePaymentService.getPaymentProducts(totalPrice.getValue(),
+                totalPrice.getCurrencyIso(),
+                getCountryCode(cartData),
+                getShopperLocale(false),
+                cartData.isReplenishmentOrder());
+
+        return paymentProducts;
+    }
+
+    @Override
+    public Boolean checkForCardPaymentMethods(List<PaymentProduct> paymentProducts) {
+        for (PaymentProduct paymentProduct : paymentProducts) {
+            if (StringUtils.equals(paymentProduct.getPaymentMethod(), WorldlinegopaycoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue())) {
+                return Boolean.TRUE;
+            }
+        }
+
+        return Boolean.FALSE;
+    }
+
+    @Override
+    public PaymentProduct getPaymentMethodById(int paymentId) {
+        if (paymentId == PAYMENT_METHOD_HTP) {
+            return createHtpGroupedCardPaymentProduct();
+        } else if (paymentId == WorldlinegopaycoreConstants.PAYMENT_METHOD_HCP) {
+            return createHcpGroupedCardPaymentProduct();
+        } else if (paymentId == WorldlinegopaycoreConstants.PAYMENT_METHOD_GROUP_CARDS) {
+            return createGroupCartPaymentProduct();
+        } else if (paymentId == WorldlinegopaycoreConstants.PAYMENT_METHOD_PAY_BY_LINK) {
+            return createPayByLinkPaymentProduct();
+        }
+        final CartData cartData = checkoutFacade.getCheckoutCart();
+        final PriceData totalPrice = cartData.getTotalPrice();
+
+        return worldlinePaymentService.getPaymentProduct(paymentId,
+                totalPrice.getValue(),
+                totalPrice.getCurrencyIso(),
+                getCountryCode(cartData),
+                getShopperLocale(false));
+    }
+
+    @Override
+    public CreateHostedTokenizationResponse createHostedTokenization() {
+        final List<WorldlinePaymentInfoData> worldlinePaymentInfos = worldlineUserFacade.getWorldlinePaymentInfos(true);
+        final List<String> savedTokens = worldlinePaymentInfos.stream().map(WorldlinePaymentInfoData::getToken).collect(Collectors.toList());
+        final CreateHostedTokenizationResponse hostedTokenization = worldlinePaymentService.createHostedTokenization(getShopperLocale(true), savedTokens, userService.isAnonymousUser(userService.getCurrentUser()));
+        hostedTokenization.setPartialRedirectUrl(WorldlineUrlUtils.buildFullURL(hostedTokenization.getPartialRedirectUrl()));
+        if (CollectionUtils.isNotEmpty(hostedTokenization.getInvalidTokens())) {
+            LOGGER.warn("[ WORLDLINE ] invalid tokens : {}", hostedTokenization.getInvalidTokens());
+            worldlinePaymentInfos.stream()
+                    .filter(infoData -> hostedTokenization.getInvalidTokens().contains(infoData.getToken()))
+                    .map(WorldlinePaymentInfoData::getCode)
+                    .forEach(code -> worldlineUserFacade.deleteSavedWorldlinePaymentInfo(code));
+        }
+        return hostedTokenization;
+    }
+
+    @Override
+    public void fillWorldlinePaymentInfoData(final WorldlinePaymentInfoData worldlinePaymentInfoData,
+                                             String savedPaymentCode,
+                                             Integer paymentId,
+                                             String hostedTokenizationId) throws WorldlineNonValidPaymentProductException {
+
+        if (WorldlinegopaycoreConstants.PAYMENT_METHOD_PAY_BY_LINK == paymentId) {
+            if (!isAssistedServiceSession()) {
+                throw new WorldlineNonValidPaymentProductException(paymentId);
+            }
+            final PaymentProduct paymentProduct = createPayByLinkPaymentProduct();
+            worldlinePaymentInfoData.setSavedPayment(StringUtils.EMPTY);
+            worldlinePaymentInfoData.setId(paymentProduct.getId());
+            worldlinePaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
+            worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
+            worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.PAY_BY_LINK);
+            return;
+        }
+
+        final PaymentProduct paymentProduct = getPaymentMethodById(paymentId);
+        if (BooleanUtils.isTrue(isValidPaymentMethod(paymentProduct))) {
+            worldlinePaymentInfoData.setSavedPayment(StringUtils.defaultString(savedPaymentCode, StringUtils.EMPTY));
+            worldlinePaymentInfoData.setId(paymentProduct.getId());
+            worldlinePaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
+            if (paymentId == PAYMENT_METHOD_HTP) {
+                worldlinePaymentInfoData.setHostedTokenizationId(hostedTokenizationId);
+                worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
+            } else if (paymentId == WorldlinegopaycoreConstants.PAYMENT_METHOD_GOOGLEPAY) {
+                worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
+                worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.GOOGLE_PAY);
+            } else {
+                worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
+                worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT);
+            }
+        } else {
+            throw new WorldlineNonValidPaymentProductException(paymentId);
+        }
+    }
+
+    @Override
+    public void authorisePaymentForHostedTokenization(String orderCode, WorldlineHostedTokenizationData worldlineHostedTokenizationData) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        final CreatePaymentResponse paymentForHostedTokenization = worldlinePaymentService.createPaymentForHostedTokenization(orderForCode, worldlineHostedTokenizationData);
+
+        cleanHostedCheckoutId();
+        final PaymentResponse payment = paymentForHostedTokenization.getPayment();
+        savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION, payment);
+        if (paymentForHostedTokenization.getMerchantAction() != null) {
+            updatePaymentInfoIfNeeded(orderForCode, payment);
+            storeReturnMac(orderForCode, paymentForHostedTokenization.getMerchantAction().getRedirectData().getRETURNMAC());
+            throw new WorldlineNonAuthorizedPaymentException(payment,
+                    paymentForHostedTokenization.getMerchantAction(),
+                    WorldlinegopaycoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
+        }
+        handlePaymentResponse(orderForCode, payment);
+
+    }
+
+    @Override
+    public void authorisePaymentForGooglePay(String orderCode, BrowserData browserData) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        final WorldlineHostedTokenizationData paymentData = new WorldlineHostedTokenizationData();
+        paymentData.setBrowserData(browserData);
+        final CreatePaymentResponse paymentForGooglePay;
+        try {
+            storeGooglePayDeviceContext(browserData);
+            paymentForGooglePay = worldlinePaymentService.createPaymentForHostedTokenization(orderForCode, paymentData);
+        } finally {
+            clearGooglePayPaymentSessionData();
+        }
+
+        cleanHostedCheckoutId();
+        final PaymentResponse payment = paymentForGooglePay.getPayment();
+        savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.GOOGLE_PAY, payment);
+        if (paymentForGooglePay.getMerchantAction() != null) {
+            updatePaymentInfoIfNeeded(orderForCode, payment);
+            storeReturnMac(orderForCode, paymentForGooglePay.getMerchantAction().getRedirectData().getRETURNMAC());
+            throw new WorldlineNonAuthorizedPaymentException(payment,
+                  paymentForGooglePay.getMerchantAction(),
+                  WorldlinegopaycoreConstants.UNAUTHORIZED_REASON.NEED_3DS);
+        }
+        handlePaymentResponse(orderForCode, payment);
+    }
+
+
+    public void handle3dsResponse(String orderCode, String paymentId, Boolean isRecurring) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        final PaymentResponse payment = worldlinePaymentService.getPayment(paymentId);
+
+        if (isRecurring) {
+            saveSurchargeData(orderForCode, payment);
+            savePaymentToken(orderForCode, payment, Boolean.TRUE, orderForCode.getSchedulingCronJob().getCode());
+            saveMandateIfNeeded(orderForCode.getStore().getUid(), (WorldlinePaymentInfoModel) orderForCode.getSchedulingCronJob().getPaymentInfo(), payment);
+        }
+        handlePaymentResponse(orderForCode, payment);
+    }
+
+    @Override
+    public CreateHostedCheckoutResponse createHostedCheckout(String orderCode, BrowserData browserData) throws InvalidCartException {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        final CreateHostedCheckoutResponse hostedCheckout = worldlinePaymentService.createHostedCheckout(orderForCode, browserData);
+        storeReturnMac(orderForCode, hostedCheckout.getRETURNMAC());
+        hostedCheckout.setPartialRedirectUrl(WorldlineUrlUtils.buildFullURL(hostedCheckout.getPartialRedirectUrl()));
+        return hostedCheckout;
+    }
+
+    @Override
+    public PaymentLinkResponse createPaymentLink(String orderCode) throws InvalidCartException {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        final PaymentLinkResponse paymentLink = worldlinePaymentService.createPaymentLink(orderForCode);
+        storePaymentLink(orderForCode, paymentLink);
+        return paymentLink;
+    }
+
+    protected void storePaymentLink(OrderModel orderModel, PaymentLinkResponse paymentLink) {
+        if (paymentLink == null || !(orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
+            return;
+        }
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
+        paymentInfo.setPaymentLinkId(paymentLink.getPaymentLinkId());
+        paymentInfo.setPaymentLinkRedirectionUrl(paymentLink.getRedirectionUrl());
+        paymentInfo.setPaymentLinkStatus(paymentLink.getStatus());
+        paymentInfo.setPaymentLinkPaymentId(paymentLink.getPaymentId());
+        paymentInfo.setPaymentLinkReusable(paymentLink.getIsReusableLink());
+        if (paymentLink.getExpirationDate() != null) {
+            paymentInfo.setPaymentLinkExpirationDate(Date.from(paymentLink.getExpirationDate().toInstant()));
+        }
+        orderModel.setPaymentStatus(PaymentStatus.WORLDLINE_WAITING_AUTH);
+        modelService.saveAll(paymentInfo, orderModel);
+    }
+
+
+    @Override
+    public void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId, Boolean isRecurring) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+        GetHostedCheckoutResponse hostedCheckoutData = worldlinePaymentService.getHostedCheckout(hostedCheckoutId);
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        switch (WorldlinegopaycoreConstants.HOSTED_CHECKOUT_STATUS_ENUM.valueOf(hostedCheckoutData.getStatus())) {
+            case CANCELLED_BY_CONSUMER:
+            case CLIENT_NOT_ELIGIBLE_FOR_SELECTED_PAYMENT_PRODUCT:
+                cancelOrder(orderForCode);
+                throw new WorldlineNonAuthorizedPaymentException(WorldlinegopaycoreConstants.UNAUTHORIZED_REASON.CANCELLED);
+            case IN_PROGRESS:
+                throw new WorldlineNonAuthorizedPaymentException(WorldlinegopaycoreConstants.UNAUTHORIZED_REASON.IN_PROGRESS);
+            case PAYMENT_CREATED:
+                if (hostedCheckoutData.getCreatedPaymentOutput().getPayment().getStatusOutput().getStatusCode() == 55) { // there was partial payment of the order
+                    cancelOrder(orderForCode);
+                    throw new WorldlineNonAuthorizedPaymentException(WorldlinegopaycoreConstants.UNAUTHORIZED_REASON.CANCELLED);
+                }
+                saveSurchargeData(orderForCode.getSchedulingCronJob() != null ? orderForCode.getSchedulingCronJob().getCart() : orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                savePaymentToken(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment(), isRecurring, isRecurring ? orderForCode.getSchedulingCronJob().getCode() : StringUtils.EMPTY);
+                saveMandateIfNeeded(orderForCode.getStore().getUid(), (WorldlinePaymentInfoModel) orderForCode.getPaymentInfo(), hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+                handlePaymentResponse(orderForCode, hostedCheckoutData.getCreatedPaymentOutput().getPayment());
+
+                break;
+            default:
+                LOGGER.error(String.format("Unexpected HostedCheckout Status value: %s", hostedCheckoutData.getStatus()));
+                throw new IllegalStateException(String.format("Unexpected HostedCheckout Status value: %s", hostedCheckoutData.getStatus()));
+        }
+    }
+
+    protected void savePaymentToken(AbstractOrderModel orderModel, PaymentResponse paymentData, Boolean isRecurring, String cronjobId) {
+        WorldlinePaymentInfoModel paymentInfoModel = (WorldlinePaymentInfoModel) orderModel.getPaymentInfo();
+        if (BooleanUtils.isTrue(isRecurring) && paymentData.getPaymentOutput().getMobilePaymentMethodSpecificOutput() != null) {
+            saveGooglePayRecurringReference(paymentInfoModel, paymentData, cronjobId);
+            modelService.refresh(orderModel);
+            return;
+        }
+        if (paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput() != null) {
+            if (isRecurring) {
+                final TokenResponse tokenResponse = worldlinePaymentService.getToken(
+                        paymentData.getPaymentOutput().getCardPaymentMethodSpecificOutput().getToken());
+                worldlineUserFacade.updateWorldlinePaymentInfo(paymentInfoModel, tokenResponse, cronjobId, baseStoreService.getCurrentBaseStore().getUid(), paymentData.getId());
+                modelService.refresh(orderModel);
+            } else {
+                savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum.HOSTED_CHECKOUT, paymentData);
+            }
+
+        }
+    }
+
+    private void saveGooglePayRecurringReference(WorldlinePaymentInfoModel paymentInfoModel, PaymentResponse paymentData, String cronjobId) {
+        WorldlineRecurringTokenModel tokenModel = modelService.create(WorldlineRecurringTokenModel.class);
+        tokenModel.setInitialPaymentId(paymentData.getId());
+        tokenModel.setSubscriptionID(cronjobId);
+        tokenModel.setStatus(WorldlineRecurringPaymentStatus.ACTIVE);
+        tokenModel.setStoreId(baseStoreService.getCurrentBaseStore().getUid());
+        tokenModel.setCustomer(checkoutCustomerStrategy.getCurrentUserForCheckout());
+        if (paymentData.getPaymentOutput().getMobilePaymentMethodSpecificOutput().getPaymentData() != null) {
+            MobilePaymentData paymentDataOutput = paymentData.getPaymentOutput().getMobilePaymentMethodSpecificOutput().getPaymentData();
+            tokenModel.setAlias(paymentDataOutput.getDpan());
+            tokenModel.setExpiryDate(paymentDataOutput.getExpiryDate());
+        }
+        paymentInfoModel.setWorldlineRecurringToken(tokenModel);
+        modelService.saveAll(paymentInfoModel, tokenModel);
+    }
+
+    protected void saveSurchargeData(AbstractOrderModel orderModel, PaymentResponse paymentResponse) {
+        if (paymentResponse.getPaymentOutput().getSurchargeSpecificOutput() != null) {
+            SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
+            worldlineTransactionService.savePaymentCost(orderModel, surchargeSpecificOutput.getSurchargeAmount());
+        }
+    }
+
+    protected void saveMandateIfNeeded(String storeId, WorldlinePaymentInfoModel worldlinePaymentInfoModel, PaymentResponse paymentResponse) {
+        SepaDirectDebitPaymentMethodSpecificOutput sepaDirectDebitPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getSepaDirectDebitPaymentMethodSpecificOutput();
+        if (WorldlinePaymentProductUtils.isPaymentBySepaDirectDebit(worldlinePaymentInfoModel) && sepaDirectDebitPaymentMethodSpecificOutput != null && StringUtils.isNotEmpty(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference())) {
+            GetMandateResponse mandate = worldlinePaymentService.getMandate(sepaDirectDebitPaymentMethodSpecificOutput.getPaymentProduct771SpecificOutput().getMandateReference());
+            if (mandate != null) {
+                worldlinePaymentInfoModel.setMandateDetail(createMandate(mandate.getMandate(), storeId));
+                MandatePersonalNameResponse personalName = mandate.getMandate().getCustomer().getPersonalInformation().getName();
+                worldlinePaymentInfoModel.setCardholderName(personalName.getFirstName() + " " + personalName.getSurname());
+                modelService.save(worldlinePaymentInfoModel);
+            }
+        }
+    }
+
+    private void cancelOrder(AbstractOrderModel orderForCode) {
+        orderForCode.setPaymentStatus(PaymentStatus.WORLDLINE_CANCELED);
+        modelService.save(orderForCode);
+        modelService.refresh(orderForCode);
+        worldlineBusinessProcessService.triggerOrderProcessEvent(orderForCode, WorldlinegopaycoreConstants.WORLDLINE_EVENT_PAYMENT);
+    }
+
+    private WorldlineMandateModel createMandate(MandateResponse mandateResponse, String storeId) {
+        WorldlineMandateModel worldlineMandateModel = modelService.create(WorldlineMandateModel.class);
+        try {
+            WorldlineRecurringPaymentStatus worldlineRecurringPaymentStatus = WorldlineRecurringPaymentStatus.valueOf(mandateResponse.getStatus());
+            worldlineMandateModel.setStatus(worldlineRecurringPaymentStatus);
+        } catch (IllegalArgumentException e) {
+            worldlineMandateModel.setStatus(WorldlineRecurringPaymentStatus.UNKNOWN);
+        }
+        worldlineMandateModel.setAlias(mandateResponse.getAlias());
+        worldlineMandateModel.setStoreId(storeId);
+        worldlineMandateModel.setUniqueMandateReference(mandateResponse.getUniqueMandateReference());
+        worldlineMandateModel.setCustomerReference(mandateResponse.getCustomerReference());
+        try {
+            WorldlineRecurringType worldlineRecurringType = WorldlineRecurringType.valueOf(mandateResponse.getRecurrenceType());
+            worldlineMandateModel.setRecurrenceType(worldlineRecurringType);
+        } catch (IllegalArgumentException e) {
+            worldlineMandateModel.setRecurrenceType(WorldlineRecurringType.UNKNOWN);
+        }
+        MandateCustomerResponse customer = mandateResponse.getCustomer();
+        if (customer != null) {
+            worldlineMandateModel.setCompanyName(customer.getCompanyName());
+            if (customer.getPersonalInformation() != null) {
+
+                if (StringUtils.isNotEmpty(customer.getPersonalInformation().getTitle())) {
+                    try {
+                        TitleModel title = userService.getTitleForCode(Strings.toLowerCase(customer.getPersonalInformation().getTitle()));
+                        worldlineMandateModel.setTitle(title);
+                    } catch (Exception e) {
+                        LOGGER.error(String.format("no title found for %s", customer.getPersonalInformation().getTitle()));
+                    }
+                }
+                if (customer.getPersonalInformation().getName() != null) {
+                    worldlineMandateModel.setFirstName(customer.getPersonalInformation().getName().getFirstName());
+                    worldlineMandateModel.setLastName(customer.getPersonalInformation().getName().getSurname());
+                }
+
+            }
+            if (customer.getBankAccountIban() != null) {
+                worldlineMandateModel.setIban(customer.getBankAccountIban().getIban());
+            }
+            if (customer.getContactDetails() != null) {
+                worldlineMandateModel.setEmailAddress(customer.getContactDetails().getEmailAddress());
+            }
+            if (customer.getMandateAddress() != null) {
+                MandateAddressResponse mandateAddress = customer.getMandateAddress();
+                worldlineMandateModel.setCity(mandateAddress.getCity());
+                worldlineMandateModel.setStreet(mandateAddress.getStreet());
+                worldlineMandateModel.setZip(mandateAddress.getZip());
+                worldlineMandateModel.setHouseNumber(mandateAddress.getHouseNumber());
+                if (StringUtils.isNotEmpty(mandateAddress.getCountryCode())) {
+                    try {
+                        CountryModel country = commonI18NService.getCountry(mandateAddress.getCountryCode());
+                        worldlineMandateModel.setCountry(country);
+                    } catch (UnknownIdentifierException e) {
+                        LOGGER.error("no country found for code :" + mandateAddress.getCountryCode());
+                    }
+                }
+            }
+        }
+        worldlineMandateModel.setCustomer(checkoutCustomerStrategy.getCurrentUserForCheckout());
+        modelService.save(worldlineMandateModel);
+        return worldlineMandateModel;
+    }
+
+    @Override
+    public void validateReturnMAC(AbstractOrderData orderDetails, String returnMAC) throws WorldlineNonValidReturnMACException {
+        if (orderDetails == null || orderDetails.getWorldlinePaymentInfo() == null
+                || !StringUtils.equals(returnMAC, orderDetails.getWorldlinePaymentInfo().getReturnMAC())) {
+            throw new WorldlineNonValidReturnMACException(returnMAC);
+        }
+    }
+
+
+    @Override
+    public void handlePaymentInfo(WorldlinePaymentInfoData worldlinePaymentInfoData) {
+
+        final CartModel cartModel = getCart();
+        final CommerceCheckoutParameter parameter = new CommerceCheckoutParameter();
+        parameter.setEnableHooks(Boolean.TRUE);
+        parameter.setCart(cartModel);
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(getWorldlineCheckoutType())) {
+            if (cartModel.isWorldlineReplenishmentOrder()) {
+                if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isFirstRecurringPayment()) {
+                    calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
+                }
+            } else {
+                calculateSurcharge(cartModel, worldlinePaymentInfoData.getHostedTokenizationId(), StringUtils.EMPTY, worldlinePaymentInfoData.getSavedPayment(), worldlinePaymentInfoData.getPaymentMethod());
+            }
+        }
+        parameter.setPaymentInfo(updateOrCreatePaymentInfo(cartModel, worldlinePaymentInfoData));
+
+        commerceCheckoutService.setPaymentInfo(parameter);
+    }
+
+    @Override
+    public boolean isTemporaryToken(String hostedTokenizationID) {
+        GetHostedTokenizationResponse hostedTokenizationResponse = worldlinePaymentService.getHostedTokenization(hostedTokenizationID);
+        return hostedTokenizationResponse.getToken().getIsTemporary();
+    }
+
+    public void calculateSurcharge(AbstractOrderModel cartModel, String hostedTokenizationID, String token, String savedPaymentInfoId, String paymentMethodType) {
+        final WorldlineConfigurationModel currentWorldlineConfiguration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (currentWorldlineConfiguration.isApplySurcharge() &&
+                StringUtils.equals(WorldlinegopaycoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue(), paymentMethodType)) {
+            CalculateSurchargeResponse surchargeResponse;
+            if (StringUtils.isNotEmpty(savedPaymentInfoId)) {
+                final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+                WorldlinePaymentInfoModel savedPaymentInfo = worldlineCustomerAccountService.getWorldlinePaymentInfoByCode(currentCustomer, savedPaymentInfoId);
+                surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, savedPaymentInfo.getToken(), cartModel);
+            } else {
+                surchargeResponse = worldlinePaymentService.calculateSurcharge(hostedTokenizationID, token, cartModel);
+            }
+            AmountOfMoney surcharge = surchargeResponse.getSurcharges().get(0).getSurchargeAmount();
+            worldlineTransactionService.savePaymentCost(cartModel, surcharge);
+        }
+    }
+
+
+    public void handlePaymentResponse(OrderModel orderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException {
+        switch (WorldlinegopaycoreConstants.PAYMENT_STATUS_ENUM.valueOf(paymentResponse.getStatus())) {
+            case CREATED:
+//                if (paymentResponse.getPaymentOutput().getAmountOfMoney().getAmount() == 0L) {
+//                    updateOrderFromPaymentResponse(orderModel, paymentResponse, PaymentTransactionType.AUTHORIZATION);
+//                    break;
+//                }
+                // fall through - non-zero CREATED means incomplete/abandoned
+            case REJECTED:
+            case REJECTED_CAPTURE:
+                updatePaymentInfoIfNeeded(orderModel, paymentResponse);
+                worldlineTransactionService.createAuthorizationPaymentTransaction(orderModel,
+                        paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                        paymentResponse.getId(),
+                        paymentResponse.getStatus(),
+                        paymentResponse.getPaymentOutput().getAmountOfMoney());
+                throw new WorldlineNonAuthorizedPaymentException(paymentResponse, WorldlinegopaycoreConstants.UNAUTHORIZED_REASON.REJECTED);
+            case CANCELLED:
+                updatePaymentInfoIfNeeded(orderModel, paymentResponse);
+                worldlineTransactionService.createAuthorizationPaymentTransaction(orderModel,
+                        paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                        paymentResponse.getId(),
+                        paymentResponse.getStatus(),
+                        paymentResponse.getPaymentOutput().getAmountOfMoney());
+                throw new WorldlineNonAuthorizedPaymentException(WorldlinegopaycoreConstants.UNAUTHORIZED_REASON.CANCELLED);
+            case REDIRECTED:
+            case PENDING_PAYMENT:
+            case PENDING_COMPLETION:
+            case PENDING_CAPTURE:
+            case AUTHORIZATION_REQUESTED:
+            case CAPTURE_REQUESTED:
+                updateOrderFromPaymentResponse(orderModel, paymentResponse, PaymentTransactionType.AUTHORIZATION);
+                break;
+            case CAPTURED:
+                updateOrderFromPaymentResponse(orderModel, paymentResponse, PaymentTransactionType.CAPTURE);
+                break;
+            default:
+                LOGGER.warn(String.format("Unexpected value: %s", paymentResponse.getStatus()));
+                throw new IllegalStateException("Unexpected value: " + paymentResponse.getStatus());
+        }
+    }
+
+    protected void updateOrderFromPaymentResponse(AbstractOrderModel orderModel, final PaymentResponse paymentResponse, PaymentTransactionType paymentTransactionType) {
+        updatePaymentInfoIfNeeded(orderModel, paymentResponse);
+        Integer paymentProductId = getPaymentProductIdFromPaymentOutput(paymentResponse.getPaymentOutput());
+        if (paymentProductId != null) {
+            updatePaymentMode(paymentProductId.toString(), orderModel);
+        }
+        AmountOfMoney transactionAmount = paymentResponse.getPaymentOutput().getAcquiredAmount() != null ? paymentResponse.getPaymentOutput().getAcquiredAmount() : paymentResponse.getPaymentOutput().getAmountOfMoney();
+        if (paymentResponse.getPaymentOutput().getSurchargeSpecificOutput() != null) {
+            SurchargeSpecificOutput surchargeSpecificOutput = paymentResponse.getPaymentOutput().getSurchargeSpecificOutput();
+            worldlineTransactionService.saveSurchargeData(orderModel, surchargeSpecificOutput);
+        }
+
+
+        final PaymentTransactionModel paymentTransaction = worldlineTransactionService.getOrCreatePaymentTransaction(orderModel,
+                paymentResponse.getPaymentOutput().getReferences().getMerchantReference(),
+                paymentResponse.getId());
+
+        worldlineTransactionService.updatePaymentTransaction(
+                paymentTransaction,
+                paymentResponse.getId(),
+                paymentResponse.getStatus(),
+                transactionAmount,
+                paymentTransactionType
+        );
+
+        cartService.removeSessionCart();
+        cartService.getSessionCart();
+        modelService.refresh(orderModel);
+    }
+
+    protected Integer getPaymentProductIdFromPaymentOutput(final PaymentOutput paymentOutput) {
+        if (paymentOutput == null) {
+            return null;
+        }
+
+        final MobilePaymentMethodSpecificOutput mobilePaymentMethodSpecificOutput = paymentOutput.getMobilePaymentMethodSpecificOutput();
+        if (mobilePaymentMethodSpecificOutput != null && mobilePaymentMethodSpecificOutput.getPaymentProductId() != null) {
+            return mobilePaymentMethodSpecificOutput.getPaymentProductId();
+        }
+
+        final CardPaymentMethodSpecificOutput cardPaymentMethodSpecificOutput = paymentOutput.getCardPaymentMethodSpecificOutput();
+        if (cardPaymentMethodSpecificOutput != null) {
+            return cardPaymentMethodSpecificOutput.getPaymentProductId();
+        }
+
+        final RedirectPaymentMethodSpecificOutput redirectPaymentMethodSpecificOutput = paymentOutput.getRedirectPaymentMethodSpecificOutput();
+        if (redirectPaymentMethodSpecificOutput != null) {
+            return redirectPaymentMethodSpecificOutput.getPaymentProductId();
+        }
+
+        return null;
+    }
+
+
+    @Override
+    public WorldlineCheckoutTypesEnum getWorldlineCheckoutType() {
+        final BaseStoreModel currentBaseStore = baseStoreService.getCurrentBaseStore();
+        if (currentBaseStore != null) {
+            return currentBaseStore.getWorldlineCheckoutType();
+        }
+        return null;
+    }
+
+    @Override
+    public void saveReplenishmentData(boolean replenishmentOrder, String replenishmentStartDate, String replenishmentEndDate, String nDays, String nWeeks,
+                                      String nMonths, String nthDayOfMonth, List<String> nDaysOfWeek, String replenishmentRecurrence) {
+        saveReplenishmentData(replenishmentOrder,
+                StringUtils.isNotEmpty(replenishmentStartDate) ? new Date(replenishmentStartDate) : null,
+                StringUtils.isNotEmpty(replenishmentEndDate) ? new Date(replenishmentEndDate) : null,
+                nDays,
+                nWeeks,
+                nMonths,
+                nthDayOfMonth,
+                nDaysOfWeek,
+                replenishmentRecurrence);
+    }
+
+    @Override
+    public void saveReplenishmentData(boolean replenishmentOrder, Date replenishmentStartDate, Date replenishmentEndDate, String nDays, String nWeeks,
+                                      String nMonths, String nthDayOfMonth, List<String> nDaysOfWeek, String replenishmentRecurrence) {
+        CartModel cartModel = getCart();
+        cartModel.setWorldlineReplenishmentOrder(replenishmentOrder);
+        if (replenishmentOrder) {
+            WorldlineReplenishmentOccurrenceEnum replenishmentOccurrenceEnum = WorldlineReplenishmentOccurrenceEnum.valueOf(replenishmentRecurrence);
+            cartModel.setWorldlineReplenishmentStartDate(replenishmentStartDate);
+            cartModel.setWorldlineReplenishmentEndDate(replenishmentEndDate);
+            cartModel.setWorldlineReplenishmentRecurrence(replenishmentOccurrenceEnum);
+            cartModel.setWorldlineNDays(nDays);
+            cartModel.setWorldlineNWeeks(nWeeks);
+            cartModel.setWorldlineNDaysOfWeek(replenishmentOrderDaysOfWeek(nDaysOfWeek));
+            cartModel.setWorldlineNMonths(nMonths);
+            cartModel.setWorldlineNthDayOfMonth(nthDayOfMonth);
+        }
+        if (cartModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
+            WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cartModel.getPaymentInfo();
+            paymentInfo.setRecurringToken(replenishmentOrder);
+            modelService.save(paymentInfo);
+        }
+
+        modelService.save(cartModel);
+    }
+
+    @Override
+    public PlaceOrderData prepareOrderPlacementData() {
+        return worldlinePlaceOrderConverter.convert(getCart());
+    }
+
+    private List<DayOfWeek> replenishmentOrderDaysOfWeek(List<String> nDaysOfWeek) {
+        List<DayOfWeek> result = new ArrayList<>();
+        if (nDaysOfWeek.size() > 0) {
+            for (String dayOfWeek : nDaysOfWeek) {
+                result.add(DayOfWeek.valueOf(dayOfWeek));
+            }
+        }
+        return result;
+    }
+
+    protected PaymentInfoModel updateOrCreatePaymentInfo(final CartModel cartModel, WorldlinePaymentInfoData worldlinePaymentInfoData) {
+        WorldlinePaymentInfoModel paymentInfo;
+        if (cartModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel) {
+            paymentInfo = (WorldlinePaymentInfoModel) cartModel.getPaymentInfo();
+        } else {
+            paymentInfo = modelService.create(WorldlinePaymentInfoModel.class);
+            paymentInfo.setCode(generatePaymentInfoCode(cartModel));
+            paymentInfo.setUser(cartModel.getUser());
+            paymentInfo.setSaved(false);
+        }
+        paymentInfo.setPaymentMethod(worldlinePaymentInfoData.getPaymentMethod());
+        paymentInfo.setHostedTokenizationId(worldlinePaymentInfoData.getHostedTokenizationId());
+        paymentInfo.setWorldlineCheckoutType(worldlinePaymentInfoData.getWorldlineCheckoutType());
+        paymentInfo.setGooglePayEncryptedPaymentData(worldlinePaymentInfoData.getGooglePayEncryptedPaymentData());
+        paymentInfo.setGooglePayMobileDevice(worldlinePaymentInfoData.getGooglePayMobileDevice());
+        AddressModel billingAddress = convertToAddressModel(worldlinePaymentInfoData.getBillingAddress());
+        paymentInfo.setBillingAddress(billingAddress);
+        billingAddress.setOwner(paymentInfo);
+        String paymentModeCode = StringUtils.EMPTY;
+        if (StringUtils.isNotBlank(worldlinePaymentInfoData.getSavedPayment())) {
+            final CustomerModel currentCustomer = checkoutCustomerStrategy.getCurrentUserForCheckout();
+            final WorldlinePaymentInfoModel savedPaymentInfo = worldlineCustomerAccountService.getWorldlinePaymentInfoByCode(currentCustomer, worldlinePaymentInfoData.getSavedPayment());
+            paymentInfo.setUsedSavedPayment(savedPaymentInfo);
+            paymentInfo.setId(savedPaymentInfo.getId());
+            paymentInfo.setToken(savedPaymentInfo.getToken());
+            paymentModeCode = String.valueOf(savedPaymentInfo.getId());
+        } else {
+            paymentInfo.setUsedSavedPayment(null);
+            paymentInfo.setToken(null);
+            paymentInfo.setId(worldlinePaymentInfoData.getId());
+            paymentModeCode = String.valueOf(worldlinePaymentInfoData.getId());
+        }
+        updatePaymentMode(paymentModeCode, cartModel);
+        modelService.save(paymentInfo);
+        return paymentInfo;
+    }
+
+    private void updatePaymentMode(String paymentModeCode, AbstractOrderModel abstractOrderModel) {
+        if (!virtualPaymentModes.contains(paymentModeCode)) {
+
+            Double keepPaymentCost = abstractOrderModel.getPaymentCost();
+            PaymentModeModel paymentMode = paymentModeService.getPaymentModeForCode(paymentModeCode);
+            abstractOrderModel.setPaymentMode(paymentMode);
+            modelService.save(abstractOrderModel);
+            if (worldlineConfigurationService.getCurrentWorldlineConfiguration().isApplySurcharge() || abstractOrderModel instanceof OrderModel) {
+                worldlineTransactionService.savePaymentCost(abstractOrderModel, keepPaymentCost);
+            }
+        }
+    }
+
+    protected void updatePaymentInfoIfNeeded(final AbstractOrderModel orderModel, PaymentResponse paymentResponse) {
+        if (orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel paymentInfo) {
+            final PaymentOutput paymentOutput = paymentResponse.getPaymentOutput();
+            if (paymentOutput == null) {
+                return;
+            }
+            WorldlinePaymentDetailsUtils.updatePaymentDetails(paymentInfo, paymentResponse);
+            modelService.save(paymentInfo);
+            final Integer paymentProductId = getPaymentProductIdFromPaymentOutput(paymentOutput);
+            if (paymentOutput.getRedirectPaymentMethodSpecificOutput() != null) {
+                if (Integer.valueOf(WorldlinegopaycoreConstants.PAYMENT_METHOD_MEALVOUCHER).equals(paymentInfo.getId())) {
+                    String brand = paymentOutput.getRedirectPaymentMethodSpecificOutput().getPaymentProduct5402SpecificOutput().getBrand();
+                    if (brand != null) {
+                        paymentInfo.setMealvoucherBrand(brand);
+                        modelService.save(paymentInfo);
+                    }
+                }
+            }
+            if (paymentOutput.getCardPaymentMethodSpecificOutput() != null) {
+                if ((Integer.valueOf(PAYMENT_METHOD_HTP).equals(paymentInfo.getId()) || Integer.valueOf(PAYMENT_METHOD_GROUP_CARDS).equals(paymentInfo.getId())) && paymentProductId != null) {
+                    paymentInfo.setId(paymentProductId);
+                    if (paymentInfo.isRecurringToken()) {
+                        // update cart so the recurring payments for subscription made by HTP to have valid payment method
+                        AbstractOrderModel cartModel = cartService.getSessionCart();
+                        ((WorldlinePaymentInfoModel) cartModel.getPaymentInfo()).setId(paymentProductId);
+                        modelService.save(cartModel);
+                    }
+                    modelService.save(paymentInfo);
+                    modelService.refresh(orderModel);
+                }
+            }
+        }
+    }
+
+
+    protected AddressModel convertToAddressModel(AddressData addressData) {
+        final AddressModel addressModel = modelService.create(AddressModel.class);
+        addressReverseConverter.convert(addressData, addressModel);
+
+        return addressModel;
+    }
+
+    protected String generatePaymentInfoCode(CartModel cartModel) {
+        return cartModel.getCode() + "|" + UUID.randomUUID();
+    }
+
+    protected String getShopperLocale(boolean useLocaleCodeIfAvailable) {
+        final LanguageModel currentLanguage = commonI18NService.getCurrentLanguage();
+        if (currentLanguage != null) {
+            if (useLocaleCodeIfAvailable && StringUtils.isNotBlank(currentLanguage.getLocaleCode())) {
+                return currentLanguage.getLocaleCode();
+            }
+            return commonI18NService.getLocaleForLanguage(currentLanguage).toString();
+        }
+        return Locale.ENGLISH.toString();
+    }
+
+    protected String getCountryCode(CartData cartData) {
+        AddressData deliveryAddress = cartData.getDeliveryAddress();
+        if (deliveryAddress != null) {
+            CountryData deliveryCountry = deliveryAddress.getCountry();
+            if (deliveryCountry != null) {
+                return deliveryCountry.getIsocode();
+            }
+        }
+        if (cartData.getPickupItemsQuantity() > 0) {
+            final List<PickupOrderEntryGroupData> pickupOrderGroups = cartData.getPickupOrderGroups();
+            final Optional<String> pickupCountry = pickupOrderGroups.stream()
+                    .map(PickupOrderEntryGroupData::getDeliveryPointOfService)
+                    .filter(Objects::nonNull)
+                    .map(PointOfServiceData::getAddress)
+                    .filter(Objects::nonNull)
+                    .map(AddressData::getCountry)
+                    .filter(Objects::nonNull)
+                    .map(CountryData::getIsocode)
+                    .findFirst();
+            if (pickupCountry.isPresent()) {
+                return pickupCountry.get();
+            }
+        }
+        final BaseStoreModel currentBaseStore = baseStoreService.getCurrentBaseStore();
+        if (currentBaseStore != null) {
+            final Optional<String> firstBillingCountry = currentBaseStore.getBillingCountries()
+                    .stream()
+                    .map(C2LItemModel::getIsocode)
+                    .findFirst();
+            if (firstBillingCountry.isPresent()) {
+                return firstBillingCountry.get();
+            }
+        }
+
+        return null;
+    }
+
+    protected CartModel getCart() {
+        return cartService.hasSessionCart() ? cartService.getSessionCart() : null;
+    }
+
+    protected void savePaymentTokenIfNeeded(WorldlineCheckoutTypesEnum checkoutType, PaymentResponse paymentResponse) {
+
+        String token = null;
+        final String paymentMethod = paymentResponse.getPaymentOutput().getPaymentMethod();
+        switch (WorldlinegopaycoreConstants.PAYMENT_METHOD_TYPE.fromString(paymentMethod)) {
+            case CARD:
+                final CardPaymentMethodSpecificOutput cardPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getCardPaymentMethodSpecificOutput();
+                token = cardPaymentMethodSpecificOutput.getToken();
+                break;
+            case REDIRECT:
+                final RedirectPaymentMethodSpecificOutput redirectPaymentMethodSpecificOutput = paymentResponse.getPaymentOutput().getRedirectPaymentMethodSpecificOutput();
+                token = redirectPaymentMethodSpecificOutput.getToken();
+                break;
+            case MOBILE:
+                return;
+            case DIRECT_DEBIT:
+            default:
+                return;
+        }
+
+        if (token == null) {
+            LOGGER.debug("[WORLDLINE] no token to save!");
+            return;
+        }
+        final TokenResponse tokenResponse = worldlinePaymentService.getToken(token);
+        if (tokenResponse != null && (!WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(checkoutType) || BooleanUtils.isFalse(tokenResponse.getIsTemporary()))) {
+            final PaymentProduct paymentProduct = getPaymentMethodById(tokenResponse.getPaymentProductId());
+            worldlineUserFacade.saveWorldlinePaymentInfo(checkoutType, tokenResponse, paymentProduct);
+
+        }
+    }
+
+    private PaymentProduct createHtpGroupedCardPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(PAYMENT_METHOD_HTP);
+        paymentProduct.setPaymentMethod(WorldlinegopaycoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.byCard"));
+        return paymentProduct;
+    }
+
+    private PaymentProduct createHcpGroupedCardPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(WorldlinegopaycoreConstants.PAYMENT_METHOD_HCP);
+        paymentProduct.setPaymentMethod(WorldlinegopaycoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel("");
+        return paymentProduct;
+    }
+
+    private PaymentProduct createGroupCartPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(WorldlinegopaycoreConstants.PAYMENT_METHOD_GROUP_CARDS);
+        paymentProduct.setPaymentMethod(WorldlinegopaycoreConstants.PAYMENT_METHOD_TYPE.CARD.getValue());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.groupedCards"));
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (configuration.getGroupCardsLogo() != null) {
+            paymentProduct.getDisplayHints().setLogo(configuration.getGroupCardsLogo().getURL());
+        }
+        return paymentProduct;
+    }
+
+    private PaymentProduct createPayByLinkPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(WorldlinegopaycoreConstants.PAYMENT_METHOD_PAY_BY_LINK);
+        paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel(PAY_BY_LINK_LABEL);
+        return paymentProduct;
+    }
+
+    protected boolean isAssistedServiceSession() {
+        return sessionService.getAttribute("ASM") != null;
+    }
+
+
+    private Boolean isValidPaymentMethod(PaymentProduct paymentProduct) {
+        final WorldlineCheckoutTypesEnum worldlineCheckoutType = getWorldlineCheckoutType();
+        if (WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION.equals(worldlineCheckoutType)) {
+            return paymentProduct.getId() >= 0 || paymentProduct.getId() == PAYMENT_METHOD_HTP;
+        }
+        return true;
+    }
+
+    protected void storeReturnMac(AbstractOrderModel abstractOrderModel, String returnMAC) {
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();//
+        paymentInfo.setReturnMAC(returnMAC);
+        modelService.save(paymentInfo);
+    }
+
+
+    protected void cleanHostedCheckoutId() throws InvalidCartException {
+        final CartModel cart = getCart();
+        if (cart == null || !(cart.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
+            throw new InvalidCartException("Invalid cart while storing ReturnMAC");
+        }
+        final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) cart.getPaymentInfo();//
+        paymentInfo.setHostedTokenizationId(null);
+        modelService.save(paymentInfo);
+    }
+
+    protected void storeGooglePayDeviceContext(BrowserData browserData) {
+        sessionService.setAttribute(GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY, isGooglePayPhoneDevice(browserData));
+    }
+
+    protected void clearGooglePayPaymentSessionData() {
+        sessionService.removeAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY);
+        sessionService.removeAttribute(GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY);
+    }
+
+    protected boolean isGooglePayPhoneDevice(BrowserData browserData) {
+        return browserData != null
+              && StringUtils.isNotBlank(browserData.getUserAgent())
+              && GOOGLE_PAY_PHONE_USER_AGENT_PATTERN.matcher(browserData.getUserAgent()).matches();
+    }
+
+    public void setWorldlinePlaceOrderConverter(Converter<CartModel, PlaceOrderData> worldlinePlaceOrderConverter) {
+        this.worldlinePlaceOrderConverter = worldlinePlaceOrderConverter;
+    }
+
+    public void setCommonI18NService(CommonI18NService commonI18NService) {
+        this.commonI18NService = commonI18NService;
+    }
+
+    public void setCheckoutFacade(CheckoutFacade checkoutFacade) {
+        this.checkoutFacade = checkoutFacade;
+    }
+
+    public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
+        this.worldlinePaymentService = worldlinePaymentService;
+    }
+
+    public void setCommerceCheckoutService(CommerceCheckoutService commerceCheckoutService) {
+        this.commerceCheckoutService = commerceCheckoutService;
+    }
+
+    public void setCartService(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    public void setModelService(ModelService modelService) {
+        this.modelService = modelService;
+    }
+
+    public void setAddressReverseConverter(Converter<AddressData, AddressModel> addressReverseConverter) {
+        this.addressReverseConverter = addressReverseConverter;
+    }
+
+    public void setBaseStoreService(BaseStoreService baseStoreService) {
+        this.baseStoreService = baseStoreService;
+    }
+
+    public void setWorldlineUserFacade(WorldlineUserFacade worldlineUserFacade) {
+        this.worldlineUserFacade = worldlineUserFacade;
+    }
+
+    public void setWorldlineTransactionService(WorldlineTransactionService worldlineTransactionService) {
+        this.worldlineTransactionService = worldlineTransactionService;
+    }
+
+    public void setCustomerAccountService(CustomerAccountService customerAccountService) {
+        this.customerAccountService = customerAccountService;
+    }
+
+    public void setOrderConverter(Converter<OrderModel, OrderData> orderConverter) {
+        this.orderConverter = orderConverter;
+    }
+
+    public void setWorldlineBusinessProcessService(WorldlineBusinessProcessService worldlineBusinessProcessService) {
+        this.worldlineBusinessProcessService = worldlineBusinessProcessService;
+    }
+
+
+    public void setWorldlineCustomerAccountService(WorldlineCustomerAccountService worldlineCustomerAccountService) {
+        this.worldlineCustomerAccountService = worldlineCustomerAccountService;
+    }
+
+    public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
+        this.checkoutCustomerStrategy = checkoutCustomerStrategy;
+    }
+
+    public void setPaymentModeService(PaymentModeService paymentModeService) {
+        this.paymentModeService = paymentModeService;
+    }
+
+    @Required
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public void setVirtualPaymentModes(List<String> virtualPaymentModes) {
+        this.virtualPaymentModes = virtualPaymentModes;
+    }
+
+    public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
+        this.worldlineConfigurationService = worldlineConfigurationService;
+    }
+
+    public void setWorldlineScheduleOrderService(WorldlineScheduleOrderService worldlineScheduleOrderService) {
+        this.worldlineScheduleOrderService = worldlineScheduleOrderService;
+    }
+
+    public void setSessionService(SessionService sessionService) {
+        this.sessionService = sessionService;
+    }
+}

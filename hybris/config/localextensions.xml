@@ -160,11 +160,11 @@
     <extension name='spartacussampledata' />
 
 
-    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectcore"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectb2ccheckoutaddon"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectb2bcheckoutaddon"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectbackoffice"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectocc"/>
-    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinedirectwebhook"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopaycore"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopayb2ccheckoutaddon"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopayb2bcheckoutaddon"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopaybackoffice"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopayocc"/>
+    <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopaywebhook"/>
   </extensions>
 </hybrisconfig>

@@ -1,11 +1,15 @@
-# Worldline Direct Plugin for SAP Commerce Cloud
+# Worldline GoPay Plugin for SAP Commerce Cloud
+
+> **Upgrading from Worldline Direct?** See [UPGRADE.md](UPGRADE.md). The rename
+> touches extension names, the Java package and some database values, so a
+> rebuild alone is not enough.
 
 ## Overview
 
-The Worldline Direct plugin for SAP Commerce Cloud connects your SAP Commerce (Hybris) storefront to the Worldline Online Payments platform, enabling you to accept a wide range of payment methods through a single integration. The plugin supports both B2C and B2B commerce scenarios, including recurring payments, saved payment methods, and order replenishment.
+The Worldline GoPay plugin for SAP Commerce Cloud connects your SAP Commerce (Hybris) storefront to the Worldline Online Payments platform, enabling you to accept a wide range of payment methods through a single integration. The plugin supports both B2C and B2B commerce scenarios, including recurring payments, saved payment methods, and order replenishment.
 
 **Plugin Version:** 6.0
-**Worldline SDK Version:** 6.3.1
+**Worldline SDK Version:** 8.6.0
 **Developed by:** Greenlight Commerce
 
 ## Supported Payment Methods
@@ -76,13 +80,13 @@ The plugin supports 45+ payment methods across the following categories:
 | Cheques Vacances Connect | 5403 |
 | Cpay | 5100 |
 
-> **Note:** Available payment methods depend on your Worldline merchant configuration and the countries/currencies you operate in.
+> **Note:** Available payment methods depend on your Worldline GoPay merchant configuration and the countries/currencies you operate in.
 
 ## Key Features
 
 ### Checkout Flows
 
-- **Hosted Checkout Page (HCP)** - Redirect customers to a Worldline-hosted payment page with full PCI DSS compliance
+- **Hosted Checkout Page (HCP)** - Redirect customers to a Worldline GoPay-hosted payment page with full PCI DSS compliance
 - **Hosted Tokenization Page (HTP)** - Embed a secure card entry form directly in your checkout page for a seamless experience
 
 ### Payment Operations
@@ -145,22 +149,22 @@ The plugin consists of the following extensions, all located in `hybris/bin/cust
 
 | Extension | Purpose |
 |---|---|
-| `worldlinedirectcore` | Core business logic, services, data models, and payment processing |
-| `worldlinedirectb2ccheckoutaddon` | B2C storefront checkout addon |
-| `worldlinedirectb2bcheckoutaddon` | B2B storefront checkout addon with approval workflows |
-| `worldlinedirectocc` | REST API (OCC v2) endpoints for headless commerce |
-| `worldlinedirectwebhook` | Webhook receiver for asynchronous payment notifications |
-| `worldlinedirectbackoffice` | Backoffice administration widgets |
-| `worldlinedirectcustomersupportbackoffice` | Customer support backoffice features |
-| `worldlinedirectfulfilmentprocess` | Order fulfillment process definitions |
+| `worldlinegopaycore` | Core business logic, services, data models, and payment processing |
+| `worldlinegopayb2ccheckoutaddon` | B2C storefront checkout addon |
+| `worldlinegopayb2bcheckoutaddon` | B2B storefront checkout addon with approval workflows |
+| `worldlinegopayocc` | REST API (OCC v2) endpoints for headless commerce |
+| `worldlinegopaywebhook` | Webhook receiver for asynchronous payment notifications |
+| `worldlinegopaybackoffice` | Backoffice administration widgets |
+| `worldlinegopaycustomersupportbackoffice` | Customer support backoffice features |
+| `worldlinegopayfulfilmentprocess` | Order fulfillment process definitions |
 
 ## Installation
 
 ### Prerequisites
 
 - SAP Commerce Cloud 2011 or later installed and configured
-- A Worldline Direct merchant account with API credentials
-- Access to the Worldline Merchant Portal
+- A Worldline GoPay merchant account with API credentials
+- Access to the Worldline GoPay Merchant Portal
 
 ### Step 1: Deploy the Plugin
 
@@ -171,15 +175,15 @@ Copy the `worldline` directory into your SAP Commerce installation at `hybris/bi
 Add the following extensions to your `hybris/config/localextensions.xml`:
 
 ```xml
-<extension name="worldlinedirectcore"/>
-<extension name="worldlinedirectfulfilmentprocess"/>
-<extension name="worldlinedirectwebhook"/>
-<extension name="worldlinedirectbackoffice"/>
-<extension name="worldlinedirectcustomersupportbackoffice"/>
-<extension name="worldlinedirectocc"/>
+<extension name="worldlinegopaycore"/>
+<extension name="worldlinegopayfulfilmentprocess"/>
+<extension name="worldlinegopaywebhook"/>
+<extension name="worldlinegopaybackoffice"/>
+<extension name="worldlinegopaycustomersupportbackoffice"/>
+<extension name="worldlinegopayocc"/>
 <!-- Include the addon(s) applicable to your storefront: -->
-<extension name="worldlinedirectb2ccheckoutaddon"/>
-<extension name="worldlinedirectb2bcheckoutaddon"/>
+<extension name="worldlinegopayb2ccheckoutaddon"/>
+<extension name="worldlinegopayb2bcheckoutaddon"/>
 ```
 
 ### Step 3: Install Storefront Addons
@@ -192,11 +196,11 @@ From `hybris/bin/platform/`, run:
 # Install standard accelerator addons in yacceleratorstorefront (if not already installed)
 ant addoninstall -Daddonnames="adaptivesearchsamplesaddon,assistedservicecustomerinterestsaddon,assistedservicepromotionaddon,assistedservicestorefront,assistedserviceyprofileaddon,captchaaddon,configurablebundleaddon,consignmenttrackingaddon,customercouponaddon,customercouponsamplesaddon,customerinterestsaddon,customerticketingaddon,eventtrackingwsaddon,merchandisingaddon,merchandisingstorefrontsampledataaddon,multicountrysampledataaddon,notificationaddon,ordermanagementaddon,orderselfserviceaddon,pcmbackofficesamplesaddon,personalizationaddon,personalizationsampledataaddon,personalizationyprofilesampledataaddon,profiletagaddon,selectivecartsplitlistaddon,smarteditaddon,stocknotificationaddon,textfieldconfiguratortemplateaddon,timedaccesspromotionengineaddon,timedaccesspromotionenginesamplesaddon,xyformssamples,xyformsstorefrontcommons,ysapproductconfigaddon" -DaddonStorefront.yacceleratorstorefront="yacceleratorstorefront"
 
-# Install the Worldline checkout addon for B2C storefronts
-ant addoninstall -Daddonnames="worldlinedirectb2ccheckoutaddon" -DaddonStorefront.yacceleratorstorefront="yacceleratorstorefront"
+# Install the Worldline GoPay checkout addon for B2C storefronts
+ant addoninstall -Daddonnames="worldlinegopayb2ccheckoutaddon" -DaddonStorefront.yacceleratorstorefront="yacceleratorstorefront"
 
-# Install the Worldline checkout addon for B2B storefronts
-ant addoninstall -Daddonnames="worldlinedirectb2bcheckoutaddon" -DaddonStorefront.yacceleratorstorefront="yb2bacceleratorstorefront"
+# Install the Worldline GoPay checkout addon for B2B storefronts
+ant addoninstall -Daddonnames="worldlinegopayb2bcheckoutaddon" -DaddonStorefront.yb2bacceleratorstorefront="yb2bacceleratorstorefront"
 ```
 
 ### Step 4: Build and Initialize
@@ -229,7 +233,7 @@ website.powertools.https=https\://powertools.local\:9002/yb2bacceleratorstorefro
 # OCC
 occ.rewrite.overlapping.paths.enabled=true
 
-# Worldline Hosted Tokenization JS
+# Worldline GoPay Hosted Tokenization JS
 worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js
 ```
 
@@ -237,7 +241,7 @@ worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hos
 
 ### Merchant Configuration
 
-Create your Worldline merchant configuration using the following ImpEx:
+Create your Worldline GoPay merchant configuration using the following ImpEx:
 
 ```impex
 INSERT_UPDATE WorldlineConfiguration ; merchantID[unique=true] ; apiKey       ; apiSecret       ; webhookKeyId   ; webhookSecret   ; variant          ; defaultOperationCode(code) ; endpointURL
@@ -246,14 +250,14 @@ INSERT_UPDATE WorldlineConfiguration ; merchantID[unique=true] ; apiKey       ; 
 
 | Field | Description |
 |---|---|
-| `merchantID` | Your Worldline merchant identifier |
-| `apiKey` | API key from the Worldline Merchant Portal |
-| `apiSecret` | API secret from the Worldline Merchant Portal |
+| `merchantID` | Your Worldline GoPay merchant identifier |
+| `apiKey` | API key from the Worldline GoPay Merchant Portal |
+| `apiSecret` | API secret from the Worldline GoPay Merchant Portal |
 | `webhookKeyId` | Webhook key ID for signature verification |
 | `webhookSecret` | Webhook secret for signature verification |
 | `variant` | Hosted Tokenization Page template (e.g. `HTPTemplate.html`) |
 | `defaultOperationCode` | `SALE` for immediate capture, or `FINAL_AUTHORIZATION` for authorize-then-capture |
-| `endpointURL` | Worldline API endpoint URL |
+| `endpointURL` | Worldline GoPay API endpoint URL |
 
 ### Assign Configuration to BaseStore
 
@@ -266,7 +270,7 @@ UPDATE BaseStore ; uid[unique=true] ; paymentProvider ; checkoutFlowGroup       
 
 ### Hosted Tokenization JavaScript
 
-Add the Worldline tokenization JavaScript URL to `hybris/config/local.properties`:
+Add the Worldline GoPay tokenization JavaScript URL to `hybris/config/local.properties`:
 
 ```properties
 # Pre-production / sandbox
@@ -278,13 +282,18 @@ worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hos
 
 ### Webhook Endpoint
 
-Configure your webhook endpoint in the Worldline Merchant Portal. The plugin exposes the following URL:
+Configure your webhook endpoint in the Worldline GoPay Merchant Portal. The plugin exposes the following URL:
 
 ```
-https://<your-domain>/worldlinedirectwebhook/webhook
+https://<your-domain>/worldline/webhook
 ```
 
-Ensure this URL is accessible from the Worldline platform and configure the webhook key ID and secret in your merchant configuration.
+> **Note:** The webhook path is `/worldline/webhook`, taken from the `webroot`
+> declared in `worldlinegopaywebhook/extensioninfo.xml`. It does **not** contain
+> the extension name, so it is unchanged by the GoPay rename and existing
+> merchants do not need to update the endpoint configured in the Merchant Portal.
+
+Ensure this URL is accessible from the Worldline GoPay platform and configure the webhook key ID and secret in your merchant configuration.
 
 ### Advanced Configuration Options
 
@@ -314,13 +323,13 @@ To enable the saved payment methods page in the storefront My Account section, r
 ```impex
 $contentCatalog = <your-site>ContentCatalog
 $contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
-$jspPath = /WEB-INF/views/addons/worldlinedirectb2ccheckoutaddon/responsive/pages/account/payment-details/worldlineAccountPaymentInfoPage.jsp
+$jspPath = /WEB-INF/views/addons/worldlinegopayb2ccheckoutaddon/responsive/pages/account/payment-details/worldlineAccountPaymentInfoPage.jsp
 
 UPDATE CMSLinkComponent ; $contentCV[unique=true] ; uid[unique=true]   ; name                              ; url
                         ;                         ; PaymentDetailsLink ; WorldlineAccountPaymentDetailsLink ; /my-account/worldline/payment-details
 
 INSERT_UPDATE JspIncludeComponent ; $contentCV[unique=true] ; uid[unique=true]               ; name                                       ; page
-                                  ;                         ; AccountPaymentDetailsComponent ; Worldline Account Payment Details Component ; $jspPath
+                                  ;                         ; AccountPaymentDetailsComponent ; Worldline GoPay Account Payment Details Component ; $jspPath
 ```
 
 Remember to synchronize the content catalog after importing into the Staged version.
@@ -395,13 +404,13 @@ The plugin includes the following cronjobs that are created automatically during
 
 | Job | Purpose |
 |---|---|
-| `WorldlineProcessWebhooksEventJob` | Processes queued webhook events from Worldline |
+| `WorldlineProcessWebhooksEventJob` | Processes queued webhook events from Worldline GoPay |
 | `WorldlineAutomaticCaptureJob` | Automatically captures authorized payments after the configured `captureTimeFrame` |
 | `WorldlineAcceleratorCartToOrderJob` | Converts replenishment carts into orders on their scheduled dates |
 
 ## Support
 
-For technical support and documentation, contact your Worldline account representative or visit the [Worldline Developer Portal](https://docs.direct.worldline-solutions.com/).
+For technical support and documentation, contact your Worldline GoPay account representative or visit the [Worldline GoPay Developer Portal](https://docs.direct.worldline-solutions.com/).
 
 ## License
 
