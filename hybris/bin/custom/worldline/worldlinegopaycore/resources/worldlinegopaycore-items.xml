@@ -279,6 +279,13 @@
                     <modifiers read="true" write="true" optional="false" />
                     <defaultvalue>Integer.valueOf(168)</defaultvalue>
                 </attribute>
+                <attribute qualifier="paymentLinkReturnUrl" type="java.lang.String">
+                    <description>Optional page the customer is redirected to after paying via a Pay By Link. Either a
+                    site-relative path (e.g. /payment-complete) or a full absolute URL. If blank, no returnUrl is sent
+                    to Worldline GoPay and the customer is not redirected back to the storefront.</description>
+                    <persistence type="property" />
+                    <modifiers read="true" write="true" optional="true" />
+                </attribute>
             </attributes>
         </itemtype>
 
