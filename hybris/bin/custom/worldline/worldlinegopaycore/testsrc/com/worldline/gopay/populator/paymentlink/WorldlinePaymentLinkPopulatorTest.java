@@ -10,6 +10,8 @@ import com.onlinepayments.domain.RedirectPaymentMethodSpecificInput;
 import com.onlinepayments.domain.RedirectionData;
 import com.worldline.gopay.model.WorldlineConfigurationModel;
 import de.hybris.bootstrap.annotations.UnitTest;
+import de.hybris.platform.acceleratorservices.urlresolver.SiteBaseUrlResolutionService;
+import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
@@ -49,7 +51,7 @@ public class WorldlinePaymentLinkPopulatorTest {
     }
 
     @Test
-    public void populateNeverSendsReturnUrlBecauseCustomerIsNotRedirectedBack() {
+    public void populateSendsNoReturnUrlWhenNoReturnPageIsConfigured() {
         WorldlinePaymentLinkPopulator populator = new WorldlinePaymentLinkPopulator();
         CreateHostedCheckoutRequest hostedCheckoutRequest = hostedCheckoutRequest();
         hostedCheckoutRequest.getHostedCheckoutSpecificInput().setReturnUrl("https://shop.example/worldline/payment-link/return/ORDER-100");
@@ -78,6 +80,82 @@ public class WorldlinePaymentLinkPopulatorTest {
         populator.populate(order(168), paymentLinkRequest);
 
         assertNull(paymentLinkRequest.getHostedCheckoutSpecificInput().getTokens());
+    }
+
+    @Test
+    public void populateResolvesConfiguredSiteRelativePathAgainstTheOrdersBaseSite() {
+        WorldlinePaymentLinkPopulator populator = new WorldlinePaymentLinkPopulator();
+        CreateHostedCheckoutRequest hostedCheckoutRequest = hostedCheckoutRequestWithRedirectionData();
+        populator.setWorldlineHostedCheckoutParamConverter(converter(hostedCheckoutRequest));
+        RecordingSiteBaseUrlResolutionService urlResolver = new RecordingSiteBaseUrlResolutionService("https://shop.example/payment-complete");
+        populator.setSiteBaseUrlResolutionService(urlResolver);
+
+        AbstractOrderModel order = order(168);
+        BaseSiteModel site = new BaseSiteModel();
+        order.setSite(site);
+        order.getStore().getWorldlineConfiguration().setPaymentLinkReturnUrl("/payment-complete");
+
+        CreatePaymentLinkRequest paymentLinkRequest = new CreatePaymentLinkRequest();
+        populator.populate(order, paymentLinkRequest);
+
+        assertEquals("https://shop.example/payment-complete", paymentLinkRequest.getHostedCheckoutSpecificInput().getReturnUrl());
+        assertEquals("https://shop.example/payment-complete", paymentLinkRequest.getRedirectPaymentMethodSpecificInput().getRedirectionData().getReturnUrl());
+        assertSame(site, urlResolver.site);
+        assertTrue(urlResolver.secure);
+        assertEquals("/payment-complete", urlResolver.path);
+    }
+
+    @Test
+    public void populatePrependsSlashToAConfiguredPathThatOmitsIt() {
+        WorldlinePaymentLinkPopulator populator = new WorldlinePaymentLinkPopulator();
+        populator.setWorldlineHostedCheckoutParamConverter(converter(hostedCheckoutRequestWithRedirectionData()));
+        RecordingSiteBaseUrlResolutionService urlResolver = new RecordingSiteBaseUrlResolutionService("https://shop.example/payment-complete");
+        populator.setSiteBaseUrlResolutionService(urlResolver);
+
+        AbstractOrderModel order = order(168);
+        order.setSite(new BaseSiteModel());
+        order.getStore().getWorldlineConfiguration().setPaymentLinkReturnUrl("payment-complete");
+
+        populator.populate(order, new CreatePaymentLinkRequest());
+
+        assertEquals("/payment-complete", urlResolver.path);
+    }
+
+    @Test
+    public void populateSendsAConfiguredAbsoluteUrlWithoutResolvingIt() {
+        WorldlinePaymentLinkPopulator populator = new WorldlinePaymentLinkPopulator();
+        CreateHostedCheckoutRequest hostedCheckoutRequest = hostedCheckoutRequestWithRedirectionData();
+        populator.setWorldlineHostedCheckoutParamConverter(converter(hostedCheckoutRequest));
+        RecordingSiteBaseUrlResolutionService urlResolver = new RecordingSiteBaseUrlResolutionService("https://shop.example/resolved");
+        populator.setSiteBaseUrlResolutionService(urlResolver);
+
+        AbstractOrderModel order = order(168);
+        order.setSite(new BaseSiteModel());
+        order.getStore().getWorldlineConfiguration().setPaymentLinkReturnUrl("https://thanks.example/payment-complete");
+
+        CreatePaymentLinkRequest paymentLinkRequest = new CreatePaymentLinkRequest();
+        populator.populate(order, paymentLinkRequest);
+
+        assertEquals("https://thanks.example/payment-complete", paymentLinkRequest.getHostedCheckoutSpecificInput().getReturnUrl());
+        assertEquals("https://thanks.example/payment-complete", paymentLinkRequest.getRedirectPaymentMethodSpecificInput().getRedirectionData().getReturnUrl());
+        assertNull(urlResolver.site);
+    }
+
+    @Test
+    public void populateSendsNoReturnUrlWhenARelativePathIsConfiguredButTheOrderHasNoSite() {
+        WorldlinePaymentLinkPopulator populator = new WorldlinePaymentLinkPopulator();
+        CreateHostedCheckoutRequest hostedCheckoutRequest = hostedCheckoutRequestWithRedirectionData();
+        populator.setWorldlineHostedCheckoutParamConverter(converter(hostedCheckoutRequest));
+        populator.setSiteBaseUrlResolutionService(new RecordingSiteBaseUrlResolutionService("https://shop.example/payment-complete"));
+
+        AbstractOrderModel order = order(168);
+        order.getStore().getWorldlineConfiguration().setPaymentLinkReturnUrl("/payment-complete");
+
+        CreatePaymentLinkRequest paymentLinkRequest = new CreatePaymentLinkRequest();
+        populator.populate(order, paymentLinkRequest);
+
+        assertNull(paymentLinkRequest.getHostedCheckoutSpecificInput().getReturnUrl());
+        assertNull(paymentLinkRequest.getRedirectPaymentMethodSpecificInput().getRedirectionData().getReturnUrl());
     }
 
     private AbstractOrderModel order(Integer expirationHours) {
@@ -125,5 +203,60 @@ public class WorldlinePaymentLinkPopulatorTest {
         request.setOrder(order);
         request.setHostedCheckoutSpecificInput(hostedCheckoutSpecificInput);
         return request;
+    }
+
+    private CreateHostedCheckoutRequest hostedCheckoutRequestWithRedirectionData() {
+        CreateHostedCheckoutRequest request = hostedCheckoutRequest();
+        RedirectionData redirectionData = new RedirectionData();
+        redirectionData.setReturnUrl("https://shop.example/worldline/payment-link/return/ORDER-100");
+        RedirectPaymentMethodSpecificInput redirectInput = new RedirectPaymentMethodSpecificInput();
+        redirectInput.setRedirectionData(redirectionData);
+        request.setRedirectPaymentMethodSpecificInput(redirectInput);
+        return request;
+    }
+
+    private static class RecordingSiteBaseUrlResolutionService implements SiteBaseUrlResolutionService {
+
+        private final String websiteUrl;
+        private BaseSiteModel site;
+        private boolean secure;
+        private String path;
+
+        private RecordingSiteBaseUrlResolutionService(String websiteUrl) {
+            this.websiteUrl = websiteUrl;
+        }
+
+        @Override
+        public String getWebsiteUrlForSite(BaseSiteModel site, boolean secure, String path) {
+            this.site = site;
+            this.secure = secure;
+            this.path = path;
+            return websiteUrl;
+        }
+
+        @Override
+        public String getMediaUrlForSite(BaseSiteModel site, boolean secure) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getMediaUrlForSite(BaseSiteModel site, boolean secure, String path) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getWebsiteUrlForSite(BaseSiteModel site, boolean secure, String path, String queryParams) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getWebsiteUrlForSite(BaseSiteModel site, String encodingAttributes, boolean secure, String path) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getWebsiteUrlForSite(BaseSiteModel site, String encodingAttributes, boolean secure, String path, String queryParams) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

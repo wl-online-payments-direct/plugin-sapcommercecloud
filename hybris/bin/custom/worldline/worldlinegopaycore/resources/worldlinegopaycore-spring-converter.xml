@@ -111,6 +111,7 @@
     <bean id="worldlinePaymentLinkPopulator"
           class="com.worldline.gopay.populator.paymentlink.WorldlinePaymentLinkPopulator">
         <property name="worldlineHostedCheckoutParamConverter" ref="worldlineHostedCheckoutParamConverter"/>
+        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
         <property name="displayQRCode" value="true"/>
     </bean>
 
