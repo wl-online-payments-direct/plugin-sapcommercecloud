@@ -93,6 +93,7 @@
 
     <bean id="worldlineHostedCheckoutMobilePopulator"
           class="com.worldline.gopay.populator.hostedcheckout.WorldlineHostedCheckoutMobilePopulator">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
     </bean>
 
     <bean id="worldlineHostedCheckoutParamConverter" parent="abstractPopulatingConverter">
