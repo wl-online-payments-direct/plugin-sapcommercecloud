@@ -44,7 +44,7 @@ INSERT_UPDATE StandardPaymentMode; code[unique = true]; name[lang = en]         
                                  ; 5003               ; Linxo Connect                 ; Linxo Connect                 ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
                                  ; 5300               ; Sofinco                       ; Sofinco                       ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
                                  ; 900                ; Wero                          ; Wero                          ; true  ; false     ; false   ; false       ; WorldlinePaymentInfo
-
+                                 ; 5410               ; in3                           ; in3                           ; true  ; false     ; true    ; false       ; WorldlinePaymentInfo
 INSERT_UPDATE OneyPaymentMode; code[unique = true]; name[lang = en]   ; description[lang = en]; active; intersolve; saleOnly; overrideName; paymentOption; paymentinfotype(code);
                              ; 5127               ; Oney Card         ; Oney Card             ; true  ; false     ; false   ; false       ; 0            ; WorldlinePaymentInfo
                              ; 5128               ; Oney Branded Card ; Oney Branded Card     ; false ; false     ; false   ; false       ; 0            ; WorldlinePaymentInfo
