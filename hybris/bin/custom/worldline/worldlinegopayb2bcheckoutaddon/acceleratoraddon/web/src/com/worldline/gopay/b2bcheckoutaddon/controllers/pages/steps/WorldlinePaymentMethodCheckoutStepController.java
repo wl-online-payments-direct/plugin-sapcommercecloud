@@ -19,6 +19,7 @@ import com.worldline.gopay.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.gopay.facade.WorldlineCheckoutFacade;
 import com.worldline.gopay.facade.WorldlineUserFacade;
 import com.worldline.gopay.factory.WorldlinePaymentProductFilterStrategyFactory;
+import com.worldline.gopay.model.WorldlineConfigurationModel;
 import com.worldline.gopay.order.data.WorldlinePaymentInfoData;
 import com.worldline.gopay.service.WorldlineConfigurationService;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
@@ -241,6 +242,10 @@ public class    WorldlinePaymentMethodCheckoutStepController extends AbstractChe
         paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
         paymentProduct.getDisplayHints().setLabel(getMessageSource().getMessage("checkout.multi.paymentLink.paymentMethod", null, getI18nService().getCurrentLocale()));
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (configuration != null && configuration.getPaymentLinkLogo() != null) {
+            paymentProduct.getDisplayHints().setLogo(configuration.getPaymentLinkLogo().getURL());
+        }
         return paymentProduct;
     }
 

@@ -301,6 +301,10 @@ public class SelectWorldlinePaymentMethodCheckoutStepController extends Abstract
         paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
         paymentProduct.getDisplayHints().setLabel(getMessageSource().getMessage("checkout.multi.paymentLink.paymentMethod", null, getI18nService().getCurrentLocale()));
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (configuration != null && configuration.getPaymentLinkLogo() != null) {
+            paymentProduct.getDisplayHints().setLogo(configuration.getPaymentLinkLogo().getURL());
+        }
         return paymentProduct;
     }
 

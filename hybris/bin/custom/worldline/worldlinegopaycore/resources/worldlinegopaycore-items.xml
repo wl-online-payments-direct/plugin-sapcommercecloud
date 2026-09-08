@@ -286,6 +286,12 @@
                     <persistence type="property" />
                     <modifiers read="true" write="true" optional="true" />
                 </attribute>
+                <attribute qualifier="paymentLinkLogo" type="Media">
+                    <description>Logo shown next to the Pay By Link payment method on the payment methods page. If
+                    blank, the payment method is rendered without a logo.</description>
+                    <persistence type="property" />
+                    <modifiers read="true" write="true" optional="true" />
+                </attribute>
             </attributes>
         </itemtype>
 

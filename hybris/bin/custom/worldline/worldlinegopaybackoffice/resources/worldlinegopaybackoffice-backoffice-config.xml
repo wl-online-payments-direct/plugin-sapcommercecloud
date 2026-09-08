@@ -113,6 +113,11 @@
 				<ea:section name="hmc.worldline.worldlineWeroConfig">
 					<ea:attribute qualifier="weroCaptureTrigger"/>
 				</ea:section>
+				<ea:section name="hmc.worldline.worldlinePayByLinkConfig">
+					<ea:attribute qualifier="paymentLinkLogo"/>
+					<ea:attribute qualifier="paymentLinkExpirationHours"/>
+					<ea:attribute qualifier="paymentLinkReturnUrl"/>
+				</ea:section>
 				<ea:section name="hmc.worldline.worldlineMerchantConfig">
 					<ea:attribute qualifier="merchantName"/>
 				</ea:section>
