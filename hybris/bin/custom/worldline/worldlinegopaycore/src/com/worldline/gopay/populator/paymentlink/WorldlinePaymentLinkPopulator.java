@@ -12,7 +12,6 @@ import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,7 @@ public class WorldlinePaymentLinkPopulator implements Populator<AbstractOrderMod
         createPaymentLinkRequest.setFraudFields(hostedCheckoutRequest.getFraudFields());
         createPaymentLinkRequest.setFeedbacks(hostedCheckoutRequest.getFeedbacks());
         createPaymentLinkRequest.setIsReusableLink(Boolean.FALSE);
-        createPaymentLinkRequest.setDisplayQRCode(BooleanUtils.toBooleanObject(displayQRCode));
+        createPaymentLinkRequest.setDisplayQRCode(Boolean.valueOf(displayQRCode));
         createPaymentLinkRequest.setPaymentLinkSpecificInput(getPaymentLinkSpecificInput(abstractOrderModel));
     }
 
