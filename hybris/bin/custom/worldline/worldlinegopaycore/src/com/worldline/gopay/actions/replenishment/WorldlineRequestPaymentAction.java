@@ -14,7 +14,7 @@ import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.processengine.action.AbstractAction;
 import de.hybris.platform.processengine.model.BusinessProcessParameterModel;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;

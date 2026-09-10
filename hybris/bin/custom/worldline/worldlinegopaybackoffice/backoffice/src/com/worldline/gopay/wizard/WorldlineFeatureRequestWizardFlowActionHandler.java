@@ -7,7 +7,7 @@ import com.worldline.gopay.constants.WorldlinegopaybackofficeConstants;
 import com.worldline.gopay.dto.FeatureRequestFormBean;
 import com.worldline.gopay.model.WorldlineConfigurationModel;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;

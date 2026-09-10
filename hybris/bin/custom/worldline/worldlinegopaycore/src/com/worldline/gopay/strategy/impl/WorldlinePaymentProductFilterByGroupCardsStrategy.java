@@ -9,7 +9,7 @@ import com.worldline.gopay.strategy.WorldlinePaymentProductFilterStrategy;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 import de.hybris.platform.util.localization.Localization;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import com.worldline.gopay.enums.WorldlineCheckoutTypesEnum;
 
 import java.util.List;

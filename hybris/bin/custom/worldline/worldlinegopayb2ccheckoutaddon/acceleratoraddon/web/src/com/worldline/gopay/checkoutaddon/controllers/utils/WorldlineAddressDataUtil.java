@@ -3,7 +3,7 @@ package com.worldline.gopay.checkoutaddon.controllers.utils;
 import com.worldline.gopay.checkoutaddon.forms.WorldlineAddressForm;
 import de.hybris.platform.acceleratorstorefrontcommons.util.AddressDataUtil;
 import de.hybris.platform.commercefacades.user.data.AddressData;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component("worldlineDefaultAddressDataUtil")

@@ -19,7 +19,7 @@ import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.servicelayer.session.SessionService;
 import de.hybris.platform.site.BaseSiteService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 

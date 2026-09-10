@@ -13,7 +13,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Required;
 
 public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> {

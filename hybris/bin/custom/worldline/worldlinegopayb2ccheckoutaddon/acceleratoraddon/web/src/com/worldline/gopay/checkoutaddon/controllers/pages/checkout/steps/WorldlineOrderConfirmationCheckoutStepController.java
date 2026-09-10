@@ -28,7 +28,7 @@ import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.commerceservices.customer.DuplicateUidException;
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

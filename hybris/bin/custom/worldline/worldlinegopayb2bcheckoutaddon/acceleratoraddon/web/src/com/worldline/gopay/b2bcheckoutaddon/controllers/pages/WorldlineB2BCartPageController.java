@@ -41,7 +41,7 @@ import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.enumeration.EnumerationService;
 import de.hybris.platform.site.BaseSiteService;
 import de.hybris.platform.util.Config;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

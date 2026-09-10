@@ -8,7 +8,7 @@ import com.hybris.cockpitng.actions.CockpitAction;
 
 import de.hybris.platform.util.Config;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zk.ui.Executions;

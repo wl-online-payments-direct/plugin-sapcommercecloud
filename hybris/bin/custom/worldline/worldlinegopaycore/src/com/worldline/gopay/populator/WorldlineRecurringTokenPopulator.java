@@ -5,7 +5,7 @@ import com.worldline.gopay.order.data.WorldlineRecurringTokenData;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.enumeration.EnumerationService;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class WorldlineRecurringTokenPopulator implements Populator<WorldlineRecurringTokenModel, WorldlineRecurringTokenData> {
 

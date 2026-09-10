@@ -13,7 +13,7 @@ import de.hybris.platform.webservicescommons.dto.error.ErrorWsDTO;
 import de.hybris.platform.webservicescommons.errors.exceptions.WebserviceValidationException;
 import de.hybris.platform.webservicescommons.mapping.FieldSetLevelHelper;
 import de.hybris.platform.webservicescommons.util.YSanitizer;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

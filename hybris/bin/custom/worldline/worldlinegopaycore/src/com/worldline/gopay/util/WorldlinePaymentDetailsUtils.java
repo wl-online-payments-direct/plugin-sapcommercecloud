@@ -13,7 +13,7 @@ import com.onlinepayments.domain.PaymentStatusOutput;
 import com.onlinepayments.domain.RedirectPaymentMethodSpecificOutput;
 import com.onlinepayments.domain.ThreeDSecureResults;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public final class WorldlinePaymentDetailsUtils {
 

@@ -38,7 +38,7 @@ import de.hybris.platform.commercefacades.user.data.CountryData;
 import de.hybris.platform.commerceservices.enums.CountryType;
 import de.hybris.platform.servicelayer.session.SessionService;
 import de.hybris.platform.util.Config;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

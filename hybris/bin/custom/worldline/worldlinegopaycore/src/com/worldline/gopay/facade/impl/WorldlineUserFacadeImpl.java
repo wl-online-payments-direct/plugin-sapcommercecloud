@@ -24,7 +24,7 @@ import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.ArrayList;

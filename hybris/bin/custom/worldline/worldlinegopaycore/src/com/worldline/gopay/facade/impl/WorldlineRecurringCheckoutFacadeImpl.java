@@ -20,7 +20,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

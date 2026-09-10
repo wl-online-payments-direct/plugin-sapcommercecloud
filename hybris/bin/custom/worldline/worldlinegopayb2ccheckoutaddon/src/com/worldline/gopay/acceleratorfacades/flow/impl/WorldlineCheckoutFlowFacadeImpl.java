@@ -4,7 +4,7 @@ import com.worldline.gopay.order.data.WorldlinePaymentInfoData;
 import de.hybris.platform.acceleratorfacades.flow.impl.DefaultCheckoutFlowFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commerceservices.order.CommercePaymentProviderStrategy;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.function.Predicate;
 

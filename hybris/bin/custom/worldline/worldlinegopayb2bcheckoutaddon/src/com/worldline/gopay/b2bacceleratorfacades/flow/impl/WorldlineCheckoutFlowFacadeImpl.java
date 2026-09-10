@@ -5,7 +5,7 @@ import de.hybris.platform.b2bacceleratorfacades.order.impl.B2BMultiStepCheckoutF
 import de.hybris.platform.b2b.enums.CheckoutPaymentType;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commerceservices.order.CommercePaymentProviderStrategy;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.function.Predicate;
 

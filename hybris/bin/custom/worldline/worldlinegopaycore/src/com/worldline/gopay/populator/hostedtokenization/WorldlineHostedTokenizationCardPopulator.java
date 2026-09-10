@@ -16,7 +16,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import static com.worldline.gopay.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
