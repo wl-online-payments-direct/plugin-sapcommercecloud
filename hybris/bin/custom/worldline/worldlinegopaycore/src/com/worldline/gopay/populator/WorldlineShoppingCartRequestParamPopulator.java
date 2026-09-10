@@ -6,7 +6,6 @@ import com.worldline.gopay.factory.impl.WorldlineShoppingCartFactoriesConfigurat
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
-import org.springframework.beans.factory.annotation.Required;
 
 public class WorldlineShoppingCartRequestParamPopulator implements Populator<AbstractOrderModel, Order> {
 
@@ -19,7 +18,6 @@ public class WorldlineShoppingCartRequestParamPopulator implements Populator<Abs
 
     }
 
-    @Required
     public void setWorldlineShoppingCartFactoriesConfiguration(WorldlineShoppingCartFactoriesConfiguration worldlineShoppingCartFactoriesConfiguration) {
         this.worldlineShoppingCartFactoriesConfiguration = worldlineShoppingCartFactoriesConfiguration;
     }

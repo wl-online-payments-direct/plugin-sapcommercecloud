@@ -39,7 +39,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.*;
 
@@ -262,37 +261,30 @@ public class WorldLineExtendedB2CCheckoutFacadeImpl extends DefaultCheckoutFacad
     }
 
 
-    @Required
     public void setI18NService(I18NService i18NService) {
         this.i18NService = i18NService;
     }
 
-    @Required
     public void setBaseSiteService(BaseSiteService baseSiteService) {
         this.baseSiteService = baseSiteService;
     }
 
-    @Required
     public void setTriggerService(TriggerService triggerService) {
         this.triggerService = triggerService;
     }
 
-    @Required
     public void setScheduledCartConverter(Converter<CartToOrderCronJobModel, ScheduledCartData> scheduledCartConverter) {
         this.scheduledCartConverter = scheduledCartConverter;
     }
 
-    @Required
     public void setTriggerPopulator(Populator<TriggerData, TriggerModel> triggerPopulator) {
         this.triggerPopulator = triggerPopulator;
     }
 
-    @Required
     public void setB2bDaysOfWeekConverter(Converter<DayOfWeek, B2BDaysOfWeekData> b2bDaysOfWeekConverter) {
         this.b2bDaysOfWeekConverter = b2bDaysOfWeekConverter;
     }
 
-    @Required
     public void setWorldlineScheduleOrderService(WorldlineScheduleOrderService worldlineScheduleOrderService) {
         this.worldlineScheduleOrderService = worldlineScheduleOrderService;
     }

@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.*;
 
@@ -301,17 +300,14 @@ public class DefaultWorldLineExtendedB2BCheckoutFacadeImpl extends DefaultB2BChe
     }
 
 
-    @Required
     public void setGuidKeyGenerator(KeyGenerator guidKeyGenerator) {
         this.guidKeyGenerator = guidKeyGenerator;
     }
 
-    @Required
     public void setWorldlineScheduleOrderService(WorldlineScheduleOrderService worldlineScheduleOrderService) {
         this.worldlineScheduleOrderService = worldlineScheduleOrderService;
     }
 
-    @Required
     public void setWorldlineConfigurationService(WorldlineConfigurationService worldlineConfigurationService) {
         this.worldlineConfigurationService = worldlineConfigurationService;
     }

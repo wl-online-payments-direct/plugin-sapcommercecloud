@@ -10,7 +10,6 @@ import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 import de.hybris.platform.util.localization.Localization;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -81,17 +80,14 @@ public class WorldlinePaymentProductFilterByCheckoutStrategy implements Worldlin
         return null;
     }
 
-    @Required
     public void setWorldlineHostedCheckoutPaymentProductsEvaluatorList(List<WorldlinePaymentProductEvaluator> worldlineHostedCheckoutPaymentProductsEvaluatorList) {
         this.worldlineHostedCheckoutPaymentProductsEvaluatorList = worldlineHostedCheckoutPaymentProductsEvaluatorList;
     }
 
-    @Required
     public void setWorldlineHostedTokenizationPaymentProductsEvaluatorList(List<WorldlinePaymentProductEvaluator> worldlineHostedTokenizationPaymentProductsEvaluatorList) {
         this.worldlineHostedTokenizationPaymentProductsEvaluatorList = worldlineHostedTokenizationPaymentProductsEvaluatorList;
     }
 
-    @Required
     public void setBaseStoreService(BaseStoreService baseStoreService) {
         this.baseStoreService = baseStoreService;
     }

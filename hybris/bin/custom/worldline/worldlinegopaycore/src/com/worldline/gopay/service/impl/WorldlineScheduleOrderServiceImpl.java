@@ -15,7 +15,6 @@ import de.hybris.platform.servicelayer.cronjob.CronJobService;
 import de.hybris.platform.servicelayer.keygenerator.KeyGenerator;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.servicelayer.type.TypeService;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.List;
 
@@ -55,7 +54,6 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
         clone.setUser(cart.getUser());
         return clone;
     }
-    @Required
     protected void setCronJobToTrigger(final CronJobModel cronJob, final List<TriggerModel> triggers) {
         for (final TriggerModel trigger : triggers) {
             trigger.setCronJob(cronJob);
@@ -73,27 +71,22 @@ public class WorldlineScheduleOrderServiceImpl implements WorldlineScheduleOrder
         }
     }
 
-    @Required
     public void setModelService(ModelService modelService) {
         this.modelService = modelService;
     }
 
-    @Required
     public void setCronJobService(CronJobService cronJobService) {
         this.cronJobService = cronJobService;
     }
 
-    @Required
     public void setCartService(CartService cartService) {
         this.cartService = cartService;
     }
 
-    @Required
     public void setTypeService(TypeService typeService) {
         this.typeService = typeService;
     }
 
-    @Required
     public void setKeyGenerator(KeyGenerator keyGenerator) {
         this.keyGenerator = keyGenerator;
     }

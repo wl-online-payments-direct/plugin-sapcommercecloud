@@ -4,7 +4,6 @@ import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.gopay.service.WorldlinePaymentModeService;
 import com.worldline.gopay.strategy.WorldlinePaymentProductFilterStrategy;
 import de.hybris.platform.core.model.order.payment.PaymentModeModel;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,6 @@ public class WorldlinePaymentProductFilterNamesStrategy implements WorldlinePaym
         return paymentProducts;
     }
 
-    @Required
     public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
         this.worldlinePaymentModeService = worldlinePaymentModeService;
     }

@@ -13,7 +13,6 @@ import de.hybris.platform.core.model.user.UserModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Locale;
 
@@ -110,7 +109,6 @@ public class WorldlineCustomerRequestParamPopulator implements Populator<Abstrac
         this.customerEmailResolutionService = customerEmailResolutionService;
     }
 
-    @Required
     public void setCustomerNameStrategy(CustomerNameStrategy customerNameStrategy) {
         this.customerNameStrategy = customerNameStrategy;
     }

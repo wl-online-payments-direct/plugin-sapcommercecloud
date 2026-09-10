@@ -14,7 +14,6 @@ import de.hybris.platform.core.model.user.AddressModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Required;
 
 public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> {
 
@@ -101,7 +100,6 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         }
     }
 
-    @Required
     public void setWorldlineMandateConverter(Converter<WorldlineMandateModel, WorldlineMandateDetail> worldlineMandateConverter) {
         this.worldlineMandateConverter = worldlineMandateConverter;
     }

@@ -70,7 +70,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -1009,7 +1008,6 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         this.paymentModeService = paymentModeService;
     }
 
-    @Required
     public void setUserService(UserService userService) {
         this.userService = userService;
     }

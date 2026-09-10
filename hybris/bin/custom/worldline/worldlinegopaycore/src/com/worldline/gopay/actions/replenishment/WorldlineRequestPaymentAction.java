@@ -17,7 +17,6 @@ import de.hybris.platform.processengine.model.BusinessProcessParameterModel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -88,7 +87,6 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
         return commerceCheckoutService;
     }
 
-    @Required
     public void setCommerceCheckoutService(final CommerceCheckoutService commerceCheckoutService) {
         this.commerceCheckoutService = commerceCheckoutService;
     }
@@ -117,7 +115,6 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
         return impersonationService;
     }
 
-    @Required
     public void setImpersonationService(final ImpersonationService impersonationService) {
         this.impersonationService = impersonationService;
     }
@@ -131,7 +128,6 @@ public class WorldlineRequestPaymentAction extends AbstractAction<ReplenishmentP
         return Transition.getStringValues();
     }
 
-    @Required
     public void setWorldlineRecurringService(WorldlineRecurringService worldlineRecurringService) {
         this.worldlineRecurringService = worldlineRecurringService;
     }

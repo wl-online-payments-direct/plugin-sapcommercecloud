@@ -16,7 +16,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.time.ZonedDateTime;
 
@@ -142,12 +141,10 @@ public class WorldlinePaymentLinkPopulator implements Populator<AbstractOrderMod
         return Math.max(MIN_EXPIRATION_HOURS, Math.min(MAX_EXPIRATION_HOURS, expirationHours));
     }
 
-    @Required
     public void setWorldlineHostedCheckoutParamConverter(Converter<AbstractOrderModel, CreateHostedCheckoutRequest> worldlineHostedCheckoutParamConverter) {
         this.worldlineHostedCheckoutParamConverter = worldlineHostedCheckoutParamConverter;
     }
 
-    @Required
     public void setSiteBaseUrlResolutionService(SiteBaseUrlResolutionService siteBaseUrlResolutionService) {
         this.siteBaseUrlResolutionService = siteBaseUrlResolutionService;
     }

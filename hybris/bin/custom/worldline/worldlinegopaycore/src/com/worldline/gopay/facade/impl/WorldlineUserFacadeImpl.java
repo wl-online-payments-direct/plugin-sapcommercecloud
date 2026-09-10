@@ -25,7 +25,6 @@ import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
 import de.hybris.platform.servicelayer.model.ModelService;
 import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -196,37 +195,30 @@ public class WorldlineUserFacadeImpl implements WorldlineUserFacade {
         modelService.saveAll(paymentInfoModel, worldlineRecurringTokenModel);
     }
 
-    @Required
     public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
         this.checkoutCustomerStrategy = checkoutCustomerStrategy;
     }
 
-    @Required
     public void setWorldlineCustomerAccountService(WorldlineCustomerAccountService worldlineCustomerAccountService) {
         this.worldlineCustomerAccountService = worldlineCustomerAccountService;
     }
 
-    @Required
     public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
         this.worldlinePaymentService = worldlinePaymentService;
     }
 
-    @Required
     public void setWorldlinePaymentInfoConverter(Converter<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> worldlinePaymentInfoConverter) {
         this.worldlinePaymentInfoConverter = worldlinePaymentInfoConverter;
     }
 
-    @Required
     public void setCustomerAccountService(CustomerAccountService customerAccountService) {
         this.customerAccountService = customerAccountService;
     }
 
-    @Required
     public void setModelService(ModelService modelService) {
         this.modelService = modelService;
     }
 
-    @Required
     public void setWorldlinePaymentModeService(WorldlinePaymentModeService worldlinePaymentModeService) {
         this.worldlinePaymentModeService = worldlinePaymentModeService;
     }

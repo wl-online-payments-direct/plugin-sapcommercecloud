@@ -14,7 +14,6 @@ import de.hybris.platform.servicelayer.cronjob.TriggerService;
 import de.hybris.platform.servicelayer.i18n.I18NService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Date;
 
@@ -83,7 +82,6 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
         return businessProcessService;
     }
 
-    @Required
     public void setBusinessProcessService(final BusinessProcessService businessProcessService) {
         this.businessProcessService = businessProcessService;
     }
@@ -92,7 +90,6 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
         return triggerService;
     }
 
-    @Required
     public void setTriggerService(final TriggerService triggerService) {
         this.triggerService = triggerService;
     }
@@ -101,12 +98,10 @@ public class WorldlineAcceleratorCartToOrderJob extends AbstractJobPerformable<C
         return i18NService;
     }
 
-    @Required
     public void setI18NService(final I18NService i18NService) {
         this.i18NService = i18NService;
     }
 
-    @Required
     public void setWorldlineRecurringService(WorldlineRecurringService worldlineRecurringService) {
         this.worldlineRecurringService = worldlineRecurringService;
     }

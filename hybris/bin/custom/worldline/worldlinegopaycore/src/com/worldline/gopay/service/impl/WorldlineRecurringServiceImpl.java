@@ -17,7 +17,6 @@ import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.model.ModelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Optional;
 
@@ -235,12 +234,10 @@ public class WorldlineRecurringServiceImpl implements WorldlineRecurringService 
         return WorldlineRecurringPaymentStatus.BLOCKED;
     }
 
-    @Required
     public void setWorldlinePaymentService(WorldlinePaymentService worldlinePaymentService) {
         this.worldlinePaymentService = worldlinePaymentService;
     }
 
-    @Required
     public void setModelService(ModelService modelService) {
         this.modelService = modelService;
     }

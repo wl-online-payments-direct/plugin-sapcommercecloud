@@ -7,7 +7,6 @@ import com.worldline.gopay.factory.WorldlinePaymentProductFilterStrategyFactory;
 import com.worldline.gopay.strategy.WorldlinePaymentProductFilterByCartDataStrategy;
 import com.worldline.gopay.strategy.WorldlinePaymentProductFilterStrategy;
 import de.hybris.platform.commercefacades.order.data.CartData;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -43,12 +42,10 @@ public class DefaultWorldlinePaymentProductFilterStrategyFactory implements Worl
         };
     }
 
-    @Required
     public void setPaymentProductFilterStrategyMap(Map<WorldlinePaymentProductFilterEnum, WorldlinePaymentProductFilterStrategy> paymentProductFilterStrategyMap) {
         this.paymentProductFilterStrategyMap = paymentProductFilterStrategyMap;
     }
 
-    @Required
     public void setPaymentProductFilterByCartDataStrategyMap(Map<WorldlinePaymentProductFilterByCartDataEnum, WorldlinePaymentProductFilterByCartDataStrategy> paymentProductFilterByCartDataStrategyMap) {
         this.paymentProductFilterByCartDataStrategyMap = paymentProductFilterByCartDataStrategyMap;
     }

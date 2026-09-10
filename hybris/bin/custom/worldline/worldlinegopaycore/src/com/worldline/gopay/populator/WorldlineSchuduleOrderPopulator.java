@@ -12,7 +12,6 @@ import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.util.localization.Localization;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.math.BigDecimal;
 
@@ -39,7 +38,6 @@ public class WorldlineSchuduleOrderPopulator implements Populator<CartToOrderCro
         }
     }
 
-    @Required
     public void setWorldlinePaymentInfoConverter(Converter<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> worldlinePaymentInfoConverter) {
         this.worldlinePaymentInfoConverter = worldlinePaymentInfoConverter;
     }

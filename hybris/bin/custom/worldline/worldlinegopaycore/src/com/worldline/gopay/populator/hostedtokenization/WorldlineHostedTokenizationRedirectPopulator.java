@@ -10,7 +10,6 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
-import org.springframework.beans.factory.annotation.Required;
 
 import static com.worldline.gopay.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 import static de.hybris.platform.servicelayer.util.ServicesUtil.validateParameterNotNull;
@@ -44,7 +43,6 @@ public class WorldlineHostedTokenizationRedirectPopulator implements Populator<A
         return sessionService.getAttribute(HOSTED_TOKENIZATION_RETURN_URL);
     }
 
-    @Required
     public void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }

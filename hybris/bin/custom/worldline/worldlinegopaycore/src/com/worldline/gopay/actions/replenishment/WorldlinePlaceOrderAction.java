@@ -12,7 +12,6 @@ import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.processengine.action.AbstractProceduralAction;
 import de.hybris.platform.processengine.model.BusinessProcessParameterModel;
 import de.hybris.platform.tx.Transaction;
-import org.springframework.beans.factory.annotation.Required;
 
 
 /**
@@ -66,12 +65,10 @@ public class WorldlinePlaceOrderAction extends AbstractProceduralAction<Replenis
         }
     }
 
-    @Required
     public void setB2bCommerceCheckoutService(CommerceCheckoutService b2bCommerceCheckoutService) {
         this.b2bCommerceCheckoutService = b2bCommerceCheckoutService;
     }
 
-    @Required
     public void setB2cCommerceCheckoutService(CommerceCheckoutService b2cCommerceCheckoutService) {
         this.b2cCommerceCheckoutService = b2cCommerceCheckoutService;
     }
@@ -80,7 +77,6 @@ public class WorldlinePlaceOrderAction extends AbstractProceduralAction<Replenis
         return impersonationService;
     }
 
-    @Required
     public void setImpersonationService(final ImpersonationService impersonationService) {
         this.impersonationService = impersonationService;
     }

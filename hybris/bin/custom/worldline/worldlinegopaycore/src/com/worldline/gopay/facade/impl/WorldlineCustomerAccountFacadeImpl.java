@@ -5,7 +5,6 @@ import com.worldline.gopay.service.WorldlineCustomerAccountService;
 import de.hybris.platform.b2bacceleratorfacades.order.data.ScheduledCartData;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import org.springframework.beans.factory.annotation.Required;
 
 public class WorldlineCustomerAccountFacadeImpl implements WorldlineCustomerAccountFacade {
     private WorldlineCustomerAccountService worldlineCustomerAccountService;
@@ -20,7 +19,6 @@ public class WorldlineCustomerAccountFacadeImpl implements WorldlineCustomerAcco
         this.worldlineCustomerAccountService = worldlineCustomerAccountService;
     }
 
-    @Required
     public void setScheduledCartDataConverter(Converter<CartToOrderCronJobModel, ScheduledCartData> scheduledCartDataConverter) {
         this.scheduledCartDataConverter = scheduledCartDataConverter;
     }

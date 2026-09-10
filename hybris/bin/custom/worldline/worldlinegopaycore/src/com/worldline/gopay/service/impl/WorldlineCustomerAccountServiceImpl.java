@@ -9,7 +9,6 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.exceptions.ModelNotFoundException;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.List;
 
@@ -55,16 +54,13 @@ public class WorldlineCustomerAccountServiceImpl implements WorldlineCustomerAcc
         CartToOrderCronJobModel cartToOrderCronJob = b2BCustomerAccountService.getCartToOrderCronJobForCode(jobCode, currentCustomer);
         return cartToOrderCronJob;
     }
-    @Required
     public void setWorldlineCustomerAccountDao(WorldlineCustomerAccountDao worldlineCustomerAccountDao) {
         this.worldlineCustomerAccountDao = worldlineCustomerAccountDao;
     }
-    @Required
     public void setCheckoutCustomerStrategy(CheckoutCustomerStrategy checkoutCustomerStrategy) {
         this.checkoutCustomerStrategy = checkoutCustomerStrategy;
     }
 
-    @Required
     public void setB2BCustomerAccountService(B2BCustomerAccountService b2BCustomerAccountService) {
         this.b2BCustomerAccountService = b2BCustomerAccountService;
     }

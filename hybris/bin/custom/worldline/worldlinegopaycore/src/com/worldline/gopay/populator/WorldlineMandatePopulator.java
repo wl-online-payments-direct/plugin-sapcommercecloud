@@ -8,7 +8,6 @@ import com.worldline.gopay.order.data.WorldlineMandateDetail;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.enumeration.EnumerationService;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
-import org.springframework.beans.factory.annotation.Required;
 
 public class WorldlineMandatePopulator implements Populator<WorldlineMandateModel, WorldlineMandateDetail> {
     private EnumerationService enumerationService;
@@ -57,7 +56,6 @@ public class WorldlineMandatePopulator implements Populator<WorldlineMandateMode
         return personalInformation;
     }
 
-    @Required
     public void setEnumerationService(EnumerationService enumerationService) {
         this.enumerationService = enumerationService;
     }

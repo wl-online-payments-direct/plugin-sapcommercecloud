@@ -7,7 +7,6 @@ import de.hybris.platform.task.RetryLaterException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -113,7 +112,6 @@ public class WorldlineSourceOrderAction extends AbstractProceduralAction<OrderPr
         LOG.info("[WORLDLINE-DEBUG] ========== WorldlineSourceOrderAction completed ==========");
     }
 
-    @Required
     public void setOriginalSourceOrderAction(final AbstractProceduralAction<OrderProcessModel> originalSourceOrderAction) {
         this.originalSourceOrderAction = originalSourceOrderAction;
     }

@@ -2,7 +2,6 @@ package com.worldline.gopay.evaluate.impl;
 
 import com.onlinepayments.domain.PaymentProduct;
 import com.worldline.gopay.evaluate.WorldlinePaymentProductEvaluator;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.function.Predicate;
 
@@ -14,7 +13,6 @@ public class DefaultWorldlinePaymentProductEvaluator implements WorldlinePayment
         return paymentProduct -> paymentProductId.equals(paymentProduct.getId());
     }
 
-    @Required
     public void setPaymentProductId(Integer paymentProductId) {
         this.paymentProductId = paymentProductId;
     }

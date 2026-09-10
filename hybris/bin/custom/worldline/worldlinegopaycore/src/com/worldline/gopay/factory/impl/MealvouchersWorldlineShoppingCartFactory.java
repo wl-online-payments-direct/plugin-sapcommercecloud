@@ -14,7 +14,6 @@ import de.hybris.platform.util.TaxValue;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -227,12 +226,10 @@ public class MealvouchersWorldlineShoppingCartFactory implements WorldlineShoppi
         return ""; // All units were null
     }
 
-    @Required
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
     }
 
-    @Required
     public void setEnumerationService(EnumerationService enumerationService) {
         this.enumerationService = enumerationService;
     }

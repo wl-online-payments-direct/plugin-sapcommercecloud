@@ -11,7 +11,6 @@ import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
-import org.springframework.beans.factory.annotation.Required;
 
 import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_SEPA;
 
@@ -38,7 +37,6 @@ public class WorldlineSepaDirectDebitPopulator implements Populator<AbstractOrde
         }
     }
 
-    @Required
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;
     }

@@ -10,7 +10,6 @@ import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 import org.zkoss.zk.ui.Executions;
 
 import java.util.Map;
@@ -89,7 +88,6 @@ public class WorldlineFeatureRequestWizardFlowActionHandler implements FlowActio
         return mailToLink.toString();
     }
 
-    @Required
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
