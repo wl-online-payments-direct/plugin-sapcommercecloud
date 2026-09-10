@@ -57,9 +57,9 @@
 		<property name="suffix" value=".jsp" />
 	</bean>
 
-	<security:global-method-security pre-post-annotations="enabled" proxy-target-class="true" secured-annotations="enabled" />
+	<security:method-security pre-post-enabled="true" proxy-target-class="true" secured-enabled="true" />
 	
-	<mvc:resources mapping="**/swagger-ui.html" location="classpath:/META-INF/resources/"/>
+	<mvc:resources mapping="/swagger-ui.html" location="classpath:/META-INF/resources/"/>
 	<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
 
 
