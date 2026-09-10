@@ -13,7 +13,7 @@ import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zk.ui.WrongValueException;

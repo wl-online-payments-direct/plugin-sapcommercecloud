@@ -64,7 +64,7 @@ import de.hybris.platform.servicelayer.user.UserService;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 import de.hybris.platform.util.localization.Localization;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.Strings;

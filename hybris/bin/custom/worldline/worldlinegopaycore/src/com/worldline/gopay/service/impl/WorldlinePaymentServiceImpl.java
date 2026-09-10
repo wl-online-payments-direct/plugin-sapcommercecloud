@@ -25,7 +25,7 @@ import de.hybris.platform.core.model.order.payment.PaymentModeModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import de.hybris.platform.store.services.BaseStoreService;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -14,7 +14,7 @@ import de.hybris.platform.core.model.c2l.LanguageModel;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import de.hybris.platform.servicelayer.i18n.I18NService;
 import de.hybris.platform.servicelayer.session.SessionService;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
