@@ -18,11 +18,11 @@
 
     <bean id="worldlineCacheKeyGenerator" class="com.worldline.gopay.cache.WorldlineCacheKeyGenerator" lazy-init="true"/>
 
-    <bean id="worldlineCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+    <bean id="worldlineCacheManager" class="org.springframework.cache.jcache.JCacheCacheManager">
         <property name="cacheManager" ref="worldlineEhCache"/>
     </bean>
 
-    <bean id="worldlineEhCache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="cache/worldline-ehcache.xml"/>
+    <bean id="worldlineEhCache" class="org.springframework.cache.jcache.JCacheManagerFactoryBean">
+        <property name="cacheManagerUri" value="classpath:cache/worldline-ehcache.xml"/>
     </bean>
 </beans>

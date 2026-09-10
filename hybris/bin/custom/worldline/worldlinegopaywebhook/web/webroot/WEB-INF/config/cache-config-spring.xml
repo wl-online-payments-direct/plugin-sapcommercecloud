@@ -29,14 +29,13 @@
 	<!-- Default cache manager for worldlinegopaywebhook -->
 
 	<alias name="defaultWSCacheManager" alias="wsCacheManager"/>
-	<bean id="defaultWSCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+	<bean id="defaultWSCacheManager" class="org.springframework.cache.jcache.JCacheCacheManager">
 		<property name="cacheManager" ref="wsEhcache"/>
 	</bean>
 
 	<alias name="defaultWSEhcache" alias="wsEhcache"/>
-	<bean id="defaultWSEhcache" class="de.hybris.platform.webservicescommons.cache.TenantAwareEhCacheManagerFactoryBean">
-		<property name="cacheNamePrefix" value="worldlinegopaywebhook"/>
-		<property name="configLocation" value="/WEB-INF/cache/ehcache.xml"/>
+	<bean id="defaultWSEhcache" class="org.springframework.cache.jcache.JCacheManagerFactoryBean">
+		<property name="cacheManagerUri" value="classpath:${worldlinegopaywebhook.ehcache.location:worldlinegopaywebhook/cache/ehcache.xml}"/>
 	</bean>
 	
 </beans>
