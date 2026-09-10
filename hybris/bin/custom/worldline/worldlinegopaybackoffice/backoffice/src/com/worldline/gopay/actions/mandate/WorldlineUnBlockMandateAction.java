@@ -13,7 +13,7 @@ import com.worldline.gopay.service.WorldlinePaymentService;
 import com.worldline.gopay.service.WorldlineRecurringService;
 import org.zkoss.zhtml.Messagebox;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 public class WorldlineUnBlockMandateAction implements CockpitAction<WorldlineMandateModel, Object> {
 

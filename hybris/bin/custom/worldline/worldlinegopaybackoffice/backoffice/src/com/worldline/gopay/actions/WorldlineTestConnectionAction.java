@@ -1,6 +1,6 @@
 package com.worldline.gopay.actions;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import com.hybris.cockpitng.actions.ActionContext;
 import com.hybris.cockpitng.actions.ActionResult;

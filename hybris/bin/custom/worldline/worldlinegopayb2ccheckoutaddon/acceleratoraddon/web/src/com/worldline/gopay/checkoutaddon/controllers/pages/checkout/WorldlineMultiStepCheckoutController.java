@@ -21,7 +21,7 @@ import de.hybris.platform.commerceservices.order.CommerceCartModificationExcepti
 
 import java.util.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;

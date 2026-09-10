@@ -14,7 +14,7 @@ import com.worldline.gopay.service.WorldlineRecurringService;
 import de.hybris.platform.b2bacceleratorservices.customer.B2BCustomerAccountService;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import static org.zkoss.zul.Messagebox.show;
 

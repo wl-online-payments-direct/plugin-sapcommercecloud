@@ -19,7 +19,7 @@ import de.hybris.platform.returns.model.ReturnRequestModel;
 import de.hybris.platform.servicelayer.time.TimeService;
 import org.zkoss.zhtml.Messagebox;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

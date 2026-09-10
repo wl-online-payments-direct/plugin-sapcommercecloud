@@ -1,6 +1,6 @@
 package com.worldline.gopay.checkoutaddon.controllers.pages;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import com.worldline.gopay.checkoutaddon.controllers.WorldlineWebConstants;
 import com.worldline.gopay.checkoutaddon.controllers.utils.WorldlineAddressDataUtil;

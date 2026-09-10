@@ -16,7 +16,7 @@ import de.hybris.platform.cronjob.model.CronJobModel;
 import de.hybris.platform.orderscheduling.model.CartToOrderCronJobModel;
 import de.hybris.platform.servicelayer.model.ModelService;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import static org.zkoss.zul.Messagebox.show;
 

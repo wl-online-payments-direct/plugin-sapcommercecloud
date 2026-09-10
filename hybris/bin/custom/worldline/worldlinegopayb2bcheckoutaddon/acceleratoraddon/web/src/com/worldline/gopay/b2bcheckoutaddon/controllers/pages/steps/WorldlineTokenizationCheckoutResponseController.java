@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Controller
 @RequestMapping(value = WorldlineWebConstants.URL.Checkout.Payment.HTP.root)

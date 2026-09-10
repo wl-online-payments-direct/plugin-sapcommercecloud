@@ -8,7 +8,7 @@ import com.hybris.cockpitng.dataaccess.facades.object.exceptions.ObjectSavingExc
 import com.worldline.gopay.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.gopay.model.WorldlineRecurringTokenModel;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import static org.zkoss.zul.Messagebox.show;
 

@@ -4,8 +4,8 @@ import com.worldline.gopay.enums.WorldlineExemptionType;
 import com.worldline.gopay.model.WorldlineConfigurationModel;
 import de.hybris.platform.util.localization.Localization;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.math.BigDecimal;
 
 public class WorldlineConfigurationValidator implements ConstraintValidator<WorldlineConfigurationValid, WorldlineConfigurationModel>

@@ -12,7 +12,7 @@ import com.worldline.gopay.model.WorldlineMandateModel;
 import com.worldline.gopay.service.WorldlinePaymentService;
 import com.worldline.gopay.service.WorldlineRecurringService;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import static org.zkoss.zul.Messagebox.show;
 
