@@ -2,6 +2,8 @@ package com.worldline.gopay.facade.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onlinepayments.communication.RequestHeader;
 import com.onlinepayments.domain.WebhooksEvent;
 import com.worldline.gopay.dao.WorldlineOrderDao;
@@ -34,6 +36,8 @@ public class WorldlineWebhookFacadeImpl implements WorldlineWebhookFacade {
     @Override
     public void saveWebhooksEvent(WebhooksEvent webhooksEvent) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String webhookAsString = objectMapper.writeValueAsString(webhooksEvent);
         worldlineWebhookService.saveWebhooksEvent(webhookAsString, webhooksEvent.getCreated());
     }
