@@ -55,6 +55,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.worldline.direct.occ.controllers.v2.WorldlineB2BOrdersController.CART_CHECKOUT_TERM_UNCHECKED;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY;
 import static com.worldline.direct.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator.HOSTED_TOKENIZATION_RETURN_URL;
 import static de.hybris.platform.util.localization.Localization.getLocalizedString;
 
@@ -322,6 +324,44 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         return getDataMapper().map((ScheduledCartData)abstractOrderData, ReplenishmentOrderWsDTO.class, fields);
     }
 
+
+    @PostMapping(value = "/googlePay")
+    @ResponseBody
+    @Operation(operationId = "placeOrderGooglePay", summary = "Place the order with HostedCheckout.", description =
+            "Returns a hosted checkout data for the current base store. " +
+                    "cart must be valid, otherwise an error will be returned.")
+    @ApiBaseSiteIdAndUserIdParam
+    public OrderWsDTO placeOrderGooglePay(
+            @Parameter(description = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
+            @RequestBody final BrowserDataWsDTO browserDataWsDTO,
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @RequestParam final String cartId,
+            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
+            final HttpServletRequest request) throws InvalidCartException, WorldlineNonAuthorizedPaymentException {
+
+        cartLoaderStrategy.loadCart(cartId);
+
+        final CartData cartData = cartFacade.getSessionCart();
+        if (cartData.getWorldlinePaymentInfo() == null) {
+            throw new CartException("No Worldline Payment Info found.", CartException.INVALID);
+        } else if (!WorldlineCheckoutTypesEnum.GOOGLE_PAY.equals(cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType())) {
+            throw new CartException("Invalid Worldline Checkout Type.", CartException.INVALID);
+        }
+
+        validate(browserDataWsDTO, "browserData", browserDataWsDTOValidator);
+        final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);
+        fillBrowserData(request, browserData);
+
+        OrderData orderData = extendedCheckoutFacade.placeOrder();
+
+        storeReturnUrlInSession(orderData.getCode(), request, OrderType.PLACE_ORDER, WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
+
+        worldlineCheckoutFacade.authorisePaymentForGooglePay(orderData.getCode(), browserData);
+        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
+
+        return getDataMapper().map(orderData, OrderWsDTO.class, fields);
+
+    }
 
 
     protected void validateTerms(final boolean termsChecked) {

@@ -47,7 +47,7 @@ public class WorldlineHostedTokenizationMobilePopulator implements Populator<Abs
 
         MobilePaymentMethodSpecificInput mobileInput = new MobilePaymentMethodSpecificInput();
         mobileInput.setPaymentProductId(WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY);
-        mobileInput.setEncryptedPaymentData(sessionService.getAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY));
+        mobileInput.setEncryptedPaymentData(paymentInfo.getGooglePayEncryptedPaymentData().isEmpty() ? sessionService.getAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY) : paymentInfo.getGooglePayEncryptedPaymentData());
         MobilePaymentProduct320SpecificInput product320SpecificInput = createProduct320SpecificInput(abstractOrderModel, paymentInfo);
         mobileInput.setPaymentProduct320SpecificInput(product320SpecificInput);
 

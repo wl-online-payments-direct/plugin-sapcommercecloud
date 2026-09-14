@@ -56,6 +56,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
+import static com.worldline.direct.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY;
 import static com.worldline.direct.occ.controllers.v2.WorldlineB2BOrdersController.OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM;
 
 @Controller
@@ -186,11 +188,13 @@ public class WorldlineCartsController extends WorldlineBaseController {
         validate(worldlinePaymentDetailsWsDTO, "worldlinePaymentDetailsWsDTO", worldlinePaymentDetailsWsDTOValidator);
         final WorldlinePaymentInfoData worldlinePaymentInfoData = new WorldlinePaymentInfoData();
 
+        // if GooglePay is selected save GooglePayEncryptedPaymentData
+        worldlinePaymentInfoData.setGooglePayEncryptedPaymentData(worldlinePaymentDetailsWsDTO.getGooglePayEncryptedPaymentData());
         worldlineCheckoutFacade.fillWorldlinePaymentInfoData(worldlinePaymentInfoData,
                 worldlinePaymentDetailsWsDTO.getSavedCardCode(),
                 worldlinePaymentDetailsWsDTO.getPaymentProductId(),
                 worldlinePaymentDetailsWsDTO.getHostedTokenizationId());
-
+        
         final AddressData addressData;
         if (Boolean.TRUE.equals(worldlinePaymentDetailsWsDTO.isUseDeliveryAddress())) {
             addressData = getCheckoutFacade().getCheckoutCart().getDeliveryAddress();
