@@ -4,13 +4,16 @@ This directory contains CAWL-branded replacement files that are copied over the
 converted output **after** `cawl.sh` completes its find/replace pass (Step 8).
 
 The directory structure mirrors the **post-conversion** output (i.e., all
-`worldline` references have already been renamed to `cawl`). Files placed here
-will overwrite the corresponding files in `cawl_output/` via `rsync`.
+`worldline` references have already been renamed to `cawl`, and the `gopay`
+product-brand segment has been renamed to `direct`, so the source package
+`com.worldline.gopay` and keys `worldline.gopay.*` arrive here as
+`com.cawl.direct` and `cawl.direct.*`). Files placed here will overwrite the
+corresponding files in `cawl_output/` via `rsync`.
 
 ## When to use this
 
 The `cawl.sh` script performs a mechanical find/replace on localisation files,
-which works for property **keys** (e.g. renaming `worldlinedirect` prefixes).
+which works for property **keys** (e.g. renaming `worldlinegopay` prefixes).
 However, localisation **values** (user-visible strings) may need hand-crafted
 CAWL-specific wording that a simple find/replace cannot produce.
 
@@ -94,7 +97,7 @@ attempt to download the artifact using these coordinates.
 
 ## Notes
 
-- Files here must use the **post-conversion** names (e.g. `cawlcore-locales_en.properties`, not `worldlinedirectcore-locales_en.properties`).
-- Property keys should also use the post-conversion names (e.g. `type.cawl...` not `type.worldlinedirect...`).
+- Files here must use the **post-conversion** names (e.g. `cawlcore-locales_en.properties`, not `worldlinegopaycore-locales_en.properties`).
+- Property keys should also use the post-conversion names (e.g. `type.cawl...` not `type.worldlinegopay...`).
 - You do not need to provide every locale — only files present here will overwrite the auto-converted versions. Missing locales will keep the auto-converted output.
 - You can also place non-localisation files here if needed — any file in this tree will overwrite its counterpart in `cawl_output/`.

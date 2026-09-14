@@ -1,0 +1,91 @@
+
+package com.worldline.gopay.checkoutaddon.forms;
+
+import de.hybris.platform.acceleratorstorefrontcommons.forms.AddressForm;
+
+
+/**
+ *
+ */
+public class WorldlinePaymentDetailsForm {
+    private Integer paymentProductId;
+
+    private String hostedTokenizationId;
+
+    private String savedCardCode;
+
+    private String googlePayEncryptedPaymentData;
+
+    private Boolean googlePayMobileDevice;
+
+    private boolean useDeliveryAddress;
+
+    private boolean newBillingAddress;
+
+    private WorldlineAddressForm billingAddress;
+
+    public String getHostedTokenizationId() {
+        return hostedTokenizationId;
+    }
+
+    public void setHostedTokenizationId(String hostedTokenizationId) {
+        this.hostedTokenizationId = hostedTokenizationId;
+    }
+
+    public boolean isUseDeliveryAddress() {
+        return useDeliveryAddress;
+    }
+
+    public void setUseDeliveryAddress(boolean useDeliveryAddress) {
+        this.useDeliveryAddress = useDeliveryAddress;
+    }
+
+    public boolean isNewBillingAddress() {
+        return newBillingAddress;
+    }
+
+    public void setNewBillingAddress(boolean newBillingAddress) {
+        this.newBillingAddress = newBillingAddress;
+    }
+
+    public WorldlineAddressForm getBillingAddress() {
+        return billingAddress;
+    }
+
+    public void setBillingAddress(WorldlineAddressForm billingAddress) {
+        this.billingAddress = billingAddress;
+    }
+
+    public Integer getPaymentProductId() {
+        return paymentProductId;
+    }
+
+    public void setPaymentProductId(Integer paymentProductId) {
+        this.paymentProductId = paymentProductId;
+    }
+
+    public String getSavedCardCode() {
+        return savedCardCode;
+    }
+
+    public void setSavedCardCode(String savedCardCode) {
+        this.savedCardCode = savedCardCode;
+    }
+
+    public String getGooglePayEncryptedPaymentData() {
+        return googlePayEncryptedPaymentData;
+    }
+
+    public void setGooglePayEncryptedPaymentData(String googlePayEncryptedPaymentData) {
+        this.googlePayEncryptedPaymentData = googlePayEncryptedPaymentData;
+    }
+
+    public Boolean getGooglePayMobileDevice() {
+        return googlePayMobileDevice;
+    }
+
+    public void setGooglePayMobileDevice(Boolean googlePayMobileDevice) {
+        this.googlePayMobileDevice = googlePayMobileDevice;
+    }
+
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="worldlinegopaybackofficeService" class="com.worldline.gopay.services.WorldlinegopaybackofficeService" />
+
+	<bean id="worldlinegopaybackofficeLabelLocator" class="com.hybris.cockpitng.util.labels.ResourcesLabelLocator" scope="singleton" init-method="init" lazy-init="false">
+  		<property name="location" value="/worldlinegopaybackoffice-backoffice-labels/"/>
+  		<property name="name" value="labels"/>
+  	</bean>
+
+	<bean id="worldlineFeatureRequestWizardFlowActionHandler" class="com.worldline.gopay.wizard.WorldlineFeatureRequestWizardFlowActionHandler">
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+
+</beans>

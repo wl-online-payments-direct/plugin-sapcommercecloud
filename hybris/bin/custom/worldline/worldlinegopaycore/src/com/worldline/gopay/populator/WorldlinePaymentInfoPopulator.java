@@ -1,0 +1,116 @@
+package com.worldline.gopay.populator;
+
+import com.worldline.gopay.model.WorldlineMandateModel;
+import com.worldline.gopay.model.WorldlineRecurringTokenModel;
+import com.worldline.gopay.order.data.WorldlineMandateDetail;
+import com.worldline.gopay.order.data.WorldlinePaymentInfoData;
+import com.worldline.gopay.order.data.WorldlineRecurringTokenData;
+import com.worldline.gopay.util.WorldlinePaymentProductUtils;
+import de.hybris.platform.commercefacades.order.data.CardTypeData;
+import de.hybris.platform.commercefacades.user.data.AddressData;
+import de.hybris.platform.converters.Populator;
+import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
+import de.hybris.platform.core.model.user.AddressModel;
+import de.hybris.platform.servicelayer.dto.converter.ConversionException;
+import de.hybris.platform.servicelayer.dto.converter.Converter;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Required;
+
+public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePaymentInfoModel, WorldlinePaymentInfoData> {
+
+    private Converter<AddressModel, AddressData> addressConverter;
+    private Converter<WorldlineMandateModel, WorldlineMandateDetail> worldlineMandateConverter;
+
+    private Converter<WorldlineRecurringTokenModel, WorldlineRecurringTokenData> worldlineRecurringTokenConverter;
+
+    @Override
+    public void populate(WorldlinePaymentInfoModel worldlinePaymentInfoModel, WorldlinePaymentInfoData worldlinePaymentInfoData) throws ConversionException {
+
+        worldlinePaymentInfoData.setCode(worldlinePaymentInfoModel.getCode());
+        worldlinePaymentInfoData.setId(worldlinePaymentInfoModel.getId());
+        worldlinePaymentInfoData.setPaymentMethod(worldlinePaymentInfoModel.getPaymentMethod());
+        worldlinePaymentInfoData.setHostedTokenizationId(worldlinePaymentInfoModel.getHostedTokenizationId());
+        worldlinePaymentInfoData.setWorldlineCheckoutType(worldlinePaymentInfoModel.getWorldlineCheckoutType());
+        worldlinePaymentInfoData.setAlias(formattedAlias(worldlinePaymentInfoModel.getAlias()));
+        worldlinePaymentInfoData.setCardholderName(worldlinePaymentInfoModel.getCardholderName());
+        worldlinePaymentInfoData.setExpiryDate(worldlinePaymentInfoModel.getExpiryDate());
+        String[] splittedDate = StringUtils.split(worldlinePaymentInfoModel.getExpiryDate(), "/");
+        if (splittedDate != null && splittedDate.length == 2) {
+            worldlinePaymentInfoData.setExpiryMonth(splittedDate[0]);
+            worldlinePaymentInfoData.setExpiryYear(splittedDate[1]);
+        }
+        worldlinePaymentInfoData.setToken(worldlinePaymentInfoModel.getToken());
+        worldlinePaymentInfoData.setCardBrand(worldlinePaymentInfoModel.getCardBrand());
+        worldlinePaymentInfoData.setType(worldlinePaymentInfoModel.getType());
+
+        if (worldlinePaymentInfoModel.getBillingAddress() != null) {
+            AddressData addressData = new AddressData();
+            addressConverter.convert(worldlinePaymentInfoModel.getBillingAddress(), addressData);
+            worldlinePaymentInfoData.setBillingAddress(addressData);
+        }
+
+
+        worldlinePaymentInfoData.setReturnMAC(worldlinePaymentInfoModel.getReturnMAC());
+        worldlinePaymentInfoData.setSaved(worldlinePaymentInfoModel.isSaved());
+        worldlinePaymentInfoData.setRecurring(worldlinePaymentInfoModel.isRecurringToken());
+        worldlinePaymentInfoData.setGooglePayEncryptedPaymentData(worldlinePaymentInfoModel.getGooglePayEncryptedPaymentData());
+        worldlinePaymentInfoData.setGooglePayMobileDevice(worldlinePaymentInfoModel.getGooglePayMobileDevice());
+        worldlinePaymentInfoData.setPaymentLinkId(worldlinePaymentInfoModel.getPaymentLinkId());
+        worldlinePaymentInfoData.setPaymentLinkRedirectionUrl(worldlinePaymentInfoModel.getPaymentLinkRedirectionUrl());
+        worldlinePaymentInfoData.setPaymentLinkExpirationDate(worldlinePaymentInfoModel.getPaymentLinkExpirationDate());
+        worldlinePaymentInfoData.setPaymentLinkStatus(worldlinePaymentInfoModel.getPaymentLinkStatus());
+        worldlinePaymentInfoData.setPaymentLinkPaymentId(worldlinePaymentInfoModel.getPaymentLinkPaymentId());
+        worldlinePaymentInfoData.setPaymentLinkLastEvent(worldlinePaymentInfoModel.getPaymentLinkLastEvent());
+        worldlinePaymentInfoData.setPaymentLinkReusable(worldlinePaymentInfoModel.getPaymentLinkReusable());
+        worldlinePaymentInfoData.setWorldlinePaymentId(worldlinePaymentInfoModel.getWorldlinePaymentId());
+        worldlinePaymentInfoData.setWorldlineStatus(worldlinePaymentInfoModel.getWorldlineStatus());
+        worldlinePaymentInfoData.setWorldlineStatusCode(worldlinePaymentInfoModel.getWorldlineStatusCode());
+        worldlinePaymentInfoData.setWorldlineMerchantReference(worldlinePaymentInfoModel.getWorldlineMerchantReference());
+        worldlinePaymentInfoData.setWorldlinePaymentMethod(worldlinePaymentInfoModel.getWorldlinePaymentMethod());
+        worldlinePaymentInfoData.setWorldlinePaymentProductId(worldlinePaymentInfoModel.getWorldlinePaymentProductId());
+        worldlinePaymentInfoData.setWorldlineAmount(worldlinePaymentInfoModel.getWorldlineAmount());
+        worldlinePaymentInfoData.setWorldlineCurrency(worldlinePaymentInfoModel.getWorldlineCurrency());
+        worldlinePaymentInfoData.setWorldlineAcquiredAmount(worldlinePaymentInfoModel.getWorldlineAcquiredAmount());
+        worldlinePaymentInfoData.setWorldlineAcquiredCurrency(worldlinePaymentInfoModel.getWorldlineAcquiredCurrency());
+        worldlinePaymentInfoData.setCardBin(worldlinePaymentInfoModel.getCardBin());
+        worldlinePaymentInfoData.setCardLastFour(worldlinePaymentInfoModel.getCardLastFour());
+        worldlinePaymentInfoData.setFraudResult(worldlinePaymentInfoModel.getFraudResult());
+        worldlinePaymentInfoData.setLiability(worldlinePaymentInfoModel.getLiability());
+        worldlinePaymentInfoData.setAppliedExemption(worldlinePaymentInfoModel.getAppliedExemption());
+        worldlinePaymentInfoData.setAuthenticationStatus(worldlinePaymentInfoModel.getAuthenticationStatus());
+        CardTypeData cardTypeData=new CardTypeData();
+        cardTypeData.setName(worldlinePaymentInfoModel.getCardBrand());
+        worldlinePaymentInfoData.setCardType(cardTypeData);
+        if (worldlinePaymentInfoModel.getUsedSavedPayment() != null) {
+            worldlinePaymentInfoData.setSavedPayment(worldlinePaymentInfoModel.getUsedSavedPayment().getCode());
+        }
+        if (WorldlinePaymentProductUtils.isPaymentSupportingRecurring(worldlinePaymentInfoModel)) {
+            if (worldlinePaymentInfoModel.getMandateDetail() != null) {
+                worldlinePaymentInfoData.setMandateDetail(worldlineMandateConverter.convert(worldlinePaymentInfoModel.getMandateDetail()));
+            } else if (worldlinePaymentInfoModel.getWorldlineRecurringToken() != null) {
+                worldlinePaymentInfoData.setRecurringToken(worldlineRecurringTokenConverter.convert(worldlinePaymentInfoModel.getWorldlineRecurringToken()));
+            }
+        }
+    }
+
+    private String formattedAlias(String alias) {
+        if (StringUtils.isNotEmpty(alias) && alias.length()>4) {
+            return "*".repeat(12) + alias.substring(alias.length() - 4);
+        }else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @Required
+    public void setWorldlineMandateConverter(Converter<WorldlineMandateModel, WorldlineMandateDetail> worldlineMandateConverter) {
+        this.worldlineMandateConverter = worldlineMandateConverter;
+    }
+
+    public void setAddressConverter(Converter<AddressModel, AddressData> addressConverter) {
+        this.addressConverter = addressConverter;
+    }
+
+    public void setWorldlineRecurringTokenConverter(Converter<WorldlineRecurringTokenModel, WorldlineRecurringTokenData> worldlineRecurringTokenConverter) {
+        this.worldlineRecurringTokenConverter = worldlineRecurringTokenConverter;
+    }
+}

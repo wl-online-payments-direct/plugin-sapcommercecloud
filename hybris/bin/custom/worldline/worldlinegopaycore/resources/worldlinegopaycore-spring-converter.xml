@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean name="worldlinePaymentInfoPopulator" class="com.worldline.gopay.populator.WorldlinePaymentInfoPopulator">
+        <property name="addressConverter" ref="addressConverter"/>
+        <property name="worldlineMandateConverter" ref="worldlineMandateConverter"/>
+        <property name="worldlineRecurringTokenConverter" ref="worldlineRecurringTokenConverter"/>
+    </bean>
+
+    <bean id="worldlinePaymentInfoConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.worldline.gopay.order.data.WorldlinePaymentInfoData"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlinePaymentInfoPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="worldlineOrderRequestParamPopulator"
+          class="com.worldline.gopay.populator.WorldlineOrderRequestParamPopulator">
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+    </bean>
+
+    <bean id="worldlineShoppingCartRequestParamPopulator"
+          class="com.worldline.gopay.populator.WorldlineShoppingCartRequestParamPopulator">
+        <property name="worldlineShoppingCartFactoriesConfiguration" ref="worldlineShoppingCartFactoriesConfiguration"/>
+    </bean>
+
+
+    <bean id="worldlineCustomerRequestParamPopulator"
+          class="com.worldline.gopay.populator.WorldlineCustomerRequestParamPopulator">
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="customerEmailResolutionService" ref="customerEmailResolutionService"/>
+        <property name="customerNameStrategy" ref="customerNameStrategy"/>
+    </bean>
+
+    <bean id="worldlineBrowserCustomerDevicePopulator"
+          class="com.worldline.gopay.populator.WorldlineBrowserCustomerDevicePopulator"/>
+
+    <bean id="worldlineBrowserCustomerDeviceConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.onlinepayments.domain.CustomerDevice"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineBrowserCustomerDevicePopulator"/>
+            </list>
+        </property>
+    </bean>
+    <bean id="worldlineOrderParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.onlinepayments.domain.Order"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineOrderRequestParamPopulator"/>
+                <ref bean="worldlineShoppingCartRequestParamPopulator"/>
+                <ref bean="worldlineCustomerRequestParamPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="worldlineHostedCheckoutBasicPopulator"
+          class="com.worldline.gopay.populator.hostedcheckout.WorldlineHostedCheckoutBasicPopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="i18NService" ref="i18NService"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="worldlineUserFacade" ref="worldlineUserFacade"/>
+        <property name="worldlineOrderParamConverter" ref="worldlineOrderParamConverter"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
+    </bean>
+
+    <bean id="worldlineHostedCheckoutCardPopulator"
+          class="com.worldline.gopay.populator.hostedcheckout.WorldlineHostedCheckoutCardPopulator">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
+    </bean>
+
+
+
+    <bean id="worldlineSepaDirectDebitPopulator"
+          class="com.worldline.gopay.populator.hostedcheckout.WorldlineSepaDirectDebitPopulator">
+           <property name="commonI18NService" ref="commonI18NService"/>
+    </bean>
+
+    <bean id="worldlineHostedCheckoutRedirectPopulator"
+          class="com.worldline.gopay.populator.hostedcheckout.WorldlineHostedCheckoutRedirectPopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+    </bean>
+
+    <bean id="worldlineHostedCheckoutMobilePopulator"
+          class="com.worldline.gopay.populator.hostedcheckout.WorldlineHostedCheckoutMobilePopulator">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+    </bean>
+
+    <bean id="worldlineHostedCheckoutParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.onlinepayments.domain.CreateHostedCheckoutRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineHostedCheckoutBasicPopulator"/>
+                <ref bean="worldlineHostedCheckoutCardPopulator"/>
+                <ref bean="worldlineHostedCheckoutRedirectPopulator"/>
+                <ref bean="worldlineHostedCheckoutMobilePopulator"/>
+                <ref bean="worldlineSepaDirectDebitPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="worldlinePaymentLinkPopulator"
+          class="com.worldline.gopay.populator.paymentlink.WorldlinePaymentLinkPopulator">
+        <property name="worldlineHostedCheckoutParamConverter" ref="worldlineHostedCheckoutParamConverter"/>
+        <property name="siteBaseUrlResolutionService" ref="siteBaseUrlResolutionService"/>
+        <property name="displayQRCode" value="true"/>
+    </bean>
+
+    <bean id="worldlinePaymentLinkParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.onlinepayments.domain.CreatePaymentLinkRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlinePaymentLinkPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="worldlineHostedTokenizationBasicPopulator"
+          class="com.worldline.gopay.populator.hostedtokenization.WorldlineHostedTokenizationBasicPopulator">
+        <property name="worldlineOrderParamConverter" ref="worldlineOrderParamConverter"/>
+    </bean>
+
+    <bean id="worldlineHostedTokenizationCardPopulator"
+          class="com.worldline.gopay.populator.hostedtokenization.WorldlineHostedTokenizationCardPopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+    </bean>
+    <bean id="worldlineHostedTokenizationRedirectPopulator"
+          class="com.worldline.gopay.populator.hostedtokenization.WorldlineHostedTokenizationRedirectPopulator">
+        <property name="sessionService" ref="sessionService"/>
+    </bean>
+
+    <bean id="worldlineHostedTokenizationSepaPopulator"
+          class="com.worldline.gopay.populator.hostedtokenization.WorldlineHostedTokenizationSepaPopulator"/>
+
+    <bean id="worldlineHostedTokenizationMobilePopulator"
+          class="com.worldline.gopay.populator.hostedtokenization.WorldlineHostedTokenizationMobilePopulator">
+        <property name="sessionService" ref="sessionService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+    </bean>
+
+
+    <bean id="worldlineHostedTokenizationParamConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.onlinepayments.domain.CreatePaymentRequest"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineHostedTokenizationBasicPopulator"/>
+                <ref bean="worldlineHostedTokenizationCardPopulator"/>
+                <ref bean="worldlineHostedTokenizationMobilePopulator"/>
+                <ref bean="worldlineHostedTokenizationRedirectPopulator"/>
+                <ref bean="worldlineHostedTokenizationSepaPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean name="worldlineCartPopulator" class="com.worldline.gopay.populator.WorldlineCartPopulator">
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="priceDataFactory" ref="priceDataFactory"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="cartConverter"/>
+        <property name="add" ref="worldlineCartPopulator"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="extendedCartConverter"/>
+        <property name="add" ref="worldlineCartPopulator"/>
+    </bean>
+
+    <bean name="worldlineSchuduleOrderPopulator" class="com.worldline.gopay.populator.WorldlineSchuduleOrderPopulator">
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="priceDataFactory" ref="priceDataFactory"/>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="scheduledCartConverter"/>
+        <property name="add" ref="worldlineSchuduleOrderPopulator"/>
+    </bean>
+
+
+    <bean name="worldlineOrderPopulator" class="com.worldline.gopay.populator.WorldlineOrderPopulator">
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="priceDataFactory" ref="priceDataFactory"/>
+    </bean>
+
+    <bean name="worldlineMandatePopulator" class="com.worldline.gopay.populator.WorldlineMandatePopulator">
+        <property name="enumerationService" ref="enumerationService"/>
+    </bean>
+
+    <bean id="worldlineMandateConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.worldline.gopay.order.data.WorldlineMandateDetail"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineMandatePopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean name="worldlineRecurringTokenPopulator" class="com.worldline.gopay.populator.WorldlineRecurringTokenPopulator">
+        <property name="enumerationService" ref="enumerationService"/>
+    </bean>
+
+    <bean id="worldlineRecurringTokenConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.worldline.gopay.order.data.WorldlineRecurringTokenData"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlineRecurringTokenPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="orderConverter"/>
+        <property name="add" ref="worldlineOrderPopulator"/>
+    </bean>
+
+    <bean name="worldlineShoppingCartFactoriesConfiguration"
+          class="com.worldline.gopay.factory.impl.WorldlineShoppingCartFactoriesConfiguration">
+        <property name="factoriesConfiguration" ref="shoppingCartfactoriesConfiguration"/>
+    </bean>
+    <util:map id="shoppingCartfactoriesConfiguration" key-type="java.lang.String"
+              value-type="com.worldline.gopay.factory.WorldlineShoppingCartFactory" map-class="java.util.HashMap">
+        <entry key="DEFAULT" value-ref="defaultShoppingCartFactory"/>
+        <entry key="MEALVOUCHERS" value-ref="mealvouchersShoppingCartFactory" />
+    </util:map>
+
+    <bean id="defaultShoppingCartFactory" class="com.worldline.gopay.factory.impl.DefaultWorldlineShoppingCartFactory">
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+    </bean>
+    <bean id="mealvouchersShoppingCartFactory" class="com.worldline.gopay.factory.impl.MealvouchersWorldlineShoppingCartFactory">
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils" />
+        <property name="enumerationService" ref="enumerationService" />
+    </bean>
+
+    <bean id="worldlineTriggerPopulator" class="com.worldline.gopay.populator.WorldlineTriggerPopulator"/>
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="triggerConverter"/>
+        <property name="add" ref="worldlineTriggerPopulator"/>
+    </bean>
+
+    <alias name="worldlineTriggerReversePopulator" alias="triggerReversePopulator"/>
+    <bean id="worldlineTriggerReversePopulator" class="com.worldline.gopay.populator.WorldlineTriggerReversePopulator"/>
+
+    <bean id="worldlinePlaceOrderPopulator" class="com.worldline.gopay.populator.WorldlinePlaceOrderPopulator"/>
+
+    <bean id="worldlinePlaceOrderConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="de.hybris.platform.b2bacceleratorfacades.checkout.data.PlaceOrderData"/>
+        <property name="populators">
+            <list>
+                <ref bean="worldlinePlaceOrderPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="worldlineProductMealvoucherTypePopulator" class="com.worldline.gopay.populator.WorldlineProductMealvoucherTypePopulator"/>
+    <bean parent="modifyPopulatorList">
+        <property name="list" ref="productConverter"/>
+        <property name="add" ref="worldlineProductMealvoucherTypePopulator"/>
+    </bean>
+</beans>

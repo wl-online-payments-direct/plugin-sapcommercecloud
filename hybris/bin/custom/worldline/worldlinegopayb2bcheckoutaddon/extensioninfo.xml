@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+
+
+    <extension abstractclassprefix="Generated" classprefix="Worldlinegopayb2bcheckoutaddon"
+               description="worldlinegopayb2bcheckoutaddon extension"
+               managername="Worldlinegopayb2bcheckoutaddonManager"
+               managersuperclass="de.hybris.platform.jalo.extension.Extension" name="worldlinegopayb2bcheckoutaddon">
+
+
+        <!-- you should add all required extensions to this list, except platform extensions which are automatically required -->
+
+
+        <requires-extension name="addonsupport"/>
+        <requires-extension name="worldlinegopaycore"/>
+        <requires-extension name="b2bapprovalprocess"/>
+        <requires-extension name="acceleratorstorefrontcommons"/>
+
+
+        <coremodule generated="true" manager="com.worldline.gopay.jalo.Worldlinegopayb2bcheckoutaddonManager"
+                    packageroot="com.worldline.gopay"/>
+
+
+        <meta key="classpathgen" value="false"/>
+
+
+    </extension>
+
+
+</extensioninfo>

@@ -1,2 +1,0 @@
-﻿## messageSource=classpath:/worldlinedirectcore/messages/replenishmentPaymentFailedCustomer_$lang.properties
-${ctx.messages.emailSubject}
