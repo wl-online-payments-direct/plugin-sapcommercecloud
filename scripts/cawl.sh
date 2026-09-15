@@ -64,6 +64,21 @@ if [[ ! -d "$SRC_DIR" ]]; then
     exit 1
 fi
 
+# Detect the SDK version the source plugin ships with. Used as the default
+# when cawl.conf does not pin CAWL_SDK_VERSION, so the CAWL output always
+# carries the same SDK as the Worldline release it was generated from.
+SRC_DEPS_XML="$SRC_DIR/worldlinegopaycore/external-dependencies.xml"
+SRC_SDK_VERSION=""
+if [[ -f "$SRC_DEPS_XML" ]]; then
+    SRC_SDK_VERSION=$(sed -n 's|.*<worldline\.gopay\.version>\([^<]*\)</worldline\.gopay\.version>.*|\1|p' "$SRC_DEPS_XML" | head -1)
+fi
+if [[ -z "$CAWL_SDK_VERSION" && -n "$SRC_SDK_VERSION" ]]; then
+    CAWL_SDK_VERSION="$SRC_SDK_VERSION"
+    echo "Using SDK version from source plugin: $CAWL_SDK_VERSION"
+elif [[ -n "$SRC_SDK_VERSION" && "$CAWL_SDK_VERSION" != "$SRC_SDK_VERSION" ]]; then
+    echo "WARNING: cawl.conf pins SDK $CAWL_SDK_VERSION but the source plugin ships $SRC_SDK_VERSION."
+fi
+
 # ------------------------------------------------------------------------------
 # 1. Prepare target directory
 # ------------------------------------------------------------------------------
@@ -424,13 +439,22 @@ elif [[ -n "$CAWL_SDK_GROUP_ID" && -n "$CAWL_SDK_ARTIFACT_ID" && -n "$CAWL_SDK_V
     LIB_DIR="$CORE_EXT_DIR/lib"
     if [[ -d "$LIB_DIR" ]]; then
         # Remove the original Worldline SDK jar (name may vary after renaming)
-        OLD_JAR=$(find "$LIB_DIR" -name "onlinepayments-sdk-java-*.jar" -o -name "*payments-sdk*.jar" | head -1)
-        if [[ -n "$OLD_JAR" ]]; then
+        OLD_JAR=$(find "$LIB_DIR" \( -name "onlinepayments-sdk-java-*.jar" -o -name "*payments-sdk*.jar" \) | head -1)
+        KEEP_JAR=false
+        if [[ -n "$OLD_JAR" && -z "$CAWL_SDK_JAR" \
+              && "$CAWL_SDK_ARTIFACT_ID" == "onlinepayments-sdk-java" \
+              && "$(basename "$OLD_JAR")" == "onlinepayments-sdk-java-${CAWL_SDK_VERSION}.jar" ]]; then
+            # Same artifact and version as the source plugin: nothing to swap.
+            echo "  Keeping shipped SDK jar: $OLD_JAR"
+            KEEP_JAR=true
+        elif [[ -n "$OLD_JAR" ]]; then
             echo "  Removing old SDK jar: $OLD_JAR"
             rm -f "$OLD_JAR"
         fi
 
-        if [[ -n "$CAWL_SDK_JAR" && -f "$CAWL_SDK_JAR" ]]; then
+        if [[ "$KEEP_JAR" == "true" ]]; then
+            :
+        elif [[ -n "$CAWL_SDK_JAR" && -f "$CAWL_SDK_JAR" ]]; then
             # Option B: Copy the provided local jar
             cp "$CAWL_SDK_JAR" "$LIB_DIR/"
             echo "  Copied new SDK jar: $CAWL_SDK_JAR -> $LIB_DIR/"
@@ -481,6 +505,8 @@ fi
 echo ""
 echo "=== Step 7: Verification ==="
 
+# The Maven groupId of the upstream SDK (com.worldline-solutions) is a
+# required external coordinate, not a branding leak, so it is excluded.
 remaining_files=$(grep -rl "worldline\|Worldline\|WORLDLINE\|gopay\|GoPay\|GOPAY" . \
     --include="*.java" \
     --include="*.xml" \
@@ -492,13 +518,17 @@ remaining_files=$(grep -rl "worldline\|Worldline\|WORLDLINE\|gopay\|GoPay\|GOPAY
     --include="*.css" \
     --include="*.less" \
     --include="*.json" \
-    2>/dev/null || true)
+    2>/dev/null | while IFS= read -r f; do
+        if grep -v "com\.worldline-solutions" "$f" | grep -q "worldline\|Worldline\|WORLDLINE\|gopay\|GoPay\|GOPAY"; then
+            echo "$f"
+        fi
+    done || true)
 
 if [[ -n "$remaining_files" ]]; then
     echo "  WARNING: The following files still contain 'worldline' or 'gopay' references:"
     echo "$remaining_files" | while IFS= read -r f; do
         echo "    $f"
-        grep -n "worldline\|Worldline\|WORLDLINE\|gopay\|GoPay\|GOPAY" "$f" | head -5 | while IFS= read -r line; do
+        grep -v "com\.worldline-solutions" "$f" | grep -n "worldline\|Worldline\|WORLDLINE\|gopay\|GoPay\|GOPAY" | head -5 | while IFS= read -r line; do
             echo "      $line"
         done
     done
