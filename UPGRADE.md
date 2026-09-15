@@ -233,3 +233,37 @@ rm -rf hybris/bin/platform/tomcat/work/Catalina
 - [ ] A replenishment failure email renders without error (step 6)
 - [ ] `SELECT {code} FROM {RendererTemplate} WHERE {contextClass} LIKE 'com.worldline.direct%'` returns nothing
 - [ ] `SELECT {uid} FROM {JspIncludeComponent} WHERE {page} LIKE '%worldlinedirect%'` returns nothing
+
+## Upgrading from 6.0 to 7.0
+
+Release 7.0 keeps all item types and tables. Every data model change is additive
+except one, so a clean build plus a system update is enough:
+
+```bash
+ant clean all
+ant updatesystem
+```
+
+After the system update:
+
+1. **Re-select the Wero capture trigger.** The `WeroCaptureTrigger` enum values
+   were re-cased to match the Worldline GoPay API (`SHIPPING` became `shipping`,
+   `SERVICEFULFILMENT` became `serviceFulfilment`, and so on). A trigger saved
+   under 6.0 no longer matches a valid value, so open each Worldline Configuration
+   in the Backoffice and choose the trigger again. Merchants that do not offer
+   Wero can skip this.
+2. **Review the new configuration attributes.** `WorldlineConfiguration` gains
+   Google Pay settings (`googlePayMerchantId`, `googlePayMerchantName`,
+   `googlePayEnvironment`, `googlePayAcquirerCountry`), Pay by Link settings
+   (`paymentLinkExpirationHours`, `paymentLinkReturnUrl`, `paymentLinkLogo`),
+   `showMobileWalletsFirst` and `merchantName`. All are optional; Google Pay and
+   Pay by Link stay inactive until configured.
+3. **Re-import the payment modes** if you use the shipped
+   `projectdata-paymentmodes.impex`. It adds Wero (900) and in3 (5410) and renames
+   Pledg to Sofinco (product 5300 is unchanged).
+4. **Reinstall the checkout addons** (step 4 above) so the storefronts pick up the
+   new Google Pay, Apple Pay and Pay by Link templates and scripts.
+
+`WorldlinePaymentInfo` and `WorldlineRecurringToken` gain new optional attributes
+(transaction details, Google Pay data, Pay by Link data, `initialPaymentId`). They
+are created by the system update and populated for new payments only.
