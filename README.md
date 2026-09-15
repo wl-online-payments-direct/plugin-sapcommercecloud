@@ -1,16 +1,16 @@
 # Worldline GoPay Plugin for SAP Commerce Cloud
 
-> **Upgrading from Worldline Direct?** See [UPGRADE.md](UPGRADE.md). The rename
-> touches extension names, the Java package and some database values, so a
-> rebuild alone is not enough.
+> **Upgrading?** See [UPGRADE.md](UPGRADE.md). The Worldline Direct to Worldline
+> GoPay rename touches extension names, the Java package and some database values,
+> so a rebuild alone is not enough. It also lists the two items in 7.0 that need
+> action after a system update.
 
 ## Overview
 
 The Worldline GoPay plugin for SAP Commerce Cloud connects your SAP Commerce (Hybris) storefront to the Worldline Online Payments platform, enabling you to accept a wide range of payment methods through a single integration. The plugin supports both B2C and B2B commerce scenarios, including recurring payments, saved payment methods, and order replenishment.
 
-**Plugin Version:** 6.0
+**Plugin Version:** 7.0
 **Worldline SDK Version:** 8.6.0
-**Developed by:** Greenlight Commerce
 
 ## Supported Payment Methods
 
@@ -47,6 +47,7 @@ The plugin supports 45+ payment methods across the following categories:
 |---|---|
 | SEPA Direct Debit | 771 |
 | iDEAL / WERO | 809 |
+| Wero | 900 |
 | Bank Transfer | 5408 |
 | Bancontact | 3012 |
 | Multibanco | 5500 |
@@ -67,7 +68,8 @@ The plugin supports 45+ payment methods across the following categories:
 | Oney 3x-4x | 5110 |
 | Oney Financement Long | 5125 |
 | Floa (1x/3x/4x/10x) | 5138-5144 |
-| Pledg | 5300 |
+| Sofinco (formerly Pledg) | 5300 |
+| in3 | 5410 |
 
 ### Vouchers and Gift Cards
 
@@ -88,6 +90,13 @@ The plugin supports 45+ payment methods across the following categories:
 
 - **Hosted Checkout Page (HCP)** - Redirect customers to a Worldline GoPay-hosted payment page with full PCI DSS compliance
 - **Hosted Tokenization Page (HTP)** - Embed a secure card entry form directly in your checkout page for a seamless experience
+- **Pay by Link** - Agents in Assisted Service Mode can send the customer a Worldline GoPay payment link instead of taking payment in the storefront. Expiry, an optional return page and an optional logo are configurable, and the order is completed from the webhook
+
+### Mobile Wallets
+
+- **Apple Pay** - Offered on every browser and device; the payment product and authorization mode are passed through to Hosted Checkout so the customer does not have to choose again
+- **Google Pay** - Native Google Pay button at checkout with merchant ID, merchant name, environment and acquirer country configured in the Backoffice. Supports saved tokens and recurring payments, and exposes a cart endpoint for headless (Spartacus) storefronts
+- **Wallets first** - Optionally show mobile wallets in their own section at the top of the payment methods page (`showMobileWalletsFirst`)
 
 ### Payment Operations
 
@@ -95,6 +104,8 @@ The plugin supports 45+ payment methods across the following categories:
 - **Partial Capture** - Capture a portion of the authorized amount (e.g. for partial shipments)
 - **Refunds** - Process full or partial refunds from the backoffice
 - **Cancellations** - Cancel authorized payments before capture
+- **Accurate amounts** - Tax is sent to Worldline GoPay as a separate amount, with correct net and gross handling for product and shipping prices
+- **Wero** - Configurable capture trigger sent on Hosted Checkout, and the full set of Wero refund reasons (including Returned Goods) available when refunding from the Backoffice
 
 ### Security
 
@@ -108,6 +119,8 @@ The plugin supports 45+ payment methods across the following categories:
 - **Token Management** - View, block, and revoke saved tokens from the backoffice
 - **SEPA Direct Debit Mandates** - Full mandate lifecycle management (create, block, revoke)
 - **Order Replenishment** - Scheduled recurring orders using saved payment methods (daily, weekly, monthly, yearly)
+- **Subsequent Payments** - Recurring card charges use the Worldline GoPay subsequent payment API against the initial payment, rather than creating a new payment from scratch
+- **Mandate checks** - Recurring SEPA Direct Debit charges are only attempted against mandates whose recurrence type is recurring
 
 ### B2B Commerce
 
@@ -132,6 +145,7 @@ The plugin supports 45+ payment methods across the following categories:
 - Manual capture, refund, and cancellation actions
 - Partial capture widget for split shipments
 - Recurring token and mandate management
+- Worldline GoPay transaction details on the payment info record: payment ID, status, merchant reference, payment product, amounts, acquired amount and currency, card BIN and last four digits, fraud result and authentication status
 - Customer support backoffice integration
 
 ### Surcharging
@@ -140,8 +154,9 @@ The plugin supports 45+ payment methods across the following categories:
 
 ## Compatibility
 
-- **SAP Commerce Cloud** 2011 and later
-- **Java** 11+
+- **SAP Commerce Cloud** 2211, built and tested against 2211.28 on **Java 17**
+- **SAP Commerce Cloud 2211-jdk21** releases: use the separate JDK 21 build of the plugin (`worldline-plugin-sapcommerce-7.0-jdk21`), which is the same code migrated to Jakarta EE, Spring 6 and Ehcache 3
+- **Worldline Java SDK** 8.6.0 (bundled in `worldlinegopaycore/lib`)
 
 ## Plugin Architecture
 
@@ -234,7 +249,7 @@ website.powertools.https=https\://powertools.local\:9002/yb2bacceleratorstorefro
 occ.rewrite.overlapping.paths.enabled=true
 
 # Worldline GoPay Hosted Tokenization JS
-worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js
+worldline.hosted.tokenization.js=https://payment.preprod.direct.worldline-solutions.com/hostedtokenization/js/client/tokenizer.min.js
 ```
 
 ## Configuration
@@ -274,10 +289,10 @@ Add the Worldline GoPay tokenization JavaScript URL to `hybris/config/local.prop
 
 ```properties
 # Pre-production / sandbox
-worldline.hosted.tokenization.js=https://payment.preprod.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js
+worldline.hosted.tokenization.js=https://payment.preprod.direct.worldline-solutions.com/hostedtokenization/js/client/tokenizer.min.js
 
 # Production (update when going live)
-# worldline.hosted.tokenization.js=https://payment.direct.ingenico.com/hostedtokenization/js/client/tokenizer.min.js
+# worldline.hosted.tokenization.js=https://payment.direct.worldline-solutions.com/hostedtokenization/js/client/tokenizer.min.js
 ```
 
 ### Webhook Endpoint
@@ -315,6 +330,16 @@ The following options can be set on the `WorldlineConfiguration` item via ImpEx 
 | `hostedCheckoutVariant` | `SimplifiedCustomPaymentPage` | Hosted Checkout Page template |
 | `firstRecurringPayment` | `false` | Process the first recurring payment immediately |
 | `replenishmentAttempts` | - | Number of retry attempts for failed replenishment orders |
+| `merchantName` | - | Merchant name sent in the order descriptor |
+| `showMobileWalletsFirst` | `false` | Show Apple Pay and Google Pay in their own section at the top of the payment methods page |
+| `weroCaptureTrigger` | - | Capture trigger sent for Wero payments (`shipping`, `delivery`, `availability`, `serviceFulfilment`, `other`) |
+| `googlePayMerchantId` | - | Merchant ID from the Google Pay Business Console |
+| `googlePayMerchantName` | - | Merchant name shown in the Google Pay payment sheet |
+| `googlePayEnvironment` | `TEST` | Google Pay API environment (`TEST` or `PRODUCTION`) |
+| `googlePayAcquirerCountry` | - | Acquiring bank country code sent to Google Pay |
+| `paymentLinkExpirationHours` | `168` | Pay by Link expiry in hours (Worldline GoPay accepts 24 hours to 6 months) |
+| `paymentLinkReturnUrl` | - | Optional page the customer is sent to after paying a Pay by Link. Leave blank to rely on webhooks only |
+| `paymentLinkLogo` | - | Optional logo shown next to the Pay by Link payment method |
 
 ### Account Payment Details Page
 
@@ -386,6 +411,7 @@ The plugin provides the following REST API endpoints for headless integrations:
 | `GET` | `/{baseSiteId}/users/{userId}/carts/{cartId}/checkoutType` | Get checkout type (HCP or HTP) |
 | `GET` | `/{baseSiteId}/users/{userId}/carts/{cartId}/hostedTokenization` | Get tokenization session |
 | `GET` | `/{baseSiteId}/users/{userId}/carts/{cartId}/worldlinePaymentdetails` | List saved payment methods |
+| `GET` | `/{baseSiteId}/users/{userId}/carts/{cartId}/googlePayData` | Google Pay configuration for the cart (environment, merchant, allowed networks, amount) |
 
 ### Order Endpoints
 
@@ -414,4 +440,4 @@ For technical support and documentation, contact your Worldline GoPay account re
 
 ## License
 
-This plugin is provided under the terms of your Worldline merchant agreement. Copyright Worldline / Greenlight Commerce.
+This plugin is provided under the terms of your Worldline merchant agreement. Copyright Worldline.
