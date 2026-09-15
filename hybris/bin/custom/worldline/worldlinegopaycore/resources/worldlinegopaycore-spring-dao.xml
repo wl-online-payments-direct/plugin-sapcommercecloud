@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="worldlineCustomerAccountDao" class="com.worldline.gopay.dao.impl.WorldlineCustomerAccountDaoImpl"
+          parent="abstractItemDao"/>
+
+    <bean id="worldlineConfigurationDao" class="com.worldline.gopay.dao.impl.WorldlineConfigurationDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="worldlineWebhookDao" class="com.worldline.gopay.dao.impl.WorldlineWebhookDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="worldlineTransactionDao" class="com.worldline.gopay.dao.impl.WorldlineTransactionDaoImpl">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="worldlineOrderDao" class="com.worldline.gopay.dao.impl.WorldlineOrderDaoImpl" parent="defaultOrderDao" >
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <bean id="worldlinePaymentModeDao" class="com.worldline.gopay.dao.impl.WorldlinePaymentModeDaoImpl" parent="defaultPaymentModeDao"/>
+
+    <alias name="worldlineB2BAcceleratorCartToOrderCronJobModelDao" alias="b2bAcceleratorCartToOrderCronJobModelDao"/>
+    <bean id="worldlineB2BAcceleratorCartToOrderCronJobModelDao" class="com.worldline.gopay.dao.impl.DefaultWorldlineB2BAcceleratorCartToOrderCronJobModelDao">
+        <property name="flexibleSearchService" ref="flexibleSearchService" />
+        <property name="pagedFlexibleSearchService" ref="pagedFlexibleSearchService" />
+    </bean>
+</beans>

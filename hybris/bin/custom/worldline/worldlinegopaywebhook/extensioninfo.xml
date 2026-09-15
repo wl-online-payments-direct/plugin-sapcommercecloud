@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+--><extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+           
+    
+    <extension abstractclassprefix="Generated" classprefix="Worldlinegopaywebhook" managername="WorldlinegopaywebhookManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="worldlinegopaywebhook" usemaven="false">
+
+        <requires-extension name="webservicescommons"/>
+        <requires-extension name="worldlinegopaycore"/>
+        
+        <coremodule generated="true" manager="com.worldline.gopay.jalo.WorldlinegopaywebhookManager" packageroot="com.worldline.gopay"/>
+        <webmodule jspcompile="false" webroot="/worldline"/>
+
+    </extension>
+              
+
+
+</extensioninfo>

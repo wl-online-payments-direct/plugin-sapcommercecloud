@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:utils="http://www.springframework.org/schema/util"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="worldlinegopaycore-spring-dao.xml"/>
+    <import resource="worldlinegopaycore-spring-service.xml"/>
+    <import resource="worldlinegopaycore-spring-converter.xml"/>
+    <import resource="worldlinegopaycore-spring-process.xml"/>
+    <import resource="worldlinegopaycore-spring-event.xml"/>
+    <import resource="worldlinegopaycore-spring-email.xml"/>
+
+
+    <bean id="worldlineClientFactory" class="com.worldline.gopay.factory.impl.WorldlineClientFactoryImpl">
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="communicatorConfiguration" ref="communicatorConfiguration"/>
+    </bean>
+
+    <bean id="communicatorConfiguration" class="com.onlinepayments.CommunicatorConfiguration">
+        <property name="authorizationType" value="${worldline.gopay.api.authorizationType}"/>
+        <property name="connectTimeout" value="${worldline.gopay.api.connectTimeout}"/>
+        <property name="socketTimeout" value="${worldline.gopay.api.socketTimeout}"/>
+        <property name="maxConnections" value="${worldline.gopay.api.maxConnections}"/>
+        <property name="integrator" value="${worldline.gopay.api.integrator}"/>
+        <property name="shoppingCartExtension" ref="worldlineShoppingCartExtension"/>
+    </bean>
+    <bean id="worldlineShoppingCartExtension" class="com.onlinepayments.domain.ShoppingCartExtension">
+        <constructor-arg name="creator" value="${worldline.gopay.api.shoppingCartExtension.creator}"/>
+        <constructor-arg name="name" value="${worldline.gopay.api.shoppingCartExtension.name}"/>
+        <constructor-arg name="version" value="${worldline.gopay.api.shoppingCartExtension.version}"/>
+        <constructor-arg name="extensionId" value="${worldline.gopay.api.shoppingCartExtension.extensionId}"/>
+    </bean>
+
+    <!-- utils -->
+
+    <bean id="worldlineAmountUtils" class="com.worldline.gopay.util.WorldlineAmountUtils">
+        <property name="commonI18NService" ref="commonI18NService"/>
+    </bean>
+
+    <!-- facades -->
+    <alias name="worldlineUserFacade" alias="worldlineUserFacade"/>
+    <bean id="worldlineUserFacade" class="com.worldline.gopay.facade.impl.WorldlineUserFacadeImpl">
+        <property name="modelService" ref="modelService"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
+        <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlinePaymentInfoConverter" ref="worldlinePaymentInfoConverter"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+    </bean>
+
+    <bean id="worldlineCheckoutFacade" class="com.worldline.gopay.facade.impl.WorldlineCheckoutFacadeImpl">
+        <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="checkoutFacade" ref="checkoutFacade"/>
+        <property name="worldlineUserFacade" ref="worldlineUserFacade"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlineTransactionService" ref="worldlineTransactionService"/>
+        <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
+        <property name="addressReverseConverter" ref="addressReverseConverter"/>
+        <property name="orderConverter" ref="orderConverter"/>
+        <property name="worldlinePlaceOrderConverter" ref="worldlinePlaceOrderConverter" />
+        <property name="cartService" ref="cartService"/>
+        <property name="commerceCheckoutService" ref="commerceCheckoutService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
+        <property name="paymentModeService" ref="worldlinePaymentModeService"/>
+        <property name="userService" ref="userService"/>
+        <property name="virtualPaymentModes" ref="virtualPaymentModes"/>
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="worldlineScheduleOrderService" ref="worldlineScheduleOrderService"/>
+        <property name="sessionService" ref="sessionService"/>
+    </bean>
+
+    <bean id="worldlineRecurringCheckoutFacade" parent="worldlineCheckoutFacade"
+          class="com.worldline.gopay.facade.impl.WorldlineRecurringCheckoutFacadeImpl">
+        <property name="scheduledCartConverter" ref="scheduledCartConverter"/>
+        <property name="worldlineB2BPaymentService" ref="worldlineB2BPaymentServiceImpl"/>
+        <property name="worldlineCartToOrderService" ref="worldlineCartToOrderService"/>
+    </bean>
+
+    <bean id="worldlineCustomerAccountFacade"
+          class="com.worldline.gopay.facade.impl.WorldlineCustomerAccountFacadeImpl">
+        <property name="scheduledCartDataConverter" ref="scheduledCartConverter"/>
+        <property name="worldlineCustomerAccountService" ref="worldlineCustomerAccountService"/>
+    </bean>
+
+    <bean id="worldlineWebhookFacade" class="com.worldline.gopay.facade.impl.WorldlineWebhookFacadeImpl">
+        <property name="worldlineWebhookService" ref="worldlineWebhookService"/>
+        <property name="worldlineOrderDao" ref="worldlineOrderDao"/>
+    </bean>
+
+    <!-- Job -->
+    <bean id="worldlineProcessWebhooksEventJob" class="com.worldline.gopay.cronjob.WorldlineProcessWebhooksEventJob"
+          parent="abstractJobPerformable">
+        <property name="modelService" ref="modelService"/>
+        <property name="worldlineWebhookService" ref="worldlineWebhookService"/>
+        <property name="worldlineWebhookDao" ref="worldlineWebhookDao"/>
+    </bean>
+
+    <bean id="worldlineAutomaticCaptureJob" class="com.worldline.gopay.cronjob.WorldlineAutomaticCaptureJob"
+          parent="abstractJobPerformable">
+        <property name="worldlineOrderDao" ref="worldlineOrderDao"/>
+        <property name="worldlinePaymentService" ref="worldlinePaymentService"/>
+        <property name="worldlineTransactionService" ref="worldlineTransactionService"/>
+        <property name="worldlineBusinessProcessService" ref="worldlineBusinessProcessService"/>
+        <property name="worldlineAmountUtils" ref="worldlineAmountUtils"/>
+    </bean>
+
+    <bean id="worldlineAcceleratorCartToOrderJob"
+          class="com.worldline.gopay.cronjob.WorldlineAcceleratorCartToOrderJob" parent="abstractJobPerformable">
+        <property name="businessProcessService" ref="businessProcessService"/>
+        <property name="triggerService" ref="triggerService"/>
+        <property name="i18NService" ref="i18NService"/>
+        <property name="worldlineRecurringService" ref="worldlineRecurringService"/>
+    </bean>
+
+
+    <!-- strategies -->
+    <bean id="worldlinePaymentProductFilterByAvailabilityStrategy"
+          class="com.worldline.gopay.strategy.impl.WorldlinePaymentProductFilterByAvailabilityStrategy">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService"/>
+    </bean>
+
+    <bean id="worldlinePaymentProductFilterByGroupCardsStrategy" class="com.worldline.gopay.strategy.impl.WorldlinePaymentProductFilterByGroupCardsStrategy">
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
+        <property name="baseStoreService" ref="baseStoreService"/>
+    </bean>
+    <bean id="worldlinePaymentProductFilterByCheckoutStrategy"
+          class="com.worldline.gopay.strategy.impl.WorldlinePaymentProductFilterByCheckoutStrategy">
+        <property name="baseStoreService" ref="baseStoreService"/>
+        <property name="worldlineHostedCheckoutPaymentProductsEvaluatorList"
+                  ref="worldlineHostedCheckoutPaymentProductsEvaluatorList"/>
+        <property name="worldlineHostedTokenizationPaymentProductsEvaluatorList"
+                  ref="worldlineHostedTokenizationPaymentProductsEvaluatorList"/>
+    </bean>
+    <bean id="worldlinePaymentProductFilterNamesStrategy" class="com.worldline.gopay.strategy.impl.WorldlinePaymentProductFilterNamesStrategy">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
+    </bean>
+    <bean id="worldlinePaymentProductSortStrategy" class="com.worldline.gopay.strategy.impl.WorldlinePaymentProductSortStrategy">
+        <property name="worldlineConfigurationService" ref="worldlineConfigurationService" />
+    </bean>
+    <bean id="worldlinePaymentProductFilterByCartDataMealvouchersStrategy" class="com.worldline.gopay.strategy.impl.WorldlinePaymentProductFilterByCartDataMealvouchersStrategy">
+
+    </bean>
+
+    <util:map id="worldlinePaymentProductFilterStrategyMap"
+              key-type="com.worldline.gopay.enums.WorldlinePaymentProductFilterEnum"
+              value-type="com.worldline.gopay.strategy.WorldlinePaymentProductFilterStrategy"
+              map-class="java.util.HashMap">
+        <entry key="CHECKOUT_TYPE" value-ref="worldlinePaymentProductFilterByCheckoutStrategy"/>
+        <entry key="ACTIVE_PAYMENTS" value-ref="worldlinePaymentProductFilterByAvailabilityStrategy"/>
+        <entry key="GROUP_CARDS" value-ref="worldlinePaymentProductFilterByGroupCardsStrategy"/>
+        <entry key="NAMES" value-ref="worldlinePaymentProductFilterNamesStrategy" />
+        <entry key="SORT" value-ref="worldlinePaymentProductSortStrategy" />
+    </util:map>
+
+    <util:map id="worldlinePaymentProductFilterByCartDataStrategyMap"
+              key-type="com.worldline.gopay.enums.WorldlinePaymentProductFilterByCartDataEnum"
+              value-type="com.worldline.gopay.strategy.WorldlinePaymentProductFilterByCartDataStrategy"
+              map-class="java.util.HashMap">
+        <entry key="MEALVOUCHERS" value-ref="worldlinePaymentProductFilterByCartDataMealvouchersStrategy" />
+    </util:map>
+
+    <bean id="worldlinePaymentProductFilterStrategyFactory"
+          class="com.worldline.gopay.factory.impl.DefaultWorldlinePaymentProductFilterStrategyFactory">
+        <property name="paymentProductFilterStrategyMap" ref="worldlinePaymentProductFilterStrategyMap"/>
+        <property name="paymentProductFilterByCartDataStrategyMap"  ref="worldlinePaymentProductFilterByCartDataStrategyMap" />
+    </bean>
+
+    <!-- evaluator -->
+    <bean id="worldlineHostedCheckoutPaymentProductsEvaluator"
+          class="com.worldline.gopay.evaluate.impl.WorldlineHostedCheckoutPaymentProductsEvaluator"/>
+    <bean id="worldlineHostedTokenizationPaymentProductsEvaluator"
+          class="com.worldline.gopay.evaluate.impl.WorldlineHostedTokenizationPaymentProductsEvaluator"/>
+
+    <bean id="defaultWorldlinePaymentProductEvaluator" abstract="true"
+          class="com.worldline.gopay.evaluate.impl.DefaultWorldlinePaymentProductEvaluator"/>
+
+    <bean id="worldlineBcmcPaymentProductsEvaluator"
+          parent="defaultWorldlinePaymentProductEvaluator">
+        <property name="paymentProductId">
+            <utils:constant
+                    static-field="com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_BCC"/>
+        </property>
+    </bean>
+
+    <bean id="worldlineIntersolvePaymentProductsEvaluator"
+          parent="defaultWorldlinePaymentProductEvaluator"
+          class="com.worldline.gopay.evaluate.impl.IntersolveWorldlinePaymentProductEvaluator">
+        <property name="worldlinePaymentModeService" ref="worldlinePaymentModeService" />
+    </bean>
+
+    <bean id="worldlineApplePayPaymentProductsEvaluator"
+          class="com.worldline.gopay.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
+        <property name="paymentProductId">
+            <utils:constant
+                    static-field="com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_APPLEPAY"/>
+        </property>
+    </bean>
+    <bean id="worldlineGooglePayPaymentProductsEvaluator"
+          class="com.worldline.gopay.evaluate.impl.DefaultWorldlinePaymentProductEvaluator">
+        <property name="paymentProductId">
+            <utils:constant
+                    static-field="com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_GOOGLEPAY"/>
+        </property>
+    </bean>
+
+    <utils:list id="worldlineHostedCheckoutPaymentProductsEvaluatorList">
+        <ref bean="worldlineHostedCheckoutPaymentProductsEvaluator"/>
+        <ref bean="worldlineApplePayPaymentProductsEvaluator"/>
+        <ref bean="worldlineGooglePayPaymentProductsEvaluator"/>
+    </utils:list>
+
+    <utils:list id="worldlineHostedTokenizationPaymentProductsEvaluatorList">
+        <ref bean="worldlineHostedTokenizationPaymentProductsEvaluator"/>
+        <ref bean="worldlineBcmcPaymentProductsEvaluator"/>
+        <ref bean="worldlineIntersolvePaymentProductsEvaluator"/>
+    </utils:list>
+
+    <utils:list id="virtualPaymentModes">
+        <utils:constant
+                static-field="com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_GROUP_CARDS"/>
+        <utils:constant
+                static-field="com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_HCP"/>
+        <utils:constant
+                static-field="com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_HTP"/>
+    </utils:list>
+
+</beans>

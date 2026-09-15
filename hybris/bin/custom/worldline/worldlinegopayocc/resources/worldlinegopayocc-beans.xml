@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<!--
+	ATTENTION: This is just an example file. You have to edit it according to your needs.
+-->
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
+
+    <bean class="de.hybris.platform.commercewebservicescommons.dto.order.AbstractOrderWsDTO">
+        <property name="worldlinePaymentInfo" type="com.worldline.gopay.payment.dto.WorldlinePaymentInfoWsDTO"/>
+        <property name="surcharge" type="de.hybris.platform.commercewebservicescommons.dto.product.PriceWsDTO"/>
+    </bean>
+
+    <bean class="de.hybris.platform.commercewebservicescommons.dto.order.CartWsDTO">
+        <property name="replenishmentOrder" type="Boolean"/>
+        <property name="nDays" type="String"/>
+        <property name="nWeeks" type="String"/>
+        <property name="nthDayOfMonth" type="String"/>
+        <property name="nMonths" type="String"/>
+        <property name="nYear" type="String"/>
+        <property name="replenishmentRecurrence" type="String"/>
+        <property name="replenishmentStartDate" type="java.util.Date"/>
+        <property name="replenishmentEndDate" type="java.util.Date"/>
+        <property name="nDaysOfWeek" type="java.util.List&lt;de.hybris.platform.b2bwebservicescommons.dto.order.DayOfWeekWsDTO>"/>
+    </bean>
+
+
+    <bean class="com.worldline.gopay.payment.dto.PaymentProductDisplayHintsWsDTO">
+        <description>PaymentProduct display hints</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">DisplayHints</hint>
+        </hints>
+        <property name="displayOrder" type="String"/>
+        <property name="label" type="String"/>
+        <property name="logo" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.WorldlineGooglePayConfigurationWsDTO">
+        <property name="environment" type="String"/>
+        <property name="merchantId" type="String"/>
+        <property name="merchantName" type="String"/>
+        <property name="gateway" type="String"/>
+        <property name="gatewayMerchantId" type="String"/>
+        <property name="networks" type="String"/>
+        <property name="countryCode" type="String"/>
+        <property name="currencyCode" type="String"/>
+        <property name="totalPrice" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.PaymentProductWsDTO">
+        <description>PaymentProduct</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">PaymentProduct</hint>
+        </hints>
+        <property name="id" type="String"/>
+        <property name="paymentMethod" type="String"/>
+        <property name="displayHints" type="com.worldline.gopay.payment.dto.PaymentProductDisplayHintsWsDTO"/>
+    </bean>
+
+
+    <bean class="com.worldline.gopay.payment.dto.PaymentProductListWsDTO">
+        <description>list of PaymentProduct</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">PaymentProductList</hint>
+        </hints>
+        <property name="paymentProducts"
+                  type="java.util.List&lt;com.worldline.gopay.payment.dto.PaymentProductWsDTO>">
+            <description>list of PaymentProduct</description>
+        </property>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.HostedTokenizationResponseWsDTO">
+        <description>Hosted Tokenization Response</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">HostedTokenizationResponse</hint>
+        </hints>
+        <property name="hostedTokenizationId" type="String"/>
+        <property name="checkoutType" type="com.worldline.gopay.payment.dto.WorldlineCheckoutTypeWsDTO"/>
+        <property name="redirectURL" type="String"/>
+        <property name="savedPaymentDetails" type="de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsListWsDTO"/>
+    </bean>
+
+    <bean class="de.hybris.platform.commercewebservicescommons.dto.order.PaymentDetailsWsDTO">
+        <property name="cardBrand" type="String">
+            <description>Worldline GoPay Card Brand</description>
+        </property>
+        <property name="token" type="String">
+            <description>Worldline GoPay token</description>
+        </property>
+        <property name="paymentMethodImageUrl" type="String">
+            <description>Worldline GoPay payment Method Image Url</description>
+        </property>
+        <property name="alias" type="String">
+            <description>Worldline GoPay alias</description>
+        </property>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.BrowserDataWsDTO">
+        <description>Browser Data</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">BrowserData</hint>
+        </hints>
+        <property name="screenHeight" type="String"/>
+        <property name="screenWidth" type="String"/>
+        <property name="navigatorJavaEnabled" type="Boolean"/>
+        <property name="navigatorJavaScriptEnabled" type="Boolean"/>
+        <property name="timezoneOffsetUtcMinutes" type="String"/>
+        <property name="colorDepth" type="Integer"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.RecurringDataWSDTO">
+        <description>Recurring Data</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="recurring Data">Recurring Data</hint>
+        </hints>
+        <property name="browserData" type="com.worldline.gopay.payment.dto.BrowserDataWsDTO"/>
+        <property name="scheduleReplenishment" type="de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO"/>
+    </bean>
+
+    <bean class="de.hybris.platform.b2bwebservicescommons.dto.order.ScheduleReplenishmentFormWsDTO">
+        <property name="numberOfMonths" type="String">
+            <description>How frequent replenishment should be activated expressed in Months. Mandatory with
+                'recurrencePeriod=Monthly'.
+            </description>
+            <hints>
+                <hint name="example">14</hint>
+            </hints>
+        </property>
+        <property name="replenishmentEndDate" type="java.util.Date">
+            <description>Lasd day for replenishment order</description>
+            <hints>
+                <hint name="example">2020-12-31T09:00:00+0000</hint>
+            </hints>
+        </property>
+        <property name="tokenizePayment" type="boolean">
+            <description>If recurring payment is paid by card the customer must accept to keep his payment details</description>
+        </property>
+        <property name="isReplenishmentOrder" type="boolean">
+            <description>A switch to tell if an order is one-off or replenish</description>
+        </property>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.RedirectDataWsDTO">
+        <description>Redirect Data</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">RedirectData</hint>
+        </hints>
+        <property name="redirectURL" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.MerchantActionWsDTO">
+        <description>Merchant Action</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">MerchantAction</hint>
+        </hints>
+        <property name="actionType" type="String"/>
+        <property name="redirectData" type="com.worldline.gopay.payment.dto.RedirectDataWsDTO"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.CreatePaymentResponseWsDTO">
+        <description>Create Payment Response</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">CreatePaymentResponse</hint>
+        </hints>
+        <property name="MerchantAction" type="com.worldline.gopay.payment.dto.MerchantActionWsDTO"/>
+        <property name="PaymentResponse" type="com.worldline.gopay.payment.dto.PaymentResponseWsDTO"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.PaymentResponseWsDTO">
+        <description>Payment Response</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">PaymentResponse</hint>
+        </hints>
+        <property name="id" type="String"/>
+        <property name="status" type="String"/>
+    </bean>
+
+
+    <bean class="com.worldline.gopay.payment.dto.WorldlinePaymentDetailsWsDTO">
+        <description>Worldline GoPay Payment Details</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlinePaymentDetails</hint>
+        </hints>
+        <property name="paymentProductId" type="Integer"/>
+        <property name="paymentMethod" type="String"/>
+        <property name="hostedTokenizationId" type="String"/>
+        <property name="savedCardCode" type="String"/>
+        <property name="useDeliveryAddress" type="boolean"/>
+        <property name="cardholderName" type="String"/>
+        <property name="worldlineCheckoutType" type="com.worldline.gopay.payment.dto.WorldlineCheckoutTypeWsDTO"/>
+        <property name="billingAddress" type="de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO"/>
+        <property name="mandateDetail" type="com.worldline.gopay.payment.dto.MandateDetailWsDTO"/>
+
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.WorldlinePaymentInfoWsDTO"
+          extends="com.worldline.gopay.payment.dto.WorldlinePaymentDetailsWsDTO">
+        <description>Worldline GoPay Payment Info</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlinePaymentInfo</hint>
+        </hints>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.WorldlineCheckoutTypeWsDTO">
+        <description>Worldline GoPay Checkout Type</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlineCheckoutType</hint>
+        </hints>
+        <property name="worldlineCheckoutType" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.HostedCheckoutResponseWsDTO">
+        <description>Hosted Tokenization Response</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">HostedCheckoutResponse</hint>
+        </hints>
+        <property name="hostedCheckoutId" type="String"/>
+        <property name="redirectURL" type="String"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.NonAuthorizedPaymentWsDTO">
+        <description>Non Authorized Payment</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">NonAuthorizedPayment</hint>
+        </hints>
+        <property name="status" type="String"/>
+        <property name="redirectTo" type="String"/>
+    </bean>
+
+
+    <bean class="com.worldline.gopay.payment.dto.MandateDetailWsDTO">
+        <description>Worldline GoPay Mandate Detail</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">MandateDetailWsDTO</hint>
+        </hints>
+        <property name="alias" type="String"/>
+        <property name="customerReference" type="String"/>
+        <property name="recurrenceType" type="String"/>
+        <property name="status" type="String"/>
+        <property name="uniqueMandateReference" type="String"/>
+        <property name="customer" type="com.worldline.gopay.payment.dto.WorldlineMandateCustomerWsDTO"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.WorldlineMandateCustomerWsDTO">
+        <description>Worldline GoPay Mandate Customer Detail</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlineMandateCustomer</hint>
+        </hints>
+        <property name="iban" type="String"/>
+        <property name="companyName" type="String"/>
+        <property name="emailAddress" type="String"/>
+        <property name="address" type="com.worldline.gopay.payment.dto.WorldlineMandateAddressWsDTO"/>
+        <property name="personalInformation" type="com.worldline.gopay.payment.dto.WorldlinePersonalInformationWsDTO"/>
+    </bean>
+
+    <bean class="com.worldline.gopay.payment.dto.WorldlineMandateAddressWsDTO">
+        <description>Worldline GoPay Mandate Address Detail</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlineMandateAddress</hint>
+        </hints>
+        <property name="city" type="String"/>
+        <property name="country" type="String"/>
+        <property name="HouseNumber" type="String"/>
+        <property name="street" type="String"/>
+        <property name="zip" type="String"/>
+    </bean>
+    <bean class="com.worldline.gopay.payment.dto.WorldlinePersonalInformationWsDTO">
+        <description>Worldline GoPay Mandate Address Detail</description>
+        <hints>
+            <hint name="wsRelated"/>
+            <hint name="alias">WorldlineMandateAddress</hint>
+        </hints>
+        <property name="firstName" type="String"/>
+        <property name="lastName" type="String"/>
+        <property name="title" type="String"/>
+    </bean>
+
+
+</beans>
