@@ -1,4 +1,4 @@
-package com.worldline.direct.occ.controllers.v2;
+package com.worldline.gopay.occ.controllers.v2;
 
 
 import com.onlinepayments.domain.CreateHostedTokenizationResponse;
@@ -56,8 +56,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.worldline.gopay.constants.WorldlinedirectcoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
-import static com.worldline.gopay.constants.WorldlinedirectcoreConstants.PAYMENT_METHOD_GOOGLEPAY;
+import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
+import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_GOOGLEPAY;
 import static com.worldline.gopay.occ.controllers.v2.WorldlineB2BOrdersController.OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM;
 
 @Controller

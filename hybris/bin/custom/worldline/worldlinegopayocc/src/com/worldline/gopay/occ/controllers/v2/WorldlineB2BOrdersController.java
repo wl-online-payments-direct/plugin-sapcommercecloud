@@ -263,6 +263,80 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
         return dataMapper.map(createHostedCheckoutResponse, HostedCheckoutResponseWsDTO.class, fields);
     }
 
+    @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+    @ApiBaseSiteIdAndUserIdParam
+    @PostMapping(value = "/googlePay")
+    @ResponseBody
+    @Operation(operationId = "placeOrderGooglePay", summary = "Place the order with HostedCheckout.", description =
+            "Returns a hosted checkout data for the current base store. " +
+                    "cart must be valid, otherwise an error will be returned.")
+    public OrderWsDTO placeOrderGooglePay(
+            @Parameter(description = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
+            @RequestBody final BrowserDataWsDTO browserDataWsDTO,
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @RequestParam final String cartId,
+            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
+            final HttpServletRequest request) throws InvalidCartException, WorldlineNonAuthorizedPaymentException {
+
+        cartLoaderStrategy.loadCart(cartId);
+
+        final CartData cartData = cartFacade.getSessionCart();
+        if (cartData.getWorldlinePaymentInfo() == null) {
+            throw new CartException("No Worldline Payment Info found.", CartException.INVALID);
+        } else if (!WorldlineCheckoutTypesEnum.GOOGLE_PAY.equals(cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType())) {
+            throw new CartException("Invalid Worldline Checkout Type.", CartException.INVALID);
+        }
+
+        validate(browserDataWsDTO, "browserData", browserDataWsDTOValidator);
+        final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);
+        fillBrowserData(request, browserData);
+
+        OrderData orderData = extendedCheckoutFacade.placeOrder(new PlaceOrderData());
+
+        storeReturnUrlInSession(orderData.getCode(), request, OrderType.PLACE_ORDER, WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
+
+        worldlineCheckoutFacade.authorisePaymentForGooglePay(orderData.getCode(), browserData);
+        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
+
+        return getDataMapper().map(orderData, OrderWsDTO.class, fields);
+
+    }
+
+    @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+    @ApiBaseSiteIdAndUserIdParam
+    @PostMapping(value = "/recurringGooglePay", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    @Operation(operationId = "placeReplenishmentOrderGooglePay", summary = "Place the Replenishment order with GooglePay", description = "Place the Replenishment order with GooglePay")
+    public ReplenishmentOrderWsDTO placeReplenishmentOrderGooglePay(
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true) @RequestParam(required = true) final String cartId,
+            @Parameter(description = "Whether terms were accepted or not.", required = true) @RequestParam(required = true) final boolean termsChecked,
+            @Parameter(description = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
+            @RequestBody final BrowserDataWsDTO browserDataWsDTO,
+            @ApiFieldsParam @RequestParam(required = false, defaultValue = FieldSetLevelHelper.DEFAULT_LEVEL) final String fields, final HttpServletRequest request)
+            throws InvalidCartException, WorldlineNonAuthorizedPaymentException {
+
+        validateTerms(termsChecked);
+        validateUser();
+
+        cartLoaderStrategy.loadCart(cartId);
+        final CartData cartData = cartFacade.getSessionCart();
+
+        validateCart(cartData);
+
+        final PlaceOrderData placeOrderData = worldlineCheckoutFacade.prepareOrderPlacementData();
+        placeOrderData.setTermsCheck(termsChecked);
+        placeOrderData.setCardDetailsCheck(Boolean.TRUE);
+        AbstractOrderData abstractOrderData = extendedCheckoutFacade.placeOrder(placeOrderData);
+
+        storeReturnUrlInSession(abstractOrderData.getCode(), request, OrderType.SCHEDULE_REPLENISHMENT_ORDER, WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
+        validate(browserDataWsDTO, "browserDataWsDTO", browserDataWsDTOValidator);
+        final BrowserData browserData = getDataMapper().map(browserDataWsDTO, BrowserData.class, BROWSER_MAPPING);
+        abstractOrderData = worldlineRecurringCheckoutFacade.authorizeRecurringPaymentForGooglePay(abstractOrderData.getCode(), browserData, RecurringPaymentEnum.IMMEDIATE);
+
+        return getDataMapper().map((ScheduledCartData)abstractOrderData, ReplenishmentOrderWsDTO.class, fields);
+    }
+
+
     protected void validateTerms(final boolean termsChecked) {
         if (!termsChecked) {
             throw new RequestParameterException(getLocalizedString(CART_CHECKOUT_TERM_UNCHECKED));

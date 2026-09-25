@@ -182,7 +182,6 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             params = worldlineHostedTokenizationParamConverter.convert(orderForCode);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(worldlineHostedTokenizationData.getBrowserData()));
 
-            WorldlineLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, "payment");
             final CreatePaymentResponse payment = merchant.payments().createPayment(params);
 
             WorldlineLogUtils.logAction(LOGGER, "createPaymentForHostedTokenization", params, payment);
