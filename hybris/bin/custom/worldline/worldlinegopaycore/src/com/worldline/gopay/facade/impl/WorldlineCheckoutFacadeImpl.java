@@ -84,7 +84,6 @@ import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineCheckoutFacadeImpl.class);
     private static final Pattern GOOGLE_PAY_PHONE_USER_AGENT_PATTERN = Pattern.compile(".*(iPhone|iPod|Android.*Mobile|Windows Phone|BlackBerry|IEMobile|Opera Mini).*", Pattern.CASE_INSENSITIVE);
-    private static final String PAY_BY_LINK_LABEL = "Pay by link";
 
     protected CommonI18NService commonI18NService;
     protected ModelService modelService;
@@ -891,7 +890,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         paymentProduct.setId(WorldlinegopaycoreConstants.PAYMENT_METHOD_PAY_BY_LINK);
         paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
-        paymentProduct.getDisplayHints().setLabel(PAY_BY_LINK_LABEL);
+        paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.payByLink"));
         return paymentProduct;
     }
 
