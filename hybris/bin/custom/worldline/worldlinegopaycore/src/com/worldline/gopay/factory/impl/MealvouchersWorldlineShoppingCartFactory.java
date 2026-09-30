@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -115,17 +114,27 @@ public class MealvouchersWorldlineShoppingCartFactory implements WorldlineShoppi
         }
         orderLineDetails.setProductType(overallProductTypeName);
 
-        // Price/unit data should be the same whether merged or not.
-        orderLineDetails.setProductPrice(worldlineAmountUtils.createAmount(calculateNetProductPrice(order, linePrice, lineDiscounts, totalTaxes, orderLineDetails.getQuantity()), currencyIsoCode));
-        orderLineDetails.setTaxAmount(worldlineAmountUtils.createAmount(totalTaxes, currencyIsoCode));
+        // Worldline treats price, discount and tax as per unit values, so they must divide evenly by the quantity.
+        // Otherwise send the whole line as a single unit, as the merged case does.
+        long lineAmount = worldlineAmountUtils.createAmount(calculateLineAmount(order, linePrice, totalTaxes), currencyIsoCode);
+        long lineTax = worldlineAmountUtils.createAmount(totalTaxes, currencyIsoCode);
+        long lineDiscount = worldlineAmountUtils.createAmount(lineDiscounts, currencyIsoCode);
+        List<WorldlineLineItemPortions.Portion> portions = WorldlineLineItemPortions.split(orderLineDetails.getQuantity(), lineAmount - lineTax, lineDiscount, lineTax);
+        WorldlineLineItemPortions.Portion portion = portions.size() == 1
+                ? portions.get(0)
+                : WorldlineLineItemPortions.split(1L, lineAmount - lineTax, lineDiscount, lineTax).get(0);
+
+        orderLineDetails.setQuantity(portion.quantity());
+        orderLineDetails.setProductPrice(portion.productPrice());
+        orderLineDetails.setTaxAmount(portion.tax());
         orderLineDetails.setUnit(resolveUnitString(sameUnit, detectedUnit));
-        orderLineDetails.setDiscountAmount(worldlineAmountUtils.createAmount(lineDiscounts, currencyIsoCode));
+        orderLineDetails.setDiscountAmount(portion.discount());
 
 
         // Set Money
         AmountOfMoney amountOfMoney = new AmountOfMoney();
         amountOfMoney.setCurrencyCode(currencyIsoCode);
-        amountOfMoney.setAmount(worldlineAmountUtils.createAmount(calculateLineAmount(order, linePrice, totalTaxes), currencyIsoCode));
+        amountOfMoney.setAmount(portion.amount());
 
         lineItem.setAmountOfMoney(amountOfMoney);
         lineItem.setOrderLineDetails(orderLineDetails);
@@ -204,17 +213,6 @@ public class MealvouchersWorldlineShoppingCartFactory implements WorldlineShoppi
             return linePrice.add(tax);
         }
         return linePrice;
-    }
-
-    private BigDecimal calculateNetProductPrice(AbstractOrderModel order, BigDecimal linePrice, BigDecimal discount, BigDecimal tax, Long quantity) {
-        BigDecimal netLinePrice = linePrice.add(discount);
-        if (!Boolean.TRUE.equals(order.getNet())) {
-            netLinePrice = netLinePrice.subtract(tax);
-        }
-        if (quantity == null || quantity == 0L) {
-            return netLinePrice;
-        }
-        return netLinePrice.divide(BigDecimal.valueOf(quantity), 2, RoundingMode.HALF_UP);
     }
 
     private String resolveUnitString(boolean sameUnit, UnitModel detectedUnit) {

@@ -203,10 +203,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     public CreateHostedCheckoutResponse createHostedCheckout(OrderModel orderForCode, com.worldline.gopay.order.data.BrowserData browserData) {
         validateParameterNotNullStandardMessage("browserData", browserData);
         validateParameterNotNull(orderForCode, "order cannot be null");
+        CreateHostedCheckoutRequest params = null;
         try {
             MerchantClient merchant = worldlineClientFactory.getMerchantClient(getStoreId(), getMerchantId());
 
-            final CreateHostedCheckoutRequest params = worldlineHostedCheckoutParamConverter.convert(orderForCode);
+            params = worldlineHostedCheckoutParamConverter.convert(orderForCode);
             params.getOrder().getCustomer().setDevice(worldlineBrowserCustomerDeviceConverter.convert(browserData));
 
             final CreateHostedCheckoutResponse hostedCheckout = merchant.hostedCheckout().createHostedCheckout(params);
@@ -216,6 +217,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             return hostedCheckout;
 
         } catch (Exception e) {
+            logCreatePaymentFailure(LOGGER, "createHostedCheckout", params, e);
             LOGGER.error("[ WORLDLINE ] Errors during getting createHostedCheckout ", e);
             //TODO Throw Logical Exception
             return null;
@@ -540,7 +542,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
         return null;
     }
 
-    protected void logCreatePaymentFailure(final Logger logger, final String action, final CreatePaymentRequest params, final Exception exception) {
+    protected void logCreatePaymentFailure(final Logger logger, final String action, final Object params, final Exception exception) {
         WorldlineLogUtils.logFailedAction(logger, action, params, exception);
         if (logger.isDebugEnabled() && exception instanceof ApiException) {
             final ApiException apiException = (ApiException) exception;
