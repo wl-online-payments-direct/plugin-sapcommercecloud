@@ -404,7 +404,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
             "Returns a hosted checkout data for the current base store. " +
                     "cart must be valid, otherwise an error will be returned.")
     @ApiBaseSiteIdAndUserIdParam
-    public OrderWsDTO placeOrderPayBuLink(
+    public OrderWsDTO placeOrderPayByLink(
             @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
             @RequestParam final String cartId,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
