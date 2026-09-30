@@ -336,6 +336,35 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
         return getDataMapper().map((ScheduledCartData)abstractOrderData, ReplenishmentOrderWsDTO.class, fields);
     }
 
+    @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+    @PostMapping(value = "/payByLink")
+    @ResponseBody
+    @Operation(operationId = "placeOrderPayBuLink", summary = "Place the order with HostedCheckout.", description =
+            "Returns a hosted checkout data for the current base store. " +
+                    "cart must be valid, otherwise an error will be returned.")
+    @ApiBaseSiteIdAndUserIdParam
+    public OrderWsDTO placeOrderPayBuLink(
+            @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
+            @RequestParam final String cartId,
+            @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
+            final HttpServletRequest request) throws InvalidCartException {
+
+        cartLoaderStrategy.loadCart(cartId);
+
+        final CartData cartData = cartFacade.getSessionCart();
+        if (cartData.getWorldlinePaymentInfo() == null) {
+            throw new CartException("No Worldline Payment Info found.", CartException.INVALID);
+        } else if (!WorldlineCheckoutTypesEnum.PAY_BY_LINK.equals(cartData.getWorldlinePaymentInfo().getWorldlineCheckoutType())) {
+            throw new CartException("Invalid Worldline Checkout Type.", CartException.INVALID);
+        }
+
+        OrderData orderData = extendedCheckoutFacade.placeOrder(new PlaceOrderData());
+
+        worldlineCheckoutFacade.createPaymentLink(orderData.getCode());
+        orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
+
+        return getDataMapper().map(orderData, OrderWsDTO.class, fields);
+    }
 
     protected void validateTerms(final boolean termsChecked) {
         if (!termsChecked) {

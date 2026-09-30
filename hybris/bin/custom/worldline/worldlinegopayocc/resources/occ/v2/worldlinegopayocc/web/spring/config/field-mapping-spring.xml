@@ -59,7 +59,7 @@
         <property name="dtoClass" value="com.worldline.gopay.payment.dto.WorldlinePaymentInfoWsDTO"/>
         <property name="levelMapping">
             <map>
-                <entry key="BASIC" value="paymentProductId,paymentMethod,cardholderName,worldlineCheckoutType,mandateDetail(BASIC)"/>
+                <entry key="BASIC" value="paymentProductId,paymentMethod,cardholderName,worldlineCheckoutType,mandateDetail(BASIC),paymentLinkRedirectionUrl"/>
                 <entry key="DEFAULT" value="BASIC,billingAddress(DEFAULT),mandateDetail(DEFAULT)"/>
                 <entry key="FULL" value="BASIC,billingAddress(FULL),mandateDetail(FULL)"/>
             </map>

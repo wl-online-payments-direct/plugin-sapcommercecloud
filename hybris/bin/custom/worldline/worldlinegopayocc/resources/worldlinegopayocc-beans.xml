@@ -199,6 +199,7 @@
         <property name="hostedTokenizationId" type="String"/>
         <property name="savedCardCode" type="String"/>
         <property name="googlePayEncryptedPaymentData" type="String"/>
+        <property name="paymentLinkRedirectionUrl" type="String"/>
         <property name="useDeliveryAddress" type="boolean"/>
         <property name="cardholderName" type="String"/>
         <property name="worldlineCheckoutType" type="com.worldline.gopay.payment.dto.WorldlineCheckoutTypeWsDTO"/>

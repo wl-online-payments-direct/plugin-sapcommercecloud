@@ -1,10 +1,8 @@
 package com.worldline.gopay.occ.controllers.v2;
 
 
-import com.onlinepayments.domain.CreateHostedTokenizationResponse;
-import com.onlinepayments.domain.GetPaymentProductsResponse;
-import com.onlinepayments.domain.PaymentProduct;
-import com.onlinepayments.domain.PaymentProduct320SpecificData;
+import com.onlinepayments.domain.*;
+import com.worldline.gopay.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.gopay.enums.WorldlinePaymentProductFilterEnum;
 import com.worldline.gopay.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.gopay.facade.WorldlineCheckoutFacade;
@@ -33,6 +31,7 @@ import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartAddre
 import de.hybris.platform.commercewebservicescommons.errors.exceptions.CartException;
 import de.hybris.platform.cronjob.enums.DayOfWeek;
 import de.hybris.platform.order.InvalidCartException;
+import de.hybris.platform.servicelayer.i18n.I18NService;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdUserIdAndCartIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
@@ -42,6 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -52,12 +52,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.QueryParam;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
-import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_METHOD_GOOGLEPAY;
+import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.*;
 import static com.worldline.gopay.occ.controllers.v2.WorldlineB2BOrdersController.OBJECT_NAME_SCHEDULE_REPLENISHMENT_FORM;
 
 @Controller
@@ -76,6 +76,12 @@ public class WorldlineCartsController extends WorldlineBaseController {
 
     @Resource(name = "commerceWebServicesCartFacade2")
     private CartFacade cartFacade;
+
+    @Resource(name = "messageSource")
+    private MessageSource messageSource;
+
+    @Resource(name = "i18nService")
+    private I18NService i18nService;
 
     @Resource(name = "worldlineHelper")
     private WorldlineHelper worldlineHelper;
@@ -114,10 +120,16 @@ public class WorldlineCartsController extends WorldlineBaseController {
             "Returns all payment products supported for the "
                     + "current base store and cart delivery address. A delivery address must be set for the cart, otherwise an empty list will be returned.")
     @ApiBaseSiteIdUserIdAndCartIdParam
-    public PaymentProductListWsDTO getCartPaymentProducts(
+    public PaymentProductListWsDTO getCartPaymentProducts(@QueryParam(value = "asmEnabled") Boolean asmEnabled,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) {
         List<PaymentProduct> availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(worldlineCheckoutFacade.getAvailablePaymentMethods(), WorldlinePaymentProductFilterEnum.ACTIVE_PAYMENTS, WorldlinePaymentProductFilterEnum.CHECKOUT_TYPE, WorldlinePaymentProductFilterEnum.GROUP_CARDS, WorldlinePaymentProductFilterEnum.NAMES, WorldlinePaymentProductFilterEnum.SORT).get();
         availablePaymentMethods = worldlinePaymentProductFilterStrategyFactory.filter(availablePaymentMethods, checkoutFacade.getCheckoutCart()).get();
+
+        if (asmEnabled) {
+            PaymentProduct payByLink = createPayByLinkPaymentProduct();
+            availablePaymentMethods.add(payByLink);
+        }
+
         GetPaymentProductsResponse productsResponse = new GetPaymentProductsResponse();
         productsResponse.setPaymentProducts(availablePaymentMethods);
         final PaymentProductListWsDTO paymentProductListWsDTO = getDataMapper()
@@ -178,7 +190,8 @@ public class WorldlineCartsController extends WorldlineBaseController {
     @ResponseBody
     @Operation(operationId = "selectCartPaymentProduct", summary = "selectCartPaymentProduct", description = "selectCartPaymentProduct")
     @ApiBaseSiteIdUserIdAndCartIdParam
-    public void selectCartPaymentProduct(@Parameter(description = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
+    public void selectCartPaymentProduct(
+            @QueryParam(value = "asmEnabled") Boolean asmEnabled, @Parameter(description = "Request body parameter that contains details \n\nThe DTO is in XML or .json format.", required = true)
                                          @RequestBody final WorldlinePaymentDetailsWsDTO worldlinePaymentDetailsWsDTO,
                                          @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields) throws CartException, WorldlineNonValidPaymentProductException {
         if (!checkoutFacade.hasCheckoutCart()) {
@@ -187,6 +200,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
 
         validate(worldlinePaymentDetailsWsDTO, "worldlinePaymentDetailsWsDTO", worldlinePaymentDetailsWsDTOValidator);
         final WorldlinePaymentInfoData worldlinePaymentInfoData = new WorldlinePaymentInfoData();
+        sessionService.setAttribute("ASM", asmEnabled);
 
         // if GooglePay is selected save GooglePayEncryptedPaymentData
         worldlinePaymentInfoData.setGooglePayEncryptedPaymentData(worldlinePaymentDetailsWsDTO.getGooglePayEncryptedPaymentData());
@@ -194,6 +208,7 @@ public class WorldlineCartsController extends WorldlineBaseController {
                 worldlinePaymentDetailsWsDTO.getSavedCardCode(),
                 worldlinePaymentDetailsWsDTO.getPaymentProductId(),
                 worldlinePaymentDetailsWsDTO.getHostedTokenizationId());
+        sessionService.removeAttribute("ASM");
 
         final AddressData addressData;
         if (Boolean.TRUE.equals(worldlinePaymentDetailsWsDTO.isUseDeliveryAddress())) {
@@ -377,6 +392,21 @@ public class WorldlineCartsController extends WorldlineBaseController {
         }
         return StringUtils.EMPTY;
     }
+
+
+    protected PaymentProduct createPayByLinkPaymentProduct() {
+        PaymentProduct paymentProduct = new PaymentProduct();
+        paymentProduct.setId(PAYMENT_METHOD_PAY_BY_LINK);
+        paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
+        paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
+        paymentProduct.getDisplayHints().setLabel(messageSource.getMessage("checkout.multi.paymentLink.paymentMethod", null, i18nService.getCurrentLocale()));
+        WorldlineConfigurationModel configuration = worldlineConfigurationService.getCurrentWorldlineConfiguration();
+        if (configuration != null && configuration.getPaymentLinkLogo() != null) {
+            paymentProduct.getDisplayHints().setLogo(configuration.getPaymentLinkLogo().getURL());
+        }
+        return paymentProduct;
+    }
+
 
     public DataMapper getDataMapper() {
         return dataMapper;
