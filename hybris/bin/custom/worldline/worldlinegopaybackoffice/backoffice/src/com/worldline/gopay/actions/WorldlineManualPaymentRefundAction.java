@@ -131,7 +131,8 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
       return finalPaymentTransaction.getEntries()
             .stream()
             .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
-            .filter(entry -> WorldlinegopaycoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(entry.getTransactionStatus()))
+            .filter(entry -> (WorldlinegopaycoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(entry.getTransactionStatus())
+                    || WorldlinegopaycoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED.getValue().equals(entry.getTransactionStatusDetails())))
             .findFirst().orElse(null);
    }
 }
