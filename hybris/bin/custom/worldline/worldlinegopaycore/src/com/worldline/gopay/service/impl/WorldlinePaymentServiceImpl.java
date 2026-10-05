@@ -603,7 +603,11 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
     private SubsequentCardPaymentMethodSpecificInput createSubsequentCardPaymentMethodSpecificInput(AbstractOrderModel abstractOrderModel, CreatePaymentRequest createPaymentRequest) {
         final WorldlinePaymentInfoModel paymentInfo = (WorldlinePaymentInfoModel) abstractOrderModel.getPaymentInfo();
         validateParameterNotNull(paymentInfo.getWorldlineRecurringToken(), "worldlineRecurringToken cannot be null");
-        validateParameterNotNull(paymentInfo.getWorldlineRecurringToken().getToken(), "worldlineRecurringToken.token cannot be null");
+        // Google Pay recurring series have no stored token; the subsequent call relies on the initial payment id alone
+        final boolean isGooglePay = Integer.valueOf(WorldlinegopaycoreConstants.PAYMENT_METHOD_GOOGLEPAY).equals(paymentInfo.getId());
+        if (!isGooglePay) {
+            validateParameterNotNull(paymentInfo.getWorldlineRecurringToken().getToken(), "worldlineRecurringToken.token cannot be null");
+        }
 
         final SubsequentCardPaymentMethodSpecificInput subsequentCardInput = new SubsequentCardPaymentMethodSpecificInput();
         subsequentCardInput.setSubsequentType(SUBSEQUENT_TYPE_RECURRING);
@@ -621,7 +625,9 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
             }
         }
 
-        subsequentCardInput.setToken(paymentInfo.getWorldlineRecurringToken().getToken());
+        if (StringUtils.isNotBlank(paymentInfo.getWorldlineRecurringToken().getToken())) {
+            subsequentCardInput.setToken(paymentInfo.getWorldlineRecurringToken().getToken());
+        }
 
         return subsequentCardInput;
     }
