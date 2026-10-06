@@ -17,6 +17,9 @@
     <import resource="worldlinegopaycore-spring-email.xml"/>
 
 
+    <bean id="worldlineLiabilityDisplayAttributeHandler" class="com.worldline.gopay.attributehandlers.WorldlineLiabilityDisplayAttributeHandler"/>
+    <bean id="worldlineAppliedExemptionDisplayAttributeHandler" class="com.worldline.gopay.attributehandlers.WorldlineAppliedExemptionDisplayAttributeHandler"/>
+
     <bean id="worldlineClientFactory" class="com.worldline.gopay.factory.impl.WorldlineClientFactoryImpl">
         <property name="worldlineConfigurationService" ref="worldlineConfigurationService"/>
         <property name="communicatorConfiguration" ref="communicatorConfiguration"/>

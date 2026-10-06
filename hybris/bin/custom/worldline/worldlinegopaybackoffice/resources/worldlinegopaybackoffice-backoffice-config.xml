@@ -412,8 +412,8 @@
 					</ea:section>
 					<ea:section name="hmc.worldline.worldlineFraudAnd3ds">
 						<ea:attribute qualifier="fraudResult" readonly="true"/>
-						<ea:attribute qualifier="liability" readonly="true"/>
-						<ea:attribute qualifier="appliedExemption" readonly="true"/>
+						<ea:attribute qualifier="liabilityDisplay" readonly="true"/>
+						<ea:attribute qualifier="appliedExemptionDisplay" readonly="true"/>
 						<ea:attribute qualifier="authenticationStatus" readonly="true"/>
 						<ea:attribute qualifier="eci" readonly="true"/>
 						<ea:attribute qualifier="xid" readonly="true"/>
@@ -602,8 +602,8 @@
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineFraudAnd3ds">
 					<ea:attribute qualifier="fraudResult" readonly="true"/>
-					<ea:attribute qualifier="liability" readonly="true"/>
-					<ea:attribute qualifier="appliedExemption" readonly="true"/>
+					<ea:attribute qualifier="liabilityDisplay" readonly="true"/>
+					<ea:attribute qualifier="appliedExemptionDisplay" readonly="true"/>
 					<ea:attribute qualifier="authenticationStatus" readonly="true"/>
 					<ea:attribute qualifier="eci" readonly="true"/>
 					<ea:attribute qualifier="xid" readonly="true"/>
