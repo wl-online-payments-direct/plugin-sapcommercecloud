@@ -410,6 +410,8 @@
 						<ea:attribute qualifier="liability" readonly="true"/>
 						<ea:attribute qualifier="appliedExemption" readonly="true"/>
 						<ea:attribute qualifier="authenticationStatus" readonly="true"/>
+						<ea:attribute qualifier="eci" readonly="true"/>
+						<ea:attribute qualifier="xid" readonly="true"/>
 					</ea:section>
 					<ea:section name="hmc.worldline.worldlineSavedPaymentInfo">
 						<ea:attribute qualifier="token"/>
@@ -598,6 +600,8 @@
 					<ea:attribute qualifier="liability" readonly="true"/>
 					<ea:attribute qualifier="appliedExemption" readonly="true"/>
 					<ea:attribute qualifier="authenticationStatus" readonly="true"/>
+					<ea:attribute qualifier="eci" readonly="true"/>
+					<ea:attribute qualifier="xid" readonly="true"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>

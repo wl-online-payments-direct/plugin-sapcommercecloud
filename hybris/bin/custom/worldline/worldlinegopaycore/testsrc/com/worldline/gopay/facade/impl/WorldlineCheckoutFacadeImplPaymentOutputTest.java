@@ -158,6 +158,29 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
     }
 
     @Test
+    public void updatePaymentInfoStoresGooglePayThreeDSecureResultsFromMobileOutput() {
+        CartModel order = new CartModel();
+        WorldlinePaymentInfoModel paymentInfo = new WorldlinePaymentInfoModel();
+        paymentInfo.setId(WorldlinegopaycoreConstants.PAYMENT_METHOD_GOOGLEPAY);
+        TestModelService modelService = new TestModelService(new WorldlineRecurringTokenModel());
+        order.setPaymentInfo(paymentInfo);
+        facade.setModelService(modelService.proxy());
+
+        // Worldline returns the 3DS results for Google Pay on the mobile output only, next to a card output without them
+        ThreeDSecureResults threeDSecureResults = new ThreeDSecureResults();
+        threeDSecureResults.setEci("5");
+        threeDSecureResults.setXid("MTAyODYzMTI3Mjg=");
+        PaymentResponse paymentResponse = googlePayPaymentResponse();
+        paymentResponse.getPaymentOutput().getMobilePaymentMethodSpecificOutput().setThreeDSecureResults(threeDSecureResults);
+        paymentResponse.getPaymentOutput().setCardPaymentMethodSpecificOutput(new CardPaymentMethodSpecificOutput());
+
+        facade.updatePaymentInfo(order, paymentResponse);
+
+        assertEquals("5", paymentInfo.getEci());
+        assertEquals("MTAyODYzMTI3Mjg=", paymentInfo.getXid());
+    }
+
+    @Test
     public void savePaymentTokenUsesGooglePayRecurringReferenceWhen3dsResponseAlsoContainsCardOutputWithoutToken() {
         CustomerModel customer = new CustomerModel();
         CartModel order = new CartModel();

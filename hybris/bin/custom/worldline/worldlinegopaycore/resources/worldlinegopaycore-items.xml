@@ -468,6 +468,14 @@
                     <persistence type="property" />
                     <modifiers optional="true" search="true" />
                 </attribute>
+                <attribute qualifier="eci" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="xid" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
                 <attribute qualifier="mealvoucherBrand" type="java.lang.String">
                     <persistence type="property" />
                     <modifiers optional="true" />
