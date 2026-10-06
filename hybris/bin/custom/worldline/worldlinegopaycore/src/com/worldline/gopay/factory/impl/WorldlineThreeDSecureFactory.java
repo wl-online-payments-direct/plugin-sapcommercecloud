@@ -152,8 +152,12 @@ public class WorldlineThreeDSecureFactory {
 
     private static boolean isWithinExemptionLimit(WorldlineConfigurationModel config, AbstractOrderModel order) {
         BigDecimal limit = config.getExemptionLimit3DS();
+        if (limit == null || order.getTotalPrice() == null) {
+            return false;
+        }
         BigDecimal total = BigDecimal.valueOf(order.getTotalPrice());
-        return limit.compareTo(total) > 0;
+        // Orders equal to the limit qualify for the exemption ("below or equals the exemption limit").
+        return limit.compareTo(total) >= 0;
     }
 
     private static void applyExemption(ThreeDSecure threeDSecure, WorldlineExemptionType type) {
