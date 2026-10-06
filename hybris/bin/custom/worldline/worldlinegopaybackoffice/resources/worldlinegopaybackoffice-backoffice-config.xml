@@ -300,7 +300,12 @@
 			<ea:tab name="hmc.worldline">
 				<ea:section name="hmc.worldline.worldlineConfiguration">
 					<ea:attribute qualifier="worldlineConfiguration"/>
-					<ea:attribute qualifier="worldlineCheckoutType"/>
+					<ea:attribute qualifier="worldlineCheckoutType">
+						<ea:editor-parameter>
+							<ea:name>valueResolver</ea:name>
+							<ea:value>worldlineStoreCheckoutTypeValueResolver</ea:value>
+						</ea:editor-parameter>
+					</ea:attribute>
 					<ea:attribute qualifier="returnUrl"/>
 					<ea:attribute qualifier="merchant"/>
 				</ea:section>
