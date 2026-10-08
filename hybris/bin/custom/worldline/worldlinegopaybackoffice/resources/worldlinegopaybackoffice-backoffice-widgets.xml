@@ -53,10 +53,30 @@
         </widget>
     </widget-extension>
 
+    <widget-extension widgetId="backofficeMainSlot">
+        <widget id="omsWorldlineCreateReturnRequestPopup"
+                widgetDefinitionId="com.worldline.gopay.widgets.returns.worldlinecreatereturnrequest"
+                slotId="cockpitWidgetChildrenInvisible" title="Create Return Request" template="true">
+            <instance-settings socketEventRoutingMode="LAST_USED">
+                <create onInit="false" reuseExisting="true"><all-incoming-events/></create>
+                <close><all-outgoing-events/></close>
+                <select onInit="false"><all-incoming-events/></select>
+            </instance-settings>
+            <setting key="widgetStyleClass" type="String"></setting>
+            <setting key="__externalLocationPath" type="String">extension://worldlinegopaybackoffice</setting>
+            <setting key="widgetStyleAttribute" type="String"></setting>
+            <setting key="_width" type="String">1200px</setting>
+            <setting key="_height" type="String">700px</setting>
+            <virtual-sockets />
+        </widget>
+    </widget-extension>
+
     <!-- Action widget connections -->
     <widget-connection sourceWidgetId="STUB_com.worldline.gopay.actions.worldlinemanualpaymentcaptureaction" outputId="capturePaymentContext" targetWidgetId="omsWorldlinePartialCapturePopup" inputId="inputObject"/>
     <widget-connection sourceWidgetId="STUB_com.worldline.gopay.actions.worldlinemanualpaymentrefundaction" outputId="weroRefundContext" targetWidgetId="omsWorldlineWeroRefundReasonPopup" inputId="inputObject"/>
-
+    <widget-connection sourceWidgetId="STUB_com.worldline.gopay.actions.worldlinecreatereturnrequestaction"
+                       outputId="createReturnRequestContext"
+                       targetWidgetId="omsWorldlineCreateReturnRequestPopup" inputId="inputObject"/>
     <widget-connection sourceWidgetId="STUB_com.worldline.gopay.backoffice.action.featurerequest"
                        outputId="featureRequestWizardContext"
                        targetWidgetId="configurableFlow"
