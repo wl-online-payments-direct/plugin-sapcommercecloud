@@ -21,7 +21,8 @@ public interface WorldlineTransactionService {
                                                      String paymentTransactionId,
                                                      String status,
                                                      AmountOfMoney amountOfMoney,
-                                                     PaymentTransactionType paymentTransactionType);
+                                                     PaymentTransactionType paymentTransactionType,
+                                                     String weroRefundPaymentReason);
 
     void processCapturedEvent(WebhooksEvent webhooksEvent);
 

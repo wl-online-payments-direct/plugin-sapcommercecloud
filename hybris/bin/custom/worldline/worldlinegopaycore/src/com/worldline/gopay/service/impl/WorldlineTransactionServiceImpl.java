@@ -8,6 +8,7 @@ import com.worldline.gopay.service.WorldlineBusinessProcessService;
 import com.worldline.gopay.service.WorldlineTransactionService;
 import com.worldline.gopay.util.WorldlineAmountUtils;
 import com.worldline.gopay.util.WorldlinePaymentDetailsUtils;
+import de.hybris.platform.comments.model.CommentModel;
 import de.hybris.platform.core.enums.PaymentStatus;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.OrderModel;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,12 +82,13 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 paymentTransactionId,
                 status,
                 amountOfMoney,
-                PaymentTransactionType.AUTHORIZATION);
+                PaymentTransactionType.AUTHORIZATION,
+                StringUtils.EMPTY);
     }
 
 
     @Override
-    public PaymentTransactionModel updatePaymentTransaction(PaymentTransactionModel paymentTransaction, String paymentTransactionId, String status, AmountOfMoney amountOfMoney, PaymentTransactionType paymentTransactionType) {
+    public PaymentTransactionModel updatePaymentTransaction(PaymentTransactionModel paymentTransaction, String paymentTransactionId, String status, AmountOfMoney amountOfMoney, PaymentTransactionType paymentTransactionType, String weroRefundReason) {
         validateParameterNotNullStandardMessage("paymentTransaction", paymentTransaction);
         validateParameterNotNullStandardMessage("paymentTransactionId", paymentTransactionId);
         validateParameterNotNullStandardMessage("status", status);
@@ -97,7 +100,8 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 paymentTransaction.getOrder(),
                 status,
                 amountOfMoney,
-                paymentTransactionType
+                paymentTransactionType,
+                weroRefundReason
         );
 
         return paymentTransaction;
@@ -128,7 +132,8 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                     webhooksEvent.getPayment().getId(),
                     webhooksEvent.getPayment().getStatus(),
                     webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() != null ? webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() : webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
-                    PaymentTransactionType.CAPTURE
+                    PaymentTransactionType.CAPTURE,
+                    StringUtils.EMPTY
             );
         }
     }
@@ -151,7 +156,8 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                     paymentTransaction.getOrder(),
                     capture.getStatus(),
                     capture.getCaptureOutput().getAcquiredAmount() != null ? capture.getCaptureOutput().getAcquiredAmount() : capture.getCaptureOutput().getAmountOfMoney(),
-                    PaymentTransactionType.CAPTURE
+                    PaymentTransactionType.CAPTURE,
+                    StringUtils.EMPTY
             );
         }
 
@@ -169,7 +175,8 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                 webhooksEvent.getRefund().getId(),
                 webhooksEvent.getRefund().getStatus(),
                 webhooksEvent.getRefund().getRefundOutput().getAmountOfMoney(),
-                PaymentTransactionType.REFUND_FOLLOW_ON
+                PaymentTransactionType.REFUND_FOLLOW_ON,
+                StringUtils.EMPTY
         );
 
     }
@@ -219,7 +226,8 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
                         webhooksEvent.getPayment().getId(),
                         webhooksEvent.getPayment().getStatus(),
                         webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() != null ? webhooksEvent.getPayment().getPaymentOutput().getAcquiredAmount() : webhooksEvent.getPayment().getPaymentOutput().getAmountOfMoney(),
-                        PaymentTransactionType.AUTHORIZATION
+                        PaymentTransactionType.AUTHORIZATION,
+                        StringUtils.EMPTY
                 );
             }
         } catch (ModelNotFoundException e) {
@@ -318,7 +326,8 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
             final AbstractOrderModel abstractOrderModel,
             final String status,
             final AmountOfMoney amountOfMoney,
-            final PaymentTransactionType transactionType) {
+            final PaymentTransactionType transactionType,
+            final String weroPaymentRefundReason) {
         validateParameterNotNullStandardMessage("order", abstractOrderModel);
         validateParameterNotNullStandardMessage("paymentTransaction", paymentTransaction);
         validateParameterNotNullStandardMessage("paymentTransactionId", paymentTransactionId);
@@ -345,6 +354,13 @@ public class WorldlineTransactionServiceImpl implements WorldlineTransactionServ
 
         transactionEntryModel.setTransactionStatus(getTransactionStatus(status));
         transactionEntryModel.setTransactionStatusDetails(status);
+        if (StringUtils.isNotEmpty(weroPaymentRefundReason)) {
+            List<CommentModel> comments = new ArrayList<>();
+            CommentModel weroRefundReason = new CommentModel();
+            weroRefundReason.setCode(weroPaymentRefundReason);
+            comments.add(weroRefundReason);
+            transactionEntryModel.setComments(comments);
+        }
 
         modelService.save(transactionEntryModel);
         modelService.refresh(paymentTransaction);

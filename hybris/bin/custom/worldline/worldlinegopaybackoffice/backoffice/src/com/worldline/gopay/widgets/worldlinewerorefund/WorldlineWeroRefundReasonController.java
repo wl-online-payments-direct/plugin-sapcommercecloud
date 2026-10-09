@@ -11,7 +11,6 @@ import com.worldline.gopay.service.WorldlinePaymentModeService;
 import com.worldline.gopay.service.WorldlinePaymentService;
 import com.worldline.gopay.service.WorldlineTransactionService;
 import de.hybris.platform.core.model.order.OrderModel;
-import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
@@ -171,7 +170,8 @@ public class WorldlineWeroRefundReasonController extends DefaultWidgetController
                         paymentTransactionToRefund.getRequestId(),
                         refundResponse.getStatus(),
                         refundResponse.getRefundOutput().getAmountOfMoney(),
-                        PaymentTransactionType.REFUND_FOLLOW_ON);
+                        PaymentTransactionType.REFUND_FOLLOW_ON,
+                        selectedReason.getCode());
                 worldlineBusinessProcessService.triggerReturnProcessEvent(order, WORLDLINE_EVENT_REFUND);
                 Messagebox.show(this.getLabel("worldline.werorefund.success.message")
                         + " (" + refundResponse.getStatus() + ")");
@@ -209,8 +209,8 @@ public class WorldlineWeroRefundReasonController extends DefaultWidgetController
         return finalPaymentTransaction.getEntries()
                 .stream()
                 .filter(entry -> PaymentTransactionType.CAPTURE.equals(entry.getType()))
-                .filter(entry -> WorldlinegopaycoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue()
-                        .equals(entry.getTransactionStatus()))
+                .filter(entry -> (WorldlinegopaycoreConstants.PAYMENT_STATUS_CATEGORY_ENUM.SUCCESSFUL.getValue().equals(entry.getTransactionStatus())
+                        || WorldlinegopaycoreConstants.PAYMENT_STATUS_ENUM.CAPTURE_REQUESTED.getValue().equals(entry.getTransactionStatusDetails())))
                 .findFirst().orElse(null);
     }
 }

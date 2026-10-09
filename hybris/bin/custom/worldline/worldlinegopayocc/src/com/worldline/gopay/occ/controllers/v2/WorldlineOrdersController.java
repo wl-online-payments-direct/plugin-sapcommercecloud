@@ -2,6 +2,7 @@ package com.worldline.gopay.occ.controllers.v2;
 
 
 import com.onlinepayments.domain.CreateHostedCheckoutResponse;
+import com.onlinepayments.domain.Order;
 import com.worldline.gopay.enums.OrderType;
 import com.worldline.gopay.enums.RecurringPaymentEnum;
 import com.worldline.gopay.enums.WorldlineCheckoutTypesEnum;
@@ -69,6 +70,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
     private static final String HTP_MAPPING = "hostedTokenizationId,browserData(screenHeight,screenWidth,navigatorJavaEnabled,navigatorJavaScriptEnabled,timezoneOffsetUtcMinutes,colorDepth)";
     private static final String HOP_SESSION_RETURN_PARAM = "hostedCheckoutReturnUrl";
     private static final String HTP_SESSION_RETURN_PARAM = "hostedTokenizationReturnUrl";
+    private final static String DEFAILT_ORDER_TYPE_PARAM = "PLACE_ORDER";
     @Resource(name = "dataMapper")
     private DataMapper dataMapper;
 
@@ -168,7 +170,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
             @RequestParam(value = "paymentId", required = true) final String paymentId,
             @Parameter(description = "Cart identifier: cart code for logged in user, cart guid for anonymous user, 'current' for the last modified cart", required = true)
             @RequestParam final String cartId,
-            @RequestParam final String orderType,
+            @RequestParam(defaultValue = DEFAILT_ORDER_TYPE_PARAM) final String orderType,
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
             throws WorldlineNonAuthorizedPaymentException, InvalidCartException, WorldlineNonValidReturnMACException {
         cartLoaderStrategy.loadCart(cartId);
@@ -400,7 +402,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
     @PostMapping(value = "/payByLink")
     @ResponseBody
-    @Operation(operationId = "placeOrderPayBuLink", summary = "Place the order with HostedCheckout.", description =
+    @Operation(operationId = "placeOrderPayByLink", summary = "Place the order with HostedCheckout.", description =
             "Returns a hosted checkout data for the current base store. " +
                     "cart must be valid, otherwise an error will be returned.")
     @ApiBaseSiteIdAndUserIdParam

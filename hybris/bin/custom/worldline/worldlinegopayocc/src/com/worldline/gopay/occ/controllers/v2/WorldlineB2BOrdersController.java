@@ -339,7 +339,7 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
     @Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
     @PostMapping(value = "/payByLink")
     @ResponseBody
-    @Operation(operationId = "placeOrderPayBuLink", summary = "Place the order with HostedCheckout.", description =
+    @Operation(operationId = "placeOrderPayByLink", summary = "Place the order with HostedCheckout.", description =
             "Returns a hosted checkout data for the current base store. " +
                     "cart must be valid, otherwise an error will be returned.")
     @ApiBaseSiteIdAndUserIdParam

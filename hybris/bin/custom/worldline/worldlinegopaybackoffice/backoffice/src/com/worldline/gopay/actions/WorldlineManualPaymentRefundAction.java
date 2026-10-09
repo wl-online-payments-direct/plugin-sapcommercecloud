@@ -17,6 +17,7 @@ import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.returns.model.ReturnRequestModel;
 import de.hybris.platform.servicelayer.time.TimeService;
+import org.apache.tika.utils.StringUtils;
 import org.zkoss.zhtml.Messagebox;
 
 import javax.annotation.Resource;
@@ -97,7 +98,8 @@ public class WorldlineManualPaymentRefundAction extends ManualRefundAction imple
                paymentTransactionToRefund.getRequestId(),
                refundResponse.getStatus(),
                refundResponse.getRefundOutput().getAmountOfMoney(),
-               PaymentTransactionType.REFUND_FOLLOW_ON);
+               PaymentTransactionType.REFUND_FOLLOW_ON,
+               StringUtils.EMPTY);
          worldlineBusinessProcessService.triggerReturnProcessEvent(order, WORLDLINE_EVENT_REFUND);
          result = new ActionResult<ReturnRequestModel>(ActionResult.SUCCESS, returnRequestModel);
          resultMessage = actionContext.getLabel("action.manualrefund.success");
