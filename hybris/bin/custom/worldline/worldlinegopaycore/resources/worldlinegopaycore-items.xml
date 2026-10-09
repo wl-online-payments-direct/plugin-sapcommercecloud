@@ -468,6 +468,24 @@
                     <persistence type="property" />
                     <modifiers optional="true" search="true" />
                 </attribute>
+                <attribute qualifier="eci" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" search="true" />
+                </attribute>
+                <attribute qualifier="xid" type="java.lang.String">
+                    <persistence type="property" />
+                    <modifiers optional="true" />
+                </attribute>
+                <attribute qualifier="liabilityDisplay" type="java.lang.String">
+                    <description>3DS liability shown in the Backoffice (Merchant, Issuer or NA).</description>
+                    <persistence type="dynamic" attributeHandler="worldlineLiabilityDisplayAttributeHandler" />
+                    <modifiers read="true" write="false" optional="true" />
+                </attribute>
+                <attribute qualifier="appliedExemptionDisplay" type="java.lang.String">
+                    <description>Applied 3DS exemption shown in the Backoffice (friendly name or N/A).</description>
+                    <persistence type="dynamic" attributeHandler="worldlineAppliedExemptionDisplayAttributeHandler" />
+                    <modifiers read="true" write="false" optional="true" />
+                </attribute>
                 <attribute qualifier="mealvoucherBrand" type="java.lang.String">
                     <persistence type="property" />
                     <modifiers optional="true" />

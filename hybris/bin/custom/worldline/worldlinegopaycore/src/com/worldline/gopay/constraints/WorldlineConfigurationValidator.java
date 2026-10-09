@@ -34,6 +34,11 @@ public class WorldlineConfigurationValidator implements ConstraintValidator<Worl
 
         BigDecimal exemptionLimit = model.getExemptionLimit3DS();
         WorldlineExemptionType exemptionType = model.getExemptionType3DS();
+        if (exemptionLimit == null || exemptionType == null) {
+            // Both attributes are mandatory, so the platform reports a missing value itself.
+            return true;
+        }
+        final boolean negative = exemptionLimit.signum() < 0;
 
         /*
          * The manual localisation of Strings here is a bit weird. For some reason if I don't do it this way, the
@@ -43,17 +48,17 @@ public class WorldlineConfigurationValidator implements ConstraintValidator<Worl
         String localizedMsg = null;
         switch(exemptionType) {
             case NO_CHALLENGE_REQUEST:
-                if (exemptionLimit.compareTo(NO_CHALLENGE_REQUEST_LIMIT) > 0) {
+                if (negative || exemptionLimit.compareTo(NO_CHALLENGE_REQUEST_LIMIT) > 0) {
                     localizedMsg = Localization.getLocalizedString(NO_CHALLENGE_REQUEST_ERROR_KEY);
                 }
                 break;
             case LOW_VALUE:
-                if (exemptionLimit.compareTo(LOW_VALUE_LIMIT) > 0) {
+                if (negative || exemptionLimit.compareTo(LOW_VALUE_LIMIT) > 0) {
                     localizedMsg  = Localization.getLocalizedString(LOW_VALUE_ERROR_KEY);
                 }
                 break;
             case TRANSACTION_RISK_ANALYSIS:
-                if (exemptionLimit.compareTo(TRANSACTION_RISK_ANALYSIS_LIMIT) > 0) {
+                if (negative || exemptionLimit.compareTo(TRANSACTION_RISK_ANALYSIS_LIMIT) > 0) {
                     localizedMsg = Localization.getLocalizedString(TRANSACTION_RISK_ANALYSIS_LIMIT_KEY);
                 }
                 break;

@@ -1,2 +1,7 @@
+# A row saved without its annotation cannot be repaired by INSERT_UPDATE (the uniqueness check needs the
+# annotation), so remove and recreate it. This keeps the exemption limit validation active on every import.
+REMOVE WorldlineConfigurationConstraint; id[unique = true]
+                                       ; worldlineExemptionValueCheck
+
 INSERT_UPDATE WorldlineConfigurationConstraint; id[unique = true]            ; type(code)             ; severity(code); active; message
                                               ; worldlineExemptionValueCheck ; WorldlineConfiguration ; ERROR         ; true  ; ""
