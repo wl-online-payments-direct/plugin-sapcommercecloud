@@ -64,8 +64,6 @@ Then update `hybris/config/localextensions.xml`:
 <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopaybackoffice"/>
 <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopayocc"/>
 <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopaywebhook"/>
-<extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopayfulfilmentprocess"/>
-<extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopaycustomersupportbackoffice"/>
 ```
 
 ### 2. Update your own code, if you have any
@@ -113,7 +111,6 @@ fallback is possible. If you override any of them, rename them by hand:
 | `worldlinedirectwebhook.*` | `worldlinegopaywebhook.*` |
 | `worldlinedirectocc.*` | `worldlinegopayocc.*` |
 | `worldlinedirectbackoffice.key` | `worldlinegopaybackoffice.key` |
-| `worldlinedirectcustomersupportbackoffice.*` | `worldlinegopaycustomersupportbackoffice.*` |
 | `yacceleratorstorefront.additionalWebSpringConfigs.worldlinedirectb2ccheckoutaddon` | `...worldlinegopayb2ccheckoutaddon` |
 | `yacceleratorstorefront.wro4jconfigscan.worldlinedirectb2ccheckoutaddon` | `...worldlinegopayb2ccheckoutaddon` |
 | `yb2bacceleratorstorefront.additionalWebSpringConfigs.worldlinedirectb2bcheckoutaddon` | `...worldlinegopayb2bcheckoutaddon` |

@@ -20,7 +20,7 @@
             </instance-settings>
 
             <setting key="widgetStyleClass" type="String"></setting>
-            <setting key="__externalLocationPath" type="String">extension://worldlinegopaycustomersupportbackoffice</setting>
+            <setting key="__externalLocationPath" type="String">extension://worldlinegopaybackoffice</setting>
             <setting key="widgetStyleAttribute" type="String"></setting>
             <setting key="_width" type="String">1140px</setting>
             <setting key="_height" type="String">650px</setting>
@@ -45,7 +45,7 @@
             </instance-settings>
 
             <setting key="widgetStyleClass" type="String"></setting>
-            <setting key="__externalLocationPath" type="String">extension://worldlinegopaycustomersupportbackoffice</setting>
+            <setting key="__externalLocationPath" type="String">extension://worldlinegopaybackoffice</setting>
             <setting key="widgetStyleAttribute" type="String"></setting>
             <setting key="_width" type="String">600px</setting>
             <setting key="_height" type="String">400px</setting>
