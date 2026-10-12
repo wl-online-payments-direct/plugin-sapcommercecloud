@@ -17,7 +17,7 @@ import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.returns.model.ReturnRequestModel;
 import de.hybris.platform.servicelayer.time.TimeService;
-import org.apache.tika.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.zkoss.zhtml.Messagebox;
 
 import javax.annotation.Resource;
