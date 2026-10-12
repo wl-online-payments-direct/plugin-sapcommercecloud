@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<widget-definition id="com.worldline.gopay.widgets.returns.worldlinecreatereturnrequest"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/widget-definition.xsd">
+
+    <name>Create Return Request</name>
+    <description>Create Return Request widget with Worldline GoPay Wero refund reason support.</description>
+    <defaultTitle>Create Return Request</defaultTitle>
+    <author>Worldline</author>
+    <version>0.2</version>
+
+    <view src="worldlinecreatereturnrequest.zul" />
+    <sockets>
+        <input type="de.hybris.platform.core.model.order.OrderModel" id="inputObject"/>
+        <output type="java.lang.String" id="confirm"/>
+    </sockets>
+
+    <keywords>
+        <keyword>OMS</keyword>
+    </keywords>
+
+    <controller class="com.worldline.gopay.widgets.worldlinereturnrequest.WorldlineCreateReturnRequestController"/>
+
+</widget-definition>

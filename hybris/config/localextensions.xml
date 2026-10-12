@@ -157,7 +157,9 @@
     <extension name='webservicescommons' />
     <extension name='ywebservices' />
     <extension name='orbeonweb' />
+    <extension name='assistedservicewebservices' />
     <extension name='spartacussampledata' />
+
 
 
     <extension dir="${HYBRIS_BIN_DIR}/custom/worldline/worldlinegopaycore"/>

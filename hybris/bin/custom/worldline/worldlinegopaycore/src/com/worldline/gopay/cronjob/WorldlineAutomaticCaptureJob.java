@@ -1,5 +1,6 @@
 package com.worldline.gopay.cronjob;
 
+import bsh.StringUtil;
 import com.onlinepayments.domain.CaptureResponse;
 import com.onlinepayments.domain.CapturesResponse;
 import com.worldline.gopay.constants.WorldlinegopaycoreConstants;
@@ -22,6 +23,7 @@ import de.hybris.platform.servicelayer.cronjob.PerformResult;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.store.BaseStoreModel;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +101,7 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
                                     Boolean.TRUE);
                         worldlineTransactionService.updatePaymentTransaction(lastPaymentTransaction, captureResponse.getId(), captureResponse.getStatus(),
                               orderModel.getStore().getWorldlineConfiguration().isApplySurcharge() ? captureResponse.getCaptureOutput().getAcquiredAmount() :
-                                    captureResponse.getCaptureOutput().getAmountOfMoney(), PaymentTransactionType.CAPTURE);
+                                    captureResponse.getCaptureOutput().getAmountOfMoney(), PaymentTransactionType.CAPTURE, StringUtils.EMPTY);
                         LOGGER.info("[WORLDLINE] Order {}, remaining amount {} captured", orderModel.getCode(), amount);
                     }
 

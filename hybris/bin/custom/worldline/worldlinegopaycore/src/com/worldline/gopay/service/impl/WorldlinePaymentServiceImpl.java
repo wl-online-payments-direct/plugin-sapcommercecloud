@@ -782,7 +782,7 @@ public class WorldlinePaymentServiceImpl implements WorldlinePaymentService {
 
             RefundResponse refundResponse =
                     merchant.payments().refundPayment(paymentId, refundRequest);
-            WorldlineLogUtils.logAction(LOGGER, "refundPayment", paymentId, refundResponse);
+            WorldlineLogUtils.logAction(LOGGER, "refundPayment", refundRequest, refundResponse);
 
             return refundResponse;
         } catch (Exception e) {

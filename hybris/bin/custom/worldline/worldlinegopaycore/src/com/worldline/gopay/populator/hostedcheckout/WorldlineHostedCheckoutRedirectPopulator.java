@@ -71,9 +71,9 @@ public class WorldlineHostedCheckoutRedirectPopulator implements Populator<Abstr
                 break;
             case WorldlinegopaycoreConstants.PAYMENT_METHOD_WERO:
                 String weroCaptureTrigger = getWeroCaptureTrigger();
-                if (StringUtils.isNotBlank(weroCaptureTrigger)) {
+                if (requiresApproval(String.valueOf(paymentInfo.getId()))) {
                     RedirectPaymentProduct900SpecificInput redirectPaymentProduct900SpecificInput = new RedirectPaymentProduct900SpecificInput();
-                    redirectPaymentProduct900SpecificInput.setCaptureTrigger(weroCaptureTrigger);
+                    redirectPaymentProduct900SpecificInput.setCaptureTrigger(StringUtils.isNotEmpty(weroCaptureTrigger) ? weroCaptureTrigger : WeroCaptureTrigger.SHIPPING.getCode());
                     redirectPaymentMethodSpecificInput.setPaymentProduct900SpecificInput(redirectPaymentProduct900SpecificInput);
                 }
                 break;

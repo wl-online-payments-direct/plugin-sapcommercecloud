@@ -170,8 +170,6 @@ The plugin consists of the following extensions, all located in `hybris/bin/cust
 | `worldlinegopayocc` | REST API (OCC v2) endpoints for headless commerce |
 | `worldlinegopaywebhook` | Webhook receiver for asynchronous payment notifications |
 | `worldlinegopaybackoffice` | Backoffice administration widgets |
-| `worldlinegopaycustomersupportbackoffice` | Customer support backoffice features |
-| `worldlinegopayfulfilmentprocess` | Order fulfillment process definitions |
 
 ## Installation
 
@@ -191,10 +189,8 @@ Add the following extensions to your `hybris/config/localextensions.xml`:
 
 ```xml
 <extension name="worldlinegopaycore"/>
-<extension name="worldlinegopayfulfilmentprocess"/>
 <extension name="worldlinegopaywebhook"/>
 <extension name="worldlinegopaybackoffice"/>
-<extension name="worldlinegopaycustomersupportbackoffice"/>
 <extension name="worldlinegopayocc"/>
 <!-- Include the addon(s) applicable to your storefront: -->
 <extension name="worldlinegopayb2ccheckoutaddon"/>

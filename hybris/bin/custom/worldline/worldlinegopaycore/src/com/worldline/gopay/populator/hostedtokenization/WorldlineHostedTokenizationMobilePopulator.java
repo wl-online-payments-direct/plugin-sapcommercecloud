@@ -19,6 +19,7 @@ import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.session.SessionService;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 
 import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY;
 import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.GOOGLE_PAY_MOBILE_DEVICE_SESSION_KEY;
@@ -46,8 +47,8 @@ public class WorldlineHostedTokenizationMobilePopulator implements Populator<Abs
         }
 
         MobilePaymentMethodSpecificInput mobileInput = new MobilePaymentMethodSpecificInput();
+        mobileInput.setEncryptedPaymentData(StringUtils.isNotEmpty(paymentInfo.getGooglePayEncryptedPaymentData()) ? paymentInfo.getGooglePayEncryptedPaymentData() : sessionService.getAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY));
         mobileInput.setPaymentProductId(WorldlinegopaycoreConstants.PAYMENT_METHOD_GOOGLEPAY);
-        mobileInput.setEncryptedPaymentData(sessionService.getAttribute(GOOGLE_PAY_ENCRYPTED_PAYMENT_DATA_SESSION_KEY));
         MobilePaymentProduct320SpecificInput product320SpecificInput = createProduct320SpecificInput(abstractOrderModel, paymentInfo);
         mobileInput.setPaymentProduct320SpecificInput(product320SpecificInput);
 

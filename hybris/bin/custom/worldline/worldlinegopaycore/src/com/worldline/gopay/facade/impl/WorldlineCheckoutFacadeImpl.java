@@ -287,7 +287,16 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         final PaymentLinkResponse paymentLink = worldlinePaymentService.createPaymentLink(orderForCode);
         storePaymentLink(orderForCode, paymentLink);
+        // the order is placed and paid through the link later, so the cart is no longer needed
+        cartService.removeSessionCart();
         return paymentLink;
+    }
+
+    @Override
+    public void setOrderPlacedBy(final String orderCode, final String agentUid) {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        orderForCode.setPlacedBy(userService.getUserForUID(agentUid));
+        modelService.save(orderForCode);
     }
 
     protected void storePaymentLink(OrderModel orderModel, PaymentLinkResponse paymentLink) {
@@ -581,7 +590,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
                 transactionAmount,
-                paymentTransactionType
+                paymentTransactionType,
+                StringUtils.EMPTY
         );
 
         cartService.removeSessionCart();
