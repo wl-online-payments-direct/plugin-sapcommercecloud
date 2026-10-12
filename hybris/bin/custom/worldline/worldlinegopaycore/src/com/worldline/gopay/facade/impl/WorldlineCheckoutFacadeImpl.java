@@ -292,6 +292,13 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         return paymentLink;
     }
 
+    @Override
+    public void setOrderPlacedBy(final String orderCode, final String agentUid) {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        orderForCode.setPlacedBy(userService.getUserForUID(agentUid));
+        modelService.save(orderForCode);
+    }
+
     protected void storePaymentLink(OrderModel orderModel, PaymentLinkResponse paymentLink) {
         if (paymentLink == null || !(orderModel.getPaymentInfo() instanceof WorldlinePaymentInfoModel)) {
             return;

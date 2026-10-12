@@ -13,6 +13,7 @@ import com.worldline.gopay.facade.WorldlineGoPayCheckoutFacade;
 import com.worldline.gopay.facade.WorldlineRecurringCheckoutFacade;
 import com.worldline.gopay.occ.controllers.v2.validator.WorldlineBrowserDataWsDTOValidator;
 import com.worldline.gopay.occ.helpers.WorldlineHelper;
+import com.worldline.gopay.occ.security.WorldlineAgentSessionResolver;
 import com.worldline.gopay.order.data.BrowserData;
 import com.worldline.gopay.order.data.WorldlineHostedTokenizationData;
 import com.worldline.gopay.payment.dto.BrowserDataWsDTO;
@@ -45,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -73,6 +75,9 @@ public class WorldlineOrdersController extends WorldlineBaseController {
     private final static String DEFAILT_ORDER_TYPE_PARAM = "PLACE_ORDER";
     @Resource(name = "dataMapper")
     private DataMapper dataMapper;
+
+    @Resource(name = "worldlineAgentSessionResolver")
+    private WorldlineAgentSessionResolver worldlineAgentSessionResolver;
 
     @Resource(name = "worldlineExtendedCheckoutFacade")
     private WorldlineGoPayCheckoutFacade extendedCheckoutFacade;
@@ -400,6 +405,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
         return getDataMapper().map((ScheduledCartData)abstractOrderData, ReplenishmentOrderWsDTO.class, fields);
     }
 
+    @Secured({"ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT"})
     @PostMapping(value = "/payByLink")
     @ResponseBody
     @Operation(operationId = "placeOrderPayByLink", summary = "Place the order with HostedCheckout.", description =
@@ -412,6 +418,11 @@ public class WorldlineOrdersController extends WorldlineBaseController {
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
             final HttpServletRequest request) throws InvalidCartException {
 
+        final String agentUid = worldlineAgentSessionResolver.getAgentUid();
+        if (agentUid == null) {
+            throw new AccessDeniedException("Access is denied");
+        }
+
         cartLoaderStrategy.loadCart(cartId);
 
         final CartData cartData = cartFacade.getSessionCart();
@@ -423,6 +434,7 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
         OrderData orderData = extendedCheckoutFacade.placeOrder();
 
+        worldlineCheckoutFacade.setOrderPlacedBy(orderData.getCode(), agentUid);
         worldlineCheckoutFacade.createPaymentLink(orderData.getCode());
         orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
 

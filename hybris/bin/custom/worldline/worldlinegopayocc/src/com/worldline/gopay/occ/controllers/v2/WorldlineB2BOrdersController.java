@@ -10,6 +10,7 @@ import com.worldline.gopay.facade.WorldlineCheckoutFacade;
 import com.worldline.gopay.facade.WorldlineRecurringCheckoutFacade;
 import com.worldline.gopay.occ.controllers.v2.validator.WorldlineBrowserDataWsDTOValidator;
 import com.worldline.gopay.occ.helpers.WorldlineHelper;
+import com.worldline.gopay.occ.security.WorldlineAgentSessionResolver;
 import com.worldline.gopay.order.data.BrowserData;
 import com.worldline.gopay.order.data.WorldlineHostedTokenizationData;
 import com.worldline.gopay.payment.dto.BrowserDataWsDTO;
@@ -74,6 +75,9 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
 
     @Resource(name = "cartLoaderStrategy")
     private CartLoaderStrategy cartLoaderStrategy;
+
+    @Resource(name = "worldlineAgentSessionResolver")
+    private WorldlineAgentSessionResolver worldlineAgentSessionResolver;
 
     @Resource(name = "orderFacade")
     private OrderFacade orderFacade;
@@ -349,6 +353,11 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
             @ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
             final HttpServletRequest request) throws InvalidCartException {
 
+        final String agentUid = worldlineAgentSessionResolver.getAgentUid();
+        if (agentUid == null) {
+            throw new AccessDeniedException("Access is denied");
+        }
+
         cartLoaderStrategy.loadCart(cartId);
 
         final CartData cartData = cartFacade.getSessionCart();
@@ -360,6 +369,7 @@ public class WorldlineB2BOrdersController extends WorldlineBaseController {
 
         OrderData orderData = extendedCheckoutFacade.placeOrder(new PlaceOrderData());
 
+        worldlineCheckoutFacade.setOrderPlacedBy(orderData.getCode(), agentUid);
         worldlineCheckoutFacade.createPaymentLink(orderData.getCode());
         orderData = orderFacade.getOrderDetailsForCodeWithoutUser(orderData.getCode());
 
