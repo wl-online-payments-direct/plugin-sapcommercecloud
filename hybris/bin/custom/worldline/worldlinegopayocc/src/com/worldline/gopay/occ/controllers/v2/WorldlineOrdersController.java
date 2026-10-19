@@ -394,7 +394,6 @@ public class WorldlineOrdersController extends WorldlineBaseController {
 
         final PlaceOrderData placeOrderData = worldlineCheckoutFacade.prepareOrderPlacementData();
         placeOrderData.setTermsCheck(termsChecked);
-        placeOrderData.setCardDetailsCheck(Boolean.TRUE);
         AbstractOrderData abstractOrderData = extendedCheckoutFacade.placeOrder(placeOrderData);
 
         storeReturnUrlInSession(abstractOrderData.getCode(), request, OrderType.SCHEDULE_REPLENISHMENT_ORDER, WorldlineCheckoutTypesEnum.HOSTED_TOKENIZATION);
