@@ -110,8 +110,8 @@ echo "  Removed stale .class and gensrc/ files."
 #   6. "GoPay" / "gopay" AFTER the generic pass - these are the product-brand
 #      remnants left inside identifiers such as the package com.worldline.gopay
 #      and the type WorldlineGoPayCheckoutFacade. They map to Direct/direct so
-#      that the CAWL output keeps its established com.cawl.direct package and
-#      cawl.direct.* property keys.
+#      that the CAWL output keeps its cawl.direct.* property keys. (The Java
+#      package com.cawl.direct is flattened to com.cawl later, in step 5d.)
 #   7. Brand-specific strings (emails, labels)
 # ------------------------------------------------------------------------------
 
@@ -390,6 +390,58 @@ find . -type f | while IFS= read -r file; do
 done
 
 # ------------------------------------------------------------------------------
+# 6d. Flatten the Java package: com.cawl.direct -> com.cawl
+# ------------------------------------------------------------------------------
+# The generic replacement turns com.worldline.gopay into com.cawl.direct. The
+# CAWL variant wants the "direct" level removed, so everything that lives in
+# .../com/cawl/direct/ moves up into .../com/cawl/ and every reference to the
+# package (package/import statements, Spring XML, items.xml, beans.xml, web.xml,
+# slash-separated resource paths ...) drops the ".direct" segment.
+#
+# NOTE: only the package path "com.cawl.direct" / "com/cawl/direct" is touched.
+# Property keys such as cawl.direct.api.* keep their "direct" segment.
+echo ""
+echo "=== Step 5d: Flattening package com.cawl.direct -> com.cawl ==="
+
+# Directories: deepest first, merge contents into the parent, then drop "direct".
+find . -depth -type d -path "*/com/cawl/direct" | while IFS= read -r dir; do
+    parent="$(dirname "$dir")"
+    rsync -a "$dir"/ "$parent"/
+    rm -rf "$dir"
+    echo "  DIR: $dir -> $parent (contents moved up, 'direct' removed)"
+done
+
+# Text: package names (dots) and resource paths (slashes) in all text files.
+find . -type f \
+    ! -name "*.jar" \
+    ! -name "*.class" \
+    ! -name "*.png" \
+    ! -name "*.gif" \
+    ! -name "*.jpg" \
+    ! -name "*.jpeg" \
+    ! -name "*.ico" \
+    ! -name "*.woff" \
+    ! -name "*.woff2" \
+    ! -name "*.ttf" \
+    ! -name "*.eot" \
+    ! -name "*.svg" \
+    ! -name "*.zip" \
+    ! -name "*.gz" \
+    ! -name "*.war" \
+    -exec sed "${SED_INPLACE[@]}" \
+        -e 's/com\.cawl\.direct/com.cawl/g' \
+        -e 's#com/cawl/direct#com/cawl#g' {} +
+
+leftover_pkg=$(grep -rIl "com[./]cawl[./]direct" . 2>/dev/null || true)
+leftover_dirs=$(find . -type d -path "*/com/cawl/direct" 2>/dev/null || true)
+if [[ -n "$leftover_pkg" || -n "$leftover_dirs" ]]; then
+    echo "  WARNING: 'com.cawl.direct' references or directories remain:"
+    { echo "$leftover_pkg"; echo "$leftover_dirs"; } | sed '/^$/d;s/^/    /'
+else
+    echo "  OK: package flattened to com.cawl, no 'direct' package level remains."
+fi
+
+# ------------------------------------------------------------------------------
 # 7. Swap SDK dependency
 # ------------------------------------------------------------------------------
 echo ""
@@ -559,6 +611,17 @@ if [[ -d "$OVERWRITES_DIR" ]]; then
     echo "=== Step 8: Applying file overwrites ==="
     rsync -aI "$OVERWRITES_DIR"/ "$DEST_DIR"/
     echo "  Overwrites applied from $OVERWRITES_DIR"
+
+    # The overwrite files are authored against the pre-flatten layout and still
+    # contain com.cawl.direct (e.g. localisation keys such as
+    # com.cawl.direct.error.3ds.*). Apply the same package flattening as step 5d
+    # so they match the converted code.
+    find "$DEST_DIR" -type f -path "*" \
+        \( -name "*.properties" -o -name "*.xml" -o -name "*.impex" -o -name "*.java" -o -name "*.jsp" -o -name "*.tag" \) \
+        -exec sed "${SED_INPLACE[@]}" \
+            -e 's/com\.cawl\.direct/com.cawl/g' \
+            -e 's#com/cawl/direct#com/cawl#g' {} +
+    echo "  Package com.cawl.direct flattened to com.cawl in overwritten files."
 else
     echo ""
     echo "=== Step 8: No overwrites directory found at $OVERWRITES_DIR - skipping ==="
