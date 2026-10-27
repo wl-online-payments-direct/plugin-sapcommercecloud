@@ -45,6 +45,11 @@ public interface WorldlineCheckoutFacade {
 
     PaymentLinkResponse createPaymentLink(String orderCode) throws InvalidCartException;
 
+    /**
+     * Records the customer support agent that placed the order on behalf of a customer or a guest.
+     */
+    void setOrderPlacedBy(String orderCode, String agentUid);
+
     void authorisePaymentForHostedCheckout(String orderCode, String hostedCheckoutId, Boolean isRecurring) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;
 
     void handlePaymentResponse(OrderModel abstractOrderModel, PaymentResponse paymentResponse) throws WorldlineNonAuthorizedPaymentException, InvalidCartException;

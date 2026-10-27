@@ -77,6 +77,8 @@ public class WorldlinePaymentInfoPopulator implements Populator<WorldlinePayment
         worldlinePaymentInfoData.setLiability(worldlinePaymentInfoModel.getLiability());
         worldlinePaymentInfoData.setAppliedExemption(worldlinePaymentInfoModel.getAppliedExemption());
         worldlinePaymentInfoData.setAuthenticationStatus(worldlinePaymentInfoModel.getAuthenticationStatus());
+        worldlinePaymentInfoData.setEci(worldlinePaymentInfoModel.getEci());
+        worldlinePaymentInfoData.setXid(worldlinePaymentInfoModel.getXid());
         CardTypeData cardTypeData=new CardTypeData();
         cardTypeData.setName(worldlinePaymentInfoModel.getCardBrand());
         worldlinePaymentInfoData.setCardType(cardTypeData);

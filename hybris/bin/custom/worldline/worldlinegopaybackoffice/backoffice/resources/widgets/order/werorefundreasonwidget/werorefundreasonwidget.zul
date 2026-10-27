@@ -37,7 +37,7 @@
     <hlayout width="100%" sclass="oms-widget-werorefund-list">
         <hbox sclass="oms-widget-werorefund-body">
             <vbox>
-                <label value="${labels.worldline.werorefund.reason}" width="240px" class="oms-widget-werorefund--reason-label"/>
+                <label value="${labels.worldline.werorefund.reasonLabel}" width="240px" class="oms-widget-werorefund--reason-label"/>
                 <combobox id="refundReasonCombobox" width="300px" readonly="true"
                           constraint="no empty: A refund reason must be selected">
                 </combobox>

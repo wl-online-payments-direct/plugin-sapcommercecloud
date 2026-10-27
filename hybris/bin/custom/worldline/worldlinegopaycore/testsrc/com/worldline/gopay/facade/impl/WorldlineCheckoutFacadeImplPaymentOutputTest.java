@@ -18,14 +18,18 @@ import com.worldline.gopay.enums.WorldlineCheckoutTypesEnum;
 import com.worldline.gopay.exception.WorldlineNonValidPaymentProductException;
 import com.worldline.gopay.enums.WorldlineRecurringPaymentStatus;
 import com.worldline.gopay.model.WorldlineRecurringTokenModel;
+import com.worldline.gopay.order.data.BrowserData;
 import com.worldline.gopay.order.data.WorldlinePaymentInfoData;
 import com.worldline.gopay.service.WorldlinePaymentService;
 import de.hybris.bootstrap.annotations.UnitTest;
+import de.hybris.platform.commerceservices.customer.CustomerAccountService;
 import de.hybris.platform.commerceservices.strategies.CheckoutCustomerStrategy;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.core.model.order.CartModel;
+import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.core.model.user.CustomerModel;
+import de.hybris.platform.order.InvalidCartException;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.servicelayer.session.SessionService;
 import de.hybris.platform.store.BaseStoreModel;
@@ -154,6 +158,29 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
     }
 
     @Test
+    public void updatePaymentInfoStoresGooglePayThreeDSecureResultsFromMobileOutput() {
+        CartModel order = new CartModel();
+        WorldlinePaymentInfoModel paymentInfo = new WorldlinePaymentInfoModel();
+        paymentInfo.setId(WorldlinegopaycoreConstants.PAYMENT_METHOD_GOOGLEPAY);
+        TestModelService modelService = new TestModelService(new WorldlineRecurringTokenModel());
+        order.setPaymentInfo(paymentInfo);
+        facade.setModelService(modelService.proxy());
+
+        // Worldline returns the 3DS results for Google Pay on the mobile output only, next to a card output without them
+        ThreeDSecureResults threeDSecureResults = new ThreeDSecureResults();
+        threeDSecureResults.setEci("5");
+        threeDSecureResults.setXid("MTAyODYzMTI3Mjg=");
+        PaymentResponse paymentResponse = googlePayPaymentResponse();
+        paymentResponse.getPaymentOutput().getMobilePaymentMethodSpecificOutput().setThreeDSecureResults(threeDSecureResults);
+        paymentResponse.getPaymentOutput().setCardPaymentMethodSpecificOutput(new CardPaymentMethodSpecificOutput());
+
+        facade.updatePaymentInfo(order, paymentResponse);
+
+        assertEquals("5", paymentInfo.getEci());
+        assertEquals("MTAyODYzMTI3Mjg=", paymentInfo.getXid());
+    }
+
+    @Test
     public void savePaymentTokenUsesGooglePayRecurringReferenceWhen3dsResponseAlsoContainsCardOutputWithoutToken() {
         CustomerModel customer = new CustomerModel();
         CartModel order = new CartModel();
@@ -174,6 +201,21 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
         assertEquals("payment-id", recurringToken.getInitialPaymentId());
         assertSame(recurringToken, paymentInfo.getWorldlineRecurringToken());
         assertSame(order, modelService.refreshedModel);
+    }
+
+    @Test
+    public void createHostedCheckoutFailsClearlyWhenWorldlineDoesNotCreateHostedCheckout() throws InvalidCartException {
+        OrderModel order = new OrderModel();
+        facade.setBaseStoreService(baseStoreService(new BaseStoreModel()));
+        facade.setCustomerAccountService(customerAccountService(order));
+        facade.setWorldlinePaymentService(paymentServiceReturningDefaults());
+
+        try {
+            facade.createHostedCheckout("00003014", new BrowserData());
+            fail("Expected an IllegalStateException when Worldline returns no hosted checkout");
+        } catch (IllegalStateException e) {
+            assertEquals("Worldline GoPay could not create a hosted checkout for order 00003014", e.getMessage());
+        }
     }
 
     private CardPaymentMethodSpecificOutput cardPaymentMethodSpecificOutput(Integer paymentProductId) {
@@ -269,6 +311,20 @@ public class WorldlineCheckoutFacadeImplPaymentOutputTest {
                   }
                   return defaultValue(method.getReturnType());
               });
+    }
+
+    private WorldlinePaymentService paymentServiceReturningDefaults() {
+        return (WorldlinePaymentService) Proxy.newProxyInstance(
+              WorldlinePaymentService.class.getClassLoader(),
+              new Class[]{WorldlinePaymentService.class},
+              (proxy, method, args) -> defaultValue(method.getReturnType()));
+    }
+
+    private CustomerAccountService customerAccountService(OrderModel order) {
+        return (CustomerAccountService) Proxy.newProxyInstance(
+              CustomerAccountService.class.getClassLoader(),
+              new Class[]{CustomerAccountService.class},
+              (proxy, method, args) -> "getOrderForCode".equals(method.getName()) ? order : defaultValue(method.getReturnType()));
     }
 
     private static class TestableWorldlineCheckoutFacadeImpl extends WorldlineCheckoutFacadeImpl {

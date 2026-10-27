@@ -21,6 +21,7 @@ import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import de.hybris.platform.servicelayer.model.ModelService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zhtml.Messagebox;
@@ -62,7 +63,8 @@ public class WorldlineManualPaymentReverseAuthAction extends CancelOrderAction i
                   paymentTransactionToCancel.getRequestId(),
                   cancelPaymentResponse.getPayment().getStatus(),
                   order.getStore().getWorldlineConfiguration().isApplySurcharge() ? cancelPaymentResponse.getPayment().getPaymentOutput().getAcquiredAmount() : cancelPaymentResponse.getPayment().getPaymentOutput().getAmountOfMoney(),
-                  PaymentTransactionType.CANCEL);
+                  PaymentTransactionType.CANCEL,
+                    StringUtils.EMPTY);
 
             final OrderCancelRequest orderCancelRequest = new OrderCancelRequest(order,
                   Lists.newArrayList(createCancellationEntries(order)));

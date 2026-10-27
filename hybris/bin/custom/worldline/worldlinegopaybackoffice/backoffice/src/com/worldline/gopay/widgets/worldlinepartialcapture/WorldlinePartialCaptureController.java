@@ -14,6 +14,7 @@ import de.hybris.platform.payment.enums.PaymentTransactionType;
 import de.hybris.platform.payment.model.PaymentTransactionEntryModel;
 import de.hybris.platform.payment.model.PaymentTransactionModel;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zk.ui.WrongValueException;
@@ -169,7 +170,7 @@ public class WorldlinePartialCaptureController extends DefaultWidgetController {
                 captureResponse.getId(),
                 captureResponse.getStatus(),
                 orderModel.getStore().getWorldlineConfiguration().isApplySurcharge() ? captureResponse.getCaptureOutput().getAcquiredAmount() : captureResponse.getCaptureOutput().getAmountOfMoney(),
-                PaymentTransactionType.CAPTURE);
+                PaymentTransactionType.CAPTURE, StringUtils.EMPTY);
 
         worldlineBusinessProcessService.triggerOrderProcessEvent(this.orderModel, WORLDLINE_EVENT_PAYMENT);
     }

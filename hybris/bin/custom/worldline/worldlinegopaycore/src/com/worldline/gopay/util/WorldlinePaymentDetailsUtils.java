@@ -124,6 +124,8 @@ public final class WorldlinePaymentDetailsUtils {
         setIfNotBlank(threeDSecureResults.getLiability(), paymentInfo::setLiability);
         setIfNotBlank(threeDSecureResults.getAppliedExemption(), paymentInfo::setAppliedExemption);
         setIfNotBlank(threeDSecureResults.getAuthenticationStatus(), paymentInfo::setAuthenticationStatus);
+        setIfNotBlank(threeDSecureResults.getEci(), paymentInfo::setEci);
+        setIfNotBlank(threeDSecureResults.getXid(), paymentInfo::setXid);
     }
 
     private static ThreeDSecureResults getThreeDSecureResults(final PaymentOutput paymentOutput) {

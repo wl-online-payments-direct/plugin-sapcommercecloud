@@ -300,7 +300,12 @@
 			<ea:tab name="hmc.worldline">
 				<ea:section name="hmc.worldline.worldlineConfiguration">
 					<ea:attribute qualifier="worldlineConfiguration"/>
-					<ea:attribute qualifier="worldlineCheckoutType"/>
+					<ea:attribute qualifier="worldlineCheckoutType">
+						<ea:editor-parameter>
+							<ea:name>valueResolver</ea:name>
+							<ea:value>worldlineStoreCheckoutTypeValueResolver</ea:value>
+						</ea:editor-parameter>
+					</ea:attribute>
 					<ea:attribute qualifier="returnUrl"/>
 					<ea:attribute qualifier="merchant"/>
 				</ea:section>
@@ -407,9 +412,11 @@
 					</ea:section>
 					<ea:section name="hmc.worldline.worldlineFraudAnd3ds">
 						<ea:attribute qualifier="fraudResult" readonly="true"/>
-						<ea:attribute qualifier="liability" readonly="true"/>
-						<ea:attribute qualifier="appliedExemption" readonly="true"/>
+						<ea:attribute qualifier="liabilityDisplay" readonly="true"/>
+						<ea:attribute qualifier="appliedExemptionDisplay" readonly="true"/>
 						<ea:attribute qualifier="authenticationStatus" readonly="true"/>
+						<ea:attribute qualifier="eci" readonly="true"/>
+						<ea:attribute qualifier="xid" readonly="true"/>
 					</ea:section>
 					<ea:section name="hmc.worldline.worldlineSavedPaymentInfo">
 						<ea:attribute qualifier="token"/>
@@ -530,6 +537,12 @@
 				<y:action action-id="com.worldline.gopay.actions.worldlinemanualpaymentcaptureaction" property="currentObject"/>
 				<y:action action-id="com.worldline.gopay.actions.worldlinemanualpaymentreverseauthaction" property="currentObject"/>
 			</y:group>
+			<y:three-dots-group qualifier="threeDotsGroupActions" position="10" show-group-header="false" show-separator="false">
+				<y:action action-id="de.hybris.ordermanagementbackoffice.actions.returns.createreturnrequestaction"
+						  property="currentObject" merge-mode="remove"/>
+				<y:action action-id="com.worldline.gopay.actions.worldlinecreatereturnrequestaction"
+						  property="currentObject"/>
+			</y:three-dots-group>
 		</y:actions>
 	</context>
 
@@ -595,9 +608,11 @@
 				</ea:section>
 				<ea:section name="hmc.worldline.worldlineFraudAnd3ds">
 					<ea:attribute qualifier="fraudResult" readonly="true"/>
-					<ea:attribute qualifier="liability" readonly="true"/>
-					<ea:attribute qualifier="appliedExemption" readonly="true"/>
+					<ea:attribute qualifier="liabilityDisplay" readonly="true"/>
+					<ea:attribute qualifier="appliedExemptionDisplay" readonly="true"/>
 					<ea:attribute qualifier="authenticationStatus" readonly="true"/>
+					<ea:attribute qualifier="eci" readonly="true"/>
+					<ea:attribute qualifier="xid" readonly="true"/>
 				</ea:section>
 			</ea:tab>
 		</ea:editorArea>

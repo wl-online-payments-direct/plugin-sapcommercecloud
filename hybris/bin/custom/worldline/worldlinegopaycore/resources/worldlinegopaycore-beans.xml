@@ -51,6 +51,8 @@
         <property name="liability" type="String"/>
         <property name="appliedExemption" type="String"/>
         <property name="authenticationStatus" type="String"/>
+        <property name="eci" type="String"/>
+        <property name="xid" type="String"/>
 
     </bean>
 

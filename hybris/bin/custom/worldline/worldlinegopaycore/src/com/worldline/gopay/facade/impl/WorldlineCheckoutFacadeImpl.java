@@ -83,7 +83,6 @@ import static com.worldline.gopay.constants.WorldlinegopaycoreConstants.PAYMENT_
 public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldlineCheckoutFacadeImpl.class);
     private static final Pattern GOOGLE_PAY_PHONE_USER_AGENT_PATTERN = Pattern.compile(".*(iPhone|iPod|Android.*Mobile|Windows Phone|BlackBerry|IEMobile|Opera Mini).*", Pattern.CASE_INSENSITIVE);
-    private static final String PAY_BY_LINK_LABEL = "Pay by link";
 
     protected CommonI18NService commonI18NService;
     protected ModelService modelService;
@@ -184,10 +183,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
             if (!isAssistedServiceSession()) {
                 throw new WorldlineNonValidPaymentProductException(paymentId);
             }
-            final PaymentProduct paymentProduct = createPayByLinkPaymentProduct();
             worldlinePaymentInfoData.setSavedPayment(StringUtils.EMPTY);
-            worldlinePaymentInfoData.setId(paymentProduct.getId());
-            worldlinePaymentInfoData.setPaymentMethod(paymentProduct.getPaymentMethod());
+            worldlinePaymentInfoData.setId(WorldlinegopaycoreConstants.PAYMENT_METHOD_PAY_BY_LINK);
+            worldlinePaymentInfoData.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
             worldlinePaymentInfoData.setHostedTokenizationId(StringUtils.EMPTY);
             worldlinePaymentInfoData.setWorldlineCheckoutType(WorldlineCheckoutTypesEnum.PAY_BY_LINK);
             return;
@@ -275,6 +273,9 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
     public CreateHostedCheckoutResponse createHostedCheckout(String orderCode, BrowserData browserData) throws InvalidCartException {
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         final CreateHostedCheckoutResponse hostedCheckout = worldlinePaymentService.createHostedCheckout(orderForCode, browserData);
+        if (hostedCheckout == null) {
+            throw new IllegalStateException("Worldline GoPay could not create a hosted checkout for order " + orderCode);
+        }
         storeReturnMac(orderForCode, hostedCheckout.getRETURNMAC());
         hostedCheckout.setPartialRedirectUrl(WorldlineUrlUtils.buildFullURL(hostedCheckout.getPartialRedirectUrl()));
         return hostedCheckout;
@@ -285,7 +286,16 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
         final PaymentLinkResponse paymentLink = worldlinePaymentService.createPaymentLink(orderForCode);
         storePaymentLink(orderForCode, paymentLink);
+        // the order is placed and paid through the link later, so the cart is no longer needed
+        cartService.removeSessionCart();
         return paymentLink;
+    }
+
+    @Override
+    public void setOrderPlacedBy(final String orderCode, final String agentUid) {
+        final OrderModel orderForCode = customerAccountService.getOrderForCode(orderCode, baseStoreService.getCurrentBaseStore());
+        orderForCode.setPlacedBy(userService.getUserForUID(agentUid));
+        modelService.save(orderForCode);
     }
 
     protected void storePaymentLink(OrderModel orderModel, PaymentLinkResponse paymentLink) {
@@ -579,7 +589,8 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
                 paymentResponse.getId(),
                 paymentResponse.getStatus(),
                 transactionAmount,
-                paymentTransactionType
+                paymentTransactionType,
+                StringUtils.EMPTY
         );
 
         cartService.removeSessionCart();
@@ -890,7 +901,7 @@ public class WorldlineCheckoutFacadeImpl implements WorldlineCheckoutFacade {
         paymentProduct.setId(WorldlinegopaycoreConstants.PAYMENT_METHOD_PAY_BY_LINK);
         paymentProduct.setPaymentMethod(WorldlineCheckoutTypesEnum.PAY_BY_LINK.getCode());
         paymentProduct.setDisplayHints(new PaymentProductDisplayHints());
-        paymentProduct.getDisplayHints().setLabel(PAY_BY_LINK_LABEL);
+        paymentProduct.getDisplayHints().setLabel(Localization.getLocalizedString("type.payment.payByLink"));
         return paymentProduct;
     }
 

@@ -9,9 +9,9 @@ import com.worldline.gopay.util.WorldlineAmountUtils;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.util.DiscountValue;
+import org.springframework.beans.factory.annotation.Required;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,14 +26,19 @@ public class DefaultWorldlineShoppingCartFactory implements WorldlineShoppingCar
 
         List<LineItem> lineItems = new ArrayList<>();
         for (AbstractOrderEntryModel orderEntry : abstractOrderModel.getEntries()) {
-            LineItem item = new LineItem();
-            AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
             BigDecimal tax = calculateTotalLineLevelTax(orderEntry);
-            itemAmountOfMoney.setAmount(worldlineAmountUtils.createAmount(calculateLineAmount(abstractOrderModel, orderEntry, tax), currencyISOCode));
-            itemAmountOfMoney.setCurrencyCode(currencyISOCode);
-            item.setAmountOfMoney(itemAmountOfMoney);
-            item.setOrderLineDetails(createOrderLineDetails(abstractOrderModel, orderEntry, currencyISOCode));
-            lineItems.add(item);
+            long lineAmount = worldlineAmountUtils.createAmount(calculateLineAmount(abstractOrderModel, orderEntry, tax), currencyISOCode);
+            long lineTax = worldlineAmountUtils.createAmount(tax, currencyISOCode);
+            long lineDiscount = worldlineAmountUtils.createAmount(calculateTotalLineLevelDiscount(orderEntry), currencyISOCode);
+            for (WorldlineLineItemPortions.Portion portion : WorldlineLineItemPortions.split(orderEntry.getQuantity(), lineAmount - lineTax, lineDiscount, lineTax)) {
+                LineItem item = new LineItem();
+                AmountOfMoney itemAmountOfMoney = new AmountOfMoney();
+                itemAmountOfMoney.setAmount(portion.amount());
+                itemAmountOfMoney.setCurrencyCode(currencyISOCode);
+                item.setAmountOfMoney(itemAmountOfMoney);
+                item.setOrderLineDetails(createOrderLineDetails(orderEntry, portion));
+                lineItems.add(item);
+            }
         }
 
         cart.setItems(lineItems);
@@ -68,32 +73,18 @@ public class DefaultWorldlineShoppingCartFactory implements WorldlineShoppingCar
         return lineAmount;
     }
 
-    private OrderLineDetails createOrderLineDetails(AbstractOrderModel order, AbstractOrderEntryModel orderEntry, String currencyISOCode) {
+    private OrderLineDetails createOrderLineDetails(AbstractOrderEntryModel orderEntry, WorldlineLineItemPortions.Portion portion) {
         OrderLineDetails orderLineDetails = new OrderLineDetails();
         orderLineDetails.setProductName(orderEntry.getProduct().getName());
         orderLineDetails.setProductCode(orderEntry.getProduct().getCode());
-        BigDecimal discount = calculateTotalLineLevelDiscount(orderEntry);
-        BigDecimal tax = calculateTotalLineLevelTax(orderEntry);
-        BigDecimal productPrice = calculateNetProductPrice(order, orderEntry, discount, tax);
-        orderLineDetails.setQuantity(orderEntry.getQuantity());
-        orderLineDetails.setDiscountAmount(worldlineAmountUtils.createAmount(discount, currencyISOCode));
-        orderLineDetails.setProductPrice(worldlineAmountUtils.createAmount(productPrice, currencyISOCode));
-        orderLineDetails.setTaxAmount(worldlineAmountUtils.createAmount(tax, currencyISOCode));
+        orderLineDetails.setQuantity(portion.quantity());
+        orderLineDetails.setDiscountAmount(portion.discount());
+        orderLineDetails.setProductPrice(portion.productPrice());
+        orderLineDetails.setTaxAmount(portion.tax());
         return orderLineDetails;
     }
 
-    private BigDecimal calculateNetProductPrice(AbstractOrderModel order, AbstractOrderEntryModel orderEntry, BigDecimal discount, BigDecimal tax) {
-        BigDecimal netLinePrice = BigDecimal.valueOf(orderEntry.getTotalPrice()).add(discount);
-        if (!Boolean.TRUE.equals(order.getNet())) {
-            netLinePrice = netLinePrice.subtract(tax);
-        }
-        Long quantity = orderEntry.getQuantity();
-        if (quantity == null || quantity == 0L) {
-            return netLinePrice;
-        }
-        return netLinePrice.divide(BigDecimal.valueOf(quantity), 2, RoundingMode.HALF_UP);
-    }
-
+    @Required
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
     }
