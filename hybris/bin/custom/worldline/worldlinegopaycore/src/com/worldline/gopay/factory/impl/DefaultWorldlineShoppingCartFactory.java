@@ -9,7 +9,6 @@ import com.worldline.gopay.util.WorldlineAmountUtils;
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.AbstractOrderModel;
 import de.hybris.platform.util.DiscountValue;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -84,7 +83,6 @@ public class DefaultWorldlineShoppingCartFactory implements WorldlineShoppingCar
         return orderLineDetails;
     }
 
-    @Required
     public void setWorldlineAmountUtils(WorldlineAmountUtils worldlineAmountUtils) {
         this.worldlineAmountUtils = worldlineAmountUtils;
     }

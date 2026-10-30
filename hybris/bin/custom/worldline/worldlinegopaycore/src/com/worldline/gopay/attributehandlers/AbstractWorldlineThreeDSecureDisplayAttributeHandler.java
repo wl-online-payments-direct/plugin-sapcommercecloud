@@ -3,7 +3,7 @@ package com.worldline.gopay.attributehandlers;
 import de.hybris.platform.core.model.order.payment.WorldlinePaymentInfoModel;
 import de.hybris.platform.servicelayer.model.attribute.DynamicAttributeHandler;
 import de.hybris.platform.util.localization.Localization;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Read-only display value for a 3DS result stored on the payment info. Worldline's raw values are mapped to a

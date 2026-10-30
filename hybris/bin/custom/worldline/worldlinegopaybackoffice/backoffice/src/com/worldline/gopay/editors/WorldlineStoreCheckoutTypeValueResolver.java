@@ -2,7 +2,6 @@ package com.worldline.gopay.editors;
 
 import com.hybris.cockpitng.editor.defaultenum.EnumValueResolver;
 import com.worldline.gopay.enums.WorldlineCheckoutTypesEnum;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.List;
 import java.util.Set;
@@ -25,7 +24,6 @@ public class WorldlineStoreCheckoutTypeValueResolver implements EnumValueResolve
                 .collect(Collectors.toList());
     }
 
-    @Required
     public void setEnumValueResolver(EnumValueResolver enumValueResolver) {
         this.enumValueResolver = enumValueResolver;
     }

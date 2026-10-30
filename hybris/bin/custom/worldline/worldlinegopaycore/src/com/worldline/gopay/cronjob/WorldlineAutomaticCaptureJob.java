@@ -100,7 +100,7 @@ public class WorldlineAutomaticCaptureJob extends AbstractJobPerformable<CronJob
                                     Boolean.TRUE);
                         worldlineTransactionService.updatePaymentTransaction(lastPaymentTransaction, captureResponse.getId(), captureResponse.getStatus(),
                               orderModel.getStore().getWorldlineConfiguration().isApplySurcharge() ? captureResponse.getCaptureOutput().getAcquiredAmount() :
-                                    captureResponse.getCaptureOutput().getAmountOfMoney(), PaymentTransactionType.CAPTURE);
+                                    captureResponse.getCaptureOutput().getAmountOfMoney(), PaymentTransactionType.CAPTURE, StringUtils.EMPTY);
                         LOGGER.info("[WORLDLINE] Order {}, remaining amount {} captured", orderModel.getCode(), amount);
                     }
 
