@@ -30,7 +30,6 @@
     <extension name='platformbackoffice' />
     <extension name='ybackoffice' />
     <extension name='yacceleratorbackoffice' />
-    <extension name='yacceleratorcockpits' />
     <extension name='yacceleratorcore' />
     <extension name='yacceleratorfacades' />
     <extension name='yacceleratorinitialdata' />
@@ -51,9 +50,6 @@
     <extension name='chineseaddressservices' />
     <extension name='chinesecommerceorgaddressaddon' />
     <extension name='chinesecommerceorgaddressfacades' />
-    <extension name='admincockpit' />
-    <extension name='productcockpit' />
-    <extension name='cockpit' />
     <extension name='commercefacades' />
     <extension name='commerceservices' />
     <extension name='commerceservicesbackoffice' />
@@ -147,7 +143,6 @@
     <extension name='cms2' />
     <extension name='cms2lib' />
     <extension name='cmsbackoffice' />
-    <extension name='cmscockpit' />
     <extension name='cmsfacades' />
     <extension name='cmsocc' />
     <extension name='cmswebservices' />

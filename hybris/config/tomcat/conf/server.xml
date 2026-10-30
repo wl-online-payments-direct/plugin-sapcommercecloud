@@ -77,12 +77,16 @@
                SSLEnabled="true"
 					scheme="https"
 					secure="true"
-					clientAuth="false"
-   				sslProtocol = "TLS"
-   				keyAlias="${tomcat.ssl.keystore.alias}"
-   				keystoreFile="${tomcat.ssl.keystore.path}"
-   				keystorePass="${tomcat.ssl.keystore.password}"
-                />
+					clientAuth="false">
+					<SSLHostConfig sslProtocol="TLS"
+		                   certificateVerification="none">
+		        <Certificate
+		            certificateKeystoreFile="${tomcat.ssl.keystore.path}"
+		            certificateKeystorePassword="${tomcat.ssl.keystore.password}"
+		            certificateKeyAlias="${tomcat.ssl.keystore.alias}" />
+		    </SSLHostConfig>
+
+		</Connector>
 
     <!--
     This might evaluate into 
